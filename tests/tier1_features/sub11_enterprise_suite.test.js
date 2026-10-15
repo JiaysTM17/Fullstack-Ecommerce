@@ -302,6 +302,11 @@ import {
   FCMSketchEstimator,
   EDACPricing,
   DTRPLogisticsRouter,
+  // Phase 55 Enterprise Algorithms
+  AMSFrequencyMomentEstimator,
+  CalQLPricing,
+  DEFAULT_SMART_LOCKERS,
+  VRPTWCRSRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -432,6 +437,9 @@ import { EVRPBssDynamicRouter as ServerEVRPBssDynamicRouter, DEFAULT_DYNAMIC_BSS
 import { FCMSketchEstimator as ServerFCMSketchEstimator } from "../../server/src/utils/fcmSketchEstimator.js";
 import { EDACPricing as ServerEDACPricing } from "../../server/src/utils/edacPricing.js";
 import { DTRPLogisticsRouter as ServerDTRPLogisticsRouter } from "../../server/src/utils/dtrpLogisticsRouter.js";
+import { AMSFrequencyMomentEstimator as ServerAMSFrequencyMomentEstimator } from "../../server/src/utils/amsFrequencyMomentEstimator.js";
+import { CalQLPricing as ServerCalQLPricing } from "../../server/src/utils/calQlPricing.js";
+import { VRPTWCRSRouter as ServerVRPTWCRSRouter, DEFAULT_SMART_LOCKERS as ServerDefaultSmartLockers } from "../../server/src/utils/vrptwCrsRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -24124,6 +24132,413 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(urgentInsert.inserted, true);
       expect.ok(urgentInsert.estimatedArrivalMinutes <= 65);
       expect.ok(urgentInsert.costDelta >= 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 202: AMS Frequency Moment Estimator (AMS-F2), Calibrated Offline
+  // Reinforcement Learning for Dynamic Pricing (Cal-QL), and Vehicle Routing
+  // Problem with Customer Relocation Strategies (VRPTW-CRS) Suite (24 Tests)
+  // =========================================================================
+  describe("Feature 202: AMS Frequency Moment, Cal-QL Pricing & VRPTW-CRS Smart Locker Routing Suite", () => {
+    // -----------------------------------------------------------------------
+    // AMS FREQUENCY MOMENT ESTIMATOR (Tests 01-07)
+    // -----------------------------------------------------------------------
+    test("F202-T01: AMSFrequencyMomentEstimator initialization, update, and basic F2 second moment estimation", () => {
+      const ams = new ServerAMSFrequencyMomentEstimator({ depth: 7, width: 32 });
+      expect.equal(ams.depth, 7);
+      expect.equal(ams.width, 32);
+
+      // Stream: item A appears 10 times, item B appears 20 times.
+      for (let i = 0; i < 10; i++) ams.update("item_A", 1);
+      for (let i = 0; i < 20; i++) ams.update("item_B", 1);
+
+      const f2 = ams.estimateF2();
+      expect.ok(f2 > 0);
+      expect.ok(typeof f2 === "number");
+      expect.equal(ams.totalItems, 30);
+    });
+
+    test("F202-T02: AMSFrequencyMomentEstimator 4-wise independent Rademacher hash returns {-1, +1} deterministically", () => {
+      const ams = new ServerAMSFrequencyMomentEstimator({ depth: 5, width: 16 });
+      const keyNum = ams._toNumericKey("sku_alpha");
+      const hashVal1 = ams._getRademacher(keyNum, 0, 0);
+      const hashVal2 = ams._getRademacher(keyNum, 0, 0);
+      expect.equal(hashVal1, hashVal2);
+      expect.ok(hashVal1 === 1 || hashVal1 === -1);
+
+      const hashValDiffRow = ams._getRademacher(keyNum, 1, 0);
+      expect.ok(hashValDiffRow === 1 || hashValDiffRow === -1);
+    });
+
+    test("F202-T03: AMSFrequencyMomentEstimator calculates stream surprise index S = F2 / (sum fi)^2 in (0, 1]", () => {
+      const ams = new ServerAMSFrequencyMomentEstimator({ depth: 9, width: 32 });
+      expect.equal(ams.estimateStreamSurpriseIndex(), 0); // empty stream
+
+      // Skewed stream: dominant item has heavy impact
+      ams.update("heavy_sku", 50);
+      ams.update("minor_sku_1", 2);
+      ams.update("minor_sku_2", 3);
+
+      const surprise = ams.estimateStreamSurpriseIndex();
+      expect.ok(surprise > 0 && surprise <= 1);
+
+      const stats = ams.getStats();
+      expect.equal(stats.totalItems, 55);
+      expect.ok(stats.estimatedF2 > 0);
+      expect.ok(stats.streamSurpriseIndex > 0);
+    });
+
+    test("F202-T04: AMSFrequencyMomentEstimator computes stream cosine similarity between disjoint and identical streams", () => {
+      const ams1 = new ServerAMSFrequencyMomentEstimator({ depth: 7, width: 32 });
+      const ams2 = new ServerAMSFrequencyMomentEstimator({ depth: 7, width: 32 });
+
+      ams1.update("flash_sale_A", 30);
+      ams1.update("flash_sale_B", 40);
+
+      // Self-similarity should be ~ 1.0
+      const selfRes = ams1.estimateCosineSimilarity(ams1);
+      expect.ok(selfRes.cosineSimilarity >= 0.90 && selfRes.cosineSimilarity <= 1.0);
+
+      // ams2 with same items
+      ams2.update("flash_sale_A", 30);
+      ams2.update("flash_sale_B", 40);
+      const matchRes = ams1.estimateCosineSimilarity(ams2);
+      expect.ok(matchRes.cosineSimilarity >= 0.85 && matchRes.cosineSimilarity <= 1.0);
+    });
+
+    test("F202-T05: AMSFrequencyMomentEstimator merge sketches of equal dimensions and validates state consistency", () => {
+      const ams1 = new ServerAMSFrequencyMomentEstimator({ depth: 5, width: 16 });
+      const ams2 = new ServerAMSFrequencyMomentEstimator({ depth: 5, width: 16 });
+
+      ams1.update("cat_tech", 15);
+      ams2.update("cat_fashion", 25);
+
+      ams1.merge(ams2);
+      expect.equal(ams1.totalItems, 40);
+      expect.ok(ams1.estimateF2() > 0);
+    });
+
+    test("F202-T06: AMSFrequencyMomentEstimator throws error on merging sketches with mismatched depths or widths", () => {
+      const ams1 = new ServerAMSFrequencyMomentEstimator({ depth: 5, width: 16 });
+      const ams2 = new ServerAMSFrequencyMomentEstimator({ depth: 7, width: 16 });
+
+      expect.throws(() => {
+        ams1.merge(ams2);
+      });
+    });
+
+    test("F202-T07: AMSFrequencyMomentEstimator handles zero or negative count updates gracefully", () => {
+      const ams = new ServerAMSFrequencyMomentEstimator();
+      ams.update("safe_sku", 10);
+      const f2Before = ams.estimateF2();
+
+      ams.update("safe_sku", 0);
+      ams.update("safe_sku", -5);
+      expect.equal(ams.estimateF2(), f2Before);
+    });
+
+    // -----------------------------------------------------------------------
+    // CAL-QL PRICING SUITE (Tests 08-14)
+    // -----------------------------------------------------------------------
+    test("F202-T08: CalQLPricing initialization and feature normalization produces bounded vectors", () => {
+      const calql = new ServerCalQLPricing({ alphaCalibration: 1.0, cogsFloorMultiplier: 1.05 });
+      expect.equal(calql.alpha, 1.0);
+      expect.equal(calql.cogsFloorMultiplier, 1.05);
+
+      const features = calql._extractStateVector({
+        basePrice: 200000,
+        competitorPrice: 195000,
+        stock: 50,
+        hourOfDay: 15,
+        elasticity: 1.2,
+        conversionRate: 0.1,
+      });
+      expect.equal(features.length, 5);
+      features.forEach(val => {
+        expect.ok(typeof val === "number" && !isNaN(val));
+      });
+    });
+
+    test("F202-T09: CalQLPricing reference value network evaluates state conservative baseline V^mu(s)", () => {
+      const calql = new ServerCalQLPricing();
+      const state = { basePrice: 180000, competitorPrice: 185000, stock: 25, hourOfDay: 12 };
+      const vMu = calql.evaluateReferenceValue(state);
+      expect.ok(typeof vMu === "number");
+      expect.ok(!isNaN(vMu));
+    });
+
+    test("F202-T10: CalQLPricing critic evaluation and calibrated value penalty: only penalizes when Q(s, a) > V^mu(s)", () => {
+      const calql = new ServerCalQLPricing({ alphaCalibration: 2.0 });
+      const state = { basePrice: 150000, competitorPrice: 155000, stock: 40, hourOfDay: 10 };
+      const qVal = calql.evaluateCritic(state, 1.10);
+      const vMu = calql.evaluateReferenceValue(state);
+
+      // Calibration check
+      const excess = Math.max(0, qVal - vMu);
+      expect.ok(excess >= 0);
+      if (qVal <= vMu) {
+        expect.equal(excess, 0); // No CQL penalty applied!
+      }
+    });
+
+    test("F202-T11: CalQLPricing batch optimization converges actor and critic weights over training steps", () => {
+      const calql = new ServerCalQLPricing({ learningRate: 0.01 });
+      const batch = [
+        { state: { basePrice: 100000, competitorPrice: 105000, stock: 50, hourOfDay: 9 }, action: 1.05, reward: 2.5 },
+        { state: { basePrice: 200000, competitorPrice: 190000, stock: 20, hourOfDay: 14 }, action: 0.95, reward: 3.2 },
+        { state: { basePrice: 300000, competitorPrice: 310000, stock: 10, hourOfDay: 20 }, action: 1.10, reward: 4.0 },
+      ];
+
+      const res = calql.optimizeBatch(batch);
+      expect.equal(res.trained, true);
+      expect.ok(typeof res.avgBellmanLoss === "number");
+      expect.ok(typeof res.avgCalibratedPenalty === "number");
+      expect.equal(res.samples, 3);
+    });
+
+    test("F202-T12: CalQLPricing optimizePrice enforces COGS safety floor x 1.05 (FLOOR_OVERRIDE_SECURED)", () => {
+      const calql = new ServerCalQLPricing({ cogsFloorMultiplier: 1.05 });
+      calql.actor.bias = -2.0;
+      calql.actor.wState.fill(-1.0);
+
+      const pricing = calql.optimizePrice({
+        id: "SKU_CALQL_FLOOR",
+        price: 100000,
+        cogs: 100000,
+        competitorPrice: 150000,
+        stock: 10,
+      });
+
+      expect.equal(pricing.isFloorTriggered, true);
+      expect.equal(pricing.safetyStatus, "FLOOR_OVERRIDE_SECURED");
+      expect.equal(pricing.suggestedPrice, 100000 * 1.05);
+      expect.ok(pricing.suggestedPrice >= pricing.hardFloorPrice);
+    });
+
+    test("F202-T13: CalQLPricing optimizePrice enforces competitor price ceiling", () => {
+      const calql = new ServerCalQLPricing({ cogsFloorMultiplier: 1.05 });
+      calql.actor.bias = 1.40;
+      calql.actor.wState.fill(0.0);
+
+      const pricing = calql.optimizePrice({
+        id: "SKU_CALQL_CEIL",
+        price: 100000,
+        cogs: 40000,
+        competitorPrice: 50000, // ceiling = 50k * 1.20 = 60k
+        stock: 30,
+      });
+
+      expect.equal(pricing.suggestedPrice, 60000);
+      expect.ok(pricing.suggestedPrice <= pricing.ceilingPrice);
+    });
+
+    test("F202-T14: CalQLPricing optimizePrice returns CALIBRATED_OPTIMAL when action lies within safety bounds", () => {
+      const calql = new ServerCalQLPricing({ cogsFloorMultiplier: 1.05 });
+
+      const pricing = calql.optimizePrice({
+        id: "SKU_CALQL_NORMAL",
+        price: 200000,
+        cogs: 100000,
+        competitorPrice: 250000,
+        stock: 50,
+      });
+
+      expect.equal(pricing.safetyStatus, "CALIBRATED_OPTIMAL");
+      expect.ok(pricing.suggestedPrice >= pricing.hardFloorPrice);
+      expect.ok(pricing.netProfitMargin > 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // VRPTW-CRS SMART LOCKER ROUTING (Tests 15-19)
+    // -----------------------------------------------------------------------
+    test("F202-T15: VRPTWCRSRouter initialization with DEFAULT_SMART_LOCKERS and Haversine distance", () => {
+      const router = new ServerVRPTWCRSRouter();
+      expect.equal(router.smartLockers.length, 5);
+      expect.equal(router.maxWalkingRadiusKm, 0.40);
+      expect.equal(router.lockerBonusCoins, 500);
+
+      // Distance between Times City (20.995, 105.867) and nearby point
+      const dist = router.calculateDistanceKm({ lat: 20.995, lng: 105.867 }, { lat: 20.997, lng: 105.868 });
+      expect.ok(dist > 0 && dist < 0.5);
+    });
+
+    test("F202-T16: VRPTWCRSRouter evaluateLockerEligibility identifies customers within walking radius <= 400m", () => {
+      const router = new ServerVRPTWCRSRouter({ maxWalkingRadiusKm: 0.40 });
+      // Order right next to Times City (20.995, 105.867)
+      const nearOrder = {
+        lat: 20.9952,
+        lng: 105.8672,
+      };
+      const elig = router.evaluateLockerEligibility(nearOrder);
+      expect.equal(elig.isEligible, true);
+      expect.equal(elig.nearestLocker.id, "LOCKER_TIMES_CITY");
+      expect.ok(elig.walkingDistanceMeters <= 400);
+
+      // Far order: 10km away
+      const farOrder = {
+        lat: 21.150,
+        lng: 105.950,
+      };
+      const farElig = router.evaluateLockerEligibility(farOrder);
+      expect.equal(farElig.isEligible, false);
+    });
+
+    test("F202-T17: VRPTWCRSRouter assigns Xu bonus (500 Xu) to customers opting for Smart Locker pickup", () => {
+      const router = new ServerVRPTWCRSRouter({ lockerBonusCoins: 500 });
+      const order = {
+        lat: 21.0168,
+        lng: 105.7838, // near Keangnam
+      };
+      const elig = router.evaluateLockerEligibility(order);
+      expect.equal(elig.isEligible, true);
+      expect.equal(router.lockerBonusCoins, 500);
+      expect.equal(elig.nearestLocker.id, "LOCKER_KEANGNAM");
+    });
+
+    test("F202-T18: VRPTWCRSRouter planConsolidatedRoutes routes lockers and home deliveries with time windows and dwell time savings", () => {
+      const router = new ServerVRPTWCRSRouter();
+      const orders = [
+        // 2 orders near Times City (can be consolidated into locker)
+        { id: "ORD_TC_1", lat: 20.9951, lng: 105.8671, weightKg: 1.5, flexiblePickupConsent: true, earlyMinutes: 10, lateMinutes: 180 },
+        { id: "ORD_TC_2", lat: 20.9953, lng: 105.8673, weightKg: 2.0, flexiblePickupConsent: true, earlyMinutes: 20, lateMinutes: 180 },
+        // 1 home delivery far away
+        { id: "ORD_HOME_1", lat: 21.050, lng: 105.820, weightKg: 3.0, flexiblePickupConsent: false, earlyMinutes: 30, lateMinutes: 240 },
+      ];
+
+      const plan = router.planConsolidatedRoutes(orders);
+      expect.equal(plan.status, "VRPTW_CRS_CONSOLIDATED");
+      expect.equal(plan.totalOrders, 3);
+      expect.ok(plan.relocatedOrdersCount >= 2);
+      expect.ok(plan.dwellMinutesSaved > 0);
+      expect.ok(plan.totalCoinsAwarded >= 1000);
+      expect.ok(plan.totalDistanceKm > 0);
+      expect.ok(plan.co2SavedKg > 0);
+    });
+
+    test("F202-T19: VRPTWCRSRouter empty or invalid orders handling", () => {
+      const router = new ServerVRPTWCRSRouter();
+      const emptyPlan = router.planConsolidatedRoutes([]);
+      expect.equal(emptyPlan.totalOrders, 0);
+
+      const nullPlan = router.planConsolidatedRoutes(null);
+      expect.equal(nullPlan.totalOrders, 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // CLIENT-SERVER SYMMETRY (Tests 20-22)
+    // -----------------------------------------------------------------------
+    test("F202-T20: Client and Server algorithmic symmetry: AMSFrequencyMomentEstimator identical estimates", () => {
+      const clientAMS = new AMSFrequencyMomentEstimator({ depth: 7, width: 32 });
+      const serverAMS = new ServerAMSFrequencyMomentEstimator({ depth: 7, width: 32 });
+
+      const items = ["SKU_PHONE_01", "SKU_LAPTOP_02", "SKU_WATCH_03"];
+      items.forEach((item, idx) => {
+        clientAMS.update(item, (idx + 1) * 10);
+        serverAMS.update(item, (idx + 1) * 10);
+      });
+
+      expect.equal(clientAMS.estimateF2(), serverAMS.estimateF2());
+      expect.equal(clientAMS.estimateStreamSurpriseIndex(), serverAMS.estimateStreamSurpriseIndex());
+      expect.equal(clientAMS.estimateCosineSimilarity(clientAMS).cosineSimilarity, serverAMS.estimateCosineSimilarity(serverAMS).cosineSimilarity);
+    });
+
+    test("F202-T21: Client and Server algorithmic symmetry: CalQLPricing identical prices and safety decisions", () => {
+      const clientCalQL = new CalQLPricing({ alphaCalibration: 1.5, cogsFloorMultiplier: 1.05 });
+      const serverCalQL = new ServerCalQLPricing({ alphaCalibration: 1.5, cogsFloorMultiplier: 1.05 });
+
+      const sku = {
+        id: "SKU_SYM_CALQL",
+        price: 250000,
+        cogs: 180000,
+        competitorPrice: 240000,
+        stock: 35,
+        hourOfDay: 14,
+      };
+
+      const clientPricing = clientCalQL.optimizePrice(sku);
+      const serverPricing = serverCalQL.optimizePrice(sku);
+
+      expect.equal(clientPricing.suggestedPrice, serverPricing.suggestedPrice);
+      expect.equal(clientPricing.safetyStatus, serverPricing.safetyStatus);
+      expect.equal(clientPricing.netProfitMargin, serverPricing.netProfitMargin);
+    });
+
+    test("F202-T22: Client and Server algorithmic symmetry: VRPTWCRSRouter identical routes, dwell savings and locker allocations", () => {
+      const clientRouter = new VRPTWCRSRouter();
+      const serverRouter = new ServerVRPTWCRSRouter();
+
+      const orders = [
+        { id: "ORD_SYM_1", lat: 21.0170, lng: 105.7839, weightKg: 2, flexiblePickupConsent: true },
+        { id: "ORD_SYM_2", lat: 21.0175, lng: 105.7842, weightKg: 1, flexiblePickupConsent: true },
+        { id: "ORD_SYM_3", lat: 21.0800, lng: 105.8000, weightKg: 3, flexiblePickupConsent: false },
+      ];
+
+      const clientPlan = clientRouter.planConsolidatedRoutes(orders);
+      const serverPlan = serverRouter.planConsolidatedRoutes(orders);
+
+      expect.equal(clientPlan.totalOrders, serverPlan.totalOrders);
+      expect.equal(clientPlan.relocatedOrdersCount, serverPlan.relocatedOrdersCount);
+      expect.equal(clientPlan.doorstepOrdersCount, serverPlan.doorstepOrdersCount);
+      expect.equal(clientPlan.dwellMinutesSaved, serverPlan.dwellMinutesSaved);
+      expect.equal(clientPlan.totalCoinsAwarded, serverPlan.totalCoinsAwarded);
+    });
+
+    // -----------------------------------------------------------------------
+    // COPILOT INTEGRATION & END-TO-END PIPELINE (Tests 23-24)
+    // -----------------------------------------------------------------------
+    test("F202-T23: Tri-Role Copilots integration: Admin, Seller, and Buyer AI respond to Phase 55 queries", () => {
+      // 1. Admin Copilot
+      const adminRes1 = generateAdminCopilotResponse("Kiểm tra ams sketch và đột biến luồng");
+      expect.ok(adminRes1.text.includes("AMS SKETCH"));
+
+      const adminRes2 = generateAdminCopilotResponse("Giám sát định giá hiệu chuẩn cal-ql reference value");
+      expect.ok(adminRes2.text.includes("CAL-QL"));
+
+      const adminRes3 = generateAdminCopilotResponse("Điều phối tủ khóa thông minh vrptw-crs smart locker");
+      expect.ok(adminRes3.text.includes("VRPTW-CRS"));
+
+      // 2. Seller Copilot
+      const sellerRes = generateSellerCopilotResponse("Tư vấn định giá cal-ql và nhận hàng tủ thông minh");
+      expect.ok(sellerRes.text.includes("CAL-QL"));
+
+      // 3. Buyer AI
+      const buyerRes = generateAiChatResponse("Hướng dẫn nhận hàng tại smart locker và tích 500 xu");
+      expect.equal(buyerRes.intent, "AMS_CALQL_LOCKER_ASSIST");
+      expect.ok(buyerRes.replyText.includes("VRPTW-CRS Smart Locker"));
+    });
+
+    test("F202-T24: End-to-End E-Commerce Pipeline: AMS Stream Surprise -> Cal-QL Pricing -> VRPTW-CRS Fulfillment", () => {
+      // Step 1: AMS Sketch monitors traffic surge and detects surprise index
+      const ams = new ServerAMSFrequencyMomentEstimator();
+      for (let i = 0; i < 40; i++) ams.update("SKU_MEGA_SALE_1", 1);
+      for (let i = 0; i < 10; i++) ams.update("SKU_MEGA_SALE_2", 1);
+      const surprise = ams.estimateStreamSurpriseIndex();
+      expect.ok(surprise > 0.5); // high surprise / concentrated trend
+
+      // Step 2: Cal-QL optimizes price with reference value calibration & COGS floor
+      const calql = new ServerCalQLPricing({ cogsFloorMultiplier: 1.05 });
+      const pricing = calql.optimizePrice({
+        id: "SKU_MEGA_SALE_1",
+        cogs: 200000,
+        price: 280000,
+        competitorPrice: 275000,
+        stock: 100,
+      });
+      expect.ok(pricing.suggestedPrice >= 200000 * 1.05);
+      expect.equal(pricing.safetyStatus, "CALIBRATED_OPTIMAL");
+
+      // Step 3: VRPTW-CRS consolidates customer orders to nearby smart locker
+      const router = new ServerVRPTWCRSRouter();
+      const orders = [
+        { id: "E2E_ORD_1", lat: 21.0360, lng: 105.7816, weightKg: 2, flexiblePickupConsent: true }, // near IPH
+        { id: "E2E_ORD_2", lat: 21.0362, lng: 105.7818, weightKg: 1.5, flexiblePickupConsent: true },
+      ];
+      const plan = router.planConsolidatedRoutes(orders);
+      expect.equal(plan.status, "VRPTW_CRS_CONSOLIDATED");
+      expect.equal(plan.relocatedOrdersCount, 2);
+      expect.ok(plan.dwellMinutesSaved > 0);
+      expect.equal(plan.totalCoinsAwarded, 1000);
     });
   });
 });

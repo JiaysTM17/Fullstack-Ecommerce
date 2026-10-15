@@ -3110,6 +3110,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
     };
   }
 
+  // 146. Phác Thảo Moment Tần Suất Bậc Hai & Chỉ Số Đột Biến Luồng AMS (Phase 55 - Feature 202)
+  if (/ams sketch|f2 moment|moment tần suất|surprise index|đột biến luồng|alon-matias-szegedy/i.test(raw)) {
+    return {
+      text: `📊 **PHÁC THẢO MOMENT TẦN SUẤT BẬC HAI & CHỈ SỐ ĐỘT BIẾN LUỒNG AMS SKETCH (ALON, MATIAS, SZEGEDY 1996 - GÖDEL PRIZE 2005)**:
+- **Đo Lường Độ Lệch Chuẩn Luồng Dữ Liệu $F_2 = \\sum_i f_i^2$**:
+  - Đo lường phương sai và độ bất bình đẳng của lưu lượng truy cập bằng biến ngẫu nhiên 4-wise independent Rademacher $\\xi \\in \\{-1, +1\\}$, nén hàng chục triệu sự kiện trong ma trận $D \\times W$ nhỏ gọn.
+- **Chỉ Số Đột Biến Luồng (Stream Surprise Index $S = F_2 / (\\sum f_i)^2$)**:
+  - Tự động phát hiện các đợt bùng nổ nhu cầu Flash Sale bất thường, các chiến dịch cày view gian lận hoặc bot scalper thâu tóm đơn hàng khi $S > 0.15$.
+- **Độ Tương Đồng Cosine Giữa Hai Dòng Dữ Liệu**:
+  - Ước lượng tích vô hướng $\\sum f_{A, i} f_{B, i}$ và độ tương đồng hành vi mua sắm giữa các nhóm khách hàng mà không cần giải nén!`,
+      type: 'analytics',
+      tag: 'AMS F2 SKETCH ESTIMATOR',
+      suggestions: [
+        'Xem chỉ số đột biến luồng Flash Sale',
+        'Đo lường Moment F2 bằng AMS Sketch',
+        'Phân tích tương đồng Cosine luồng dữ liệu'
+      ]
+    };
+  }
+
+  // 147. Định Giá Ngoại Tuyến Hiệu Chuẩn Giá Trị Tham Chiếu Cal-QL (Phase 55 - Feature 202)
+  if (/cal-ql|calql|calibrated offline|hiệu chuẩn giá trị|reference value calibration|giá trị tham chiếu cal-ql/i.test(raw)) {
+    return {
+      text: `🤖 **ĐỊNH GIÁ BÁN NGOẠI TUYẾN HIỆU CHUẨN GIÁ TRỊ THAM CHIẾU CAL-QL (NAKAMOTO, LEVINE ET AL. - NEURIPS 2023)**:
+- **Triệt Tiêu Sự Bảo Thủ Quá Mức Của CQL Truyền Thống**:
+  - Khắc phục nhược điểm định giá bán thấp phi lý của các thuật toán Offline RL cũ: Cal-QL chỉ áp dụng phạt bảo thủ khi giá trị dự phóng vượt quá giá trị tham chiếu hành vi thực tế $V^\\mu(s)$.
+- **Hàm Phạt Hiệu Chuẩn Thích Ứng (Value Calibration)**:
+  - $\\text{Penalty} = \\alpha \\cdot \\max(0, Q(s, a) - V^\\mu(s))$, giải phóng tiềm năng tăng doanh thu của gian hàng trong các khung giờ cao điểm.
+- **Rào Cản Lợi Nhuận An Toàn Tuyệt Đối**:
+  - Khóa sàn lợi nhuận cứng $P \\ge \\text{COGS} \\times 1.05$ và chặn trần giá đối thủ, bảo vệ 100% tỷ suất lợi nhuận gộp của Người Bán!`,
+      type: 'pricing',
+      tag: 'CAL-QL CALIBRATED PRICING',
+      suggestions: [
+        'Kiểm tra giá trị tham chiếu V_mu',
+        'Tối ưu hóa giá Flash Sale bằng Cal-QL',
+        'Phân tích rào cản sàn COGS 5%'
+      ]
+    };
+  }
+
+  // 148. Định Tuyến Tủ Khóa Thông Minh Smart Lockers VRPTW-CRS (Phase 55 - Feature 202)
+  if (/vrptw-crs|smart locker|tủ khóa thông minh|customer relocation|gom điểm nhận|tủ nhận đồ|spx locker/i.test(raw)) {
+    return {
+      text: `📦 **ĐỊNH TUYẾN ĐỘI XE KẾT HỢP TỦ KHÓA THÔNG MINH SMART LOCKERS VRPTW-CRS (SCHIFFER ET AL. 2020)**:
+- **Chiến Lược Tái Định Vị Khách Hàng (Customer Relocation Strategies)**:
+  - Tự động nhận diện và gom các đơn hàng trong bán kính đi bộ ($R_{\\text{walk}} \\le 400\\text{m}$) vào mạng lưới 5 trạm SPX Smart Locker (Times City, Keangnam, Royal City, IPH, Tràng Tiền).
+- **Tặng 500 Mini Xu Khuyến Khích Nhận Hàng Linh Hoạt**:
+  - Khách hàng chủ động nhận đồ tại Smart Locker nhận ngay 500 Xu thưởng, bưu tá giảm thời gian dừng đỗ (Dwell Time) từ 5 phút/đơn xuống còn 3 phút + 0.5 phút/kiện.
+- **Tiết Kiệm 30 - 35% Quãng Đường & Giảm Phát Thải CO2**:
+  - Giảm thiểu số điểm dừng riêng lẻ, cắt giảm phát thải $0.18\\text{ kg CO}_2$ trên mỗi km hành trình được tối ưu!`,
+      type: 'logistics',
+      tag: 'VRPTW-CRS SMART LOCKER ROUTING',
+      suggestions: [
+        'Xem mạng lưới SPX Smart Locker Hà Nội',
+        'Thống kê số điểm dừng tiết kiệm nhờ Locker',
+        'Phân tích lượng phát thải CO2 giảm thiểu'
+      ]
+    };
+  }
+
   // 39. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Thực Tế Của Sàn (AI Transparency & Realtime Context)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|ai lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

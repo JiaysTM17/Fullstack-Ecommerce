@@ -27987,6 +27987,582 @@ export class DTRPLogisticsRouter {
   }
 }
 
+// ==============================================================================
+// PHASE 55 ALGORITHM 1: Alon-Matias-Szegedy (AMS) Sketch for F2 Frequency Moment
+// ==============================================================================
+export class AMSFrequencyMomentEstimator {
+  constructor(options = {}) {
+    this.depth = options.depth || 7;
+    this.width = options.width || 64;
+    this.seed = options.seed || 42;
+
+    this.matrix = Array.from({ length: this.depth }, () => new Float64Array(this.width));
+    this.prime = 2147483647;
+    this.hashParams = [];
+
+    for (let i = 0; i < this.depth; i++) {
+      const rowParams = [];
+      for (let j = 0; j < this.width; j++) {
+        const idx = i * this.width + j + 1;
+        rowParams.push({
+          a: Math.abs(Math.floor(Math.sin(this.seed + idx * 4 + 1) * 100000) % 2147483640) + 1,
+          b: Math.abs(Math.floor(Math.cos(this.seed + idx * 4 + 2) * 100000) % 2147483640) + 3,
+          c: Math.abs(Math.floor(Math.sin(this.seed + idx * 4 + 3) * 100000) % 2147483640) + 7,
+          d: Math.abs(Math.floor(Math.cos(this.seed + idx * 4 + 4) * 100000) % 2147483640) + 11,
+        });
+      }
+      this.hashParams.push(rowParams);
+    }
+
+    this.totalItems = 0;
+  }
+
+  _toNumericKey(key) {
+    if (typeof key === 'number') return key >>> 0;
+    const str = String(key);
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+  }
+
+  _getRademacher(keyNum, row, col) {
+    const { a, b, c, d } = this.hashParams[row][col];
+    const x = BigInt(keyNum);
+    const p = BigInt(this.prime);
+    const poly = (BigInt(a) * x * x * x + BigInt(b) * x * x + BigInt(c) * x + BigInt(d)) % p;
+    return Number(poly % 2n) === 0 ? 1 : -1;
+  }
+
+  update(key, count = 1) {
+    if (count <= 0) return;
+    const keyNum = this._toNumericKey(key);
+
+    for (let i = 0; i < this.depth; i++) {
+      for (let j = 0; j < this.width; j++) {
+        const xi = this._getRademacher(keyNum, i, j);
+        this.matrix[i][j] += xi * count;
+      }
+    }
+
+    this.totalItems += count;
+  }
+
+  estimateF2() {
+    if (this.totalItems === 0) return 0;
+
+    const rowMeans = [];
+    for (let i = 0; i < this.depth; i++) {
+      let sumSq = 0;
+      for (let j = 0; j < this.width; j++) {
+        sumSq += this.matrix[i][j] * this.matrix[i][j];
+      }
+      rowMeans.push(sumSq / this.width);
+    }
+
+    rowMeans.sort((a, b) => a - b);
+    const mid = Math.floor(rowMeans.length / 2);
+    const medianF2 = rowMeans.length % 2 === 0
+      ? (rowMeans[mid - 1] + rowMeans[mid]) / 2
+      : rowMeans[mid];
+
+    return Math.max(0, Math.round(medianF2));
+  }
+
+  estimateStreamSurpriseIndex() {
+    if (this.totalItems === 0) return 0;
+    const f2 = this.estimateF2();
+    const totalSq = this.totalItems * this.totalItems;
+    return Number((f2 / totalSq).toFixed(5));
+  }
+
+  estimateCosineSimilarity(other) {
+    if (this.depth !== other.depth || this.width !== other.width) {
+      throw new Error("Cannot compute similarity between sketches with different dimensions");
+    }
+
+    const rowInnerProducts = [];
+    for (let i = 0; i < this.depth; i++) {
+      let sumDot = 0;
+      for (let j = 0; j < this.width; j++) {
+        sumDot += this.matrix[i][j] * other.matrix[i][j];
+      }
+      rowInnerProducts.push(sumDot / this.width);
+    }
+
+    rowInnerProducts.sort((a, b) => a - b);
+    const mid = Math.floor(rowInnerProducts.length / 2);
+    const innerProduct = rowInnerProducts.length % 2 === 0
+      ? (rowInnerProducts[mid - 1] + rowInnerProducts[mid]) / 2
+      : rowInnerProducts[mid];
+
+    const f2A = this.estimateF2();
+    const f2B = other.estimateF2();
+    const norm = Math.sqrt(f2A) * Math.sqrt(f2B);
+    const cosine = norm > 0 ? Math.max(0, Math.min(1.0, innerProduct / norm)) : 0;
+
+    return {
+      innerProduct: Math.max(0, Math.round(innerProduct)),
+      cosineSimilarity: Number(cosine.toFixed(4)),
+    };
+  }
+
+  merge(other) {
+    if (this.depth !== other.depth || this.width !== other.width) {
+      throw new Error("Cannot merge sketches with different dimensions");
+    }
+
+    for (let i = 0; i < this.depth; i++) {
+      for (let j = 0; j < this.width; j++) {
+        this.matrix[i][j] += other.matrix[i][j];
+      }
+    }
+
+    this.totalItems += other.totalItems;
+  }
+
+  getStats() {
+    const f2 = this.estimateF2();
+    return {
+      depth: this.depth,
+      width: this.width,
+      totalItems: this.totalItems,
+      estimatedF2: f2,
+      streamSurpriseIndex: this.estimateStreamSurpriseIndex(),
+      theoreticalStdDevRatio: Number((Math.sqrt(2 / this.width)).toFixed(4)),
+    };
+  }
+}
+
+// ==============================================================================
+// PHASE 55 ALGORITHM 2: Calibrated Offline Reinforcement Learning (Cal-QL) Pricing
+// ==============================================================================
+export class CalQLPricing {
+  constructor(options = {}) {
+    this.alpha = options.alphaCalibration !== undefined ? options.alphaCalibration : 1.2;
+    this.learningRate = options.learningRate || 0.01;
+    this.gamma = options.gamma !== undefined ? options.gamma : 0.95;
+    this.cogsFloorMultiplier = options.cogsFloorMultiplier || 1.05;
+
+    this.featureDim = 5;
+    this.vReference = {
+      wState: [0.4, -0.1, 0.05, -0.2, 0.5],
+      bias: 5.0,
+    };
+
+    this.critic = {
+      wState: [0.5, -0.15, 0.08, -0.3, 0.6],
+      wAction: 2.0,
+      wActionSq: -0.8,
+      bias: 4.5,
+    };
+
+    this.targetCritic = JSON.parse(JSON.stringify(this.critic));
+
+    this.actor = {
+      wState: [0.3, -0.25, 0.04, -0.35, 0.4],
+      bias: 1.0,
+    };
+
+    this.replayBuffer = [];
+    this.maxBufferSize = 5000;
+  }
+
+  _extractStateVector(state) {
+    const compPrice = state.competitorPrice || state.basePrice || 100000;
+    const basePrice = state.basePrice || compPrice;
+    const compRatio = Math.min(2.0, compPrice / Math.max(1, basePrice));
+    const stockRatio = Math.min(1.0, Math.max(0, (state.stock || 50) / 100));
+    const hourNorm = ((state.hourOfDay !== undefined ? state.hourOfDay : 12) % 24) / 24;
+    const elasticity = Math.min(3.0, Math.max(0.2, state.elasticity || 1.2));
+    const conversion = Math.min(1.0, Math.max(0.0, state.conversionRate || 0.05));
+
+    return [compRatio, stockRatio, hourNorm, elasticity, conversion];
+  }
+
+  evaluateReferenceValue(state) {
+    const s = this._extractStateVector(state);
+    let v = this.vReference.bias;
+    for (let j = 0; j < this.featureDim; j++) {
+      v += this.vReference.wState[j] * s[j];
+    }
+    return Math.max(0, v);
+  }
+
+  evaluateCritic(state, action, useTarget = false) {
+    const s = this._extractStateVector(state);
+    const c = useTarget ? this.targetCritic : this.critic;
+    let q = c.bias + c.wAction * action + c.wActionSq * action * action;
+    for (let j = 0; j < this.featureDim; j++) {
+      q += c.wState[j] * s[j];
+    }
+    return q;
+  }
+
+  predictAction(state) {
+    const s = this._extractStateVector(state);
+    let rawAction = this.actor.bias;
+    for (let j = 0; j < this.featureDim; j++) {
+      rawAction += this.actor.wState[j] * s[j];
+    }
+    return Math.max(0.70, Math.min(1.40, rawAction));
+  }
+
+  recordTransition(state, action, reward, nextState, done = false) {
+    if (this.replayBuffer.length >= this.maxBufferSize) {
+      this.replayBuffer.shift();
+    }
+    this.replayBuffer.push({ state, action, reward, nextState, done });
+  }
+
+  optimizeBatch(transitions = null, epochs = 5) {
+    const data = transitions || this.replayBuffer;
+    if (!data || data.length === 0) {
+      return { trained: false, reason: "No training transitions available" };
+    }
+
+    let totalBellmanLoss = 0;
+    let totalCalibratedPenalty = 0;
+    let calibratedActiveCount = 0;
+
+    for (let epoch = 0; epoch < epochs; epoch++) {
+      for (const t of data) {
+        const s = this._extractStateVector(t.state);
+        const sNext = this._extractStateVector(t.nextState || t.state);
+        const a = t.action;
+        const r = t.reward;
+
+        const nextAction = this.predictAction(t.nextState || t.state);
+        const nextQ = this.evaluateCritic(t.nextState || t.state, nextAction, true);
+        const targetQ = r + (t.done ? 0 : this.gamma * nextQ);
+
+        const policyAction = this.predictAction(t.state);
+        const predPolicyQ = this.evaluateCritic(t.state, policyAction, false);
+        const refV = this.evaluateReferenceValue(t.state);
+
+        const qSurplus = predPolicyQ - refV;
+        const isCalibratedActive = qSurplus > 0;
+        const calPenalty = isCalibratedActive ? this.alpha * qSurplus : 0;
+
+        if (isCalibratedActive) {
+          calibratedActiveCount++;
+          totalCalibratedPenalty += calPenalty;
+        }
+
+        const currentQ = this.evaluateCritic(t.state, a, false);
+        const bellmanError = currentQ - targetQ;
+        totalBellmanLoss += Math.abs(bellmanError);
+
+        const effectiveGrad = bellmanError + calPenalty;
+        const step = this.learningRate;
+
+        for (let j = 0; j < this.featureDim; j++) {
+          this.critic.wState[j] -= step * effectiveGrad * s[j];
+        }
+        this.critic.wAction -= step * effectiveGrad * a;
+        this.critic.wActionSq -= step * effectiveGrad * a * a;
+        this.critic.bias -= step * effectiveGrad;
+
+        const actorGrad = -predPolicyQ * 0.05;
+        for (let j = 0; j < this.featureDim; j++) {
+          this.actor.wState[j] -= step * actorGrad * s[j];
+        }
+        this.actor.bias -= step * actorGrad;
+
+        const tau = 0.05;
+        for (let j = 0; j < this.featureDim; j++) {
+          this.targetCritic.wState[j] = tau * this.critic.wState[j] + (1 - tau) * this.targetCritic.wState[j];
+        }
+        this.targetCritic.wAction = tau * this.critic.wAction + (1 - tau) * this.targetCritic.wAction;
+        this.targetCritic.wActionSq = tau * this.critic.wActionSq + (1 - tau) * this.targetCritic.wActionSq;
+        this.targetCritic.bias = tau * this.critic.bias + (1 - tau) * this.targetCritic.bias;
+      }
+    }
+
+    const totalSamples = data.length * epochs;
+    return {
+      trained: true,
+      samples: data.length,
+      epochs,
+      avgBellmanLoss: Number((totalBellmanLoss / totalSamples).toFixed(4)),
+      avgCalibratedPenalty: Number((totalCalibratedPenalty / totalSamples).toFixed(4)),
+      calibratedActiveRate: Number((calibratedActiveCount / totalSamples).toFixed(4)),
+    };
+  }
+
+  optimizePrice(product, marketContext = {}) {
+    const cogs = product.cogs || product.costPrice || (product.price ? product.price * 0.70 : 100000);
+    const basePrice = product.price || product.basePrice || cogs * 1.30;
+    const competitorPrice = marketContext.competitorPrice || product.competitorPrice || basePrice * 1.05;
+
+    const state = {
+      basePrice,
+      competitorPrice,
+      stock: product.stock !== undefined ? product.stock : 50,
+      hourOfDay: marketContext.hourOfDay !== undefined ? marketContext.hourOfDay : 12,
+      elasticity: marketContext.elasticity || product.elasticity || 1.2,
+      conversionRate: marketContext.conversionRate || 0.05,
+    };
+
+    const policyAction = this.predictAction(state);
+    const candidateMultipliers = [
+      policyAction - 0.12,
+      policyAction - 0.04,
+      policyAction,
+      policyAction + 0.04,
+      policyAction + 0.12,
+    ];
+
+    let bestAction = policyAction;
+    let bestValue = -Infinity;
+    const refV = this.evaluateReferenceValue(state);
+
+    for (const action of candidateMultipliers) {
+      const qVal = this.evaluateCritic(state, action);
+      const penalty = Math.max(0, qVal - refV) * (this.alpha * 0.5);
+      const score = qVal - penalty;
+
+      if (score > bestValue) {
+        bestValue = score;
+        bestAction = action;
+      }
+    }
+
+    let rawSuggestedPrice = Math.round(basePrice * bestAction);
+    const ceilingPrice = Math.round(competitorPrice * 1.20);
+    let constrainedPrice = Math.min(rawSuggestedPrice, ceilingPrice);
+
+    const hardFloorPrice = Math.round(cogs * this.cogsFloorMultiplier);
+    const isFloorTriggered = constrainedPrice < hardFloorPrice;
+    const finalPrice = Math.max(constrainedPrice, hardFloorPrice);
+
+    const netProfitMargin = (finalPrice - cogs) / finalPrice;
+
+    return {
+      productId: product.id || product.productId || 'SKU_CALQL_OPTIMIZED',
+      cogs,
+      basePrice,
+      competitorPrice,
+      suggestedPrice: finalPrice,
+      rawAction: Number(bestAction.toFixed(4)),
+      referenceValueV: Number(refV.toFixed(2)),
+      estimatedQValue: Number(this.evaluateCritic(state, bestAction).toFixed(2)),
+      hardFloorPrice,
+      ceilingPrice,
+      isFloorTriggered,
+      netProfitMargin: Number(netProfitMargin.toFixed(4)),
+      safetyStatus: isFloorTriggered ? 'FLOOR_OVERRIDE_SECURED' : 'CALIBRATED_OPTIMAL',
+    };
+  }
+}
+
+// ==============================================================================
+// PHASE 55 ALGORITHM 3: Vehicle Routing with Customer Relocation Strategies (Smart Lockers)
+// ==============================================================================
+export const DEFAULT_SMART_LOCKERS = [
+  { id: 'LOCKER_TIMES_CITY', name: 'SPX Smart Locker Times City T11 - Hai Bà Trưng', lat: 20.9950, lng: 105.8670, capacity: 50 },
+  { id: 'LOCKER_KEANGNAM', name: 'SPX Smart Locker Keangnam Landmark 72 - Nam Từ Liêm', lat: 21.0168, lng: 105.7838, capacity: 60 },
+  { id: 'LOCKER_ROYAL_CITY', name: 'SPX Smart Locker Royal City R4 - Thanh Xuân', lat: 21.0028, lng: 105.8164, capacity: 50 },
+  { id: 'LOCKER_IPH_CAUGIAY', name: 'SPX Smart Locker IPH Xuân Thủy - Cầu Giấy', lat: 21.0360, lng: 105.7816, capacity: 40 },
+  { id: 'LOCKER_TRANG_TIEN', name: 'SPX Smart Locker Tràng Tiền - Hoàn Kiếm', lat: 21.0255, lng: 105.8530, capacity: 30 },
+];
+
+export class VRPTWCRSRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || {
+      id: 'DEPOT_HANOI_CDC',
+      name: 'SPX Express Central Sorting Hub - Ba Đình',
+      lat: 21.0341,
+      lng: 105.8372,
+    };
+    this.smartLockers = options.smartLockers || DEFAULT_SMART_LOCKERS;
+    this.maxWalkingRadiusKm = options.maxWalkingRadiusKm || 0.40;
+    this.lockerBonusCoins = options.lockerBonusCoins || 500;
+    this.averageSpeedKmH = options.averageSpeedKmH || 32;
+    this.doorstepServiceMinutes = options.doorstepServiceMinutes || 5;
+    this.lockerBaseServiceMinutes = options.lockerBaseServiceMinutes || 3;
+    this.lockerPerParcelMinutes = options.lockerPerParcelMinutes || 0.5;
+  }
+
+  calculateDistanceKm(p1, p2) {
+    const R = 6371;
+    const dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
+    const dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((p1.lat * Math.PI) / 180) *
+        Math.cos((p2.lat * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(4));
+  }
+
+  evaluateLockerEligibility(customerCoord) {
+    let nearestLocker = null;
+    let minWalkDist = Infinity;
+
+    for (const locker of this.smartLockers) {
+      const dist = this.calculateDistanceKm(customerCoord, locker);
+      if (dist < minWalkDist) {
+        minWalkDist = dist;
+        nearestLocker = locker;
+      }
+    }
+
+    const isEligible = minWalkDist <= this.maxWalkingRadiusKm;
+    return {
+      isEligible,
+      nearestLocker,
+      walkingDistanceMeters: Math.round(minWalkDist * 1000),
+      walkingDistanceKm: Number(minWalkDist.toFixed(3)),
+    };
+  }
+
+  planConsolidatedRoutes(orders = [], options = {}) {
+    if (!orders || orders.length === 0) {
+      return { totalStops: 0, totalOrders: 0, routes: [] };
+    }
+
+    const allowAutoRelocation = options.allowAutoRelocation !== undefined ? options.allowAutoRelocation : true;
+
+    const lockerBuckets = new Map();
+    const doorstepOrders = [];
+    let relocatedOrdersCount = 0;
+    let totalCoinsAwarded = 0;
+
+    for (const order of orders) {
+      const coord = order.coordinates || { lat: order.lat, lng: order.lng };
+      const canRelocate = allowAutoRelocation && (order.flexiblePickupConsent !== false);
+      const eligibility = this.evaluateLockerEligibility(coord);
+
+      if (canRelocate && eligibility.isEligible) {
+        const lockerId = eligibility.nearestLocker.id;
+        if (!lockerBuckets.has(lockerId)) {
+          lockerBuckets.set(lockerId, {
+            locker: eligibility.nearestLocker,
+            orders: [],
+          });
+        }
+        lockerBuckets.get(lockerId).orders.push({
+          ...order,
+          relocatedToLocker: true,
+          walkingDistanceMeters: eligibility.walkingDistanceMeters,
+          bonusCoinsEarned: this.lockerBonusCoins,
+        });
+        relocatedOrdersCount++;
+        totalCoinsAwarded += this.lockerBonusCoins;
+      } else {
+        doorstepOrders.push({
+          ...order,
+          relocatedToLocker: false,
+          coordinates: coord,
+        });
+      }
+    }
+
+    const stops = [];
+
+    for (const [lockerId, bucket] of lockerBuckets.entries()) {
+      const orderCount = bucket.orders.length;
+      const dwellMinutes = this.lockerBaseServiceMinutes + orderCount * this.lockerPerParcelMinutes;
+
+      stops.push({
+        stopType: 'SMART_LOCKER_CONSOLIDATION',
+        stopId: lockerId,
+        stopName: bucket.locker.name,
+        coordinates: { lat: bucket.locker.lat, lng: bucket.locker.lng },
+        consolidatedOrdersCount: orderCount,
+        orders: bucket.orders,
+        dwellMinutes: Number(dwellMinutes.toFixed(1)),
+        timeWindow: { early: 480, late: 1080 },
+      });
+    }
+
+    for (const order of doorstepOrders) {
+      stops.push({
+        stopType: 'DOORSTEP_DELIVERY',
+        stopId: order.orderId || order.id || `DOORSTEP_${stops.length + 1}`,
+        stopName: order.customerName || `Khách hàng tại ${order.address || 'Hà Nội'}`,
+        coordinates: order.coordinates,
+        consolidatedOrdersCount: 1,
+        orders: [order],
+        dwellMinutes: this.doorstepServiceMinutes,
+        timeWindow: { early: order.earlyMinutes || 480, late: order.lateMinutes || 1080 },
+      });
+    }
+
+    let currLoc = this.depot;
+    let currTime = options.startMinute || 480;
+    let totalDistKm = 0;
+    let totalDwellMinutes = 0;
+    const sequencedStops = [];
+    const remainingStops = [...stops];
+
+    while (remainingStops.length > 0) {
+      let bestIdx = 0;
+      let minDist = Infinity;
+
+      for (let i = 0; i < remainingStops.length; i++) {
+        const d = this.calculateDistanceKm(currLoc, remainingStops[i].coordinates);
+        if (d < minDist) {
+          minDist = d;
+          bestIdx = i;
+        }
+      }
+
+      const nextStop = remainingStops.splice(bestIdx, 1)[0];
+      const travelMins = Math.round((minDist / this.averageSpeedKmH) * 60);
+      const arrivalTime = currTime + travelMins;
+      const departureTime = arrivalTime + nextStop.dwellMinutes;
+
+      totalDistKm += minDist;
+      totalDwellMinutes += nextStop.dwellMinutes;
+
+      sequencedStops.push({
+        ...nextStop,
+        distanceFromPrevKm: Number(minDist.toFixed(2)),
+        arrivalTimeMinutes: arrivalTime,
+        departureTimeMinutes: departureTime,
+      });
+
+      currLoc = nextStop.coordinates;
+      currTime = departureTime;
+    }
+
+    const returnDist = this.calculateDistanceKm(currLoc, this.depot);
+    totalDistKm += returnDist;
+
+    const baselineDoorstepStops = orders.length;
+    const actualStopsCount = sequencedStops.length;
+    const stopsSaved = baselineDoorstepStops - actualStopsCount;
+    const baselineDwellMinutes = baselineDoorstepStops * this.doorstepServiceMinutes;
+    const dwellMinutesSaved = Math.max(0, baselineDwellMinutes - totalDwellMinutes);
+    const co2SavedKg = Number((stopsSaved * 1.2 * 0.18).toFixed(2));
+
+    const consolidationRate = orders.length > 0 ? Number((relocatedOrdersCount / orders.length).toFixed(3)) : 0;
+
+    return {
+      status: 'VRPTW_CRS_CONSOLIDATED',
+      totalOrders: orders.length,
+      relocatedOrdersCount,
+      doorstepOrdersCount: doorstepOrders.length,
+      consolidationRate,
+      baselineDoorstepStops,
+      actualStopsCount,
+      stopsSaved,
+      totalDistanceKm: Number(totalDistKm.toFixed(2)),
+      totalDwellMinutes: Number(totalDwellMinutes.toFixed(1)),
+      dwellMinutesSaved: Number(dwellMinutesSaved.toFixed(1)),
+      co2SavedKg,
+      totalCoinsAwarded,
+      stops: sequencedStops,
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -28275,6 +28851,11 @@ export default {
   FCMSketchEstimator,
   EDACPricing,
   DTRPLogisticsRouter,
+  // Phase 55 Enterprise Algorithms
+  AMSFrequencyMomentEstimator,
+  CalQLPricing,
+  DEFAULT_SMART_LOCKERS,
+  VRPTWCRSRouter,
 };
 
 

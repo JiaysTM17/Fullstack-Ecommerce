@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1287,6 +1287,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Ước lượng khoảng giá dyadic FCM',
         'Tối ưu hóa giá an toàn EDAC',
         'Định tuyến giao hỏa tốc DTRP'
+      ]
+    };
+  }
+
+  // 64. Bộ Ba Thuật Toán AMS Sketch, Cal-QL Pricing & Tủ Khóa VRPTW-CRS (Phase 55 - Feature 202)
+  if (/ams sketch|f2 moment|cal-ql|calql|vrptw-crs|smart locker|tủ khóa thông minh/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN AMS SKETCH, CAL-QL PRICING & TỦ KHÓA VRPTW-CRS (${currentShop.name})**:
+- **Phát hiện đột biến lưu lượng AMS Sketch (Alon-Matias-Szegedy F2 Moment)**:
+  - Đo lường chỉ số bất thường Stream Surprise Index $S = F_2 / (\\sum f_i)^2$, lập tức cảnh báo khi sản phẩm của shop lọt top viral Flash Sale hoặc bị bot đặt ảo.
+- **Định giá học tăng cường hiệu chuẩn giá trị tham chiếu Cal-QL (NeurIPS 2023)**:
+  - Loại bỏ tâm lý bảo thủ hạ giá quá mức của CQL truyền thống, cho phép shop tự tin nâng giá thu lợi nhuận trong vùng an toàn $V^\\mu(s)$, bảo toàn sàn $\\text{COGS} \\times 1.05$.
+- **Định tuyến giao hàng tủ khóa thông minh SPX Smart Locker (VRPTW-CRS)**:
+  - Tự động gom đơn hàng của shop gửi vào tủ Smart Locker (Times City, Royal City, Keangnam...) cho khách nhận trong bán kính 400m, giảm tỷ lệ giao không thành công xuống gần 0%!`,
+      type: 'recommendation',
+      tag: 'AMS, CAL-QL & SMART LOCKER VRPTW-CRS',
+      suggestions: [
+        'Kiểm tra chỉ số đột biến AMS Sketch',
+        'Tối ưu hóa giá bán bằng Cal-QL',
+        'Giao hàng qua tủ khóa thông minh'
       ]
     };
   }
