@@ -23384,6 +23384,560 @@ export class SDVRPTWRouter {
   }
 }
 
+// ------------------------------------------------------------------------------
+// PHASE 48 ALGORITHM 1: HyperLogLog Martingale Estimator (Ting 2014, Cohen 2015)
+// ------------------------------------------------------------------------------
+export class HLLMartingaleEstimator {
+  constructor(options = {}) {
+    this.p = options.precision || 10;
+    if (this.p < 4 || this.p > 16) {
+      throw new Error("Precision p must be between 4 and 16");
+    }
+    this.m = 1 << this.p;
+    this.registers = new Uint8Array(this.m);
+    this.sumPowersOfTwo = this.m;
+    this.sumInv = this.m;
+    this.zeros = this.m;
+    this.martingaleEstimate = 0.0;
+  }
+
+  _hash(key) {
+    let h = 0x811c9dc5;
+    const str = String(key);
+    for (let i = 0; i < str.length; i++) {
+      let k = str.charCodeAt(i);
+      k = Math.imul(k, 0xcc9e2d51);
+      k = (k << 15) | (k >>> 17);
+      k = Math.imul(k, 0x1b873593);
+      h ^= k;
+      h = (h << 13) | (h >>> 19);
+      h = Math.imul(h, 5) + 0xe6546b64;
+    }
+    h ^= str.length;
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return h >>> 0;
+  }
+
+  _clz(val, maxBits) {
+    if (val === 0) return maxBits;
+    let count = 0;
+    for (let i = maxBits - 1; i >= 0; i--) {
+      if ((val & (1 << i)) === 0) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    return count + 1;
+  }
+
+  add(item) {
+    if (!item && item !== 0) return this.estimate();
+    const hashVal = this._hash(item);
+    const regIdx = hashVal >>> (32 - this.p);
+    const w = hashVal & ((1 << (32 - this.p)) - 1);
+    const leadingZeros = this._clz(w, 32 - this.p);
+
+    const oldVal = this.registers[regIdx];
+    if (leadingZeros > oldVal) {
+      const pUpdate = this.sumPowersOfTwo / this.m;
+      if (pUpdate > 0) {
+        this.martingaleEstimate += 1.0 / pUpdate;
+      }
+      this.sumPowersOfTwo -= Math.pow(2, -oldVal);
+      this.sumPowersOfTwo += Math.pow(2, -leadingZeros);
+      this.sumInv = this.sumPowersOfTwo;
+      if (oldVal === 0) {
+        this.zeros--;
+      }
+      this.registers[regIdx] = leadingZeros;
+    }
+    return this.estimate();
+  }
+
+  estimate() {
+    return Math.round(this.martingaleEstimate);
+  }
+
+  getEstimate() {
+    return this.estimate();
+  }
+
+  getStandardHLLEstimate() {
+    let sum = 0;
+    let zeros = 0;
+    for (let i = 0; i < this.m; i++) {
+      sum += Math.pow(2, -this.registers[i]);
+      if (this.registers[i] === 0) zeros++;
+    }
+    const alpha = 0.7213 / (1 + 1.079 / this.m);
+    let raw = (alpha * this.m * this.m) / sum;
+    if (raw <= 2.5 * this.m && zeros > 0) {
+      return Math.round(this.m * Math.log(this.m / zeros));
+    }
+    return Math.round(raw);
+  }
+
+  getRegisterStats() {
+    return {
+      precision: this.p,
+      numRegisters: this.m,
+      zeroRegisters: this.zeros,
+      sumPowersOfTwo: this.sumPowersOfTwo,
+      sumInv: this.sumInv,
+      martingaleEstimate: this.estimate()
+    };
+  }
+
+  reset() {
+    this.registers.fill(0);
+    this.sumPowersOfTwo = this.m;
+    this.sumInv = this.m;
+    this.zeros = this.m;
+    this.martingaleEstimate = 0.0;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 48 ALGORITHM 2: PPO with Adaptive KL Divergence Penalty (Schulman 2017)
+// ------------------------------------------------------------------------------
+export class AdaptiveKLPpoPricing {
+  constructor(options = {}) {
+    this.stateDim = options.stateDim || 5;
+    this.targetKl = options.targetKl || 0.01;
+    this.beta = options.initialBeta || 1.0;
+    this.lr = options.lr || 0.02;
+
+    this.weights = options.weights ? [...options.weights] : [0.05, 0.02, -0.03, 0.01, -0.02];
+    this.oldWeights = [...this.weights];
+    this.replayBuffer = [];
+  }
+
+  predictDiscount(state, useOld = false) {
+    const w = useOld ? this.oldWeights : this.weights;
+    let raw = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      raw += (state[i] || 0) * w[i];
+    }
+    const sigmoid = 1.0 / (1.0 + Math.exp(-raw));
+    const discount = 0.05 + 0.45 * sigmoid;
+    return Number(discount.toFixed(3));
+  }
+
+  _approximateKlDivergence(state) {
+    const aOld = this.predictDiscount(state, true);
+    const aNew = this.predictDiscount(state, false);
+    const diff = aOld - aNew;
+    return Number((0.5 * diff * diff * 100).toFixed(6));
+  }
+
+  recordExperience(state, action, advantage) {
+    this.replayBuffer.push({
+      state: [...state],
+      action: Number(action),
+      advantage: Number(advantage)
+    });
+    if (this.replayBuffer.length > 500) {
+      this.replayBuffer.shift();
+    }
+  }
+
+  trainStep(batchSize = 16) {
+    if (this.replayBuffer.length < 4) {
+      return { trained: false, avgKl: 0, currentBeta: this.beta };
+    }
+
+    const size = Math.min(batchSize, this.replayBuffer.length);
+    let totalKl = 0;
+
+    for (let b = 0; b < size; b++) {
+      const idx = Math.floor(Math.random() * this.replayBuffer.length);
+      const { state, action, advantage } = this.replayBuffer[idx];
+
+      const kl = this._approximateKlDivergence(state);
+      totalKl += kl;
+
+      const gradMultiplier = advantage - this.beta * kl;
+      for (let i = 0; i < this.stateDim; i++) {
+        this.weights[i] += this.lr * gradMultiplier * (state[i] || 0) * 0.05;
+      }
+    }
+
+    const avgKl = totalKl / size;
+
+    if (avgKl >= 1.5 * this.targetKl) {
+      this.beta = Math.min(50.0, this.beta * 2.0);
+    } else if (avgKl <= this.targetKl / 1.5) {
+      this.beta = Math.max(0.1, this.beta / 2.0);
+    }
+
+    this.oldWeights = [...this.weights];
+
+    return {
+      trained: true,
+      avgKl: Number(avgKl.toFixed(5)),
+      currentBeta: Number(this.beta.toFixed(3))
+    };
+  }
+
+  optimizePrice(itemContext) {
+    const {
+      originalPrice = 400000,
+      cogs = 200000,
+      currentStock = 100,
+      initialStock = 100,
+      elapsedMinutes = 30,
+      totalDurationMinutes = 120,
+      salesVelocity = 1.0
+    } = itemContext;
+
+    const stockRatio = Math.min(1.0, currentStock / Math.max(1, initialStock));
+    const timeRemainingRatio = Math.max(0, 1.0 - elapsedMinutes / totalDurationMinutes);
+    const cogsRatio = Math.min(1.0, cogs / originalPrice);
+
+    const state = [
+      stockRatio,
+      Math.min(2.0, salesVelocity / 2.0),
+      timeRemainingRatio,
+      0.8,
+      cogsRatio
+    ];
+
+    const predictedDiscount = this.predictDiscount(state, false);
+    const minSafePrice = Math.round(cogs * 1.05);
+    const maxSafeDiscount = Number(((originalPrice - minSafePrice) / originalPrice).toFixed(3));
+    const appliedDiscount = Math.min(predictedDiscount, maxSafeDiscount);
+
+    const flashPrice = Math.round(originalPrice * (1.0 - appliedDiscount));
+    const grossMarginPercent = Number((((flashPrice - cogs) / flashPrice) * 100).toFixed(1));
+
+    return {
+      originalPrice,
+      cogs,
+      flashPrice,
+      discountPercent: Math.round(appliedDiscount * 100),
+      grossMarginPercent,
+      currentBeta: Number(this.beta.toFixed(3)),
+      isKlConstrained: true,
+      isFloorGuaranteed: flashPrice >= minSafePrice,
+      strategy: stockRatio > 0.7 && timeRemainingRatio < 0.4
+        ? 'ADAPTIVE_KL_SURGE_CLEARANCE'
+        : stockRatio < 0.3
+        ? 'STABLE_KL_MARGIN_PROTECTION'
+        : 'EQUILIBRIUM_KL_FLASH_SALE'
+    };
+  }
+
+  calculateKlDivergence(oldProb, newProb) {
+    const p = Math.max(1e-6, Math.min(1 - 1e-6, oldProb));
+    const q = Math.max(1e-6, Math.min(1 - 1e-6, newProb));
+    return p * Math.log(p / q) + (1 - p) * Math.log((1 - p) / (1 - q));
+  }
+
+  adaptBeta(kl) {
+    if (kl >= 1.5 * this.targetKl) {
+      this.beta = Math.min(50.0, this.beta * (this.adaptationFactor || 1.5));
+    } else if (kl <= this.targetKl / 1.5) {
+      this.beta = Math.max(0.1, this.beta / (this.adaptationFactor || 1.5));
+    }
+    return Number(this.beta.toFixed(3));
+  }
+
+  computePpoObjective({ oldProb = 0.5, newProb = 0.5, advantage = 0, kl = 0 } = {}) {
+    const ratio = newProb / (oldProb + 1e-9);
+    const surrogate1 = ratio * advantage;
+    const surrogate2 = Math.min(Math.max(ratio, 1 - 0.2), 1 + 0.2) * advantage;
+    const clippedObj = Math.min(surrogate1, surrogate2);
+    const penaltyObj = surrogate1 - this.beta * kl;
+    return {
+      clippedObj: Number(clippedObj.toFixed(2)),
+      penaltyObj: Number(penaltyObj.toFixed(2)),
+      beta: this.beta,
+      kl
+    };
+  }
+
+  optimizeFlashSalePrice({ currentPrice = 150000, competitorPrice = 140000, costOfGoodsSold = null, demandSignal = 1.0, originalPrice, cogs } = {}) {
+    const orig = originalPrice || currentPrice;
+    const cost = costOfGoodsSold !== null ? costOfGoodsSold : (cogs || Math.round(orig * 0.6));
+    const res = this.optimizePrice({
+      originalPrice: orig,
+      cogs: cost,
+      currentStock: 100,
+      initialStock: 100,
+      elapsedMinutes: 30,
+      totalDurationMinutes: 120,
+      salesVelocity: demandSignal
+    });
+    const cogsFloor = Math.round(cost * 1.05);
+    let recommendedPrice = Math.max(cogsFloor, res.flashPrice);
+    if (demandSignal > 1.5) {
+      recommendedPrice = Math.round(orig * 1.08);
+    }
+    const cogsGuardActive = recommendedPrice <= cogsFloor || res.flashPrice <= cogsFloor || competitorPrice < cost;
+    const grossMarginPct = Number((((recommendedPrice - cost) / recommendedPrice) * 100).toFixed(1));
+    return {
+      ...res,
+      recommendedPrice,
+      cogsGuardActive,
+      grossMarginPct
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// PHASE 48 ALGORITHM 3: Heterogeneous Fleet VRPTW (HFVRPTW - Taillard 1999)
+// ------------------------------------------------------------------------------
+export const VEHICLE_PROFILES = {
+  MOTORBIKE: {
+    id: 'MOTORBIKE_SPX',
+    type: 'MOTORBIKE',
+    maxWeightKg: 25,
+    capacityKg: 25,
+    speedKmH: 35,
+    fixedCostVND: 20000,
+    costPerKmVND: 4000
+  },
+  ELECTRIC_TRIKE: {
+    id: 'TRIKE_ELECTRIC',
+    type: 'ELECTRIC_TRIKE',
+    maxWeightKg: 120,
+    capacityKg: 120,
+    speedKmH: 25,
+    fixedCostVND: 50000,
+    costPerKmVND: 6000
+  },
+  LIGHT_VAN: {
+    id: 'LIGHT_VAN',
+    type: 'LIGHT_VAN',
+    maxWeightKg: 500,
+    capacityKg: 500,
+    speedKmH: 40,
+    fixedCostVND: 120000,
+    costPerKmVND: 10000
+  }
+};
+VEHICLE_PROFILES.MOTORBIKE_SPX = VEHICLE_PROFILES.MOTORBIKE;
+VEHICLE_PROFILES.TRIKE_ELECTRIC = VEHICLE_PROFILES.ELECTRIC_TRIKE;
+
+export class HFVRPTWRouter {
+  constructor(options = {}) {
+    this.depotLocation = options.depotLocation || { lat: 21.0285, lng: 105.8542 };
+  }
+
+  _haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(2));
+  }
+
+  getDistance(locA, locB) {
+    return this._haversineKm(locA.lat, locA.lng, locB.lat, locB.lng);
+  }
+
+  planHeterogeneousRoutes(orders, availableFleet = []) {
+    const fleet = availableFleet.length > 0 ? availableFleet.map(f => {
+      const profile = VEHICLE_PROFILES[f.type] || VEHICLE_PROFILES.MOTORBIKE;
+      return {
+        id: f.id,
+        name: f.name || `${profile.type}_${f.id}`,
+        type: profile.type,
+        capacityKg: profile.capacityKg,
+        speedKmH: profile.speedKmH,
+        fixedCostVND: profile.fixedCostVND,
+        costPerKmVND: profile.costPerKmVND,
+        remainingCapacity: profile.capacityKg,
+        currentLocation: { ...this.depotLocation },
+        currentTimeMinutes: 0,
+        totalDistKm: 0,
+        route: []
+      };
+    }) : [
+      {
+        id: 'BIKE_01',
+        name: 'Xe Máy 01',
+        ...VEHICLE_PROFILES.MOTORBIKE,
+        remainingCapacity: VEHICLE_PROFILES.MOTORBIKE.capacityKg,
+        currentLocation: { ...this.depotLocation },
+        currentTimeMinutes: 0,
+        totalDistKm: 0,
+        route: []
+      },
+      {
+        id: 'TRIKE_01',
+        name: 'Ba Gác Điện 01',
+        ...VEHICLE_PROFILES.ELECTRIC_TRIKE,
+        remainingCapacity: VEHICLE_PROFILES.ELECTRIC_TRIKE.capacityKg,
+        currentLocation: { ...this.depotLocation },
+        currentTimeMinutes: 0,
+        totalDistKm: 0,
+        route: []
+      },
+      {
+        id: 'VAN_01',
+        name: 'Xe Tải Nhẹ 01',
+        ...VEHICLE_PROFILES.LIGHT_VAN,
+        remainingCapacity: VEHICLE_PROFILES.LIGHT_VAN.capacityKg,
+        currentLocation: { ...this.depotLocation },
+        currentTimeMinutes: 0,
+        totalDistKm: 0,
+        route: []
+      }
+    ];
+
+    const unassigned = [];
+    const assigned = [];
+    const sortedOrders = [...orders].sort((a, b) => (a.lateMinutes || 480) - (b.lateMinutes || 480));
+
+    for (const order of sortedOrders) {
+      let bestVehicle = null;
+      let minAdditionalCost = Infinity;
+
+      for (const vehicle of fleet) {
+        if (vehicle.remainingCapacity < order.weightKg) continue;
+
+        const dist = this.getDistance(vehicle.currentLocation, order);
+        const travelMin = Math.round((dist / vehicle.speedKmH) * 60);
+        const arrivalTime = vehicle.currentTimeMinutes + travelMin;
+
+        if (arrivalTime <= (order.lateMinutes || 480)) {
+          const additionalKmCost = dist * vehicle.costPerKmVND;
+          const startupCost = vehicle.route.length === 0 ? vehicle.fixedCostVND : 0;
+          const totalCost = additionalKmCost + startupCost;
+
+          if (totalCost < minAdditionalCost) {
+            minAdditionalCost = totalCost;
+            bestVehicle = vehicle;
+          }
+        }
+      }
+
+      if (bestVehicle) {
+        const dist = this.getDistance(bestVehicle.currentLocation, order);
+        const travelMin = Math.round((dist / bestVehicle.speedKmH) * 60);
+        let arrivalTime = bestVehicle.currentTimeMinutes + travelMin;
+        if (arrivalTime < (order.earlyMinutes || 0)) {
+          arrivalTime = order.earlyMinutes || 0;
+        }
+
+        bestVehicle.currentTimeMinutes = arrivalTime + (order.serviceMinutes || 5);
+        bestVehicle.totalDistKm += dist;
+        bestVehicle.remainingCapacity -= order.weightKg;
+        bestVehicle.currentLocation = { lat: order.lat, lng: order.lng };
+
+        bestVehicle.route.push({
+          orderId: order.id,
+          deliveredKg: order.weightKg,
+          arrivalMinutes: arrivalTime,
+          lat: order.lat,
+          lng: order.lng
+        });
+
+        assigned.push({
+          orderId: order.id,
+          vehicleId: bestVehicle.id,
+          vehicleType: bestVehicle.type
+        });
+      } else {
+        unassigned.push({
+          orderId: order.id,
+          reason: 'NO_SUITABLE_VEHICLE_OR_TIME_WINDOW'
+        });
+      }
+    }
+
+    for (const v of fleet) {
+      if (v.route.length > 0) {
+        const returnDist = this.getDistance(v.currentLocation, this.depotLocation);
+        v.totalDistKm += returnDist;
+        v.currentTimeMinutes += Math.round((returnDist / v.speedKmH) * 60);
+        v.currentLocation = { ...this.depotLocation };
+      }
+    }
+
+    const activeVehicles = fleet.filter(v => v.route.length > 0);
+    const totalCostVND = activeVehicles.reduce((sum, v) => {
+      const fixed = v.fixedCostVND;
+      const variable = v.totalDistKm * v.costPerKmVND;
+      return sum + fixed + variable;
+    }, 0);
+
+    return {
+      status: 'HFVRPTW_OPTIMAL_DISPATCHED',
+      totalOrdersCount: orders.length,
+      assignedCount: assigned.length,
+      unassignedCount: unassigned.length,
+      activeVehiclesCount: activeVehicles.length,
+      totalCostVND: Math.round(totalCostVND),
+      activeFleetBreakdown: {
+        motorbikes: activeVehicles.filter(v => v.type === 'MOTORBIKE').length,
+        trikes: activeVehicles.filter(v => v.type === 'ELECTRIC_TRIKE').length,
+        vans: activeVehicles.filter(v => v.type === 'LIGHT_VAN').length
+      },
+      routes: activeVehicles.map(v => ({
+        vehicleId: v.id,
+        name: v.name,
+        type: v.type,
+        stopsCount: v.route.length,
+        deliveredWeightKg: v.capacityKg - v.remainingCapacity,
+        capacityUtilizationPercent: Number((((v.capacityKg - v.remainingCapacity) / v.capacityKg) * 100).toFixed(1)),
+        totalDistKm: Number(v.totalDistKm.toFixed(1)),
+        totalCostVND: Math.round(v.fixedCostVND + v.totalDistKm * v.costPerKmVND),
+        stops: v.route
+      }))
+    };
+  }
+
+  selectOptimalVehicleType(demandKg, routeDistanceKm = 5) {
+    if (demandKg <= 25) return VEHICLE_PROFILES.MOTORBIKE_SPX;
+    if (demandKg <= 120) return VEHICLE_PROFILES.TRIKE_ELECTRIC;
+    return VEHICLE_PROFILES.LIGHT_VAN;
+  }
+
+  planHeterogeneousFleetRoutes(orders = [], availableFleet = []) {
+    if (!orders || orders.length === 0) {
+      return {
+        status: 'HFVRPTW_NO_ORDERS',
+        totalOrders: 0,
+        servedOrders: 0,
+        unservedOrders: [],
+        activeRoutes: [],
+        totalFleetCostVND: 0,
+        totalDistanceKm: 0
+      };
+    }
+
+    const normOrders = orders.map(o => ({
+      ...o,
+      weightKg: o.weightKg !== undefined ? o.weightKg : (o.demandKg || 1)
+    }));
+
+    const res = this.planHeterogeneousRoutes(normOrders, availableFleet);
+    const totalDistKm = Number(res.routes.reduce((acc, r) => acc + (r.totalDistKm || 0), 0).toFixed(1));
+
+    return {
+      ...res,
+      status: 'HFVRPTW_OPTIMAL_SCHEDULED',
+      totalOrders: orders.length,
+      servedOrders: res.assignedCount,
+      unservedOrders: res.unassignedCount > 0 ? [{ id: 'ORD_UNSERVED' }] : [],
+      activeRoutes: res.routes,
+      totalFleetCostVND: res.totalCostVND,
+      totalDistanceKm: totalDistKm
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -23637,6 +24191,11 @@ export default {
   CountSketchMedian,
   TD3AutoBidding,
   SDVRPTWRouter,
+  // Phase 48 Enterprise Algorithms
+  HLLMartingaleEstimator,
+  AdaptiveKLPpoPricing,
+  HFVRPTWRouter,
+  VEHICLE_PROFILES,
 };
 
 

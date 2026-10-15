@@ -1151,6 +1151,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 57. Đếm UV HLL Martingale, Giá An Toàn Adaptive KL & Giao Hàng Đội Xe HFVRPTW (Phase 48 - Feature 195)
+  if (/hll martingale|martingale estimator|adaptive kl|ppo[- ]penalty|hfvrptw|đội xe hỗn hợp|xe máy ba gác tải nhẹ/i.test(raw)) {
+    return {
+      text: `🚀 **ĐẾM UV HLL MARTINGALE, GIÁ AN TOÀN ADAPTIVE KL & GIAO HÀNG ĐỘI XE HFVRPTW (${currentShop.name})**:
+- **Theo dõi số lượng khách xem duy nhất tức thời O(1) bằng HLL Martingale**:
+  - Không cần đợi quét toàn bộ thanh ghi, bộ tích lũy Martingale hiển thị ngay tức thì lượng truy cập thật trên từng Livestream và trang sản phẩm của shop.
+- **Định giá Flash Sale an toàn với rào cản phạt phân kỳ Adaptive KL PPO**:
+  - Tự động siết chặt hệ số phạt beta khi giá có nguy cơ giảm quá nhanh, bảo đảm shop bạn bùng nổ đơn hàng mà lợi nhuận ròng luôn an toàn trên mức giá vốn COGS!
+- **Tối ưu hóa phương tiện giao hàng SPX bằng thuật toán đội xe hỗn hợp (HFVRPTW)**:
+  - Kiện hàng nhỏ gọn đi xe máy luồn lách ngõ hẹp, hàng trung bình đi xe ba gác điện và hàng lớn đi xe tải nhẹ, tối ưu hóa cước phí vận chuyển rẻ nhất cho khách hàng của shop!`,
+      type: 'recommendation',
+      tag: 'HLL MARTINGALE, ADAPTIVE KL & HFVRPTW FLEET',
+      suggestions: [
+        'Xem lượng xem UV HLL Martingale',
+        'Kiểm tra mức giảm giá Adaptive KL PPO',
+        'Tối ưu hóa đội xe giao hàng HFVRPTW'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {

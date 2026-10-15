@@ -415,7 +415,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 16. Ước Lượng Số Lượng Phần Tử Duy Nhất (HyperLogLog Cardinality Estimation)
-  if (!/hll\+\+|hyperloglog\+\+|sparse|jaccard|loglog[- ]beta|loglogbeta/i.test(raw) && /hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
+  if (!/hll\+\+|hyperloglog\+\+|sparse|jaccard|loglog[- ]beta|loglogbeta|martingale|hll martingale/i.test(raw) && /hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN HYPERLOGLOG (MASSIVE CARDINALITY ESTIMATION)**:
 - **Mục đích thiết kế**: Đếm hàng chục triệu người xem Shopee Live độc nhất (Unique Viewers) hoặc người dùng hoạt động DAU với dung lượng bộ nhớ cố định **dưới 12 KB RAM** (thay vì hàng GB nếu dùng Hash Set).
@@ -2678,6 +2678,65 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem kế hoạch tách kiện xe giao SDVRPTW',
         'Kiểm tra tỷ lệ lấp đầy tải trọng xe fleet',
         'Tối ưu hóa giá thầu bằng TD3'
+      ]
+    };
+  }
+
+  // 125. Ước Lượng Độ Tập Hợp Tức Thời Bằng HLL Martingale (Phase 48 - Feature 195)
+  if (/hll martingale|martingale estimator|ước lượng martingale|cardinality martingale|quá trình martingale/i.test(raw)) {
+    return {
+      text: `📈 **ƯỚC LƯỢNG ĐỘ TẬP HỢP TỨC THỜI BẰNG HLL MARTINGALE (TING 2014, COHEN 2015)**:
+- **Đột Phá Truy Vấn Tức Thì $O(1)$ Không Quét Thanh Ghi**:
+  - HLL truyền thống và HLL++ buộc phải duyệt toàn bộ $m$ thanh ghi và tính trung bình điều hòa $O(m)$ mỗi khi muốn biết số lượng người xem duy nhất (UV).
+  - HLL Martingale duy trì bộ tích lũy martingale thời gian thực: $\\hat{N}_{t} = \\hat{N}_{t-1} + \\frac{1}{p_t}$ với $p_t = \\frac{1}{m} \\sum 2^{-M[j]}$.
+- **Phương Sai Tiệm Cận Nhỏ Hơn HLL Flajolet**:
+  - Phương sai đạt mức tối ưu $\\approx \\frac{1.0}{\\sqrt{m}}$ (thấp hơn Flajolet $\\frac{1.04}{\\sqrt{m}}$), cho phép hiển thị tức thì số người xem Shopee Live triệu view mà không tạo gánh nặng CPU!`,
+      type: 'analytics',
+      tag: 'HLL MARTINGALE STREAMING CARDINALITY',
+      suggestions: [
+        'Đo lường thời gian truy vấn HLL Martingale',
+        'Kiểm tra rào cản phạt KL PPO-Penalty',
+        'Xem điều phối đội xe hỗn hợp HFVRPTW'
+      ]
+    };
+  }
+
+  // 126. Định Giá Bán An Toàn Rào Cản Phạt KL Tự Điều Chỉnh (Adaptive KL PPO) (Phase 48 - Feature 195)
+  if (/adaptive kl|ppo[- ]penalty|phân kỳ kl tự điều chỉnh|rào cản phạt kl|định giá adaptive kl/i.test(raw)) {
+    return {
+      text: `🏷️ **ĐỊNH GIÁ BÁN AN TOÀN BẰNG PPO PHẠT PHÂN KỲ KL TỰ ĐIỀU CHỈNH (SCHULMAN ET AL. 2017)**:
+- **Cơ Chế Rào Cản Tự Co Giãn Ngăn Chặn Sụp Đổ Giá Vốn**:
+  - Trong các phiên Flash Sale tần suất cao, thuật toán định giá tự do dễ bị cuốn theo các cú sốc cung cầu ngắn hạn dẫn đến bán tháo dưới giá vốn.
+  - Adaptive KL PPO thiết lập rào cản phạt phân kỳ $D_\\text{KL}(\\pi_\\text{old} \\parallel \\pi_\\text{new})$: Nếu độ lệch vượt ngưỡng an toàn ($D_\\text{KL} \\ge 1.5 \\times d_\\text{target}$), hệ số phạt $\\beta$ lập tức tăng gấp đôi ($\\beta \\leftarrow 2\\beta$) để ghì chặt chính sách giá!
+- **Tự Động Mở Rộng Khám Phá Khi Thị Trường Ổn Định**:
+  - Khi thị trường ổn định ($D_\\text{KL} \\le d_\\text{target} / 1.5$), hệ số $\\beta \\leftarrow \\beta / 2$ nới lỏng để AI tìm kiếm các mức giá tối ưu doanh thu mới!`,
+      type: 'recommendation',
+      tag: 'ADAPTIVE KL PPO DYNAMIC PRICING',
+      suggestions: [
+        'Xem hệ số phạt beta phân kỳ KL hiện tại',
+        'Kiểm tra ngưỡng bảo vệ giá vốn COGS',
+        'Ước lượng lượng truy cập bằng HLL Martingale'
+      ]
+    };
+  }
+
+  // 127. Định Tuyến Đội Xe Hỗn Hợp Đa Chủng Loại HFVRPTW (Phase 48 - Feature 195)
+  if (/hfvrptw|đội xe hỗn hợp|heterogeneous fleet|chủng loại xe|xe máy ba gác tải nhẹ/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN ĐỘI XE HỖN HỢP ĐA CHỦNG LOẠI CÓ CỬA SỔ THỜI GIAN (HFVRPTW - TAILLARD 1999)**:
+- **Mô Phỏng Thực Tế Mạng Lưới SPX Express Toàn Quốc**:
+  - Thay vì giả định đội xe đồng nhất, HFVRPTW điều phối linh hoạt 3 nhóm phương tiện:
+    • **Xe máy nội thành (Motorbike)**: Tải trọng $25\\text{kg}$, $35\\text{km/h}$, chi phí xuất bến chỉ $20.000₫$, cực kỳ cơ động trong ngõ hẻm.
+    • **Xe ba gác điện (Electric Trike)**: Tải trọng $120\\text{kg}$, $25\\text{km/h}$, chi phí $50.000₫$, lý tưởng cho bưu kiện trung bình.
+    • **Xe tải nhẹ 500kg (Light Van)**: Tải trọng $500\\text{kg}$, $40\\text{km/h}$, chuyên chở hàng cồng kềnh liên quận.
+- **Tự Động Cân Đối Giữa Chi Phí Cố Định Và Biến Phí**:
+  - Cực tiểu hóa hàm mục tiêu chi phí tổng thể $C = \\sum \\text{FixedCost}_k + \\sum \\text{Dist}_k \\times c_k$ mà vẫn đảm bảo 100% thời gian giao hẹn giờ!`,
+      type: 'logistics',
+      tag: 'HFVRPTW HETEROGENEOUS FLEET LOGISTICS',
+      suggestions: [
+        'Xem bảng cơ cấu đội xe hỗn hợp SPX',
+        'Kiểm tra chi phí vận hành đội xe HFVRPTW',
+        'Tối ưu hóa giá bán bằng Adaptive KL PPO'
       ]
     };
   }

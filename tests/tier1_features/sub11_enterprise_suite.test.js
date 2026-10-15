@@ -267,6 +267,11 @@ import {
   CountSketchMedian,
   TD3AutoBidding,
   SDVRPTWRouter,
+  // Phase 48 Enterprise Algorithms
+  HLLMartingaleEstimator,
+  AdaptiveKLPpoPricing,
+  HFVRPTWRouter,
+  VEHICLE_PROFILES,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -376,6 +381,9 @@ import { DynamicDARPRouter as ServerDynamicDARPRouter } from "../../server/src/u
 import { CountSketchMedian as ServerCountSketchMedian } from "../../server/src/utils/countSketchMedian.js";
 import { TD3AutoBidding as ServerTD3AutoBidding } from "../../server/src/utils/td3AutoBidding.js";
 import { SDVRPTWRouter as ServerSDVRPTWRouter } from "../../server/src/utils/sdvrptwRouter.js";
+import { HLLMartingaleEstimator as ServerHLLMartingaleEstimator } from "../../server/src/utils/hllMartingaleEstimator.js";
+import { AdaptiveKLPpoPricing as ServerAdaptiveKLPpoPricing } from "../../server/src/utils/adaptiveKlPpoPricing.js";
+import { HFVRPTWRouter as ServerHFVRPTWRouter, VEHICLE_PROFILES as ServerVehicleProfiles } from "../../server/src/utils/hfvrptwRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -21610,6 +21618,297 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(dispatchPlan.splitOrdersCount, 1);
       expect.equal(dispatchPlan.fulfilledOrdersCount, 1);
       expect.equal(dispatchPlan.activeVehiclesCount, 2);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 195: HLL Martingale, Adaptive KL PPO Pricing & HFVRPTW Fleet Suite (Phase 48 - 24 Tests)
+  // =========================================================================
+  describe("Feature 195: HLL Martingale, Adaptive KL PPO Pricing & HFVRPTW Fleet Suite", () => {
+    // 1. HLL Martingale Estimator Tests (F195-T01 to F195-T07)
+    test("F195-T01: Initial state has 0 martingale cardinality estimate for empty stream", () => {
+      const hll = new HLLMartingaleEstimator({ precision: 10 });
+      expect.equal(hll.getEstimate(), 0);
+      expect.equal(hll.add(""), 0);
+      expect.equal(hll.add(null), 0);
+    });
+
+    test("F195-T02: Adding distinct items increments martingale estimate smoothly in real time", () => {
+      const hll = new HLLMartingaleEstimator({ precision: 10 });
+      for (let i = 0; i < 100; i++) {
+        hll.add(`VIEWER_USER_${i}`);
+      }
+      const estimate = hll.getEstimate();
+      expect.ok(estimate >= 70 && estimate <= 130);
+    });
+
+    test("F195-T03: Duplicate items with lower or equal hash zero rank do not trigger martingale increments", () => {
+      const hll = new HLLMartingaleEstimator({ precision: 10 });
+      hll.add("CONSTANT_USER_STREAM");
+      const est1 = hll.getEstimate();
+      for (let i = 0; i < 20; i++) {
+        hll.add("CONSTANT_USER_STREAM");
+      }
+      const est2 = hll.getEstimate();
+      expect.equal(est1, est2);
+    });
+
+    test("F195-T04: getRegisterStats reports accurate precision, zero registers, and sumInv", () => {
+      const hll = new HLLMartingaleEstimator({ precision: 8 });
+      const statsInit = hll.getRegisterStats();
+      expect.equal(statsInit.precision, 8);
+      expect.equal(statsInit.numRegisters, 256);
+      expect.equal(statsInit.zeroRegisters, 256);
+
+      hll.add("SAMPLE_VIEWER_KEY");
+      const statsAfter = hll.getRegisterStats();
+      expect.ok(statsAfter.zeroRegisters < 256);
+      expect.ok(statsAfter.martingaleEstimate >= 1);
+    });
+
+    test("F195-T05: Standard HLL estimate correlates closely with Martingale estimate", () => {
+      const hll = new ServerHLLMartingaleEstimator({ precision: 10 });
+      for (let i = 0; i < 200; i++) {
+        hll.add(`STREAM_BUYER_ID_${i}`);
+      }
+      const martingaleVal = hll.getEstimate();
+      const standardVal = hll.getStandardHLLEstimate();
+      expect.ok(martingaleVal > 0);
+      expect.ok(standardVal > 0);
+      const ratio = martingaleVal / standardVal;
+      expect.ok(ratio >= 0.6 && ratio <= 1.4);
+    });
+
+    test("F195-T06: Reset clears registers, zeros, and resets martingale accumulator to 0", () => {
+      const hll = new HLLMartingaleEstimator({ precision: 8 });
+      for (let i = 0; i < 50; i++) {
+        hll.add(`FLUSH_ITEM_${i}`);
+      }
+      expect.ok(hll.getEstimate() > 0);
+      hll.reset();
+      expect.equal(hll.getEstimate(), 0);
+      expect.equal(hll.zeros, 256);
+      expect.equal(hll.sumInv, 256);
+    });
+
+    test("F195-T07: Server vs Client HLLMartingaleEstimator consistency on identical stream inputs", () => {
+      const clientHll = new HLLMartingaleEstimator({ precision: 10 });
+      const serverHll = new ServerHLLMartingaleEstimator({ precision: 10 });
+      for (let i = 0; i < 75; i++) {
+        const item = `PARALLEL_STREAM_EVENT_${i}`;
+        clientHll.add(item);
+        serverHll.add(item);
+      }
+      expect.equal(clientHll.getEstimate(), serverHll.getEstimate());
+      expect.equal(clientHll.getStandardHLLEstimate(), serverHll.getStandardHLLEstimate());
+    });
+
+    // 2. Adaptive KL PPO Dynamic Pricing Tests (F195-T08 to F195-T14)
+    test("F195-T08: Calculates Kullback-Leibler (KL) divergence accurately between old and new action probability distributions", () => {
+      const ppo = new AdaptiveKLPpoPricing();
+      const klZero = ppo.calculateKlDivergence(0.5, 0.5);
+      expect.ok(Math.abs(klZero) < 1e-4);
+
+      const klDiff = ppo.calculateKlDivergence(0.6, 0.4);
+      expect.ok(klDiff > 0.05);
+    });
+
+    test("F195-T09: adaptBeta doubles/increases beta penalty factor when KL exceeds 1.5 * targetKl", () => {
+      const ppo = new AdaptiveKLPpoPricing({ targetKl: 0.015, initialBeta: 1.0, adaptationFactor: 1.5 });
+      const highKl = 0.030; // > 1.5 * 0.015 = 0.0225
+      const newBeta = ppo.adaptBeta(highKl);
+      expect.equal(newBeta, 1.5);
+      expect.equal(ppo.beta, 1.5);
+    });
+
+    test("F195-T10: adaptBeta relaxes/decreases beta penalty factor when KL drops below targetKl / 1.5", () => {
+      const ppo = new AdaptiveKLPpoPricing({ targetKl: 0.015, initialBeta: 1.5, adaptationFactor: 1.5 });
+      const lowKl = 0.005; // < 0.015 / 1.5 = 0.010
+      const newBeta = ppo.adaptBeta(lowKl);
+      expect.equal(newBeta, 1.0);
+      expect.equal(ppo.beta, 1.0);
+    });
+
+    test("F195-T11: computePpoObjective computes clipped surrogate objective and beta-penalized objective", () => {
+      const ppo = new AdaptiveKLPpoPricing({ initialBeta: 1.2 });
+      const res = ppo.computePpoObjective({
+        oldProb: 0.5,
+        newProb: 0.55,
+        advantage: 2000,
+        kl: 0.01
+      });
+      expect.ok(typeof res.clippedObj === 'number');
+      expect.ok(typeof res.penaltyObj === 'number');
+      expect.equal(res.beta, 1.2);
+      expect.equal(res.kl, 0.01);
+    });
+
+    test("F195-T12: optimizeFlashSalePrice strictly enforces COGS floor + 5% gross margin safeguard", () => {
+      const ppo = new AdaptiveKLPpoPricing({ cogsFloor: 100000, basePrice: 150000 });
+      const pricing = ppo.optimizeFlashSalePrice({
+        currentPrice: 110000,
+        competitorPrice: 90000, // aggressive competitor price below cost
+        costOfGoodsSold: 100000,
+        demandSignal: 0.5
+      });
+      expect.ok(pricing.recommendedPrice >= 105000); // 100000 * 1.05 floor
+      expect.ok(pricing.grossMarginPct >= 4.7);
+      expect.equal(pricing.cogsGuardActive, true);
+    });
+
+    test("F195-T13: High demand signal promotes profitable price scaling without breaking KL boundary", () => {
+      const ppo = new AdaptiveKLPpoPricing({ cogsFloor: 80000, basePrice: 120000 });
+      const pricing = ppo.optimizeFlashSalePrice({
+        currentPrice: 130000,
+        competitorPrice: 140000,
+        costOfGoodsSold: 80000,
+        demandSignal: 1.8
+      });
+      expect.ok(pricing.recommendedPrice > 130000);
+      expect.equal(pricing.cogsGuardActive, false);
+    });
+
+    test("F195-T14: Server vs Client AdaptiveKLPpoPricing consistency on pricing calculations", () => {
+      const clientPpo = new AdaptiveKLPpoPricing({ targetKl: 0.02, initialBeta: 1.0 });
+      const serverPpo = new ServerAdaptiveKLPpoPricing({ targetKl: 0.02, initialBeta: 1.0 });
+      const clientPlan = clientPpo.optimizeFlashSalePrice({ currentPrice: 150000, competitorPrice: 145000, costOfGoodsSold: 100000 });
+      const serverPlan = serverPpo.optimizeFlashSalePrice({ currentPrice: 150000, competitorPrice: 145000, costOfGoodsSold: 100000 });
+      expect.equal(clientPlan.recommendedPrice, serverPlan.recommendedPrice);
+      expect.equal(clientPlan.cogsGuardActive, serverPlan.cogsGuardActive);
+    });
+
+    // 3. HFVRPTW Heterogeneous Fleet Logistics Tests (F195-T15 to F195-T20)
+    test("F195-T15: Default vehicle profiles contain Motorbike (25kg), Trike (120kg), and Light Van (500kg)", () => {
+      expect.equal(VEHICLE_PROFILES.MOTORBIKE_SPX.maxWeightKg, 25);
+      expect.equal(VEHICLE_PROFILES.TRIKE_ELECTRIC.maxWeightKg, 120);
+      expect.equal(VEHICLE_PROFILES.LIGHT_VAN.maxWeightKg, 500);
+      expect.equal(ServerVehicleProfiles.MOTORBIKE_SPX.maxWeightKg, 25);
+    });
+
+    test("F195-T16: selectOptimalVehicleType assigns Motorbike for light orders (<25kg) and Light Van for heavy loads", () => {
+      const router = new HFVRPTWRouter();
+      const profileLight = router.selectOptimalVehicleType(15, 5);
+      expect.equal(profileLight.id, 'MOTORBIKE_SPX');
+
+      const profileMedium = router.selectOptimalVehicleType(70, 10);
+      expect.equal(profileMedium.id, 'TRIKE_ELECTRIC');
+
+      const profileHeavy = router.selectOptimalVehicleType(250, 15);
+      expect.equal(profileHeavy.id, 'LIGHT_VAN');
+    });
+
+    test("F195-T17: planHeterogeneousFleetRoutes constructs valid routes within vehicle capacity and time windows", () => {
+      const router = new HFVRPTWRouter({
+        depot: { lat: 21.0285, lng: 105.8542, openMinutes: 0, closeMinutes: 600 }
+      });
+      const orders = [
+        { id: 'ORD_LIGHT_1', lat: 21.030, lng: 105.850, demandKg: 5, earlyMinutes: 30, lateMinutes: 180, serviceMinutes: 10 },
+        { id: 'ORD_LIGHT_2', lat: 21.032, lng: 105.852, demandKg: 8, earlyMinutes: 45, lateMinutes: 200, serviceMinutes: 10 },
+        { id: 'ORD_MEDIUM_1', lat: 21.040, lng: 105.860, demandKg: 80, earlyMinutes: 60, lateMinutes: 300, serviceMinutes: 20 },
+      ];
+      const result = router.planHeterogeneousFleetRoutes(orders);
+      expect.equal(result.status, 'HFVRPTW_OPTIMAL_SCHEDULED');
+      expect.equal(result.totalOrders, 3);
+      expect.equal(result.servedOrders, 3);
+      expect.ok(result.activeRoutes.length >= 1);
+      expect.ok(result.totalFleetCostVND > 0);
+    });
+
+    test("F195-T18: Total fleet cost aggregates fixed departure costs plus distance-based mileage costs", () => {
+      const router = new HFVRPTWRouter();
+      const orders = [
+        { id: 'ORD_EXP_1', lat: 21.025, lng: 105.850, demandKg: 10, earlyMinutes: 0, lateMinutes: 300, serviceMinutes: 5 }
+      ];
+      const result = router.planHeterogeneousFleetRoutes(orders);
+      expect.ok(result.totalFleetCostVND >= 15000); // at least motorbike fixed cost
+      expect.ok(result.totalDistanceKm > 0);
+    });
+
+    test("F195-T19: Handling empty or unserviceable orders returns graceful status", () => {
+      const router = new HFVRPTWRouter();
+      const emptyRes = router.planHeterogeneousFleetRoutes([]);
+      expect.equal(emptyRes.status, 'HFVRPTW_NO_ORDERS');
+      expect.equal(emptyRes.totalFleetCostVND, 0);
+
+      const impossibleRes = router.planHeterogeneousFleetRoutes([
+        { id: 'ORD_OVERSIZED', lat: 21.030, lng: 105.850, demandKg: 9999, earlyMinutes: 0, lateMinutes: 100 }
+      ]);
+      expect.equal(impossibleRes.unservedOrders.length, 1);
+    });
+
+    test("F195-T20: Server vs Client HFVRPTWRouter consistency on identical orders and depot config", () => {
+      const orders = [
+        { id: 'ORD_SYNC_1', lat: 21.031, lng: 105.851, demandKg: 20, earlyMinutes: 20, lateMinutes: 120, serviceMinutes: 8 },
+        { id: 'ORD_SYNC_2', lat: 21.033, lng: 105.853, demandKg: 40, earlyMinutes: 30, lateMinutes: 150, serviceMinutes: 12 },
+      ];
+      const clientRouter = new HFVRPTWRouter();
+      const serverRouter = new ServerHFVRPTWRouter();
+      const clientRes = clientRouter.planHeterogeneousFleetRoutes(orders);
+      const serverRes = serverRouter.planHeterogeneousFleetRoutes(orders);
+      expect.equal(clientRes.totalOrders, serverRes.totalOrders);
+      expect.equal(clientRes.servedOrders, serverRes.servedOrders);
+      expect.equal(clientRes.activeRoutes.length, serverRes.activeRoutes.length);
+    });
+
+    // 4. Tri-Role AI Copilots & End-to-End Pipeline Integration (F195-T21 to F195-T24)
+    test("F195-T21: Admin Sentinel Copilot (Sections 125, 126, 127) responds to HLL Martingale, Adaptive KL PPO, and HFVRPTW fleet queries", () => {
+      const res125 = generateAdminCopilotResponse("Kiểm tra lượt xem streaming hll martingale sàn");
+      expect.equal(res125.tag, "HLL MARTINGALE STREAMING CARDINALITY");
+      expect.ok(res125.text.includes("HLL MARTINGALE"));
+
+      const res126 = generateAdminCopilotResponse("Định giá adaptive kl ppo flash sale");
+      expect.equal(res126.tag, "ADAPTIVE KL PPO DYNAMIC PRICING");
+      expect.ok(res126.text.includes("Adaptive KL PPO") || res126.text.includes("PPO"));
+
+      const res127 = generateAdminCopilotResponse("Điều phối đội xe hỗn hợp hfvrptw");
+      expect.equal(res127.tag, "HFVRPTW HETEROGENEOUS FLEET LOGISTICS");
+      expect.ok(res127.text.includes("HFVRPTW"));
+    });
+
+    test("F195-T22: Seller ShopSmart Copilot (Section 57) advises sellers on real-time live views, COGS safety floor, and fleet dispatch", () => {
+      const res = generateSellerCopilotResponse("Tư vấn lượt xem hll martingale và deal an toàn adaptive kl");
+      expect.equal(res.tag, "HLL MARTINGALE, ADAPTIVE KL & HFVRPTW FLEET");
+      expect.ok(res.text.includes("COGS"));
+      expect.ok(res.text.includes("HLL Martingale"));
+    });
+
+    test("F195-T23: Buyer AI Assistant triggers Intent 50 (HLL_MARTINGALE_ADAPTIVEKL_HFVRPTW_ASSIST)", () => {
+      const res = generateAiChatResponse("Giải thích lượt xem hll martingale và deal an toàn adaptive kl");
+      expect.equal(res.intent, "HLL_MARTINGALE_ADAPTIVEKL_HFVRPTW_ASSIST");
+      expect.ok(res.replyText.includes("HLL MARTINGALE"));
+      expect.ok(res.replyText.includes("ADAPTIVE KL"));
+      expect.ok(res.replyText.includes("HFVRPTW"));
+    });
+
+    test("F195-T24: End-to-End Pipeline: HLL Martingale measures flash sale views, Adaptive KL PPO sets guarded sale price, HFVRPTW dispatches heterogeneous delivery fleet", () => {
+      // Step 1: HLL Martingale counts 150 unique streaming buyers in real-time
+      const hll = new ServerHLLMartingaleEstimator({ precision: 10 });
+      for (let i = 0; i < 150; i++) {
+        hll.add(`BUYER_STREAM_SESSION_${i}`);
+      }
+      const streamBuyersCount = hll.getEstimate();
+      expect.ok(streamBuyersCount >= 100);
+
+      // Step 2: Adaptive KL PPO adjusts price safely above COGS (120k COGS -> price >= 126k)
+      const ppo = new ServerAdaptiveKLPpoPricing({ cogsFloor: 120000, targetKl: 0.015 });
+      const flashPricing = ppo.optimizeFlashSalePrice({
+        currentPrice: 160000,
+        competitorPrice: 110000, // dumping price below cost
+        costOfGoodsSold: 120000,
+        demandSignal: 1.2
+      });
+      expect.ok(flashPricing.recommendedPrice >= 126000);
+      expect.equal(flashPricing.cogsGuardActive, true);
+
+      // Step 3: HFVRPTW dispatches heterogeneous fleet (Motorbike + Electric Trike) for fulfilled orders
+      const router = new ServerHFVRPTWRouter();
+      const dispatch = router.planHeterogeneousFleetRoutes([
+        { id: 'ORD_LIGHT_PARCEL', lat: 21.030, lng: 105.850, demandKg: 12, earlyMinutes: 0, lateMinutes: 180, serviceMinutes: 10 },
+        { id: 'ORD_HEAVY_CRATE', lat: 21.035, lng: 105.855, demandKg: 95, earlyMinutes: 0, lateMinutes: 240, serviceMinutes: 15 }
+      ]);
+      expect.equal(dispatch.status, 'HFVRPTW_OPTIMAL_SCHEDULED');
+      expect.equal(dispatch.servedOrders, 2);
+      expect.ok(dispatch.totalFleetCostVND > 0);
     });
   });
 });
