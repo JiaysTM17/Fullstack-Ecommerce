@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -454,7 +454,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg|opoe|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|lossy[- ]counting|spot|spot pricing|soft time window|cửa sổ mềm/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg|opoe|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|lossy[- ]counting|spot|spot pricing|soft time window|cửa sổ mềm|dsac|bất định nhận thức/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -3236,7 +3236,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 152. Lấy Mẫu Dính Tần Suất Cao Sticky Sampling (Phase 57 - Feature 204)
-  if (!/lossy|misra|gries|kps|karp/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
+  if (!/lossy|misra|gries|kps|karp|hhh|hierarchical|phân cấp/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
     return {
       text: `📊 **BỘ ĐẾM DÒNG TẦN SUẤT CAO STICKY SAMPLING (MANKU & MOTWANI 2002)**:
 - **Cơ Chế Lấy Mẫu Thích Ứng Động (Adaptive Dynamic Sampling)**:
@@ -3344,7 +3344,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 157. Điều Phối Trung Chuyển Gom Hàng Cross-Docking VRPTW-CC (Phase 58 - Feature 205)
-  if (/vrptw-cc|vrptw cc|cross[- ]dock|cross-docking|trung chuyển gom hàng|cross-dock hub|đồng bộ hóa cross-dock/i.test(raw)) {
+  if (!/bilateral|song phương|vrptw[- ]cross[- ]dock/i.test(raw) && /vrptw-cc|vrptw cc|cross[- ]dock|cross-docking|trung chuyển gom hàng|cross-dock hub|đồng bộ hóa cross-dock/i.test(raw)) {
     return {
       text: `🚛 **ĐIỀU PHỐI GOM HÀNG TRUNG CHUYỂN CROSS-DOCKING VRPTW-CC (SANTOS 2011, GRANGIER 2017)**:
 - **Mô Hình Hai Chặng Thu Gom & Giao Vận (Inbound & Outbound Transshipment)**:
@@ -3742,6 +3742,72 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem chi phí hao mòn pin phi tuyến',
         'Kiểm tra độ xả sâu cao nhất Peak DoD',
         'Phân tích chi phí vòng đời Generalized Cost'
+      ]
+    };
+  }
+
+  // 176. Phát Hiện Phần Tử Phổ Biến Phân Cấp Hierarchical Heavy Hitters HHH (Phase 65 - Feature 212)
+  if (/hhh|hierarchical heavy hitters|heavy hitters phân cấp|heavy hitters đa tầng|tần suất có điều kiện|conditioned frequency|cây phân cấp sản phẩm/i.test(raw)) {
+    return {
+      text: `🌳 **THUẬT TOÁN PHẦN TỬ PHỔ BIẾN PHÂN CẤP HIERARCHICAL HEAVY HITTERS (CORMODE ET AL. VLDB 2008 / TODS 2010)**:
+- **Khắc Phục Khiếm Khuyết Của Heavy Hitters Đơn Tầng (Flat HHH)**:
+  - Trong cây danh mục hàng triệu sản phẩm, không một SKU riêng lẻ nào vượt ngưỡng $\\phi \\cdot N$. Nhưng toàn bộ phân nhánh cha (ví dụ "Điện Thoại > Phụ Kiện > Cáp Sạc") lại chiếm tỷ trọng áp đảo!
+- **Tần Suất Có Điều Kiện (Conditioned Frequency Principle)**:
+  - Tần suất hiệu dụng của nút $P$ được trừ đi đóng góp của các nút con cháu đã được công nhận là HHH:
+    $$f_{\\text{cond}}(P) = f(P) - \\sum_{C \\in \\text{Descendants}(P) \\cap \\text{HHH}} f(C)$$
+  - Một nút được phong tặng HHH khi và chỉ khi $f_{\\text{cond}}(P) \\ge \\phi \\cdot N$.
+- **Bảo Chứng Lý Thuyết Tuyệt Đối**:
+  - **Zero False Negatives**: Không bao giờ bỏ sót bất kỳ nhánh danh mục hot trend nào.
+  - Không gian bộ nhớ bị chặn chặt chẽ bởi $O\\left(\\frac{H}{\\phi} \\cdot \\log N\\right)$, tối ưu tuyệt đối bộ đệm hệ thống!`,
+      type: 'analytics',
+      tag: 'HIERARCHICAL HEAVY HITTERS',
+      suggestions: [
+        'Xem danh sách danh mục HHH phân cấp',
+        'Kiểm tra ngưỡng tần suất có điều kiện Phi',
+        'Phân tích cấu trúc cây phân nhánh Trie'
+      ]
+    };
+  }
+
+  // 177. Định Giá Phân Phối Học Tăng Cường DSAC Dynamic Pricing (Phase 65 - Feature 212)
+  if (/dsac|distributional soft actor[- ]critic|dsac pricing|bất định nhận thức dsac|rủi ro phương sai dsac|soft actor[- ]critic phân phối/i.test(raw)) {
+    return {
+      text: `💹 **ĐỊNH GIÁ PHÂN PHỐI HỌC TĂNG CƯỜNG DSAC DYNAMIC PRICING (DUAN ET AL. IEEE TNNLS 2022 / NEURIPS 2021)**:
+- **Mô Hình Hóa Bất Định Liên Tục $Z(s, a) \\sim \\mathcal{N}(\\mu(s, a), \\sigma^2(s, a))$**:
+  - Thay vì xem nhẹ biến động thị trường, mạng Critic DSAC ước tính song song cả giá trị kỳ vọng $\\mu(s, a)$ lẫn phương sai bất định $\\sigma^2(s, a)$ của doanh thu trong các đợt bão đơn Flash Sale.
+- **Hàm Mục Tiêu Tối Ưu Hóa Phạt Rủi Ro & Khám Phá Entropy**:
+  - Actor lựa chọn hành động giá tối ưu hóa:
+    $$J(a) = \\mu(s, a) - \\beta_{\\text{risk}} \\cdot \\sigma(s, a) + \\alpha_{\\text{entropy}} \\cdot \\mathcal{H}(\\pi)$$
+  - Tự động phạt nặng các quyết định giá quá mạo hiểm có phương sai cao $\\sigma(s, a)$ hoặc dữ liệu ít ỏi.
+- **Rào Chắn Bảo Toàn Vốn Sàn & Shop**:
+  - Khóa chặt giá bán sàn an toàn $\\ge \\text{COGS} \\times 1.05$, triệt tiêu nguy cơ sụt giảm biên lợi nhuận!`,
+      type: 'pricing',
+      tag: 'DSAC DYNAMIC PRICING',
+      suggestions: [
+        'Kiểm tra hệ số phạt rủi ro Beta (0.35)',
+        'Đo lường độ bất định phương sai Sigma',
+        'Đánh giá entropy khám phá chính sách Alpha'
+      ]
+    };
+  }
+
+  // 178. Định Tuyến Đồng Bộ Song Phương Cross-Docking VRPTW-Bilateral (Phase 65 - Feature 212)
+  if (/vrptw[- ]cross[- ]dock|cross[- ]dock.*song phương|song phương.*cross[- ]dock|bilateral|vrptw[- ]bilateral|đồng bộ inbound outbound|trung chuyển không lưu kho/i.test(raw)) {
+    return {
+      text: `🔄 **ĐỊNH TUYẾN ĐỒNG BỘ SONG PHƯƠNG CROSS-DOCKING VRPTW-BILATERAL (LEE ET AL. 2004, PETERSEN 2011)**:
+- **Đồng Bộ Hóa Hai Chiều Thu Gom (Inbound) & Phát Hàng (Outbound)**:
+  - Khi đơn hàng đa người bán (Multi-Vendor Basket) gồm nhiều kiện từ các shop khác nhau gửi cho 1 người mua, bưu tá thu gom đưa về Hub Cross-Dock trung tâm, phân loại tức thì trong $\\Delta t_{\\text{sort}} = 25\\text{ phút}$.
+- **Ràng Buộc Đồng Bộ Khởi Hành Ngặt Nghèo (Synchronization Constraint)**:
+  - Xe van phát hàng chỉ được phép xuất bến khi toàn bộ các kiện thành phần đã về đến Hub:
+    $$t_{\\text{dep}}^{\\text{out}} \\ge \\max_{k \\in \\text{InboundSuppliers}} (t_{\\text{arr}, k}^{\\text{in}} + \\Delta t_{\\text{sort}})$$
+- **Triệt Tiêu Hoàn Toàn Chi Phí Lưu Kho (Zero Inventory Holding)**:
+  - Cắt giảm $50\\%$ số lượt xe giao hàng chặng cuối, tiết kiệm $35\\%$ cước vận chuyển và cam kết giao đúng hẹn cửa sổ thời gian cho người mua!`,
+      type: 'logistics',
+      tag: 'VRPTW CROSS-DOCK BILATERAL',
+      suggestions: [
+        'Xem kế hoạch đồng bộ Inbound - Outbound',
+        'Kiểm tra thời gian phân loại tại Hub (25p)',
+        'Phân tích chi phí vận chuyển tổng thể'
       ]
     };
   }

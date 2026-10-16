@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1472,7 +1472,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 73. Bộ Ba Thuật Toán KPS Frequent Items, CQRD Distributional Pricing & Định Tuyến Xe Điện Hao Mòn Pin EVRPTW-Battery (Phase 64 - Feature 211)
-  if (/kps|karp[- ]papadimitriou|cqrd|cvar pricing|quantile risk|định giá cqrd|pin xe điện|hao mòn pin|battery degradation|evrptw[- ]battery/i.test(raw)) {
+  if (!/hhh|hierarchical|dsac|cross[- ]dock|bilateral/i.test(raw) && /kps|karp[- ]papadimitriou|cqrd|cvar pricing|quantile risk|định giá cqrd|pin xe điện|hao mòn pin|battery degradation|evrptw[- ]battery/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN KPS FREQUENT ITEMS, CQRD DISTRIBUTIONAL PRICING & ĐỊNH TUYẾN HAO MÒN PIN EVRPTW-BATTERY (${currentShop.name})**:
 - **Bắt trọn sản phẩm bão đơn Karp-Papadimitriou-Shenker (KPS)**:
@@ -1487,6 +1487,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem sản phẩm bão đơn KPS',
         'Tư vấn định giá an toàn rủi ro CQRD',
         'Tối ưu giao hàng xe điện EVRPTW-Battery'
+      ]
+    };
+  }
+
+  // 74. Bộ Ba Thuật Toán Hierarchical Heavy Hitters, DSAC Dynamic Pricing & Định Tuyến Song Phương VRPTW-Bilateral (Phase 65 - Feature 212)
+  if (/hhh|hierarchical heavy hitters|heavy hitters phân cấp|dsac|dsac pricing|bất định dsac|vrptw[- ]cross[- ]dock|cross[- ]dock song phương|bilateral cross[- ]dock/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN HIERARCHICAL HEAVY HITTERS, DSAC PRICING & ĐỊNH TUYẾN SONG PHƯƠNG VRPTW-BILATERAL (${currentShop.name})**:
+- **Bắt trọn danh mục bão đơn Hierarchical Heavy Hitters (HHH)**:
+  - Phân tích luồng theo cấu trúc cây phân cấp danh mục của shop. Bắt trúng các nhánh hàng hot trend theo tần suất có điều kiện $f_{\\text{cond}}(P) \\ge \\phi N$ kể cả khi các SKU con chưa đủ đơn lẻ vượt ngưỡng, giúp shop đón đầu xu hướng nhập hàng và tối ưu chiến dịch hiển thị!
+- **Định giá phân phối thích ứng bất định DSAC Dynamic Pricing**:
+  - Tối ưu hóa song song lợi nhuận kỳ vọng $\\mu(s, a)$ và phạt rủi ro phương sai thị trường $\\beta_{\\text{risk}} \\cdot \\sigma(s, a)$, ngăn chặn định giá lệch chuẩn trong bão sale, bảo vệ biên lợi nhuận an toàn $\\ge \\text{COGS} \\times 1.05$.
+- **Giao hàng đơn đa người bán tối ưu cước VRPTW-Bilateral Cross-Dock**:
+  - Hàng của shop được bưu tá thu gom đưa về Hub Cross-Dock trung tâm phân loại trong $25\\text{ phút}$ và ghép chung chuyến phát với các shop khác, giảm $35\\%$ cước vận chuyển và cam kết giao đúng khung giờ hẹn cho khách hàng!`,
+      type: 'recommendation',
+      tag: 'HHH, DSAC & VRPTW-BILATERAL',
+      suggestions: [
+        'Xem danh mục bão đơn HHH',
+        'Tư vấn định giá an toàn rủi ro DSAC',
+        'Tối ưu giao hàng gom đơn Cross-Dock'
       ]
     };
   }

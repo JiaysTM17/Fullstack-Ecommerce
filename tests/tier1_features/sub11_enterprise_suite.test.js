@@ -347,6 +347,10 @@ import {
   KPSFrequentItems,
   CQRDPricing,
   EVRPTWBatteryDegradationRouter,
+  // Phase 65 Enterprise Algorithms
+  HierarchicalHeavyHitters,
+  DSACDynamicPricing,
+  VRPTWCrossDockBilateralRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -507,6 +511,9 @@ import { VRPTWStochasticServiceTimeRouter as ServerVRPTWStochasticServiceTimeRou
 import { KPSFrequentItems as ServerKPSFrequentItems } from "../../server/src/utils/kpsFrequentItems.js";
 import { CQRDPricing as ServerCQRDPricing } from "../../server/src/utils/cqrdPricing.js";
 import { EVRPTWBatteryDegradationRouter as ServerEVRPTWBatteryDegradationRouter } from "../../server/src/utils/evrptwBatteryDegradationRouter.js";
+import { HierarchicalHeavyHitters as ServerHierarchicalHeavyHitters } from "../../server/src/utils/hierarchicalHeavyHitters.js";
+import { DSACDynamicPricing as ServerDSACDynamicPricing } from "../../server/src/utils/dsacDynamicPricing.js";
+import { VRPTWCrossDockBilateralRouter as ServerVRPTWCrossDockBilateralRouter } from "../../server/src/utils/vrptwCrossDockBilateralRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -28149,6 +28156,408 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(routePlan.totalVehicles, 1);
       expect.ok(routePlan.totalDegradationCostVnd > 0);
       expect.equal(routePlan.allFeasible, true);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 212: Enterprise Algorithms Suite - Phase 65
+  // 1. HierarchicalHeavyHitters (Cormode, Korn, Muthukrishnan, Srivastava 2008/2010)
+  // 2. DSACDynamicPricing (Distributional Soft Actor-Critic - Duan et al. TNNLS 2022)
+  // 3. VRPTWCrossDockBilateralRouter (Lee et al. 2004, Petersen & Ropke 2011)
+  // =========================================================================
+  describe("Feature 212: Enterprise Algorithms Suite - Phase 65", () => {
+    // -----------------------------------------------------------------------
+    // Sub-suite 1: HierarchicalHeavyHitters (T01 - T07)
+    // -----------------------------------------------------------------------
+    test("F212-T01: Initializes with phi, epsilon, maxDepth, 0 stream count and root trie node", () => {
+      const hhh = new HierarchicalHeavyHitters({ phi: 0.10, epsilon: 0.02, maxDepth: 4 });
+      const metrics = hhh.getMetrics();
+      expect.equal(metrics.phi, 0.10);
+      expect.equal(metrics.epsilon, 0.02);
+      expect.equal(metrics.maxDepth, 4);
+      expect.equal(metrics.totalStreamCount, 0);
+      expect.equal(metrics.treeNodeCount, 1);
+      expect.equal(metrics.thresholdCount, 0);
+    });
+
+    test("F212-T02: Normalizes category path from strings with delimiters (> / :) and arrays", () => {
+      const hhh = new HierarchicalHeavyHitters({ maxDepth: 3 });
+      const norm1 = hhh.normalizePath("Thời Trang > Nam > Áo Polo > Cổ Bẻ");
+      expect.deepEqual(norm1, ["Thời Trang", "Nam", "Áo Polo"]);
+
+      const norm2 = hhh.normalizePath("Điện Tử / Âm Thanh / Tai Nghe");
+      expect.deepEqual(norm2, ["Điện Tử", "Âm Thanh", "Tai Nghe"]);
+
+      const norm3 = hhh.normalizePath(["Gia Dụng", "Bếp", "Nồi Cơm"]);
+      expect.deepEqual(norm3, ["Gia Dụng", "Bếp", "Nồi Cơm"]);
+    });
+
+    test("F212-T03: Updates hierarchical path counts across all prefix levels", () => {
+      const hhh = new HierarchicalHeavyHitters();
+      hhh.update("Thời Trang > Nam > Áo Thun", 3);
+      hhh.update("Thời Trang > Nam > Quần Jean", 2);
+      hhh.update("Thời Trang > Nữ > Đầm", 4);
+
+      expect.equal(hhh.totalStreamCount, 9);
+      expect.equal(hhh.estimate("Thời Trang"), 9);
+      expect.equal(hhh.estimate("Thời Trang > Nam"), 5);
+      expect.equal(hhh.estimate("Thời Trang > Nam > Áo Thun"), 3);
+      expect.equal(hhh.estimate("Thời Trang > Nam > Quần Jean"), 2);
+      expect.equal(hhh.estimate("Thời Trang > Nữ"), 4);
+      expect.equal(hhh.estimate("Công Nghệ"), 0);
+    });
+
+    test("F212-T04: Computes conditioned frequency correctly subtracting descendant HHH counts", () => {
+      const hhh = new HierarchicalHeavyHitters({ phi: 0.30 });
+      // Stream with 10 total items:
+      // Category A > B1: 4 occurrences (40% >= 30% -> HHH)
+      // Category A > B2: 2 occurrences (20% < 30%)
+      // Category A > B3: 2 occurrences (20% < 30%)
+      // Category C: 2 occurrences (20%)
+      for (let i = 0; i < 4; i++) hhh.update("CatA > B1");
+      for (let i = 0; i < 2; i++) hhh.update("CatA > B2");
+      for (let i = 0; i < 2; i++) hhh.update("CatA > B3");
+      for (let i = 0; i < 2; i++) hhh.update("CatC");
+
+      const heavyHitters = hhh.getHierarchicalHeavyHitters();
+      expect.ok(heavyHitters.length > 0);
+      // B1 is an HHH with total 4
+      const b1 = heavyHitters.find(h => h.path === "CatA > B1");
+      expect.ok(b1);
+      expect.equal(b1.totalCount, 4);
+
+      // CatA total = 8. Since B1 is HHH (4), conditioned count for CatA = 8 - 4 = 4 (40% >= 30% -> also HHH!)
+      const catA = heavyHitters.find(h => h.path === "CatA");
+      expect.ok(catA);
+      expect.equal(catA.conditionedCount, 4);
+      expect.equal(catA.totalCount, 8);
+    });
+
+    test("F212-T05: Identifies root/parent category HHH when individual children are sparse but aggregate is heavy", () => {
+      const hhh = new HierarchicalHeavyHitters({ phi: 0.25 });
+      // 100 items: 40 scattered items under Tech > Audio, none of which exceed 25 individually
+      for (let i = 0; i < 40; i++) {
+        hhh.update(`Tech > Audio > Earbuds_${i % 10}`); // each child has 4 items (4% < 25%)
+      }
+      for (let i = 0; i < 60; i++) {
+        hhh.update(`Other > Category_${i % 20}`);
+      }
+
+      const hhhList = hhh.getHierarchicalHeavyHitters();
+      // Neither of the Earbuds children qualifies as HHH.
+      // But parent Tech > Audio has conditioned count = 40 (40% >= 25%)!
+      const audioHHH = hhhList.find(h => h.path.includes("Tech > Audio"));
+      expect.ok(audioHHH, "Parent category Tech > Audio must be identified as HHH");
+      expect.equal(audioHHH.conditionedCount, 40);
+    });
+
+    test("F212-T06: Merges two HierarchicalHeavyHitters summaries correctly", () => {
+      const hhh1 = new HierarchicalHeavyHitters();
+      const hhh2 = new HierarchicalHeavyHitters();
+
+      hhh1.update("Shoes > Running", 5);
+      hhh2.update("Shoes > Running", 3);
+      hhh2.update("Shoes > Casual", 4);
+
+      hhh1.merge(hhh2);
+      expect.equal(hhh1.totalStreamCount, 12);
+      expect.equal(hhh1.estimate("Shoes > Running"), 8);
+      expect.equal(hhh1.estimate("Shoes > Casual"), 4);
+      expect.equal(hhh1.estimate("Shoes"), 12);
+    });
+
+    test("F212-T07: Server and Client HierarchicalHeavyHitters produce identical results", () => {
+      const clientHHH = new HierarchicalHeavyHitters({ phi: 0.15 });
+      const serverHHH = new ServerHierarchicalHeavyHitters({ phi: 0.15 });
+
+      const stream = [
+        "Electronics > Mobile > Android",
+        "Electronics > Mobile > Android",
+        "Electronics > Mobile > iOS",
+        "Electronics > Laptop",
+        "Home > Kitchen"
+      ];
+      clientHHH.updateBatch(stream);
+      serverHHH.updateBatch(stream);
+
+      expect.equal(clientHHH.totalStreamCount, serverHHH.totalStreamCount);
+      expect.equal(clientHHH.estimate("Electronics > Mobile"), serverHHH.estimate("Electronics > Mobile"));
+      expect.deepEqual(clientHHH.getHierarchicalHeavyHitters(), serverHHH.getHierarchicalHeavyHitters());
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 2: DSACDynamicPricing (T08 - T14)
+    // -----------------------------------------------------------------------
+    test("F212-T08: Initializes continuous return distribution models with mean mu and uncertainty sigma", () => {
+      const pricing = new DSACDynamicPricing({ basePrice: 200000, betaRisk: 0.30 });
+      expect.equal(pricing.candidateMultipliers.length, 9);
+      expect.equal(pricing.distributionModels.size, 9);
+
+      const baseActionStat = pricing.distributionModels.get(1.00);
+      expect.ok(baseActionStat.mu > 0);
+      expect.ok(baseActionStat.sigma > 0);
+      expect.equal(baseActionStat.samplesCount, 5);
+    });
+
+    test("F212-T09: Updates mean and variance dynamically using Welford style iterative updates", () => {
+      const pricing = new DSACDynamicPricing({ basePrice: 200000 });
+      const initial = { ...pricing.distributionModels.get(0.95) };
+
+      pricing.updateDistribution(0.95, 250000, 0.20);
+      const updated = pricing.distributionModels.get(0.95);
+
+      expect.ok(updated.mu > initial.mu, "Mean should shift towards higher observed return");
+      expect.equal(updated.samplesCount, initial.samplesCount + 1);
+    });
+
+    test("F212-T10: Computes softmax policy entropy for maximum entropy exploration", () => {
+      const pricing = new DSACDynamicPricing({ alphaEntropy: 0.10 });
+      const logits = [1000, 1200, 800, 1500];
+      const { probs, entropy } = pricing.computeSoftmaxEntropy(logits);
+
+      expect.equal(probs.length, 4);
+      expect.ok(Math.abs(probs.reduce((a, b) => a + b, 0) - 1.0) < 1e-4);
+      expect.ok(entropy > 0, "Policy entropy must be strictly positive");
+    });
+
+    test("F212-T11: Evaluates action score applying risk penalty beta * sigma", () => {
+      const pricing = new DSACDynamicPricing({ betaRisk: 0.40 });
+      const evalScore = pricing.evaluateActionScore(150000, 20000);
+
+      expect.equal(evalScore.mu, 150000);
+      expect.equal(evalScore.sigma, 20000);
+      expect.equal(evalScore.riskPenalty, 8000); // 0.40 * 20000
+      expect.equal(evalScore.score, 142000); // 150000 - 8000
+    });
+
+    test("F212-T12: Recommends price maximizing DSAC score and strictly enforces COGS safety floor (1.05x)", () => {
+      const cogs = 150000;
+      const pricing = new DSACDynamicPricing({ basePrice: 160000, cogs, cogsSafetyFloorRatio: 1.05 });
+      const decision = pricing.recommendPrice({
+        basePrice: 160000,
+        cogs,
+        competitorPrice: 155000,
+        demandIndex: 0.7
+      });
+
+      const safetyFloor = Math.round(cogs * 1.05); // 157,500
+      expect.ok(decision.recommendedPrice >= safetyFloor, "Price cannot breach COGS safety floor");
+      expect.ok(decision.marginAnalysis.marginVnd >= 0);
+      expect.ok(decision.evaluatedActions.length === 9);
+      expect.ok(decision.policyEntropy > 0);
+    });
+
+    test("F212-T13: Contextual scaling respects demandIndex and inventoryUrgency", () => {
+      const pricing = new DSACDynamicPricing({ basePrice: 300000 });
+      const recHighDemand = pricing.recommendPrice({ basePrice: 300000, demandIndex: 1.8 });
+      const recLowDemand = pricing.recommendPrice({ basePrice: 300000, demandIndex: 0.6 });
+
+      expect.ok(recHighDemand.expectedReturn > recLowDemand.expectedReturn);
+    });
+
+    test("F212-T14: Server and Client DSACDynamicPricing produce identical results", () => {
+      const clientDSAC = new DSACDynamicPricing({ basePrice: 220000, cogs: 140000 });
+      const serverDSAC = new ServerDSACDynamicPricing({ basePrice: 220000, cogs: 140000 });
+
+      const item = { basePrice: 220000, cogs: 140000, competitorPrice: 230000, demandIndex: 1.1 };
+      const clientRes = clientDSAC.recommendPrice(item);
+      const serverRes = serverDSAC.recommendPrice(item);
+
+      expect.equal(clientRes.recommendedPrice, serverRes.recommendedPrice);
+      expect.equal(clientRes.priceMultiplier, serverRes.priceMultiplier);
+      expect.equal(clientRes.dsacScore, serverRes.dsacScore);
+      expect.equal(clientRes.safetyFloorVnd, serverRes.safetyFloorVnd);
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 3: VRPTWCrossDockBilateralRouter (T15 - T20)
+    // -----------------------------------------------------------------------
+    test("F212-T15: Initializes bilateral cross-docking parameters (sorting duration, inbound/outbound capacities)", () => {
+      const router = new VRPTWCrossDockBilateralRouter({
+        sortingDurationMin: 30,
+        inboundCapacityKg: 400,
+        outboundCapacityKg: 90
+      });
+
+      expect.equal(router.sortingDurationMin, 30);
+      expect.equal(router.inboundCapacityKg, 400);
+      expect.equal(router.outboundCapacityKg, 90);
+      expect.equal(router.hub.id, 'HUB_MAIN');
+    });
+
+    test("F212-T16: Calculates spatial Euclidean distance correctly between locations", () => {
+      const router = new VRPTWCrossDockBilateralRouter();
+      const p1 = { x: 0, y: 0 };
+      const p2 = { x: 3, y: 4 };
+      expect.equal(router.distance(p1, p2), 5);
+    });
+
+    test("F212-T17: Plans inbound pickup routes and computes supplier arrival times at hub", () => {
+      const router = new VRPTWCrossDockBilateralRouter();
+      const suppliers = [
+        { id: "SUP1", name: "Shop Cầu Giấy", x: 2, y: 3, supplyLoad: 20 },
+        { id: "SUP2", name: "Shop Hà Đông", x: 4, y: 5, supplyLoad: 30 }
+      ];
+      const customers = [
+        { id: "CUST1", name: "Người Mua Hoàn Kiếm", x: 1, y: 2, demand: 15, timeWindow: [0, 180] }
+      ];
+      const orders = [
+        { orderId: "ORD1", customerId: "CUST1", supplierIds: ["SUP1", "SUP2"] }
+      ];
+
+      const solution = router.planBilateralCrossDockRoutes({ suppliers, customers, crossDockOrders: orders });
+      expect.equal(solution.status, "SUCCESS");
+      expect.equal(solution.inboundRoutes.length, 1);
+      expect.ok(solution.inboundRoutes[0].hubArrivalTime > 0);
+      expect.equal(solution.inboundRoutes[0].stops.length, 2);
+    });
+
+    test("F212-T18: Enforces bilateral synchronization constraint: outbound departure >= max inbound arrival + sorting duration", () => {
+      const sortingTime = 25;
+      const router = new VRPTWCrossDockBilateralRouter({ sortingDurationMin: sortingTime });
+      const suppliers = [
+        { id: "SUP_A", x: 3, y: 4, supplyLoad: 15 },
+        { id: "SUP_B", x: 6, y: 8, supplyLoad: 25 }
+      ];
+      const customers = [
+        { id: "CUST_1", x: 2, y: 2, demand: 10, timeWindow: [0, 240] }
+      ];
+      const orders = [
+        { orderId: "ORD_SYNC", customerId: "CUST_1", supplierIds: ["SUP_A", "SUP_B"] }
+      ];
+
+      const solution = router.planBilateralCrossDockRoutes({ suppliers, customers, crossDockOrders: orders });
+      const orderSummary = solution.consolidatedOrders[0];
+      expect.equal(orderSummary.readyForDispatchMin, orderSummary.hubArrivalMaxMin + sortingTime);
+
+      const outboundVan = solution.outboundRoutes[0];
+      expect.ok(outboundVan.departureFromHubTime >= orderSummary.readyForDispatchMin, "Van cannot leave hub before orders are consolidated");
+    });
+
+    test("F212-T19: Plans synchronized outbound delivery routes minimizing generalized transportation and lateness costs", () => {
+      const router = new VRPTWCrossDockBilateralRouter({ outboundCapacityKg: 50 });
+      const suppliers = [{ id: "S1", x: 2, y: 2, supplyLoad: 40 }];
+      const customers = [
+        { id: "C1", x: 3, y: 3, demand: 30, timeWindow: [0, 150] },
+        { id: "C2", x: 5, y: 5, demand: 30, timeWindow: [0, 150] }
+      ];
+      const orders = [
+        { orderId: "O1", customerId: "C1", supplierId: "S1", demandKg: 30 },
+        { orderId: "O2", customerId: "C2", supplierId: "S1", demandKg: 30 }
+      ];
+
+      const solution = router.planBilateralCrossDockRoutes({ suppliers, customers, crossDockOrders: orders });
+      expect.ok(solution.outboundRoutes.length >= 2, "Payload exceeding 50kg forces multiple outbound delivery vans");
+      expect.ok(solution.summary.totalGeneralizedCostVnd > 0);
+      expect.equal(solution.summary.isSynchronized, true);
+    });
+
+    test("F212-T20: Server and Client VRPTWCrossDockBilateralRouter produce identical results", () => {
+      const clientRouter = new VRPTWCrossDockBilateralRouter();
+      const serverRouter = new ServerVRPTWCrossDockBilateralRouter();
+
+      const suppliers = [{ id: "SUP_X", x: 4, y: 3, supplyLoad: 20 }];
+      const customers = [{ id: "CUST_Y", x: 2, y: 5, demand: 10, timeWindow: [0, 120] }];
+      const orders = [{ orderId: "ORD_Z", customerId: "CUST_Y", supplierId: "SUP_X", demandKg: 10 }];
+
+      const clientRes = clientRouter.planBilateralCrossDockRoutes({ suppliers, customers, crossDockOrders: orders });
+      const serverRes = serverRouter.planBilateralCrossDockRoutes({ suppliers, customers, crossDockOrders: orders });
+
+      expect.equal(clientRes.summary.totalDistanceKm, serverRes.summary.totalDistanceKm);
+      expect.equal(clientRes.summary.totalGeneralizedCostVnd, serverRes.summary.totalGeneralizedCostVnd);
+      expect.equal(clientRes.inboundRoutes[0].hubArrivalTime, serverRes.inboundRoutes[0].hubArrivalTime);
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 4: Deep AI Copilot & End-to-End Integration (T21 - T24)
+    // -----------------------------------------------------------------------
+    test("F212-T21: Admin Sentinel Copilot handles Hierarchical Heavy Hitters queries with mathematical details", () => {
+      const adminRes = generateAdminCopilotResponse("Phân tích cây phân cấp sản phẩm Hierarchical Heavy Hitters HHH Cormode");
+      expect.equal(adminRes.type, "analytics");
+      expect.equal(adminRes.tag, "HIERARCHICAL HEAVY HITTERS");
+      expect.ok(adminRes.text.includes("HIERARCHICAL HEAVY HITTERS"));
+      expect.ok(adminRes.text.includes("CORMODE ET AL. VLDB 2008"));
+      expect.ok(adminRes.text.includes("Zero False Negatives"));
+    });
+
+    test("F212-T22: Admin Sentinel Copilot handles DSAC Pricing and VRPTW Cross-Dock Bilateral queries", () => {
+      const adminRes1 = generateAdminCopilotResponse("Tư vấn định giá phân phối bất định nhận thức DSAC Dynamic Pricing");
+      expect.equal(adminRes1.type, "pricing");
+      expect.equal(adminRes1.tag, "DSAC DYNAMIC PRICING");
+      expect.ok(adminRes1.text.includes("DSAC"));
+      expect.ok(adminRes1.text.includes("DUAN ET AL. IEEE TNNLS 2022"));
+
+      const adminRes2 = generateAdminCopilotResponse("Điều phối gom hàng trung chuyển song phương cross-docking VRPTW-Bilateral");
+      expect.equal(adminRes2.type, "logistics");
+      expect.equal(adminRes2.tag, "VRPTW CROSS-DOCK BILATERAL");
+      expect.ok(adminRes2.text.includes("VRPTW-BILATERAL"));
+      expect.ok(adminRes2.text.includes("Synchronization Constraint"));
+    });
+
+    test("F212-T23: Seller ShopSmart Copilot & Buyer Assistant handle Phase 65 algorithms and intents", () => {
+      const sellerRes = generateSellerCopilotResponse("Tư vấn danh mục bão đơn HHH và định giá thích ứng bất định DSAC");
+      expect.equal(sellerRes.type, "recommendation");
+      expect.equal(sellerRes.tag, "HHH, DSAC & VRPTW-BILATERAL");
+      expect.ok(sellerRes.text.includes("Hierarchical Heavy Hitters"));
+      expect.ok(sellerRes.text.includes("DSAC"));
+
+      const buyerRes = generateAiChatResponse("Hỏi về bắt trend danh mục HHH và gom đơn đa người bán Cross-Dock");
+      expect.equal(buyerRes.intent, "HHH_DSAC_CROSSDOCK_BILATERAL");
+      expect.ok(buyerRes.replyText.includes("Hierarchical Heavy Hitters"));
+      expect.ok(buyerRes.replyText.includes("DSAC Dynamic Pricing"));
+      expect.ok(buyerRes.replyText.includes("Bilateral Cross-Docking"));
+    });
+
+    test("F212-T24: Full end-to-end integration: HHH category trend detection -> DSAC uncertainty-aware pricing -> VRPTW Cross-Dock synchronized dispatch", () => {
+      // Step 1: Detect viral category with HierarchicalHeavyHitters
+      const hhh = new ServerHierarchicalHeavyHitters({ phi: 0.20 });
+      const stream = [
+        "Tech > Mobile > Flagship",
+        "Tech > Mobile > Midrange",
+        "Tech > Mobile > Budget",
+        "Tech > Mobile > Accessories",
+        "Home > Decor"
+      ];
+      hhh.updateBatch(stream);
+      const hhhResults = hhh.getHierarchicalHeavyHitters();
+      expect.ok(hhhResults.length > 0);
+      const topCategory = hhhResults.find(h => h.path.includes("Tech > Mobile"));
+      expect.ok(topCategory);
+
+      // Step 2: Risk and uncertainty-penalized pricing with DSACDynamicPricing
+      const dsac = new ServerDSACDynamicPricing({ basePrice: 400000, cogs: 260000, betaRisk: 0.35 });
+      const pricingDecision = dsac.recommendPrice({
+        basePrice: 400000,
+        cogs: 260000,
+        competitorPrice: 410000,
+        demandIndex: 1.4
+      });
+      expect.ok(pricingDecision.recommendedPrice >= 260000 * 1.05);
+      expect.ok(pricingDecision.evaluatedActions.length === 9);
+      expect.ok(pricingDecision.dsacScore > 0);
+
+      // Step 3: Bilateral synchronized logistics dispatch with VRPTWCrossDockBilateralRouter
+      const router = new ServerVRPTWCrossDockBilateralRouter({
+        sortingDurationMin: 20,
+        inboundCapacityKg: 200,
+        outboundCapacityKg: 80
+      });
+      const suppliers = [
+        { id: "S_NORTH", x: 2, y: 3, supplyLoad: 25 },
+        { id: "S_SOUTH", x: 4, y: 2, supplyLoad: 30 }
+      ];
+      const customers = [
+        { id: "BUYER_1", x: 3, y: 5, demand: 20, timeWindow: [0, 200] }
+      ];
+      const orders = [
+        { orderId: "ORD_BUNDLE", customerId: "BUYER_1", supplierIds: ["S_NORTH", "S_SOUTH"] }
+      ];
+
+      const crossDockPlan = router.planBilateralCrossDockRoutes({ suppliers, customers, crossDockOrders: orders });
+      expect.equal(crossDockPlan.status, "SUCCESS");
+      expect.equal(crossDockPlan.inboundRoutes.length, 1);
+      expect.equal(crossDockPlan.outboundRoutes.length, 1);
+      expect.equal(crossDockPlan.summary.isSynchronized, true);
     });
   });
 });
