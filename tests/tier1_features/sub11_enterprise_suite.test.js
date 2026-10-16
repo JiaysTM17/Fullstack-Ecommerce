@@ -387,6 +387,10 @@ import {
   DyadicRangeCountSketch,
   SACLagrangianContinuousPricing,
   EVRPTWMixedFleetFuelCellSolarRouter,
+  // Phase 75 Enterprise Algorithms
+  DyadicHaarWaveletSketch,
+  TRPOLagrangianContinuousPricing,
+  EVRPTWRegenerativeBrakingTerrainRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -577,6 +581,9 @@ import { EVRPTWPVPanelOnboardSolarRouter as ServerEVRPTWPVPanelOnboardSolarRoute
 import { DyadicRangeCountSketch as ServerDyadicRangeCountSketch } from "../../server/src/utils/dyadicRangeCountSketch.js";
 import { SACLagrangianContinuousPricing as ServerSACLagrangianContinuousPricing } from "../../server/src/utils/sacLagrangianContinuousPricing.js";
 import { EVRPTWMixedFleetFuelCellSolarRouter as ServerEVRPTWMixedFleetFuelCellSolarRouter } from "../../server/src/utils/evrptwMixedFleetFuelCellSolarRouter.js";
+import { DyadicHaarWaveletSketch as ServerDyadicHaarWaveletSketch } from "../../server/src/utils/dyadicHaarWaveletSketch.js";
+import { TRPOLagrangianContinuousPricing as ServerTRPOLagrangianContinuousPricing } from "../../server/src/utils/trpoLagrangianContinuousPricing.js";
+import { EVRPTWRegenerativeBrakingTerrainRouter as ServerEVRPTWRegenerativeBrakingTerrainRouter } from "../../server/src/utils/evrptwRegenerativeBrakingTerrainRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -31710,6 +31717,364 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích phân khúc bằng Dyadic range count-sketch hoặc giao bằng xe hydro pin nhiên liệu không?");
         expect.equal(buyerRes.intent, "DYADIC_COUNT_SKETCH_SAC_CONTINUOUS_HYDROGEN_SOLAR");
         expect.ok(buyerRes.replyText.includes("Dyadic Range Count-Sketch"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 222: Phase 75 Enterprise Algorithms Suite (24 Tests)
+    // 1. DyadicHaarWaveletSketch (Gilbert 2002, Cormode 2005)
+    // 2. TRPOLagrangianContinuousPricing (Schulman 2015, Achiam 2017)
+    // 3. EVRPTWRegenerativeBrakingTerrainRouter (Bektas 2011, Schiffer 2017)
+    // =========================================================================
+    describe("Feature 222: Phase 75 Enterprise Algorithms Suite", () => {
+      // --- 1. DyadicHaarWaveletSketch Tests (F222-T01 to F222-T08) ---
+      test("F222-T01: Initializes DyadicHaarWaveletSketch with dyadic power-of-2 universe and tree depth", () => {
+        const sketch = new DyadicHaarWaveletSketch({ universeSize: 256, maxCoefficients: 32 });
+        expect.equal(sketch.universeSize, 256);
+        expect.equal(sketch.treeLevels, 8);
+        expect.equal(sketch.maxCoefficients, 32);
+        expect.equal(sketch.totalWeight, 0);
+        expect.equal(sketch.totalUpdates, 0);
+      });
+
+      test("F222-T02: Point updates increment tree nodes and calculate scaling coefficient correctly", () => {
+        const sketch = new DyadicHaarWaveletSketch({ universeSize: 128 });
+        sketch.update(10, 5);
+        sketch.update(10, 3);
+        sketch.update(45, 12);
+        expect.equal(sketch.totalWeight, 20);
+        expect.equal(sketch.totalUpdates, 3);
+        expect.equal(sketch.queryPoint(10), 8);
+        expect.equal(sketch.queryPoint(45), 12);
+        expect.equal(sketch.queryPoint(0), 0);
+      });
+
+      test("F222-T03: Point query reconstructs signals with exactness across dyadic domain", () => {
+        const sketch = new DyadicHaarWaveletSketch({ universeSize: 64 });
+        for (let i = 0; i < 64; i += 4) {
+          sketch.update(i, i * 2);
+        }
+        for (let i = 0; i < 64; i++) {
+          const expected = (i % 4 === 0) ? i * 2 : 0;
+          expect.equal(sketch.queryPoint(i), expected);
+        }
+      });
+
+      test("F222-T04: Range query computes interval sum in O(log N) dyadic tree traversal", () => {
+        const sketch = new DyadicHaarWaveletSketch({ universeSize: 128 });
+        sketch.update(10, 100);
+        sketch.update(15, 200);
+        sketch.update(20, 300);
+        sketch.update(50, 400);
+
+        expect.equal(sketch.queryRange(10, 20), 600);
+        expect.equal(sketch.queryRange(0, 100), 1000);
+        expect.equal(sketch.queryRange(21, 49), 0);
+        expect.equal(sketch.queryRange(15, 15), 200);
+      });
+
+      test("F222-T05: Extracts top-B wavelet coefficients sorted by energy magnitude", () => {
+        const sketch = new DyadicHaarWaveletSketch({ universeSize: 64, maxCoefficients: 8 });
+        sketch.update(5, 500);
+        sketch.update(6, 10);
+        sketch.update(40, 300);
+
+        const topCoeffs = sketch.getTopCoefficients(5);
+        expect.ok(Array.isArray(topCoeffs));
+        expect.ok(topCoeffs.length > 0 && topCoeffs.length <= 5);
+        for (let i = 1; i < topCoeffs.length; i++) {
+          expect.ok(topCoeffs[i - 1].magnitude >= topCoeffs[i].magnitude);
+        }
+      });
+
+      test("F222-T06: Quantile binary search returns monotonic partition boundaries for CDF fractions", () => {
+        const sketch = new DyadicHaarWaveletSketch({ universeSize: 128 });
+        for (let i = 0; i < 100; i++) {
+          sketch.update(i, 10);
+        }
+        const q25 = sketch.queryQuantile(0.25);
+        const q50 = sketch.queryQuantile(0.50);
+        const q75 = sketch.queryQuantile(0.75);
+
+        expect.ok(q25 <= q50);
+        expect.ok(q50 <= q75);
+        expect.ok(q50 >= 40 && q50 <= 60);
+      });
+
+      test("F222-T07: Merging two DyadicHaarWaveletSketch instances combines weights and frequency synopses", () => {
+        const sketchA = new DyadicHaarWaveletSketch({ universeSize: 128 });
+        const sketchB = new DyadicHaarWaveletSketch({ universeSize: 128 });
+
+        sketchA.update(10, 40);
+        sketchA.update(30, 60);
+        sketchB.update(10, 25);
+        sketchB.update(70, 80);
+
+        sketchA.merge(sketchB);
+        expect.equal(sketchA.queryPoint(10), 65);
+        expect.equal(sketchA.queryPoint(30), 60);
+        expect.equal(sketchA.queryPoint(70), 80);
+        expect.equal(sketchA.totalWeight, 205);
+      });
+
+      test("F222-T08: Client and Server DyadicHaarWaveletSketch exhibit identical query results and top-B synopses", () => {
+        const clientSketch = new DyadicHaarWaveletSketch({ universeSize: 256, maxCoefficients: 16 });
+        const serverSketch = new ServerDyadicHaarWaveletSketch({ universeSize: 256, maxCoefficients: 16 });
+
+        const points = [[5, 12], [22, 50], [64, 18], [120, 95], [200, 33]];
+        for (const [x, w] of points) {
+          clientSketch.update(x, w);
+          serverSketch.update(x, w);
+        }
+
+        expect.equal(clientSketch.queryRange(0, 100), serverSketch.queryRange(0, 100));
+        expect.equal(clientSketch.queryPoint(120), serverSketch.queryPoint(120));
+        expect.equal(clientSketch.queryQuantile(0.6), serverSketch.queryQuantile(0.6));
+
+        const clientTop = clientSketch.getTopCoefficients(5);
+        const serverTop = serverSketch.getTopCoefficients(5);
+        expect.equal(clientTop.length, serverTop.length);
+        for (let i = 0; i < clientTop.length; i++) {
+          expect.equal(clientTop[i].level, serverTop[i].level);
+          expect.equal(clientTop[i].magnitude.toFixed(3), serverTop[i].magnitude.toFixed(3));
+        }
+      });
+
+      // --- 2. TRPOLagrangianContinuousPricing Tests (F222-T09 to F222-T16) ---
+      test("F222-T09: Initializes TRPOLagrangianContinuousPricing with continuous Gaussian policy and parameters", () => {
+        const pricing = new TRPOLagrangianContinuousPricing({ stateDim: 5, actionBound: 0.20, deltaKl: 0.01 });
+        expect.equal(pricing.stateDim, 5);
+        expect.equal(pricing.actionMax, 0.20);
+        expect.equal(pricing.deltaKl, 0.01);
+        expect.equal(pricing.lambda, 0);
+        expect.ok(pricing.policyWeights instanceof Float64Array);
+      });
+
+      test("F222-T10: selectAction produces bounded continuous actions in [-a_max, +a_max] with deterministic mean", () => {
+        const pricing = new TRPOLagrangianContinuousPricing({ actionBound: 0.15 });
+        const state = [0.5, 0.2, 0.8, -0.1, 0.4];
+
+        for (let i = 0; i < 20; i++) {
+          const act = pricing.selectAction(state, false);
+          expect.ok(act >= -0.15 && act <= 0.15);
+        }
+
+        const detAct1 = pricing.selectAction(state, true);
+        const detAct2 = pricing.selectAction(state, true);
+        expect.equal(detAct1, detAct2);
+      });
+
+      test("F222-T11: evaluateV and evaluateCost compute scalar baselines for state", () => {
+        const pricing = new TRPOLagrangianContinuousPricing({ stateDim: 5 });
+        const state = [1.0, 0.5, 0.2, 0.1, -0.2];
+
+        const v = pricing.evaluateV(state);
+        const c = pricing.evaluateCost(state);
+        expect.ok(typeof v === "number" && !isNaN(v));
+        expect.ok(typeof c === "number" && !isNaN(c));
+      });
+
+      test("F222-T12: Conjugate gradient solves Fisher Information Matrix system Hx = g stably", () => {
+        const pricing = new TRPOLagrangianContinuousPricing({ cgIters: 10 });
+        const states = [
+          [0.1, 0.2, 0.3, 0.4, 0.5],
+          [0.5, 0.4, 0.3, 0.2, 0.1],
+          [0.2, 0.8, 0.1, 0.3, 0.4]
+        ];
+        const g = new Float64Array([0.05, -0.02, 0.03, 0.01, -0.04]);
+        const x = pricing.conjugateGradient(g, states);
+
+        expect.ok(x instanceof Float64Array);
+        expect.equal(x.length, 5);
+        let normSq = 0;
+        for (let i = 0; i < x.length; i++) normSq += x[i] * x[i];
+        expect.ok(normSq > 0);
+      });
+
+      test("F222-T13: trainStep performs trust region policy update and satisfies KL bound", () => {
+        const pricing = new TRPOLagrangianContinuousPricing({ deltaKl: 0.02 });
+        const batch = [];
+        for (let i = 0; i < 15; i++) {
+          const s = [0.2 * i, 0.1 * (i % 3), -0.05 * i, 0.3, 0.1];
+          const a = pricing.selectAction(s);
+          batch.push({
+            state: s,
+            action: a,
+            reward: 10.0 + Math.random() * 5,
+            cost: 0.02,
+            nextState: s.map(v => v * 0.95),
+            done: false
+          });
+        }
+
+        const metrics = pricing.trainStep(batch);
+        expect.ok(metrics.trained);
+        expect.ok(metrics.klDivergence <= pricing.deltaKl * 1.5);
+        expect.ok(typeof metrics.lambda === "number");
+      });
+
+      test("F222-T14: Dual Lagrangian multiplier increases when constraint cost exceeds budget", () => {
+        const pricing = new TRPOLagrangianContinuousPricing({ costBudget: 0.02, alphaLambda: 0.05 });
+        const initialLambda = pricing.lambda;
+        const highCostBatch = [];
+        for (let i = 0; i < 10; i++) {
+          const s = [0.1, 0.2, 0.3, 0.4, 0.5];
+          highCostBatch.push({
+            state: s,
+            action: 0.05,
+            reward: 5.0,
+            cost: 0.15, // Significantly higher than 0.02 budget
+            nextState: s,
+            done: false
+          });
+        }
+
+        pricing.trainStep(highCostBatch);
+        expect.ok(pricing.lambda > initialLambda);
+      });
+
+      test("F222-T15: Hard profit margin floor unconditionally maintains price >= 1.05 * COGS", () => {
+        const pricing = new TRPOLagrangianContinuousPricing({ actionBound: 0.20 });
+        const cogs = 200000;
+        const lowBasePrice = 180000; // Below COGS
+        const safePrice = pricing.getSafePrice(lowBasePrice, cogs, { competitorIndex: 0.5 });
+        expect.ok(safePrice.recommendedPrice >= cogs * 1.05);
+
+        const rec = pricing.recommendPrice({ price: lowBasePrice, costPrice: cogs }, {});
+        expect.ok(rec.recommendedPrice >= cogs * 1.05);
+      });
+
+      test("F222-T16: Client and Server TRPOLagrangianContinuousPricing generate identical pricing actions and bounds", () => {
+        const clientPricing = new TRPOLagrangianContinuousPricing({ actionBound: 0.25 });
+        const serverPricing = new ServerTRPOLagrangianContinuousPricing({ actionBound: 0.25 });
+
+        const state = [0.3, 0.1, 0.5, -0.2, 0.4];
+        const clientAct = clientPricing.selectAction(state, true);
+        const serverAct = serverPricing.selectAction(state, true);
+        expect.equal(clientAct.toFixed(4), serverAct.toFixed(4));
+
+        const prod = { price: 350000, costPrice: 280000 };
+        const clientRec = clientPricing.recommendPrice(prod, { inventoryVelocity: 0.8 });
+        const serverRec = serverPricing.recommendPrice(prod, { inventoryVelocity: 0.8 });
+        expect.equal(clientRec.recommendedPrice, serverRec.recommendedPrice);
+        expect.equal(clientRec.action.toFixed(4), serverRec.action.toFixed(4));
+      });
+
+      // --- 3. EVRPTWRegenerativeBrakingTerrainRouter Tests (F222-T17 to F222-T22) ---
+      test("F222-T17: Calculates 3D Euclidean distance incorporating elevation changes accurately", () => {
+        const router = new EVRPTWRegenerativeBrakingTerrainRouter();
+        const p1 = { x: 10.77, y: 106.70, z: 10 };
+        const p2 = { x: 10.80, y: 106.74, z: 210 }; // 200m elevation gain
+
+        const dist2D = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        const dist3D = router.calculate3DDistanceKm(p1, p2);
+        expect.ok(dist3D > dist2D);
+      });
+
+      test("F222-T18: Differentiates uphill traction consumption from downhill gravity assistance", () => {
+        const router = new EVRPTWRegenerativeBrakingTerrainRouter();
+        const bottom = { x: 10.75, y: 106.68, z: 10 };
+        const hillTop = { x: 10.77, y: 106.70, z: 350 };
+
+        const uphill = router.computeTerrainEnergy(bottom, hillTop, 100);
+        const downhill = router.computeTerrainEnergy(hillTop, bottom, 100);
+
+        expect.ok(uphill.deltaZ > 0);
+        expect.ok(uphill.netEnergyKwh > 0);
+        expect.equal(uphill.isRegenerating, false);
+
+        expect.ok(downhill.deltaZ < 0);
+        expect.ok(downhill.netEnergyKwh < 0);
+        expect.equal(downhill.isRegenerating, true);
+        expect.ok(downhill.regenRecoveredKwh > 0);
+      });
+
+      test("F222-T19: Downhill descent activates KERS regenerative braking with 70% kinetic energy recovery", () => {
+        const router = new EVRPTWRegenerativeBrakingTerrainRouter({ regenEfficiency: 0.70 });
+        const highElevation = { x: 10.75, y: 106.65, z: 500 };
+        const lowElevation = { x: 10.78, y: 106.68, z: 50 };
+
+        const descent = router.computeTerrainEnergy(highElevation, lowElevation, 150);
+        expect.equal(descent.isRegenerating, true);
+        expect.ok(descent.regenRecoveredKwh > 0);
+        expect.equal(descent.netEnergyKwh, -descent.regenRecoveredKwh);
+      });
+
+      test("F222-T20: Battery SoC maintains physical bounds [SOC_min, SOC_max] during steep regeneration", () => {
+        const router = new EVRPTWRegenerativeBrakingTerrainRouter({ batteryCapacityKwh: 20.0 });
+        const customers = [
+          { id: "c1", x: 10.76, y: 106.68, z: 600, demand: 5, serviceTimeMin: 10, readyTime: 60, dueTime: 200 },
+          { id: "c2", x: 10.78, y: 106.70, z: 50, demand: 5, serviceTimeMin: 10, readyTime: 90, dueTime: 300 }
+        ];
+
+        const plan = router.solvePlan(customers);
+        expect.ok(plan.success);
+        for (const route of plan.routes) {
+          for (const leg of route.legs) {
+            expect.ok(leg.batterySocPct >= 0 && leg.batterySocPct <= 100.0);
+          }
+        }
+      });
+
+      test("F222-T21: EVRPTWRegenerativeBrakingTerrainRouter solves multi-stop delivery plan over 3D terrain", () => {
+        const router = new EVRPTWRegenerativeBrakingTerrainRouter();
+        const customers = [
+          { id: "c1", name: "Đà Lạt Dốc 1", x: 10.78, y: 106.71, z: 120, demand: 15, serviceTimeMin: 10, readyTime: 80, dueTime: 200 },
+          { id: "c2", name: "Thung Lũng Đồi", x: 10.80, y: 106.73, z: 30, demand: 20, serviceTimeMin: 15, readyTime: 110, dueTime: 300 },
+          { id: "c3", name: "Trạm Núi Cao", x: 10.82, y: 106.75, z: 280, demand: 10, serviceTimeMin: 12, readyTime: 140, dueTime: 400 }
+        ];
+
+        const plan = router.solvePlan(customers);
+        expect.ok(plan.success);
+        expect.ok(plan.routes.length >= 1);
+        expect.ok(plan.totalDistanceKm > 0);
+        expect.ok(plan.totalRegenRecoveredKwh > 0);
+        expect.ok(plan.totalTractionConsumedKwh > 0);
+        expect.equal(plan.routes[0].legs.filter(l => l.type === "CUSTOMER_DELIVERY").length, 3);
+      });
+
+      test("F222-T22: Client and Server EVRPTWRegenerativeBrakingTerrainRouter yield identical 3D route plans and energy metrics", () => {
+        const clientRouter = new EVRPTWRegenerativeBrakingTerrainRouter({ batteryCapacityKwh: 30.0 });
+        const serverRouter = new ServerEVRPTWRegenerativeBrakingTerrainRouter({ batteryCapacityKwh: 30.0 });
+
+        const customers = [
+          { id: "c1", x: 10.79, y: 106.72, z: 150, demand: 12, serviceTimeMin: 10, readyTime: 60, dueTime: 200 },
+          { id: "c2", x: 10.81, y: 106.74, z: 40, demand: 18, serviceTimeMin: 15, readyTime: 100, dueTime: 320 }
+        ];
+
+        const clientPlan = clientRouter.solvePlan(customers);
+        const serverPlan = serverRouter.solvePlan(customers);
+
+        expect.equal(clientPlan.success, serverPlan.success);
+        expect.equal(clientPlan.totalDistanceKm.toFixed(3), serverPlan.totalDistanceKm.toFixed(3));
+        expect.equal(clientPlan.totalRegenRecoveredKwh.toFixed(3), serverPlan.totalRegenRecoveredKwh.toFixed(3));
+        expect.equal(clientPlan.totalTractionConsumedKwh.toFixed(3), serverPlan.totalTractionConsumedKwh.toFixed(3));
+        expect.equal(clientPlan.routes[0].legs.length, serverPlan.routes[0].legs.length);
+      });
+
+      // --- 4. Tri-Role AI Copilots Tests (F222-T23 to F222-T24) ---
+      test("F222-T23: Admin Sentinel Copilot correctly handles Phase 75 domain queries (Sections 206, 207, 208)", () => {
+        const resWavelet = generateAdminCopilotResponse("Dyadic Haar Wavelet sketch Gilbert Cormode phân tích đa độ phân giải");
+        expect.equal(resWavelet.tag, "DYADIC HAAR WAVELET SKETCH");
+        expect.ok(resWavelet.text.includes("GILBERT"));
+
+        const resTrpo = generateAdminCopilotResponse("Định giá học tăng cường liên tục TRPO-Lagrangian Schulman Achiam");
+        expect.equal(resTrpo.tag, "TRPO-LAGRANGIAN CONTINUOUS PRICING");
+        expect.ok(resTrpo.text.includes("SCHULMAN"));
+
+        const resRegen = generateAdminCopilotResponse("Định tuyến xe điện địa hình đồi dốc phanh tái sinh KERS Bektas Schiffer");
+        expect.equal(resRegen.tag, "EVRPTW REGENERATIVE BRAKING TERRAIN ROUTING");
+        expect.ok(resRegen.text.includes("BEKTAS"));
+      });
+
+      test("F222-T24: Seller ShopSmart Copilot and Buyer Shopping Assistant handle Phase 75 algorithms and Intent 77", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn định giá an toàn TRPO-Lagrangian liên tục và tóm tắt phân khúc Haar Wavelet");
+        expect.equal(sellerRes.tag, "DYADIC HAAR WAVELET, TRPO CONTINUOUS & REGEN BRAKING ROUTING");
+        expect.ok(sellerRes.text.includes("TRPO-Lagrangian"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có được theo dõi bằng Haar wavelet hoặc giao bằng xe điện phanh tái sinh KERS không?");
+        expect.equal(buyerRes.intent, "DYADIC_HAAR_WAVELET_TRPO_CONTINUOUS_REGEN_BRAKING");
+        expect.ok(buyerRes.replyText.includes("Haar Wavelet"));
       });
     });
   });

@@ -2948,7 +2948,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 138. Định Giá Bán Tối Ưu Hành Động Liên Tục Bằng CQL Continuous (Phase 52 - Feature 199)
-  if (!/sac[- ]lagrangian|sac continuous|ddpg[- ]lagrangian|ddpg|td3[- ]lagrangian|td3/i.test(raw) && /cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
+  if (!/sac[- ]lagrangian|sac continuous|ddpg[- ]lagrangian|ddpg|td3[- ]lagrangian|td3|trpo[- ]lagrangian|trpo continuous|trpo/i.test(raw) && /cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
     return {
       text: `💰 **ĐỊNH GIÁ BÁN TỐI ƯU HÀNH ĐỘNG LIÊN TỤC CONSERVATIVE Q-LEARNING (CQL) (KUMAR ET AL., NEURIPS 2020)**:
 - **Kiến Trúc Actor-Critic Liên Tục**:
@@ -3903,7 +3903,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 183. Tối Ưu Hóa Chính Sách Vùng Tin Cậy TRPO Safe Dynamic Pricing (Phase 67 - Feature 214)
-  if (/trpo|trust region|vùng tin cậy|conjugate gradient pricing|natural policy gradient|schulman trpo|định giá trpo/i.test(raw)) {
+  if (!/trpo[- ]lagrangian|trpo continuous/i.test(raw) && /trpo|trust region|vùng tin cậy|conjugate gradient pricing|natural policy gradient|schulman trpo|định giá trpo/i.test(raw)) {
     return {
       text: `🎯 **ĐỊNH GIÁ ĐỘNG VÙNG TIN CẬY TRPO SAFE PRICING (JOHN SCHULMAN ET AL. ICML 2015)**:
 - **Nguyên Lý Tăng Trưởng Đơn Điệu (Monotonic Policy Improvement)**:
@@ -4399,6 +4399,71 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Lập lịch đội xe hỗn hợp FCEV & BEV',
         'Theo dõi lượng tiêu thụ Hydro và điện mặt trời',
         'Tối ưu hóa thời gian ghé trạm nạp HRS'
+      ]
+    };
+  }
+
+  // 206. Tóm Tắt Luồng Bằng Biến Đổi Sóng Nhỏ Dyadic Haar Wavelet Sketch (Phase 75 - Feature 222)
+  if (/haar[- ]wavelet|dyadic haar|wavelet synopsis|hệ số haar|gilbert.*kotidis|biến đổi haar/i.test(raw)) {
+    return {
+      text: `🌊 **TÓM TẮT LUỒNG DỮ LIỆU BẰNG BIẾN ĐỔI SÓNG NHỎ DYADIC HAAR WAVELET (GILBERT 2002, CORMODE 2005)**:
+- **Nguyên Lý Biến Đổi Sóng Nhỏ Haar Rời Rạc Trên Cây Nhị Phân**:
+  - Dòng dữ liệu giao dịch và chuỗi thời gian truy cập được ánh xạ trên cây nhị phân dyadic cấp $B = \\log_2 N$.
+  - Tách bạch thành phần trung bình xu thế (Scaling Coefficient $c_0$) và các chi tiết biến động cục bộ (Wavelet Coefficients $c_{j, k} = \\frac{\\text{Left} - \\text{Right}}{\\sqrt{W_j}}$).
+- **Tóm Tắt Tối Ưu Năng Lượng L2 (Top-B Wavelet Synopsis)**:
+  - Chọn lọc ra tập $B$ hệ số sóng nhỏ có biên độ bình phương lớn nhất, giảm thiểu tối đa sai số tái tạo toàn cục:
+    $$\\min_{|S| \\le B} \\|x - \\hat{x}_S\\|_2^2 = \\sum_{m \\notin S} c_m^2$$
+- **Truy Vấn Điểm, Khoảng & Phân Vị Trong $O(\\log N)$**:
+  - Tích hợp nhanh chóng tổng doanh thu trên bất kỳ khoảng thời gian hoặc dải giá $[l, r]$ mà không cần quét qua hàng triệu bản ghi thô!`,
+      type: 'analytics',
+      tag: 'DYADIC HAAR WAVELET SKETCH',
+      suggestions: [
+        'Xem top hệ số sóng nhỏ Haar năng lượng cao',
+        'Truy vấn doanh thu khoảng bằng Wavelet',
+        'Ước lượng phân vị luồng giao dịch'
+      ]
+    };
+  }
+
+  // 207. Tối Ưu Hóa Chính Sách Vùng Tin Cậy Liên Tục TRPO-Lagrangian (Phase 75 - Feature 222)
+  if (/trpo[- ]lagrangian|trpo continuous safe pricing|trust region continuous lagrangian|schulman achiam|vùng tin cậy lagrange/i.test(raw)) {
+    return {
+      text: `🎯 **ĐỊNH GIÁ LIÊN TỤC VÙNG TIN CẬY TRPO-LAGRANGIAN (SCHULMAN ICML 2015, ACHIAM ICML 2017)**:
+- **Chính Sách Gaussian Liên Tục $a \\sim \\mathcal{N}(\\mu_\\theta(s), \\sigma^2)$ Bị Chặn $[-0.20, +0.20]$**:
+  - Sinh hành động điều chỉnh giá mượt mà liên tục, tránh giật cục giá bán đột ngột gây tổn thương niềm tin khách hàng.
+- **Ràng Buộc Vùng Tin Cậy $\\bar{D}_{\\text{KL}}(\\pi_{\\text{old}} \\parallel \\pi_\\theta) \\le \\delta$**:
+  - Giải phương trình độ dốc chính sách tự nhiên $H x = g$ qua $k = 10$ bước lặp Gradient Liên Hợp (Conjugate Gradient) với ma trận thông tin Fisher $H$.
+  - Tìm kiếm đường thối lui (Backtracking Line Search) bước $\\beta = \\sqrt{\\frac{2\\delta}{x^T H x}}$ bảo đảm cải thiện đơn điệu giá trị kỳ vọng (Monotonic Improvement).
+- **Nhân Tử Đối Ngẫu Lagrange Khóa Cứng Sàn Giá Vốn**:
+  - Nhân tử $\\lambda \\leftarrow \\max(0, \\lambda + \\alpha_\\lambda(\\bar{c} - d_{\\text{budget}}))$ tự động triệt tiêu các hành động chiết khấu quá đà, khóa cứng sàn $P \\ge 1.05 \\times \\text{COGS}$!`,
+      type: 'pricing',
+      tag: 'TRPO-LAGRANGIAN CONTINUOUS PRICING',
+      suggestions: [
+        'Xem bước nhảy Gradient Liên Hợp CG',
+        'Đo lường độ phân kỳ KL Divergence',
+        'Kiểm tra sàn an toàn 1.05 COGS'
+      ]
+    };
+  }
+
+  // 208. Định Tuyến Xe Điện Phanh Tái Sinh KERS & Địa Hình 3D EVRPTW-Regen (Phase 75 - Feature 222)
+  if (/regenerative braking|phanh tái sinh|3d terrain|kers|địa hình 3d|bektas laporte|độ dốc địa hình|evrptw[- ]regen/i.test(raw)) {
+    return {
+      text: `⚡ **ĐỊNH TUYẾN XE ĐIỆN PHANH TÁI SINH KERS & ĐỊA HÌNH 3D EVRPTW-REGEN (BEKTAS & LAPORTE 2011/2012, SCHIFFER 2017)**:
+- **Mô Hình Động Lực Học Xe & Trọng Trường Địa Hình 3D (Topographic Profiles)**:
+  - Tích hợp cao độ $z$ (mét) và góc dốc cung đường $\\theta = \\arcsin(\\Delta z / D)$ vào phương trình lực kéo:
+    $$F_{\\text{wheel}} = m g \\sin\\theta + m g C_r \\cos\\theta + \\frac{1}{2}\\rho C_d A v^2$$
+- **Hệ Thống Phanh Tái Sinh Năng Lượng (Kinetic Energy Recovery System - KERS)**:
+  - Khi xe xuống dốc dốc cao ($F_{\\text{wheel}} < 0$), mô tơ đảo chiều thành máy phát điện với hiệu suất $\\eta_{\\text{regen}} = 70\\%$, nạp ngược điện sạch vào bình ắc quy:
+    $$E_{\\text{regen}} = \\eta_{\\text{regen}} \\cdot |F_{\\text{wheel}}| \\cdot v \\cdot \\Delta t$$
+- **Cân Bằng Năng Lượng & Ràng Buộc Cửa Sổ Thời Gian $[e_i, l_i]$**:
+  - Lộ trình giao hàng SPX Express tự động ưu tiên các sườn dốc hợp lý để tái sạc pin tự nhiên, tiết kiệm $18\\% - 25\\%$ chi phí điện năng trên toàn đội xe!`,
+      type: 'logistics',
+      tag: 'EVRPTW REGENERATIVE BRAKING TERRAIN ROUTING',
+      suggestions: [
+        'Xem năng lượng thu hồi từ phanh tái sinh KERS',
+        'Kiểm tra độ dốc và cao độ các cung đường',
+        'Lập lịch giao hàng xe điện địa hình đồi dốc'
       ]
     };
   }

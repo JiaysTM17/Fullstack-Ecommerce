@@ -1532,7 +1532,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 76. Bộ Ba Thuật Toán Q-Digest Quantiles, TRPO Safe Pricing & VRPTW-Tandem Drone Router (Phase 67 - Feature 214)
-  if (/q[- ]digest|quantile digest|qdigest|trpo|trust region|vùng tin cậy|tandem drone|truck[- ]drone|vrptw[- ]tandem/i.test(raw)) {
+  if (!/trpo[- ]lagrangian|trpo continuous|trust region continuous/i.test(raw) && /q[- ]digest|quantile digest|qdigest|trpo|trust region|vùng tin cậy|tandem drone|truck[- ]drone|vrptw[- ]tandem/i.test(raw)) {
     return {
       text: `🚀 **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 67 (${currentShop.name})**:
 - **Tóm tắt phân vị độ trễ & bảng giá luồng Q-Digest (Shrivastava et al. ACM PODS 2004)**:
@@ -1687,6 +1687,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem phân khúc giá Dyadic Count-Sketch',
         'Tư vấn định giá an toàn SAC-Lagrangian liên tục',
         'Theo dõi đội xe pin nhiên liệu Hydro FCEV'
+      ]
+    };
+  }
+
+  // 84. Bộ Ba Thuật Toán Dyadic Haar Wavelet, TRPO-Lagrangian Continuous & Phanh Tái Sinh KERS (Phase 75 - Feature 222)
+  if (/haar[- ]wavelet|dyadic haar|wavelet synopsis|trpo[- ]lagrangian|trpo continuous safe pricing|trust region continuous lagrangian|regenerative braking|phanh tái sinh|3d terrain|kers|evrptw[- ]regen/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 75 (${currentShop.name})**:
+- **Tóm tắt luồng doanh thu & phân khúc bằng Dyadic Haar Wavelet (Gilbert 2002, Cormode 2005)**:
+  - Phân tích đa độ phân giải trên cây nhị phân, lưu giữ top hệ số sóng nhỏ có năng lượng cao nhất giúp shop theo dõi biến động doanh thu theo khung giờ và khoảng giá $[l, r]$ siêu tốc trong $O(\\log N)$!
+- **Định giá vùng tin cậy liên tục an toàn TRPO-Lagrangian (Schulman 2015, Achiam 2017)**:
+  - Tối ưu hóa phân phối giá liên tục với bước nhảy Gradient Liên Hợp (Conjugate Gradient) trên ma trận Fisher, kết hợp nhân tử Lagrange khóa cứng sàn $\\ge 1.05 \\times \\text{COGS}$ bảo vệ 100% lợi nhuận của shop!
+- **Giao hàng tối ưu địa hình đồi dốc với phanh tái sinh KERS (Bektas 2011, Schiffer 2017)**:
+  - Đội xe máy điện SPX Express thu hồi tới 70% động năng khi đổ dốc để sạc ngược vào bình pin, giảm 20% chi phí điện năng và giao hàng đúng hẹn dù cung đường nhiều dốc cao!`,
+      type: 'recommendation',
+      tag: 'DYADIC HAAR WAVELET, TRPO CONTINUOUS & REGEN BRAKING ROUTING',
+      suggestions: [
+        'Xem tóm tắt sóng nhỏ Dyadic Haar Wavelet',
+        'Tư vấn định giá vùng tin cậy TRPO-Lagrangian',
+        'Lộ trình giao hàng đồi dốc phanh tái sinh KERS'
       ]
     };
   }
