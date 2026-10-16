@@ -38594,6 +38594,1127 @@ export class EVRPTWDynamicWirelessChargingRouter {
   }
 }
 
+// =========================================================================
+// PHASE 73: ENTERPRISE ALGORITHMS SUITE (FEATURE 220)
+// =========================================================================
+
+/**
+ * Count-Sketch Hierarchical Heavy Hitters (CountSketchHierarchicalHH)
+ * 
+ * Theoretical Foundations:
+ * - Moses Charikar, Kevin Chen, Martin Farach-Colton (ICALP 2002) - "Finding Frequent Items in Data Streams" (Count-Sketch with Median of Hashes)
+ * - Graham Cormode, S. Muthukrishnan (ACM TODS 2008) - "What's Hot and What's Not: Tracking Hierarchical Heavy Hitters in Data Streams"
+ * 
+ * Mathematical Formulation:
+ * 1. Unbiased Point Estimation via Rademacher Signs:
+ *    Hash h_r: U -> [0, w-1] and sign hash s_r: U -> {-1, +1}
+ *    For element x with weight w_x:
+ *      Table[r][h_r(x)] += s_r(x) * w_x
+ *    Estimate:
+ *      f_r(x) = s_r(x) * Table[r][h_r(x)]
+ *      E[f_r(x)] = f(x)
+ *      Var[f_r(x)] <= F_2 / w
+ *    Final Estimate (Median of d sketches):
+ *      \hat{f}(x) = median_{r=0..d-1} f_r(x)
+ * 2. Multi-Level Hierarchical Tree Decomposition:
+ *    Hierarchical taxonomy: Category -> Subcategory -> Item (Root: 0, Levels: 0..H)
+ *    Array of sketches CS_0, CS_1, ..., CS_H corresponding to tree depth
+ * 3. Bottom-Up Conditional Frequency:
+ *    f_cond(u) = \hat{f}(u) - \sum_{v \in Desc(u) \cap HHH} f_cond(v)
+ *    A node u is an HHH if f_cond(u) >= \phi * N
+ */
+
+export class CountSketchHierarchicalHH {
+  /**
+   * @param {Object} [options]
+   * @param {number} [options.phi=0.01] Heavy hitter threshold fraction (e.g. 0.01 = 1%)
+   * @param {number} [options.epsilon=0.005] Accuracy error bound
+   * @param {number} [options.delta=0.01] Failure probability
+   * @param {number} [options.maxDepth=4] Max hierarchy tree depth
+   */
+  constructor(options = {}) {
+    this.phi = Math.max(0.0001, Math.min(0.5, Number(options.phi || 0.01)));
+    this.epsilon = Math.max(0.0001, Math.min(0.2, Number(options.epsilon || 0.005)));
+    this.delta = Math.max(0.0001, Math.min(0.5, Number(options.delta || 0.01)));
+    this.maxDepth = Math.max(1, Math.min(8, Math.floor(Number(options.maxDepth || 4))));
+
+    this.width = options.width ? Math.max(8, Number(options.width)) : Math.max(32, Math.ceil(3.0 / (this.epsilon * this.epsilon)));
+    this.depth = options.depth ? Math.max(1, Number(options.depth)) : Math.max(3, Math.ceil(Math.log(1.0 / this.delta) * 2));
+    if (this.depth % 2 === 0) this.depth++; // Ensure odd depth for exact median
+
+    // Multi-level Count-Sketches for tree levels 0..maxDepth
+    this.sketches = [];
+    for (let l = 0; l <= this.maxDepth; l++) {
+      const levelTables = [];
+      for (let d = 0; d < this.depth; d++) {
+        levelTables.push(new Float64Array(this.width));
+      }
+      this.sketches.push(levelTables);
+    }
+
+    this.totalCount = 0;
+    this.nodeRegistry = new Map(); // pathKey -> { level, path, parentKey, childrenKeys: Set }
+    this.nodes = new Map(); // nodeId -> { id: nodeId, parentId, depth }
+    this._nodePaths = new Map();
+    this.nodeFrequencyUpperBounds = new Map();
+  }
+
+  registerTaxonomyNode(nodeId, parentId = null) {
+    let depth = 0;
+    if (parentId && this.nodes.has(parentId)) {
+      depth = this.nodes.get(parentId).depth + 1;
+    }
+    const nodeObj = { id: nodeId, parentId, depth };
+    this.nodes.set(nodeId, nodeObj);
+    if (depth > this.maxDepth) {
+      this.maxDepth = depth;
+      while (this.sketches.length <= this.maxDepth) {
+        const levelTables = [];
+        for (let d = 0; d < this.depth; d++) {
+          levelTables.push(new Float64Array(this.width));
+        }
+        this.sketches.push(levelTables);
+      }
+    }
+    let current = nodeId;
+    const path = [];
+    while (current) {
+      path.unshift(current);
+      current = this.nodes.has(current) ? this.nodes.get(current).parentId : null;
+    }
+    this._nodePaths.set(nodeId, path);
+  }
+
+  hashSign(key, r = 0) {
+    return this._sign(key, r * 101 + 59);
+  }
+
+  hashIndex(key, r = 0) {
+    return this._hash(key, r * 37 + 13);
+  }
+
+  update(nodeId, count = 1) {
+    if (this._nodePaths && this._nodePaths.has(nodeId)) {
+      this.add(this._nodePaths.get(nodeId), count);
+    } else {
+      this.add(nodeId, count);
+    }
+  }
+
+  estimatePointFrequency(nodeId) {
+    if (this._nodePaths && this._nodePaths.has(nodeId)) {
+      return this.estimate(this._nodePaths.get(nodeId));
+    }
+    return this.estimate(nodeId);
+  }
+
+  extractHeavyHitters(customPhi) {
+    const list = this.findHierarchicalHeavyHitters(customPhi);
+    return list.map(h => ({
+      ...h,
+      nodeId: h.name || h.key.split(">").pop(),
+      depth: h.level,
+      conditionalFreq: h.conditionalCount,
+      estimatedFreq: h.estimatedCount
+    }));
+  }
+
+  /**
+   * Universal 32-bit hash function
+   * @private
+   */
+  _hash(str, seed) {
+    let h = 2166136261 ^ seed;
+    const s = String(str);
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    h ^= (h >>> 16);
+    return (h >>> 0) % this.width;
+  }
+
+  /**
+   * Rademacher random sign hash {-1, +1}
+   * @private
+   */
+  _sign(str, seed) {
+    let h = 1315423911 ^ seed;
+    const s = String(str);
+    for (let i = 0; i < s.length; i++) {
+      h ^= (h << 5) + s.charCodeAt(i) + (h >> 2);
+    }
+    return (h & 1) === 0 ? 1.0 : -1.0;
+  }
+
+  /**
+   * Normalizes hierarchy array: e.g. ["Electronics", "Phones", "Smartphones"]
+   * @param {Array<string>|string} path 
+   * @returns {Array<string>}
+   */
+  normalizePath(path) {
+    if (Array.isArray(path)) {
+      return path.map(p => String(p).trim()).filter(Boolean).slice(0, this.maxDepth);
+    }
+    if (typeof path === "string") {
+      return path.split(/[\/>]/).map(p => p.trim()).filter(Boolean).slice(0, this.maxDepth);
+    }
+    return ["Root"];
+  }
+
+  /**
+   * Inserts a hierarchical purchase / event into sketches
+   * @param {Array<string>|string} path 
+   * @param {number} [weight=1] 
+   */
+  add(path, weight = 1) {
+    const segments = this.normalizePath(path);
+    if (segments.length === 0) return;
+    const w = Math.max(1, Number(weight) || 1);
+    this.totalCount += w;
+
+    let currentPrefix = "";
+    let parentKey = null;
+
+    for (let level = 0; level < segments.length; level++) {
+      const seg = segments[level];
+      currentPrefix = currentPrefix ? `${currentPrefix}>${seg}` : seg;
+      const key = currentPrefix;
+
+      // Register node in taxonomy graph
+      if (!this.nodeRegistry.has(key)) {
+        this.nodeRegistry.set(key, {
+          key,
+          level,
+          name: seg,
+          parentKey,
+          childrenKeys: new Set()
+        });
+        if (parentKey && this.nodeRegistry.has(parentKey)) {
+          this.nodeRegistry.get(parentKey).childrenKeys.add(key);
+        }
+      }
+
+      // Update level sketch
+      const tables = this.sketches[level];
+      for (let d = 0; d < this.depth; d++) {
+        const bucket = this._hash(key, d * 37 + 13);
+        const sign = this._sign(key, d * 101 + 59);
+        tables[d][bucket] += sign * w;
+      }
+
+      parentKey = key;
+    }
+  }
+
+  /**
+   * Estimates point frequency of a taxonomy node using Median Count-Sketch
+   * @param {string|Array<string>} path 
+   * @returns {number}
+   */
+  estimate(path) {
+    const segments = this.normalizePath(path);
+    const level = Math.min(this.maxDepth, segments.length - 1);
+    if (level < 0) return 0;
+    const key = segments.join(">");
+
+    const tables = this.sketches[level];
+    const estimates = new Float64Array(this.depth);
+
+    for (let d = 0; d < this.depth; d++) {
+      const bucket = this._hash(key, d * 37 + 13);
+      const sign = this._sign(key, d * 101 + 59);
+      estimates[d] = sign * tables[d][bucket];
+    }
+
+    estimates.sort();
+    const medianVal = estimates[Math.floor(this.depth / 2)];
+    return Math.max(0, Math.round(medianVal));
+  }
+
+  /**
+   * Finds all Hierarchical Heavy Hitters satisfying conditional threshold phi * N
+   * @param {number} [customPhi]
+   * @returns {Array<{ key: string, name: string, level: number, estimatedCount: number, conditionalCount: number, ratio: number }>}
+   */
+  findHierarchicalHeavyHitters(customPhi) {
+    const thresholdFraction = customPhi !== undefined ? Math.max(0.0001, Number(customPhi)) : this.phi;
+    const thresholdCount = thresholdFraction * this.totalCount;
+
+    // Collect all registered nodes grouped by level
+    const nodesByLevel = [];
+    for (let l = 0; l <= this.maxDepth; l++) nodesByLevel.push([]);
+
+    for (const [key, node] of this.nodeRegistry.entries()) {
+      if (node.level <= this.maxDepth) {
+        nodesByLevel[node.level].push(node);
+      }
+    }
+
+    const hhhNodes = new Map(); // key -> HHH result
+    const conditionalCounts = new Map();
+
+    // Bottom-Up Dynamic Programming: from leaf levels up to root level
+    for (let level = this.maxDepth; level >= 0; level--) {
+      const nodesAtLevel = nodesByLevel[level];
+      for (const node of nodesAtLevel) {
+        const estCount = this.estimate(node.key);
+
+        // Sum conditional frequencies of descendant HHH nodes
+        let descHhhSum = 0;
+        for (const childKey of node.childrenKeys) {
+          if (hhhNodes.has(childKey)) {
+            descHhhSum += conditionalCounts.get(childKey) || 0;
+          }
+        }
+
+        const condCount = Math.max(0, estCount - descHhhSum);
+        conditionalCounts.set(node.key, condCount);
+
+        if (condCount >= thresholdCount && this.totalCount > 0) {
+          const hhhItem = {
+            key: node.key,
+            name: node.name,
+            level: node.level,
+            estimatedCount: estCount,
+            conditionalCount: condCount,
+            ratio: Number((condCount / this.totalCount).toFixed(4))
+          };
+          hhhNodes.set(node.key, hhhItem);
+        }
+      }
+    }
+
+    const results = Array.from(hhhNodes.values());
+    results.sort((a, b) => b.conditionalCount - a.conditionalCount);
+    return results;
+  }
+
+  /**
+   * Merges another CountSketchHierarchicalHH sketch
+   * @param {CountSketchHierarchicalHH} other 
+   */
+  merge(other) {
+    if (!other || !(other instanceof CountSketchHierarchicalHH)) return;
+    if (this.width !== other.width || this.depth !== other.depth || this.maxDepth !== other.maxDepth) {
+      return;
+    }
+
+    for (let l = 0; l <= this.maxDepth; l++) {
+      for (let d = 0; d < this.depth; d++) {
+        for (let w = 0; w < this.width; w++) {
+          this.sketches[l][d][w] += other.sketches[l][d][w];
+        }
+      }
+    }
+
+    for (const [k, node] of other.nodeRegistry.entries()) {
+      if (!this.nodeRegistry.has(k)) {
+        this.nodeRegistry.set(k, {
+          key: node.key,
+          level: node.level,
+          name: node.name,
+          parentKey: node.parentKey,
+          childrenKeys: new Set(node.childrenKeys)
+        });
+      } else {
+        const existing = this.nodeRegistry.get(k);
+        for (const ck of node.childrenKeys) existing.childrenKeys.add(ck);
+      }
+    }
+
+    this.totalCount += other.totalCount;
+  }
+
+  /**
+   * Diagnostic telemetry
+   * @returns {Object}
+   */
+  getTelemetry() {
+    return {
+      algorithm: "CountSketchHierarchicalHH",
+      phi: this.phi,
+      epsilon: this.epsilon,
+      delta: this.delta,
+      width: this.width,
+      depth: this.depth,
+      maxDepth: this.maxDepth,
+      totalCount: this.totalCount,
+      uniqueNodesTracked: this.nodeRegistry.size
+    };
+  }
+}
+
+/**
+ * Twin Delayed DDPG with Lagrangian Safety Multiplier (TD3LagrangianSafePricing)
+ * 
+ * Theoretical Foundations:
+ * - Scott Fujimoto, Herke van Hoof, David Meger (ICML 2018) - "Addressing Function Approximation Error in Actor-Critic Methods" (TD3)
+ * - Joshua Achiam, David Held, Aviv Tamar, Pieter Abbeel (ICML 2017) - "Constrained Policy Optimization" (Lagrangian Dual Multiplier)
+ * 
+ * Mathematical Formulation:
+ * 1. Continuous Deterministic Actor:
+ *    Action a = \mu(s | \theta^\mu) \in [-0.20, +0.20] (Price adjustment percentage)
+ * 2. Twin Critics (Mitigate Overestimation Bias):
+ *    Q_1(s, a), Q_2(s, a) for reward; Q_C(s, a) for financial constraint violation cost
+ * 3. Target Policy Smoothing Regularization:
+ *    a' = clip(\mu'(s') + clip(N(0, \sigma_target), -c_noise, c_noise), -a_max, a_max)
+ *    y = r + \gamma * \min(Q_1'(s', a'), Q_2'(s', a'))
+ *    y_C = c + \gamma * Q_C'(s', a')
+ * 4. Delayed Policy & Target Updates:
+ *    Policy \mu updated every policyDelay (default 2) critic training steps
+ *    \nabla_{\theta^\mu} J = \nabla_a (Q_1(s, a) - \lambda * Q_C(s, a)) * \nabla_{\theta^\mu} \mu(s)
+ * 5. Dual Lagrangian Multiplier Ascent:
+ *    \lambda <- max(0, \lambda + \alpha_\lambda * (\bar{c} - d_budget))
+ * 6. Financial Safety Hard Sizing:
+ *    Floor: \ge 1.05 * COGS (Strict anti-loss barrier)
+ *    Ceiling: \le 1.25 * MSRP
+ */
+
+export class TD3LagrangianSafePricing {
+  /**
+   * @param {Object} [options]
+   * @param {number} [options.stateDim=5] State vector dimensions
+   * @param {number} [options.tau=0.01] Polyak target averaging parameter
+   * @param {number} [options.gamma=0.95] Reward discount factor
+   * @param {number} [options.actorLr=0.02] Learning rate for actor
+   * @param {number} [options.criticLr=0.03] Learning rate for twin critics
+   * @param {number} [options.lambdaLr=0.015] Learning rate for dual multiplier
+   * @param {number} [options.costBudget=0.05] Acceptable maximum safety cost budget
+   * @param {number} [options.initLambda=0.0] Initial Lagrangian multiplier
+   * @param {number} [options.policyDelay=2] Frequency of delayed actor updates
+   * @param {number} [options.targetNoiseStd=0.02] Target action smoothing noise std
+   * @param {number} [options.noiseClip=0.05] Target noise clipping threshold
+   * @param {number} [options.actionMax=0.20] Maximum action bounds
+   */
+  constructor(options = {}) {
+    this.stateDim = Math.max(2, Math.floor(Number(options.stateDim || 5)));
+    this.tau = Math.max(0.001, Math.min(0.2, Number(options.tau || 0.01)));
+    this.gamma = Math.max(0.8, Math.min(0.99, Number(options.gamma || 0.95)));
+    this.actorLr = Math.max(0.001, Number(options.actorLr || 0.02));
+    this.criticLr = Math.max(0.001, Number(options.criticLr || 0.03));
+    this.lambdaLr = Math.max(0.001, Number(options.alphaLambda || options.lambdaLr || 0.015));
+    this.costBudget = Math.max(0.001, Number(options.costBudget || 0.05));
+    this.lambda = Math.max(0.0, Number(options.initLambda !== undefined ? options.initLambda : 0.0));
+    this.policyDelay = Math.max(1, Math.floor(Number(options.policyDelay || 2)));
+    this.targetNoiseStd = Math.max(0.005, Number(options.targetNoiseStd || 0.02));
+    this.noiseClip = Math.max(0.01, Number(options.noiseClip || 0.05));
+    this.actionMax = Math.max(0.05, Math.min(0.50, Number(options.actionBound || options.actionMax || 0.20)));
+
+    // Online Networks
+    this.actorWeights = new Float64Array(this.stateDim);
+    this.critic1Weights = new Float64Array(this.stateDim + 1); // Q1
+    this.critic2Weights = new Float64Array(this.stateDim + 1); // Q2
+    this.costCriticWeights = new Float64Array(this.stateDim + 1); // QC
+
+    // Target Networks (Polyak averaging)
+    this.targetActorWeights = new Float64Array(this.stateDim);
+    this.targetCritic1Weights = new Float64Array(this.stateDim + 1);
+    this.targetCritic2Weights = new Float64Array(this.stateDim + 1);
+    this.targetCostCriticWeights = new Float64Array(this.stateDim + 1);
+
+    // Initial deterministic weights
+    const initActor = [0.03, 0.04, -0.02, 0.01, 0.02];
+    const initQ1 = [0.5, 0.4, 0.3, 0.2, 0.1, 0.8];
+    const initQ2 = [0.48, 0.42, 0.29, 0.21, 0.11, 0.79];
+    const initCost = [0.02, -0.01, 0.03, 0.02, 0.01, 0.5];
+
+    for (let i = 0; i < this.stateDim; i++) {
+      this.actorWeights[i] = i < initActor.length ? initActor[i] : 0.01;
+      this.targetActorWeights[i] = this.actorWeights[i];
+    }
+    for (let i = 0; i < this.stateDim + 1; i++) {
+      this.critic1Weights[i] = i < initQ1.length ? initQ1[i] : 0.02;
+      this.targetCritic1Weights[i] = this.critic1Weights[i];
+
+      this.critic2Weights[i] = i < initQ2.length ? initQ2[i] : 0.02;
+      this.targetCritic2Weights[i] = this.critic2Weights[i];
+
+      this.costCriticWeights[i] = i < initCost.length ? initCost[i] : 0.01;
+      this.targetCostCriticWeights[i] = this.costCriticWeights[i];
+    }
+
+    this.updatesCount = 0;
+    this.lastCriticLoss = 0;
+    this.lastActorLoss = 0;
+  }
+
+  get actionBound() { return this.actionMax; }
+  get targetPolicyDelay() { return this.policyDelay; }
+  get totalSteps() { return this.updatesCount; }
+  get critic1() { return this.critic1Weights; }
+  get critic2() { return this.critic2Weights; }
+
+  selectAction(state, addNoise = false) {
+    return this.predictAction(state, addNoise);
+  }
+
+  forwardCritic(weights, state, action) {
+    const sa = new Float64Array(this.stateDim + 1);
+    for (let i = 0; i < this.stateDim; i++) sa[i] = state[i] || 0;
+    sa[this.stateDim] = action;
+    return this._dot(weights, sa);
+  }
+
+  getTargetSmoothedAction(state) {
+    return this.predictTargetAction(state);
+  }
+
+  computeClippedTargetQ(reward, nextState, done = false) {
+    const targetAction = this.predictTargetAction(nextState);
+    const saNext = new Float64Array(this.stateDim + 1);
+    for (let j = 0; j < this.stateDim; j++) saNext[j] = nextState[j] || 0;
+    saNext[this.stateDim] = targetAction;
+    const q1 = this._dot(this.targetCritic1Weights, saNext);
+    const q2 = this._dot(this.targetCritic2Weights, saNext);
+    return reward + (done ? 0 : this.gamma * Math.min(q1, q2));
+  }
+
+  updateDualMultiplier(avgCost) {
+    const costViolation = avgCost - this.costBudget;
+    this.lambda = Math.max(0.0, this.lambda + this.lambdaLr * costViolation);
+    return this.lambda;
+  }
+
+  getSafePrice(basePrice, cogs, state) {
+    const res = this.recommendPrice({ price: basePrice, cogs, msrp: basePrice * 1.3 });
+    return {
+      recommendedPrice: res.recommendedPrice,
+      marginFloor: res.safetyFloor,
+      discountPct: res.priceAdjustmentPct,
+      ...res
+    };
+  }
+
+  /**
+   * Dot product helper
+   * @private
+   */
+  _dot(w, vec) {
+    let sum = 0;
+    const len = Math.min(w.length, vec.length);
+    for (let i = 0; i < len; i++) sum += w[i] * vec[i];
+    return sum;
+  }
+
+  /**
+   * Predicts continuous action via Actor
+   * @param {Float64Array|Array<number>} state 
+   * @param {boolean} [addNoise=false] 
+   * @returns {number}
+   */
+  predictAction(state, addNoise = false) {
+    const raw = this._dot(this.actorWeights, state);
+    let action = Math.max(-this.actionMax, Math.min(this.actionMax, raw));
+
+    if (addNoise) {
+      // Box-Muller Gaussian Noise
+      const u1 = Math.max(1e-6, Math.random());
+      const u2 = Math.random();
+      const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      action += z0 * 0.02;
+      action = Math.max(-this.actionMax, Math.min(this.actionMax, action));
+    }
+
+    return action;
+  }
+
+  /**
+   * Predicts target action with Target Policy Smoothing Regularization
+   * @param {Float64Array|Array<number>} state 
+   * @returns {number}
+   */
+  predictTargetAction(state) {
+    const raw = this._dot(this.targetActorWeights, state);
+
+    // Target policy smoothing noise clipped to [-noiseClip, +noiseClip]
+    const u1 = Math.max(1e-6, Math.random());
+    const u2 = Math.random();
+    const noise = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2) * this.targetNoiseStd;
+    const clippedNoise = Math.max(-this.noiseClip, Math.min(this.noiseClip, noise));
+
+    const smoothedAction = raw + clippedNoise;
+    return Math.max(-this.actionMax, Math.min(this.actionMax, smoothedAction));
+  }
+
+  /**
+   * Evaluates Twin Q1 and Q2 values
+   * @param {Float64Array|Array<number>} state 
+   * @param {number} action 
+   * @returns {{ q1: number, q2: number, minQ: number }}
+   */
+  evaluateQ(state, action) {
+    const sa = new Float64Array(this.stateDim + 1);
+    for (let i = 0; i < this.stateDim; i++) sa[i] = state[i] || 0;
+    sa[this.stateDim] = action;
+
+    const q1 = this._dot(this.critic1Weights, sa);
+    const q2 = this._dot(this.critic2Weights, sa);
+    return { q1, q2, minQ: Math.min(q1, q2) };
+  }
+
+  /**
+   * Evaluates Cost Critic Q_C(s, a)
+   * @param {Float64Array|Array<number>} state 
+   * @param {number} action 
+   * @returns {number}
+   */
+  evaluateCost(state, action) {
+    const sa = new Float64Array(this.stateDim + 1);
+    for (let i = 0; i < this.stateDim; i++) sa[i] = state[i] || 0;
+    sa[this.stateDim] = action;
+
+    return Math.max(0.0, this._dot(this.costCriticWeights, sa));
+  }
+
+  /**
+   * Polyak soft target updates
+   * @private
+   */
+  _polyakUpdate(updateActorOnly = false) {
+    if (updateActorOnly) {
+      for (let i = 0; i < this.stateDim; i++) {
+        this.targetActorWeights[i] = this.tau * this.actorWeights[i] + (1 - this.tau) * this.targetActorWeights[i];
+      }
+      return;
+    }
+
+    // Critics polyak update
+    for (let i = 0; i < this.stateDim + 1; i++) {
+      this.targetCritic1Weights[i] = this.tau * this.critic1Weights[i] + (1 - this.tau) * this.targetCritic1Weights[i];
+      this.targetCritic2Weights[i] = this.tau * this.critic2Weights[i] + (1 - this.tau) * this.targetCritic2Weights[i];
+      this.targetCostCriticWeights[i] = this.tau * this.costCriticWeights[i] + (1 - this.tau) * this.targetCostCriticWeights[i];
+    }
+  }
+
+  /**
+   * Trains TD3 on an experience replay batch with delayed actor updates
+   * @param {Array<Object>} batch Batch of { state, action, reward, cost, nextState, done }
+   * @returns {Object}
+   */
+  trainStep(batch = []) {
+    if (!Array.isArray(batch) || batch.length === 0) {
+      return { success: false, reason: "EMPTY_BATCH" };
+    }
+
+    const N = batch.length;
+    let criticLossSum = 0;
+    let actorLossSum = 0;
+    let totalCost = 0;
+
+    const s = new Float64Array(this.stateDim);
+    const sNext = new Float64Array(this.stateDim);
+
+    for (let i = 0; i < N; i++) {
+      const t = batch[i];
+      for (let j = 0; j < this.stateDim; j++) {
+        s[j] = Number(t.state ? t.state[j] : 0) || 0;
+        sNext[j] = Number(t.nextState ? t.nextState[j] : 0) || 0;
+      }
+      const a = Number(t.action || 0);
+      const r = Number(t.reward || 0);
+      const c = Math.max(0, Number(t.cost || 0));
+      totalCost += c;
+
+      // 1. Target Action with Policy Smoothing
+      const targetAction = this.predictTargetAction(sNext);
+      const saNext = new Float64Array(this.stateDim + 1);
+      for (let j = 0; j < this.stateDim; j++) saNext[j] = sNext[j];
+      saNext[this.stateDim] = targetAction;
+
+      // 2. Clipped Double Q Target
+      const targetQ1 = this._dot(this.targetCritic1Weights, saNext);
+      const targetQ2 = this._dot(this.targetCritic2Weights, saNext);
+      const minTargetQ = Math.min(targetQ1, targetQ2);
+      const targetY = r + (t.done ? 0 : this.gamma * minTargetQ);
+
+      const targetCostQ = this._dot(this.targetCostCriticWeights, saNext);
+      const targetCostY = c + (t.done ? 0 : this.gamma * targetCostQ);
+
+      // 3. Update Twin Critics & Cost Critic via TD Error
+      const sa = new Float64Array(this.stateDim + 1);
+      for (let j = 0; j < this.stateDim; j++) sa[j] = s[j];
+      sa[this.stateDim] = a;
+
+      const q1Err = targetY - this._dot(this.critic1Weights, sa);
+      const q2Err = targetY - this._dot(this.critic2Weights, sa);
+      const costErr = targetCostY - this._dot(this.costCriticWeights, sa);
+
+      criticLossSum += (q1Err * q1Err + q2Err * q2Err) / (2 * N);
+
+      for (let j = 0; j < this.stateDim + 1; j++) {
+        this.critic1Weights[j] += (this.criticLr * q1Err * sa[j]) / N;
+        this.critic2Weights[j] += (this.criticLr * q2Err * sa[j]) / N;
+        this.costCriticWeights[j] += (this.criticLr * costErr * sa[j]) / N;
+      }
+    }
+
+    this._polyakUpdate(false); // Update target critics
+    this.updatesCount++;
+
+    // 4. Delayed Policy Updates (Actor & Target Actor)
+    let isActorUpdated = false;
+    if (this.updatesCount % this.policyDelay === 0) {
+      for (let i = 0; i < N; i++) {
+        const t = batch[i];
+        for (let j = 0; j < this.stateDim; j++) s[j] = Number(t.state ? t.state[j] : 0) || 0;
+
+        const muAction = this.predictAction(s, false);
+        // Safe policy gradient: nabla_mu = nabla_a (Q1 - lambda * Q_C) * nabla_theta mu
+        const qActionGrad = this.critic1Weights[this.stateDim] - this.lambda * this.costCriticWeights[this.stateDim];
+        actorLossSum += (-qActionGrad * muAction) / N;
+
+        for (let j = 0; j < this.stateDim; j++) {
+          this.actorWeights[j] += (this.actorLr * qActionGrad * s[j]) / N;
+        }
+      }
+
+      this._polyakUpdate(true); // Update target actor
+      isActorUpdated = true;
+    }
+
+    // 5. Dual Lagrangian Multiplier Update
+    const avgCost = totalCost / N;
+    const costViolation = avgCost - this.costBudget;
+    this.lambda = Math.max(0.0, this.lambda + this.lambdaLr * costViolation);
+
+    this.lastCriticLoss = criticLossSum;
+    if (isActorUpdated) this.lastActorLoss = actorLossSum;
+
+    return {
+      success: true,
+      updatesCount: this.updatesCount,
+      isActorUpdated,
+      actorUpdated: isActorUpdated,
+      criticLoss: Number(criticLossSum.toFixed(5)),
+      actorLoss: Number(this.lastActorLoss.toFixed(5)),
+      lambda: Number(this.lambda.toFixed(4)),
+      avgCost: Number(avgCost.toFixed(5)),
+      isBudgetExceeded: costViolation > 0
+    };
+  }
+
+  /**
+   * Alias for trainStep
+   */
+  update(transitions = []) {
+    return this.trainStep(transitions);
+  }
+
+  /**
+   * Recommends optimal safe pricing for product given current market state
+   * @param {Object} product
+   * @param {Object} [marketContext]
+   * @returns {Object}
+   */
+  recommendPrice(product = {}, marketContext = {}) {
+    const currentPrice = Math.max(1000, Number(product.price || 100000));
+    const cogs = Math.max(500, Number(product.cogs || currentPrice * 0.7));
+    const msrp = Math.max(currentPrice, Number(product.msrp || currentPrice * 1.3));
+
+    const competitorPrice = Number(marketContext.competitorPrice || currentPrice);
+    const stock = Number(marketContext.inventoryLevel || 50);
+    const capacity = Math.max(1, Number(marketContext.inventoryCapacity || 100));
+    const salesVelocity = Number(marketContext.salesVelocity || 1.0);
+    const demandIndex = Number(marketContext.demandIndex || 1.0);
+
+    const state = new Float64Array([
+      Number((currentPrice / msrp).toFixed(4)),
+      Number((competitorPrice / currentPrice).toFixed(4)),
+      Number((stock / capacity).toFixed(4)),
+      Number(Math.min(3.0, salesVelocity / 10.0).toFixed(4)),
+      Number(Math.min(3.0, demandIndex).toFixed(4))
+    ]);
+
+    const deterministicAction = this.predictAction(state, false);
+    const predictedQ = this.evaluateQ(state, deterministicAction);
+    const predictedCost = this.evaluateCost(state, deterministicAction);
+
+    // Lagrangian damping factor
+    const lagrangianDamping = Math.max(0.35, 1.0 - this.lambda * predictedCost);
+    const safeAction = deterministicAction * lagrangianDamping;
+
+    const rawPrice = currentPrice * (1.0 + safeAction);
+    const safetyFloor = Math.round(cogs * 1.05);
+    const safetyCeiling = Math.round(msrp * 1.25);
+
+    const safePrice = Math.round(Math.max(safetyFloor, Math.min(safetyCeiling, rawPrice)));
+    const priceAdjustmentPct = Number((((safePrice - currentPrice) / currentPrice) * 100).toFixed(2));
+    const grossMarginVnd = safePrice - cogs;
+    const grossMarginPct = Number(((grossMarginVnd / safePrice) * 100).toFixed(2));
+
+    return {
+      currentPrice,
+      recommendedPrice: safePrice,
+      safetyFloor,
+      safetyCeiling,
+      isFloorBounded: safePrice === safetyFloor,
+      isCeilingBounded: safePrice === safetyCeiling,
+      cogs,
+      priceAdjustmentPct,
+      grossMarginVnd,
+      grossMarginPct,
+      predictedQ: Number(predictedQ.minQ.toFixed(4)),
+      predictedCost: Number(predictedCost.toFixed(4)),
+      lagrangianDamping: Number(lagrangianDamping.toFixed(3)),
+      lambda: Number(this.lambda.toFixed(4)),
+      isBudgetExceeded: predictedCost > this.costBudget
+    };
+  }
+
+  /**
+   * Diagnostic telemetry
+   * @returns {Object}
+   */
+  getTelemetry() {
+    return {
+      algorithm: "TD3LagrangianSafePricing",
+      stateDim: this.stateDim,
+      tau: this.tau,
+      gamma: this.gamma,
+      lambda: this.lambda,
+      costBudget: this.costBudget,
+      policyDelay: this.policyDelay,
+      updatesCount: this.updatesCount,
+      lastCriticLoss: this.lastCriticLoss,
+      lastActorLoss: this.lastActorLoss
+    };
+  }
+}
+
+/**
+ * EVRPTW with Onboard Photovoltaic Solar Generation (EVRPTWPVPanelOnboardSolarRouter)
+ * 
+ * Theoretical Foundations:
+ * - D. Schiffer, G. Walther (Transportation Science 2017) - "The Electric Vehicle Routing Problem with Time Windows and Partial Recharging"
+ * - E. Demir, T. Bektas, G. Laporte (Computers & Operations Research 2019) - "A Review of Green Vehicle Routing"
+ * - F. Toth et al. (Solar Energy 2021) - "Vehicle-Integrated Photovoltaics for Delivery Fleets"
+ * 
+ * Mathematical Formulation:
+ * 1. Diurnal Solar Irradiance Curve:
+ *    Day window: t in [0, 720] min (06:00 to 18:00, sunrise to sunset)
+ *    P_solar(t) = P_peak * max(0, sin(pi * t / 720)) * (1 - cloudCover)
+ * 2. Continuous In-Transit & Parked Trickle Charging:
+ *    Energy harvested over interval [t1, t2]:
+ *      E_solar = P_solar((t1 + t2)/2) * ((t2 - t1) / 60) (kWh)
+ *    Driving segment:
+ *      E(t2) = min(C_nominal, E(t1) - dist * e_rate + E_solar)
+ *    Customer service dwell:
+ *      E(t3) = min(C_nominal, E(t2) + E_solar_dwell)
+ * 3. Solar Fleet Economics:
+ *    Avoided grid electricity cost: totalHarvestedKwh * tariffVnd
+ *    CO2 offset: totalHarvestedKwh * 0.72 kg CO2/kWh
+ */
+
+export class EVRPTWPVPanelOnboardSolarRouter {
+  /**
+   * @param {Object} [options]
+   * @param {Object} [options.depot] Central logistics hub coordinates
+   * @param {number} [options.nominalBatteryKwh=35.0] Nominal battery capacity
+   * @param {number} [options.consumptionPerKm=0.28] Electricity consumption rate (kWh/km)
+   * @param {number} [options.minSocSafetyBuffer=0.15] Minimum SOC safety buffer fraction
+   * @param {number} [options.travelSpeedKmMin=0.6] Travel speed (0.6 km/min = 36 km/h)
+   * @param {number} [options.solarPeakKw=1.2] Onboard monocrystalline solar panel peak rating (kW)
+   * @param {number} [options.cloudCover=0.10] Cloud cover index [0.0 = clear sky, 1.0 = heavy overcast]
+   * @param {number} [options.gridTariffVndPerKwh=2800] Grid electricity tariff (VND/kWh)
+   * @param {number} [options.latenessPenaltyVndPerMin=800] Customer lateness penalty
+   * @param {number} [options.dayLengthMin=720] Total daytime duration (720 min = 12 hours)
+   */
+  constructor(options = {}) {
+    this.depot = options.depot || { id: "HUB_SPX_SOLAR", name: "SPX Express Green Solar Hub", x: 10.7769, y: 106.7009 };
+    this.nominalBatteryKwh = Math.max(8.0, Number(options.batteryCapacity || options.nominalBatteryKwh || 35.0));
+    this.consumptionPerKm = Math.max(0.05, Number(options.consumptionPerKm || (options.dischargeRateKw ? options.dischargeRateKw / 36.0 : 0.28)));
+    this.minSocSafetyBuffer = Math.max(0.05, Math.min(0.40, Number(options.minReserveSoc || options.minSocSafetyBuffer || 0.15)));
+    this.travelSpeedKmMin = Math.max(0.1, Number(options.travelSpeedKmMin || 0.6));
+
+    // Solar PV parameters
+    this.solarPeakKw = Math.max(0.2, Number(options.solarPeakKw || 1.2));
+    this._solarEfficiency = Number(options.solarEfficiency || 0.22);
+    this.panelAreaM2 = Number(options.panelAreaM2 || 5.5);
+    this.dischargeRateKw = Number(options.dischargeRateKw || 15);
+    this.cloudCover = Math.max(0.0, Math.min(0.95, Number(options.cloudCover !== undefined ? options.cloudCover : 0.10)));
+    this.gridTariffVndPerKwh = Math.max(500, Number(options.gridTariffVndPerKwh || 2800));
+    this.latenessPenaltyVndPerMin = Math.max(10, Number(options.latenessPenaltyVndPerMin || 800));
+    this.dayLengthMin = Math.max(300, Number(options.dayLengthMin || 720));
+
+    this.staticStations = options.staticStations || [
+      { id: "CS_SOLAR_D1", name: "Trạm Sạc Năng Lượng Mặt Trời Q1", x: 10.7720, y: 106.6950 },
+      { id: "CS_SOLAR_BTT", name: "Trạm Sạc Năng Lượng Mặt Trời Bình Thạnh", x: 10.7950, y: 106.7120 }
+    ];
+
+    this.solvedPlansCount = 0;
+  }
+
+  get batteryCapacity() { return this.nominalBatteryKwh; }
+  get solarEfficiency() { return this._solarEfficiency; }
+
+  getDiurnalSolarPower(timeMin) {
+    return this.getInstantaneousSolarPowerKw(timeMin);
+  }
+
+  computeTransitSolarEnergy(timeMin, durationMin) {
+    const solarHarvestKwh = this.calculateIntervalSolarEnergyKwh(timeMin, timeMin + durationMin);
+    const hours = durationMin / 60.0;
+    const tractionKwh = Number((hours * this.dischargeRateKw).toFixed(2));
+    return {
+      durationMin,
+      solarHarvestKwh,
+      tractionKwh,
+      netEnergyKwh: Number((solarHarvestKwh - tractionKwh).toFixed(3))
+    };
+  }
+
+  computeParkingSolarEnergy(timeMin, durationMin) {
+    const solarHarvestKwh = this.calculateIntervalSolarEnergyKwh(timeMin, timeMin + durationMin);
+    return {
+      durationMin,
+      solarHarvestKwh
+    };
+  }
+
+  /**
+   * Euclidean metric distance
+   * @param {{ x: number, y: number }} p1 
+   * @param {{ x: number, y: number }} p2 
+   * @returns {number}
+   */
+  calculateDistanceKm(p1, p2) {
+    if (!p1 || !p2) return 0;
+    const dx = (Number(p1.x) || 0) - (Number(p2.x) || 0);
+    const dy = (Number(p1.y) || 0) - (Number(p2.y) || 0);
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  /**
+   * Instantaneous solar generation power (kW) at daytime minute t
+   * @param {number} timeMin Minute from start of day (0..720)
+   * @returns {number} kW
+   */
+  getInstantaneousSolarPowerKw(timeMin) {
+    const t = Math.max(0, Math.min(this.dayLengthMin, Number(timeMin) || 0));
+    const normalizedTime = Math.sin((Math.PI * t) / this.dayLengthMin);
+    const irradianceFactor = Math.max(0.0, normalizedTime) * (1.0 - this.cloudCover);
+    return Number((this.solarPeakKw * irradianceFactor).toFixed(4));
+  }
+
+  /**
+   * Calculates solar energy generated over a time interval [t1, t2] (minutes)
+   * @param {number} t1 
+   * @param {number} t2 
+   * @returns {number} kWh
+   */
+  calculateIntervalSolarEnergyKwh(t1, t2) {
+    const start = Math.max(0, Math.min(this.dayLengthMin, Number(t1) || 0));
+    const end = Math.max(start, Math.min(this.dayLengthMin, Number(t2) || start));
+    const durationHours = (end - start) / 60.0;
+    if (durationHours <= 0) return 0;
+
+    const midTime = (start + end) / 2.0;
+    const avgPowerKw = this.getInstantaneousSolarPowerKw(midTime);
+    return Number((avgPowerKw * durationHours).toFixed(4));
+  }
+
+  /**
+   * Solves EV routing plan with continuous onboard solar generation
+   * @param {Array<Object>} customers 
+   * @param {number} [initialSoc=1.0] 
+   * @returns {Object}
+   */
+  solvePlan(customers = [], initialSoc = 1.0) {
+    this.solvedPlansCount++;
+    const minSafeKwh = this.nominalBatteryKwh * this.minSocSafetyBuffer;
+    let currentBatteryKwh = Math.min(this.nominalBatteryKwh, this.nominalBatteryKwh * Math.max(0.2, initialSoc));
+    let currentTimeMin = 60; // Start at 07:00 (minute 60)
+    let currentLocation = { ...this.depot };
+
+    let totalDistanceKm = 0;
+    let totalDrivingSolarKwh = 0;
+    let totalParkingSolarKwh = 0;
+    let totalGridChargedKwh = 0;
+    let totalLatenessMin = 0;
+
+    const routeLegs = [];
+    routeLegs.push({
+      type: "DEPOT_DEPARTURE",
+      locationId: this.depot.id,
+      name: this.depot.name,
+      timeMin: currentTimeMin,
+      solarPowerKw: this.getInstantaneousSolarPowerKw(currentTimeMin),
+      batteryKwh: Number(currentBatteryKwh.toFixed(2)),
+      socPercent: Number(((currentBatteryKwh / this.nominalBatteryKwh) * 100).toFixed(1))
+    });
+
+    const pending = [...customers].map((c, i) => ({
+      ...c,
+      id: c.id || `CUST_${i + 1}`,
+      dueTime: Number(c.dueTime || 9999),
+      readyTime: Number(c.readyTime || 0),
+      serviceTimeMin: Number(c.serviceTimeMin || 10)
+    }));
+
+    while (pending.length > 0) {
+      // Nearest neighbor with time-window prioritization
+      let bestIdx = 0;
+      let minScore = Infinity;
+
+      for (let i = 0; i < pending.length; i++) {
+        const c = pending[i];
+        const dist = this.calculateDistanceKm(currentLocation, c);
+        const arrivalTime = currentTimeMin + (dist / this.travelSpeedKmMin);
+        const lateness = Math.max(0, arrivalTime - c.dueTime);
+        const score = dist * 10 + lateness * 40;
+
+        if (score < minScore) {
+          minScore = score;
+          bestIdx = i;
+        }
+      }
+
+      const nextCustomer = pending.splice(bestIdx, 1)[0];
+      const distToCustomer = this.calculateDistanceKm(currentLocation, nextCustomer);
+      const travelDurationMin = distToCustomer / this.travelSpeedKmMin;
+      const energyConsumedKwh = distToCustomer * this.consumptionPerKm;
+
+      // Solar energy harvested while driving
+      const drivingSolarKwh = this.calculateIntervalSolarEnergyKwh(currentTimeMin, currentTimeMin + travelDurationMin);
+      totalDrivingSolarKwh += drivingSolarKwh;
+      totalDistanceKm += distToCustomer;
+
+      const arrivalTimeMin = currentTimeMin + travelDurationMin;
+      currentBatteryKwh = Math.min(this.nominalBatteryKwh, currentBatteryKwh - energyConsumedKwh + drivingSolarKwh);
+
+      // Check emergency grid recharge if below buffer
+      if (currentBatteryKwh < minSafeKwh) {
+        const topUpKwh = (this.nominalBatteryKwh * 0.85) - currentBatteryKwh;
+        totalGridChargedKwh += topUpKwh;
+        currentBatteryKwh += topUpKwh;
+        routeLegs.push({
+          type: "GRID_BACKUP_RECHARGE",
+          timeMin: Number(arrivalTimeMin.toFixed(2)),
+          chargedKwh: Number(topUpKwh.toFixed(2)),
+          batteryKwh: Number(currentBatteryKwh.toFixed(2)),
+          socPercent: Number(((currentBatteryKwh / this.nominalBatteryKwh) * 100).toFixed(1))
+        });
+      }
+
+      // Solar energy harvested while parked serving customer
+      const departureTimeMin = arrivalTimeMin + nextCustomer.serviceTimeMin;
+      const parkingSolarKwh = this.calculateIntervalSolarEnergyKwh(arrivalTimeMin, departureTimeMin);
+      totalParkingSolarKwh += parkingSolarKwh;
+      currentBatteryKwh = Math.min(this.nominalBatteryKwh, currentBatteryKwh + parkingSolarKwh);
+
+      const lateness = Math.max(0, arrivalTimeMin - nextCustomer.dueTime);
+      totalLatenessMin += lateness;
+
+      routeLegs.push({
+        type: "CUSTOMER_DELIVERY",
+        customerId: nextCustomer.id,
+        name: nextCustomer.name || nextCustomer.id,
+        arrivalTimeMin: Number(arrivalTimeMin.toFixed(2)),
+        solarHarvestedKwh: Number((drivingSolarKwh + parkingSolarKwh).toFixed(3)),
+        latenessMin: Number(lateness.toFixed(2)),
+        batteryKwh: Number(currentBatteryKwh.toFixed(2)),
+        socPercent: Number(((currentBatteryKwh / this.nominalBatteryKwh) * 100).toFixed(1))
+      });
+
+      currentTimeMin = departureTimeMin;
+      currentLocation = { x: nextCustomer.x, y: nextCustomer.y };
+    }
+
+    // Return to Depot
+    const returnDist = this.calculateDistanceKm(currentLocation, this.depot);
+    const returnTravelMin = returnDist / this.travelSpeedKmMin;
+    const returnDrivingSolarKwh = this.calculateIntervalSolarEnergyKwh(currentTimeMin, currentTimeMin + returnTravelMin);
+    totalDrivingSolarKwh += returnDrivingSolarKwh;
+    totalDistanceKm += returnDist;
+
+    const returnConsumedKwh = returnDist * this.consumptionPerKm;
+    currentBatteryKwh = Math.min(this.nominalBatteryKwh, currentBatteryKwh - returnConsumedKwh + returnDrivingSolarKwh);
+    currentTimeMin += returnTravelMin;
+
+    routeLegs.push({
+      type: "DEPOT_ARRIVAL",
+      locationId: this.depot.id,
+      name: this.depot.name,
+      arrivalTimeMin: Number(currentTimeMin.toFixed(2)),
+      solarHarvestedKwh: Number(returnDrivingSolarKwh.toFixed(3)),
+      batteryKwh: Number(currentBatteryKwh.toFixed(2)),
+      socPercent: Number(((currentBatteryKwh / this.nominalBatteryKwh) * 100).toFixed(1))
+    });
+
+    const totalSolarHarvestedKwh = totalDrivingSolarKwh + totalParkingSolarKwh;
+    const avoidedElectricityVnd = Math.round(totalSolarHarvestedKwh * this.gridTariffVndPerKwh);
+    const gridElectricityCostVnd = Math.round(totalGridChargedKwh * this.gridTariffVndPerKwh);
+    const totalLatenessCostVnd = Math.round(totalLatenessMin * this.latenessPenaltyVndPerMin);
+    const totalOperatingCostVnd = gridElectricityCostVnd + totalLatenessCostVnd + Math.round(totalDistanceKm * 1500) - avoidedElectricityVnd;
+
+    return {
+      success: true,
+      depot: this.depot,
+      totalDistanceKm: Number(totalDistanceKm.toFixed(2)),
+      totalDurationMin: Number((currentTimeMin - 60).toFixed(2)),
+      totalSolarHarvestKwh: Number(totalSolarHarvestedKwh.toFixed(3)),
+      routes: [
+        {
+          routeId: "ROUTE_SOLAR_1",
+          legs: routeLegs,
+          routeLegs,
+          totalDistanceKm: Number(totalDistanceKm.toFixed(2)),
+          totalSolarHarvestKwh: Number(totalSolarHarvestedKwh.toFixed(3))
+        }
+      ],
+      solarMetrics: {
+        totalSolarHarvestedKwh: Number(totalSolarHarvestedKwh.toFixed(3)),
+        drivingSolarKwh: Number(totalDrivingSolarKwh.toFixed(3)),
+        parkingSolarKwh: Number(totalParkingSolarKwh.toFixed(3)),
+        avoidedElectricityCostVnd: avoidedElectricityVnd,
+        co2OffsetKg: Number((totalSolarHarvestedKwh * 0.72).toFixed(3))
+      },
+      costsVnd: {
+        gridElectricity: gridElectricityCostVnd,
+        avoidedSolarSavings: avoidedElectricityVnd,
+        latenessPenalty: totalLatenessCostVnd,
+        distanceTravel: Math.round(totalDistanceKm * 1500),
+        netOperatingCost: Math.max(0, totalOperatingCostVnd)
+      },
+      batteryStatus: {
+        nominalCapacityKwh: this.nominalBatteryKwh,
+        finalRemainingKwh: Number(currentBatteryKwh.toFixed(2)),
+        finalSocPercent: Number(((currentBatteryKwh / this.nominalBatteryKwh) * 100).toFixed(1))
+      },
+      totalLatenessMin: Number(totalLatenessMin.toFixed(2)),
+      legsCount: routeLegs.length,
+      routeLegs
+    };
+  }
+
+  /**
+   * Alias helper for route planning
+   */
+  planRoute(customers = [], options = {}) {
+    const soc = options.initialBatteryKwh !== undefined
+      ? options.initialBatteryKwh / this.nominalBatteryKwh
+      : (options.initialSoc !== undefined ? options.initialSoc : 1.0);
+    return this.solvePlan(customers, soc);
+  }
+
+  /**
+   * Diagnostic telemetry
+   * @returns {Object}
+   */
+  getTelemetry() {
+    return {
+      algorithm: "EVRPTWPVPanelOnboardSolarRouter",
+      nominalBatteryKwh: this.nominalBatteryKwh,
+      solarPeakKw: this.solarPeakKw,
+      cloudCover: this.cloudCover,
+      gridTariffVndPerKwh: this.gridTariffVndPerKwh,
+      dayLengthMin: this.dayLengthMin,
+      solvedPlansCount: this.solvedPlansCount
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -38959,6 +40080,10 @@ export default {
   DyadicRangeCountMinSketch,
   DDPGLagrangianSafePricing,
   EVRPTWDynamicWirelessChargingRouter,
+  // Phase 73 Enterprise Algorithms
+  CountSketchHierarchicalHH,
+  TD3LagrangianSafePricing,
+  EVRPTWPVPanelOnboardSolarRouter,
 };
 
 

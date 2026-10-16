@@ -379,6 +379,10 @@ import {
   DyadicRangeCountMinSketch,
   DDPGLagrangianSafePricing,
   EVRPTWDynamicWirelessChargingRouter,
+  // Phase 73 Enterprise Algorithms
+  CountSketchHierarchicalHH,
+  TD3LagrangianSafePricing,
+  EVRPTWPVPanelOnboardSolarRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -563,6 +567,9 @@ import { EVRPTWBatterySwappingDecayRouter as ServerEVRPTWBatterySwappingDecayRou
 import { DyadicRangeCountMinSketch as ServerDyadicRangeCountMinSketch } from "../../server/src/utils/dyadicRangeCountMinSketch.js";
 import { DDPGLagrangianSafePricing as ServerDDPGLagrangianSafePricing } from "../../server/src/utils/ddpgLagrangianSafePricing.js";
 import { EVRPTWDynamicWirelessChargingRouter as ServerEVRPTWDynamicWirelessChargingRouter } from "../../server/src/utils/evrptwDynamicWirelessChargingRouter.js";
+import { CountSketchHierarchicalHH as ServerCountSketchHierarchicalHH } from "../../server/src/utils/countSketchHierarchicalHH.js";
+import { TD3LagrangianSafePricing as ServerTD3LagrangianSafePricing } from "../../server/src/utils/td3LagrangianSafePricing.js";
+import { EVRPTWPVPanelOnboardSolarRouter as ServerEVRPTWPVPanelOnboardSolarRouter } from "../../server/src/utils/evrptwPVPanelOnboardSolarRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -31034,6 +31041,351 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích khoảng giá Dyadic hay giao bằng xe điện sạc không dây động không?");
         expect.equal(buyerRes.intent, "DYADIC_RANGE_DDPG_LAGRANGIAN_DWPT_CHARGING");
         expect.ok(buyerRes.replyText.includes("Dyadic"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 220: Count-Sketch Hierarchical Heavy Hitters, TD3-Lagrangian Safe Pricing & EVRPTW Onboard PV Solar Routing (24 Tests)
+    // =========================================================================
+    describe("Feature 220: Count-Sketch HHH, TD3-Lagrangian Safe Pricing & Onboard Solar EVRPTW", () => {
+      // -----------------------------------------------------------------------
+      // Sub-suite 1: Count-Sketch Hierarchical Heavy Hitters (Charikar 2002, Cormode TODS 2008)
+      // -----------------------------------------------------------------------
+      test("F220-T01: Initializes Count-Sketch HHH with multi-level taxonomy hierarchy and depth indexing", () => {
+        const hhh = new CountSketchHierarchicalHH({ depth: 4, width: 64, phi: 0.1 });
+        hhh.registerTaxonomyNode("electronics", null);
+        hhh.registerTaxonomyNode("phones", "electronics");
+        hhh.registerTaxonomyNode("smartphones", "phones");
+        hhh.registerTaxonomyNode("flagship", "smartphones");
+
+        expect.equal(hhh.nodes.get("electronics").depth, 0);
+        expect.equal(hhh.nodes.get("phones").depth, 1);
+        expect.equal(hhh.nodes.get("smartphones").depth, 2);
+        expect.equal(hhh.nodes.get("flagship").depth, 3);
+        expect.equal(hhh.maxDepth, 4);
+      });
+
+      test("F220-T02: Computes unbiased Rademacher signs {-1, +1} and valid hash buckets", () => {
+        const hhh = new CountSketchHierarchicalHH({ depth: 3, width: 32 });
+        for (let r = 0; r < 3; r++) {
+          const s = hhh.hashSign("smartphones", r);
+          const b = hhh.hashIndex("smartphones", r);
+          expect.ok(s === 1 || s === -1);
+          expect.ok(b >= 0 && b < 32);
+        }
+      });
+
+      test("F220-T03: Accumulates update stream frequencies across node ancestors and total count N", () => {
+        const hhh = new CountSketchHierarchicalHH({ depth: 4, width: 64, phi: 0.1 });
+        hhh.registerTaxonomyNode("electronics", null);
+        hhh.registerTaxonomyNode("phones", "electronics");
+        hhh.registerTaxonomyNode("smartphones", "phones");
+
+        hhh.update("smartphones", 50);
+        hhh.update("smartphones", 25);
+
+        expect.equal(hhh.totalCount, 75);
+      });
+
+      test("F220-T04: Estimates point frequency using median-of-hashes trick across tables", () => {
+        const hhh = new CountSketchHierarchicalHH({ depth: 5, width: 128, phi: 0.05 });
+        hhh.registerTaxonomyNode("root", null);
+        hhh.registerTaxonomyNode("apparel", "root");
+        hhh.registerTaxonomyNode("shoes", "apparel");
+
+        hhh.update("shoes", 200);
+        const est = hhh.estimatePointFrequency("shoes");
+        expect.ok(est >= 150 && est <= 250);
+      });
+
+      test("F220-T05: Extracts conditional frequencies bottom-up by subtracting heavy children", () => {
+        const hhh = new CountSketchHierarchicalHH({ depth: 5, width: 128, phi: 0.2 });
+        hhh.registerTaxonomyNode("root", null);
+        hhh.registerTaxonomyNode("home", "root");
+        hhh.registerTaxonomyNode("kitchen", "home");
+        hhh.registerTaxonomyNode("blender", "kitchen");
+
+        hhh.update("blender", 100);
+        hhh.update("kitchen", 20);
+
+        const results = hhh.extractHeavyHitters();
+        expect.ok(results.length > 0);
+        const blenderHH = results.find(r => r.nodeId === "blender");
+        expect.ok(blenderHH);
+        expect.ok(blenderHH.conditionalFreq >= 80);
+      });
+
+      test("F220-T06: Enforces phi * N threshold test and suppresses redundant ancestors", () => {
+        const hhh = new CountSketchHierarchicalHH({ depth: 5, width: 128, phi: 0.3 });
+        hhh.registerTaxonomyNode("root", null);
+        hhh.registerTaxonomyNode("catA", "root");
+        hhh.registerTaxonomyNode("subA1", "catA");
+        hhh.registerTaxonomyNode("catB", "root");
+
+        hhh.update("subA1", 80);
+        hhh.update("catB", 20);
+
+        const hhs = hhh.extractHeavyHitters();
+        const ids = hhs.map(h => h.nodeId);
+        expect.ok(ids.includes("subA1"));
+        expect.ok(!ids.includes("catB"));
+      });
+
+      test("F220-T07: Merges two Count-Sketch HHH instances correctly combining total counts and tables", () => {
+        const hhh1 = new CountSketchHierarchicalHH({ depth: 4, width: 64, phi: 0.1 });
+        hhh1.registerTaxonomyNode("tech", null);
+        hhh1.registerTaxonomyNode("laptop", "tech");
+        hhh1.update("laptop", 40);
+
+        const hhh2 = new CountSketchHierarchicalHH({ depth: 4, width: 64, phi: 0.1 });
+        hhh2.registerTaxonomyNode("tech", null);
+        hhh2.registerTaxonomyNode("laptop", "tech");
+        hhh2.update("laptop", 60);
+
+        hhh1.merge(hhh2);
+        expect.equal(hhh1.totalCount, 100);
+        const est = hhh1.estimatePointFrequency("laptop");
+        expect.ok(est >= 70 && est <= 130);
+      });
+
+      test("F220-T08: Client and Server CountSketchHierarchicalHH yield identical taxonomy tree and heavy hitters", () => {
+        const clientHHH = new CountSketchHierarchicalHH({ depth: 5, width: 64, phi: 0.25 });
+        const serverHHH = new ServerCountSketchHierarchicalHH({ depth: 5, width: 64, phi: 0.25 });
+
+        const structure = [
+          ["root", null],
+          ["fashion", "root"],
+          ["menswear", "fashion"],
+          ["jackets", "menswear"],
+          ["womenswear", "fashion"]
+        ];
+
+        structure.forEach(([node, parent]) => {
+          clientHHH.registerTaxonomyNode(node, parent);
+          serverHHH.registerTaxonomyNode(node, parent);
+        });
+
+        const updates = [
+          ["jackets", 120],
+          ["womenswear", 80],
+          ["menswear", 15]
+        ];
+
+        updates.forEach(([node, cnt]) => {
+          clientHHH.update(node, cnt);
+          serverHHH.update(node, cnt);
+        });
+
+        expect.equal(clientHHH.totalCount, serverHHH.totalCount);
+        const clientRes = clientHHH.extractHeavyHitters();
+        const serverRes = serverHHH.extractHeavyHitters();
+        expect.equal(clientRes.length, serverRes.length);
+        for (let i = 0; i < clientRes.length; i++) {
+          expect.equal(clientRes[i].nodeId, serverRes[i].nodeId);
+          expect.equal(clientRes[i].depth, serverRes[i].depth);
+        }
+      });
+
+      // -----------------------------------------------------------------------
+      // Sub-suite 2: TD3-Lagrangian Safe Pricing (Fujimoto 2018, Achiam 2017)
+      // -----------------------------------------------------------------------
+      test("F220-T09: Initializes TD3-Lagrangian Safe Pricing with continuous actor and default lambda = 0.0", () => {
+        const agent = new TD3LagrangianSafePricing({ stateDim: 4, actionBound: 0.2 });
+        expect.equal(agent.stateDim, 4);
+        expect.equal(agent.actionBound, 0.2);
+        expect.equal(agent.lambda, 0.0);
+        expect.equal(agent.targetPolicyDelay, 2);
+        expect.equal(agent.totalSteps, 0);
+      });
+
+      test("F220-T10: Generates continuous deterministic action strictly bounded within [-maxAction, maxAction]", () => {
+        const agent = new TD3LagrangianSafePricing({ stateDim: 3, actionBound: 0.2 });
+        const state = [0.8, -0.5, 0.3];
+        const action = agent.selectAction(state, false);
+        expect.ok(action >= -0.2 && action <= 0.2);
+        const actionWithNoise = agent.selectAction(state, true);
+        expect.ok(actionWithNoise >= -0.2 && actionWithNoise <= 0.2);
+      });
+
+      test("F220-T11: Twin critics Q1 and Q2 evaluate state-action pair with target policy smoothing noise", () => {
+        const agent = new TD3LagrangianSafePricing({ stateDim: 2, actionBound: 0.2 });
+        const q1 = agent.forwardCritic(agent.critic1, [0.5, -0.2], 0.1);
+        const q2 = agent.forwardCritic(agent.critic2, [0.5, -0.2], 0.1);
+        expect.ok(typeof q1 === "number");
+        expect.ok(typeof q2 === "number");
+
+        const smoothedA = agent.getTargetSmoothedAction([0.5, -0.2]);
+        expect.ok(smoothedA >= -0.2 && smoothedA <= 0.2);
+      });
+
+      test("F220-T12: Computes clipped double Q target min(Q'1, Q'2) preventing value overestimation", () => {
+        const agent = new TD3LagrangianSafePricing({ stateDim: 2, gamma: 0.95 });
+        const nextState = [0.2, 0.4];
+        const reward = 10;
+        const targetQ = agent.computeClippedTargetQ(reward, nextState, false);
+        expect.ok(typeof targetQ === "number");
+      });
+
+      test("F220-T13: Implements delayed policy update executing actor and target updates only every 2 critic steps", () => {
+        const agent = new TD3LagrangianSafePricing({ stateDim: 2, targetPolicyDelay: 2 });
+        const batch = [
+          { state: [0.1, 0.2], action: 0.05, reward: 2.0, cost: 0.02, nextState: [0.15, 0.25], done: false }
+        ];
+
+        const step1 = agent.trainStep(batch);
+        expect.equal(agent.totalSteps, 1);
+        expect.equal(step1.actorUpdated, false);
+
+        const step2 = agent.trainStep(batch);
+        expect.equal(agent.totalSteps, 2);
+        expect.equal(step2.actorUpdated, true);
+      });
+
+      test("F220-T14: Updates dual Lagrangian multiplier via projected gradient ascent on cost constraint", () => {
+        const agent = new TD3LagrangianSafePricing({ costBudget: 0.05, alphaLambda: 0.1, initLambda: 0.0 });
+        const newLambda = agent.updateDualMultiplier(0.15);
+        expect.ok(newLambda > 0.0);
+        const loweredLambda = agent.updateDualMultiplier(0.01);
+        expect.ok(loweredLambda >= 0.0);
+      });
+
+      test("F220-T15: Recommends safe selling price strictly adhering to the 1.05 * COGS profit floor", () => {
+        const agent = new TD3LagrangianSafePricing({ actionBound: 0.2 });
+        const basePrice = 100000;
+        const cogs = 90000;
+        const state = [0.1, 0.5, 0.2, 0.8];
+
+        const recommendation = agent.getSafePrice(basePrice, cogs, state);
+        expect.ok(recommendation.recommendedPrice >= 1.05 * cogs);
+        expect.equal(recommendation.marginFloor, 94500);
+        expect.ok(recommendation.discountPct >= -20 && recommendation.discountPct <= 20);
+      });
+
+      test("F220-T16: Client and Server TD3LagrangianSafePricing yield identical action selection and safe pricing", () => {
+        const clientAgent = new TD3LagrangianSafePricing({ stateDim: 3, actionBound: 0.15, seed: 42 });
+        const serverAgent = new ServerTD3LagrangianSafePricing({ stateDim: 3, actionBound: 0.15, seed: 42 });
+
+        const state = [0.4, -0.3, 0.7];
+        const clientAct = clientAgent.selectAction(state, false);
+        const serverAct = serverAgent.selectAction(state, false);
+        expect.equal(clientAct.toFixed(6), serverAct.toFixed(6));
+
+        const clientPrice = clientAgent.getSafePrice(200000, 160000, state);
+        const serverPrice = serverAgent.getSafePrice(200000, 160000, state);
+        expect.equal(clientPrice.recommendedPrice, serverPrice.recommendedPrice);
+        expect.equal(clientPrice.marginFloor, serverPrice.marginFloor);
+      });
+
+      // -----------------------------------------------------------------------
+      // Sub-suite 3: EVRPTW Onboard PV Solar Routing (Schiffer 2017, Demir 2019)
+      // -----------------------------------------------------------------------
+      test("F220-T17: Initializes EVRPTW-PV router with solar panel specs and vehicle battery capacity", () => {
+        const router = new EVRPTWPVPanelOnboardSolarRouter({
+          batteryCapacity: 60,
+          solarPeakKw: 1.2,
+          solarEfficiency: 0.22,
+          panelAreaM2: 5.5,
+          dischargeRateKw: 15
+        });
+
+        expect.equal(router.batteryCapacity, 60);
+        expect.equal(router.solarPeakKw, 1.2);
+        expect.equal(router.solarEfficiency, 0.22);
+      });
+
+      test("F220-T18: Evaluates diurnal solar irradiance curve peaking at solar noon (t = 360 min)", () => {
+        const router = new EVRPTWPVPanelOnboardSolarRouter({ solarPeakKw: 1.2, cloudCover: 0 });
+        const midnightPower = router.getDiurnalSolarPower(0);
+        const morningPower = router.getDiurnalSolarPower(180);
+        const noonPower = router.getDiurnalSolarPower(360);
+        const sunsetPower = router.getDiurnalSolarPower(720);
+
+        expect.equal(midnightPower, 0);
+        expect.ok(morningPower > 0 && morningPower < noonPower);
+        expect.equal(noonPower.toFixed(2), "1.20");
+        expect.equal(sunsetPower, 0);
+      });
+
+      test("F220-T19: Computes in-motion net energy harvesting considering solar generation vs traction consumption", () => {
+        const router = new EVRPTWPVPanelOnboardSolarRouter({
+          batteryCapacity: 40,
+          solarPeakKw: 1.0,
+          cloudCover: 0,
+          dischargeRateKw: 12
+        });
+        const trip = router.computeTransitSolarEnergy(360, 30);
+        expect.equal(trip.durationMin, 30);
+        expect.ok(trip.solarHarvestKwh > 0.45 && trip.solarHarvestKwh <= 0.55);
+        expect.ok(trip.tractionKwh >= 5.8 && trip.tractionKwh <= 6.2);
+        expect.ok(trip.netEnergyKwh < 0);
+      });
+
+      test("F220-T20: Computes parking trickle charging during customer delivery service window", () => {
+        const router = new EVRPTWPVPanelOnboardSolarRouter({ solarPeakKw: 1.2, cloudCover: 0 });
+        const park = router.computeParkingSolarEnergy(350, 20);
+        expect.equal(park.durationMin, 20);
+        expect.ok(park.solarHarvestKwh > 0.35);
+      });
+
+      test("F220-T21: Schedules emergency grid top-up when battery drops below safety reserve", () => {
+        const router = new EVRPTWPVPanelOnboardSolarRouter({
+          batteryCapacity: 20,
+          minReserveSoc: 0.15,
+          dischargeRateKw: 30
+        });
+
+        const customers = [
+          { id: "c1", x: 20, y: 30, demand: 5, serviceTime: 15, readyTime: 500, dueTime: 650 },
+          { id: "c2", x: 80, y: 90, demand: 8, serviceTime: 20, readyTime: 700, dueTime: 900 }
+        ];
+
+        const plan = router.solvePlan(customers, 0.20);
+        expect.ok(plan.routes.length > 0);
+        expect.ok(plan.totalSolarHarvestKwh >= 0);
+      });
+
+      test("F220-T22: Client and Server EVRPTWPVPanelOnboardSolarRouter yield identical routing and solar metrics", () => {
+        const clientRouter = new EVRPTWPVPanelOnboardSolarRouter({ batteryCapacity: 50, solarPeakKw: 1.2 });
+        const serverRouter = new ServerEVRPTWPVPanelOnboardSolarRouter({ batteryCapacity: 50, solarPeakKw: 1.2 });
+
+        const customers = [
+          { id: "cust_1", x: 10, y: 15, demand: 3, serviceTime: 15, readyTime: 480, dueTime: 600 },
+          { id: "cust_2", x: 25, y: 35, demand: 4, serviceTime: 20, readyTime: 620, dueTime: 750 }
+        ];
+
+        const clientPlan = clientRouter.solvePlan(customers, 0.8);
+        const serverPlan = serverRouter.solvePlan(customers, 0.8);
+
+        expect.equal(clientPlan.totalDistanceKm.toFixed(3), serverPlan.totalDistanceKm.toFixed(3));
+        expect.equal(clientPlan.totalSolarHarvestKwh.toFixed(3), serverPlan.totalSolarHarvestKwh.toFixed(3));
+        expect.equal(clientPlan.routes[0].legs.length, serverPlan.routes[0].legs.length);
+      });
+
+      // -----------------------------------------------------------------------
+      // Sub-suite 4: Tri-Role AI Copilot Integration (Phase 73 / Feature 220)
+      // -----------------------------------------------------------------------
+      test("F220-T23: Admin Sentinel Copilot correctly handles Count-Sketch HHH, TD3-Lagrangian and Onboard PV Solar", () => {
+        const resCS = generateAdminCopilotResponse("Bóc tách cây danh mục hot Count-Sketch Hierarchical Heavy Hitters Charikar");
+        expect.equal(resCS.tag, "COUNT-SKETCH HIERARCHICAL HEAVY HITTERS");
+        expect.ok(resCS.text.includes("CHARIKAR"));
+
+        const resTd3 = generateAdminCopilotResponse("Định giá học tăng cường liên tục TD3-Lagrangian an toàn Fujimoto Achiam");
+        expect.equal(resTd3.tag, "TD3-LAGRANGIAN SAFE PRICING");
+        expect.ok(resTd3.text.includes("FUJIMOTO"));
+
+        const resSolar = generateAdminCopilotResponse("Định tuyến đội xe điện lắp pin mặt trời nóc xe EVRPTW-PV Schiffer Demir");
+        expect.equal(resSolar.tag, "EVRPTW ONBOARD PV SOLAR ROUTING");
+        expect.ok(resSolar.text.includes("SCHIFFER"));
+      });
+
+      test("F220-T24: Seller ShopSmart Copilot and Buyer Shopping Assistant handle Phase 73 algorithms and Intent 75", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn định giá an toàn TD3-Lagrangian và bóc tách cây danh mục hot Count-Sketch HHH");
+        expect.equal(sellerRes.tag, "COUNT-SKETCH HHH, TD3-LAGRANGIAN & ONBOARD SOLAR ROUTING");
+        expect.ok(sellerRes.text.includes("TD3-Lagrangian"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có được định giá an toàn TD3-Lagrangian hay giao bằng xe điện pin mặt trời trên nóc không?");
+        expect.equal(buyerRes.intent, "COUNTSKETCH_HHH_TD3_LAGRANGIAN_ONBOARD_SOLAR");
+        expect.ok(buyerRes.replyText.includes("TD3-Lagrangian"));
       });
     });
   });

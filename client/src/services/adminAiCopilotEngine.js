@@ -2629,7 +2629,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 122. Ước Lượng Dòng Dữ Liệu Không Thiên Lệch Bằng Count-Sketch Trung Vị (Phase 47 - Feature 194)
-  if (/count[- ]sketch|count sketch|ước lượng không thiên lệch|median of means|rademacher/i.test(raw)) {
+  if (!/count[- ]sketch hierarchical|count[- ]sketch hhh|charikar hhh/i.test(raw) && /count[- ]sketch|count sketch|ước lượng không thiên lệch|median of means|rademacher/i.test(raw)) {
     return {
       text: `📊 **ƯỚC LƯỢNG DÒNG DỮ LIỆU KHÔNG THIÊN LỆCH BẰNG COUNT-SKETCH TRUNG VỊ (CHARIKAR ET AL. 2004)**:
 - **Khắc Phục Hoàn Toàn Điểm Yếu Dương Tính Của Count-Min Sketch**:
@@ -2648,7 +2648,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 123. Tối Ưu Hóa Đấu Thầu Shopee Ads Bằng Twin Delayed DDPG (TD3) (Phase 47 - Feature 194)
-  if (!/td3\+bc|td3-bc/i.test(raw) && /td3|twin delayed|clipped double[- ]q|target policy smoothing|đấu thầu td3/i.test(raw)) {
+  if (!/td3\+bc|td3-bc|td3[- ]lagrangian|td3 safe pricing/i.test(raw) && /td3|twin delayed|clipped double[- ]q|target policy smoothing|đấu thầu td3/i.test(raw)) {
     return {
       text: `🎯 **TỐI ƯU HÓA ĐẤU THẦU SHOPEE ADS BẰNG TWIN DELAYED DDPG (TD3 - FUJIMOTO ET AL. 2018)**:
 - **Đột Phá 3 Cơ Chế Khắc Phục Lỗi Xấp Xỉ Giá Trị Của DDPG**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -2948,7 +2948,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 138. Định Giá Bán Tối Ưu Hành Động Liên Tục Bằng CQL Continuous (Phase 52 - Feature 199)
-  if (!/ddpg[- ]lagrangian|ddpg/i.test(raw) && /cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
+  if (!/ddpg[- ]lagrangian|ddpg|td3[- ]lagrangian|td3/i.test(raw) && /cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
     return {
       text: `💰 **ĐỊNH GIÁ BÁN TỐI ƯU HÀNH ĐỘNG LIÊN TỤC CONSERVATIVE Q-LEARNING (CQL) (KUMAR ET AL., NEURIPS 2020)**:
 - **Kiến Trúc Actor-Critic Liên Tục**:
@@ -3747,7 +3747,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 176. Phát Hiện Phần Tử Phổ Biến Phân Cấp Hierarchical Heavy Hitters HHH (Phase 65 - Feature 212)
-  if (!/count[- ]min hierarchical|count[- ]min hhh/i.test(raw) && /hhh|hierarchical heavy hitters|heavy hitters phân cấp|heavy hitters đa tầng|tần suất có điều kiện|conditioned frequency|cây phân cấp sản phẩm/i.test(raw)) {
+  if (!/count[- ]min hierarchical|count[- ]min hhh|count[- ]sketch hierarchical|count[- ]sketch hhh|charikar hhh/i.test(raw) && /hhh|hierarchical heavy hitters|heavy hitters phân cấp|heavy hitters đa tầng|tần suất có điều kiện|conditioned frequency|cây phân cấp sản phẩm/i.test(raw)) {
     return {
       text: `🌳 **THUẬT TOÁN PHẦN TỬ PHỔ BIẾN PHÂN CẤP HIERARCHICAL HEAVY HITTERS (CORMODE ET AL. VLDB 2008 / TODS 2010)**:
 - **Khắc Phục Khiếm Khuyết Của Heavy Hitters Đơn Tầng (Flat HHH)**:
@@ -4277,6 +4277,68 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem danh sách hành lang xanh sạc động DWPT',
         'Tính toán độ lợi năng lượng Net Energy Benefit',
         'Lập lịch định tuyến xe điện EVRPTW-DWPT'
+      ]
+    };
+  }
+
+  // 200. Phân Tích Cây Danh Mục Hot Bằng Count-Sketch Hierarchical Heavy Hitters (Phase 73 - Feature 220)
+  if (/count[- ]sketch hierarchical|count[- ]sketch hhh|phân cấp count[- ]sketch|unbiased hierarchical|charikar hhh/i.test(raw)) {
+    return {
+      text: `📊 **PHÂN TÍCH CÂY DANH MỤC HOT BẰNG COUNT-SKETCH HIERARCHICAL HEAVY HITTERS (CHARIKAR 2002, CORMODE TODS 2008)**:
+- **Ước Lượng Không Thiên Lệch Bằng Dấu Rademacher**:
+  - Không giống Count-Min Sketch bị thiên lệch phóng đại (Overcounting), Count-Sketch sử dụng biến ngẫu nhiên Rademacher $s_r(x) \\in \\{-1, +1\\}$ và lấy trung vị qua $d$ dòng giúp ước lượng kỳ vọng $\\mathbb{E}[\\hat{f}(u)] = f(u)$ hoàn toàn không thiên lệch với phương sai $\\text{Var} \\le F_2 / w$.
+- **Mô Hình Phân Cấp Quy Hoạch Động Đáy-Lên (Bottom-Up Dynamic Programming)**:
+  - Tần suất có điều kiện: $f_{\\text{cond}}(u) = \\hat{f}(u) - \\sum_{v \\in \\text{Desc}(u) \\cap \\text{HHH}} f_{\\text{cond}}(v)$.
+  - Bóc tách chính xác các nút ngành hàng thực sự đột biến (thỏa mãn $f_{\\text{cond}}(u) \\ge \\phi N$) mà không bị nhiễu do lượng mua dồn từ các nhánh con đã được định danh.
+- **Ứng Dụng Quản Trị Sàn**:
+  - Tự động phát hiện các danh mục và cụm sản phẩm dẫn đầu thị trường trong các chiến dịch Mega Sale triệu đơn!`,
+      type: 'analytics',
+      tag: 'COUNT-SKETCH HIERARCHICAL HEAVY HITTERS',
+      suggestions: [
+        'Xem danh mục hot Count-Sketch HHH',
+        'So sánh sai số với Count-Min HHH',
+        'Xuất bảng xếp hạng cây ngành hàng Flash Sale'
+      ]
+    };
+  }
+
+  // 201. Định Giá Bán Twin Delayed Deep Deterministic Policy Gradient TD3-Lagrangian (Phase 73 - Feature 220)
+  if (/td3[- ]lagrangian|td3 safe pricing|twin delayed lagrangian|fujimoto achiam/i.test(raw)) {
+    return {
+      text: `💰 **ĐỊNH GIÁ BÁN AN TOÀN TWIN DELAYED DDPG VỚI NHÂN TỬ LAGRANGE (FUJIMOTO ICML 2018, ACHIAM ICML 2017)**:
+- **Triệt Tiêu Thiên Lệch Phóng Đại Bằng Clipped Double Q-Learning**:
+  - Sử dụng hai mạng Critic song song $Q_1(s, a)$ và $Q_2(s, a)$, lấy cận dưới mục tiêu $y = r + \\gamma \\min(Q'_1(s', a'), Q'_2(s', a'))$, ngăn chặn hoàn toàn tình trạng thổi phồng hàm giá trị vốn có của DDPG.
+- **Làm Mượt Chính Sách Mục Tiêu (Target Policy Smoothing Regularization)**:
+  - Thêm nhiễu Gaussian bị chặn $a' = \\text{clip}(\\mu'(s') + \\epsilon, -a_{\\text{max}}, a_{\\text{max}})$ giúp chính sách không bị bẫy vào các đỉnh nhọn giá trị ảo.
+- **Trì Hoãn Cập Nhật Actor & Nhân Tử Đối Ngẫu Lagrange**:
+  - Actor và nhân tử $\\lambda$ được cập nhật trễ mỗi 2 bước Critic ($d = 2$).
+  - Khóa sàn giá vốn bất biến: $P_{\\text{safe}} \\ge 1.05 \\times \\text{COGS}$, bảo vệ tuyệt đối lợi nhuận gộp của doanh nghiệp!`,
+      type: 'pricing',
+      tag: 'TD3-LAGRANGIAN SAFE PRICING',
+      suggestions: [
+        'Xem hành động giá tối ưu TD3-Lagrangian',
+        'Kiểm tra rào chắn an toàn 1.05 COGS',
+        'Đo lường độ ổn định Critic loss'
+      ]
+    };
+  }
+
+  // 202. Định Tuyến Đội Xe Điện Tích Hợp Pin Năng Lượng Mặt Trời EVRPTW-PV (Phase 73 - Feature 220)
+  if (/evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|quang điện tích hợp|solar delivery|schiffer solar|demir solar/i.test(raw)) {
+    return {
+      text: `☀️ **ĐỊNH TUYẾN ĐỘI XE ĐIỆN QUANG ĐIỆN TÍCH HỢP EVRPTW-PV ONBOARD SOLAR (SCHIFFER 2017, DEMIR 2019)**:
+- **Tấm Pin Quang Điện Đơn Tinh Thể Nóc Xe (Vehicle-Integrated Photovoltaics - VIPV)**:
+  - Đội xe máy điện và ô tô van SPX Express trang bị tấm pin mặt trời hiệu suất cao ($1.2\\text{ kW}$ cho van, $400\\text{ W}$ cho xe máy), liên tục nạp điện nhỏ giọt (Trickle Charging) cả khi di chuyển lẫn khi đỗ giao hàng.
+- **Mô Hình Bức Xạ Mặt Trời Nhật Kỷ (Diurnal Irradiance Dynamics)**:
+  - Đường cong công suất thực tế $P_{\\text{solar}}(t) = P_{\\text{peak}} \\cdot \\max(0, \\sin(\\pi t / 720)) \\cdot (1 - \\text{cloudCover})$, tối ưu hóa nạp năng lượng vào khung giờ nắng đỉnh điểm (11:00 - 14:00).
+- **Lợi Ích Kinh Tế & Môi Trường Bền Vững**:
+  - Tiết kiệm hàng triệu đồng tiền điện lưới ($2,800\\text{ đ/kWh}$) và giảm phát thải khí nhà kính $0.72\\text{ kg CO}_2/\\text{kWh}$, giúp đơn hàng giao đúng hạn mà chi phí năng lượng tiến về $0$!`,
+      type: 'logistics',
+      tag: 'EVRPTW ONBOARD PV SOLAR ROUTING',
+      suggestions: [
+        'Xem công suất quang điện nóc xe P_solar',
+        'Tính toán lượng điện mặt trời thu được',
+        'Lập lịch định tuyến xe điện EVRPTW-PV'
       ]
     };
   }

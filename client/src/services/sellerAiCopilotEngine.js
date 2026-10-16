@@ -569,7 +569,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 28. Bắt Kịp Xu Hướng Bằng Thuật Toán Space-Saving Heavy Hitters (Phase 19 - Feature 166)
-  if (!/conservative|treap|sac[- ]lagrangian|streamsummary|stream[- ]summary|multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|dynamic wireless/i.test(raw) && /space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
+  if (!/conservative|treap|sac[- ]lagrangian|streamsummary|stream[- ]summary|multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|dynamic wireless|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|onboard solar/i.test(raw) && /space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
     return {
       text: `🔥 **BẮT KỊP XU HƯỚNG BÁN CHẠY BẰNG SPACE-SAVING HEAVY HITTERS (TOP-K STREAMING)**:
 - **Cơ chế bắt sóng Real-Time với bộ nhớ cố định $O(K)$**:
@@ -1132,7 +1132,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 56. Biến Động Ròng Count-Sketch, Đấu Thầu TD3 & Giao Hàng Chia Kiện SDVRPTW (Phase 47 - Feature 194)
-  if (!/td3\+bc|td3-bc/i.test(raw) && /count[- ]sketch|count sketch|td3|đấu thầu td3|sdvrptw|split delivery|chia nhỏ đơn hàng sdvrptw/i.test(raw)) {
+  if (!/td3\+bc|td3-bc|td3[- ]lagrangian|td3 safe pricing|count[- ]sketch hierarchical|count[- ]sketch hhh/i.test(raw) && /count[- ]sketch|count sketch|td3|đấu thầu td3|sdvrptw|split delivery|chia nhỏ đơn hàng sdvrptw/i.test(raw)) {
     return {
       text: `🎯 **BIẾN ĐỘNG RÒNG COUNT-SKETCH, ĐẤU THẦU TD3 & GIAO HÀNG CHIA KIỆN SDVRPTW (${currentShop.name})**:
 - **Theo dõi biến động bán ròng chính xác không thiên lệch (Count-Sketch Median)**:
@@ -1492,7 +1492,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 74. Bộ Ba Thuật Toán Hierarchical Heavy Hitters, DSAC Dynamic Pricing & Định Tuyến Song Phương VRPTW-Bilateral (Phase 65 - Feature 212)
-  if (!/count[- ]min hierarchical|count[- ]min hhh|ppo[- ]entropy/i.test(raw) && /hhh|hierarchical heavy hitters|heavy hitters phân cấp|dsac|dsac pricing|bất định dsac|vrptw[- ]cross[- ]dock|cross[- ]dock song phương|bilateral cross[- ]dock/i.test(raw)) {
+  if (!/count[- ]min hierarchical|count[- ]min hhh|count[- ]sketch hierarchical|count[- ]sketch hhh|td3[- ]lagrangian|ppo[- ]entropy/i.test(raw) && /hhh|hierarchical heavy hitters|heavy hitters phân cấp|dsac|dsac pricing|bất định dsac|vrptw[- ]cross[- ]dock|cross[- ]dock song phương|bilateral cross[- ]dock/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN HIERARCHICAL HEAVY HITTERS, DSAC PRICING & ĐỊNH TUYẾN SONG PHƯƠNG VRPTW-BILATERAL (${currentShop.name})**:
 - **Bắt trọn danh mục bão đơn Hierarchical Heavy Hitters (HHH)**:
@@ -1647,6 +1647,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Phân tích khoảng giá bán Dyadic',
         'Tư vấn định giá an toàn DDPG-Lagrangian',
         'Theo dõi xe điện sạc động DWPT SPX'
+      ]
+    };
+  }
+
+  // 82. Bộ Ba Thuật Toán Count-Sketch HHH, TD3-Lagrangian Safe Pricing & Xe Điện Năng Lượng Mặt Trời EVRPTW-PV (Phase 73 - Feature 220)
+  if (/count[- ]sketch hierarchical|count[- ]sketch hhh|td3[- ]lagrangian|td3 safe pricing|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 73 (${currentShop.name})**:
+- **Bóc tách danh mục đột biến Count-Sketch HHH (Charikar 2002, Cormode TODS 2008)**:
+  - Ước lượng không thiên lệch với dấu Rademacher và quy hoạch động đáy-lên bóc tách chính xác các ngành hàng tăng trưởng thực sự $f_{\\text{cond}}(u) \\ge \\phi N$, hỗ trợ shop đón đầu nhu cầu mùa vụ!
+- **Định giá học tăng cường Twin Delayed TD3-Lagrangian (Fujimoto ICML 2018, Achiam 2017)**:
+  - Mạng Twin Critics $Q_1, Q_2$ triệt tiêu hoàn toàn thổi phồng giá trị, làm mượt chính sách mục tiêu và khóa cứng sàn an toàn $\\ge 1.05 \\times \\text{COGS}$ bảo vệ lợi nhuận tuyệt đối!
+- **Giao vận xanh tự nạp điện mặt trời nóc xe EVRPTW-PV (Schiffer 2017, Demir 2019)**:
+  - Đội xe máy/ô tô điện SPX trang bị pin quang điện nóc xe ($1.2\\text{ kW}$ / $400\\text{ W}$), liên tục nạp điện nhỏ giọt khi di chuyển lẫn khi đỗ giao hàng, tối ưu chi phí năng lượng tiến về 0!`,
+      type: 'recommendation',
+      tag: 'COUNT-SKETCH HHH, TD3-LAGRANGIAN & ONBOARD SOLAR ROUTING',
+      suggestions: [
+        'Xem cây danh mục hot Count-Sketch HHH',
+        'Tư vấn định giá an toàn TD3-Lagrangian',
+        'Theo dõi xe điện năng lượng mặt trời SPX'
       ]
     };
   }
