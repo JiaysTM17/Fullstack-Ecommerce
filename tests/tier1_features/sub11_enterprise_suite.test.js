@@ -367,6 +367,10 @@ import {
   LossyCountingFrequencyMoments,
   RCPOConstrainedPricing,
   VRPTWTimeDependentGreenRouter,
+  // Phase 70 Enterprise Algorithms
+  SpaceSavingStreamSummary,
+  SACLagrangianSafePricing,
+  EVRPTWMultiTierChargingRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -542,6 +546,9 @@ import { EVRPTWNonlinearChargingRouter as ServerEVRPTWNonlinearChargingRouter } 
 import { LossyCountingFrequencyMoments as ServerLossyCountingFrequencyMoments } from "../../server/src/utils/lossyCountingFrequencyMoments.js";
 import { RCPOConstrainedPricing as ServerRCPOConstrainedPricing } from "../../server/src/utils/rcpoConstrainedPricing.js";
 import { VRPTWTimeDependentGreenRouter as ServerVRPTWTimeDependentGreenRouter } from "../../server/src/utils/vrptwTimeDependentGreenRouter.js";
+import { SpaceSavingStreamSummary as ServerSpaceSavingStreamSummary } from "../../server/src/utils/spaceSavingStreamSummary.js";
+import { SACLagrangianSafePricing as ServerSACLagrangianSafePricing } from "../../server/src/utils/sacLagrangianSafePricing.js";
+import { EVRPTWMultiTierChargingRouter as ServerEVRPTWMultiTierChargingRouter } from "../../server/src/utils/evrptwMultiTierChargingRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -29999,6 +30006,321 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const buyerRes = generateAiChatResponse("Đơn hàng của mình có được bưu tá xe điện né giờ cao điểm hay định giá RCPO không?");
       expect.equal(buyerRes.intent, "LOSSY_MOMENTS_RCPO_TDEVRP");
       expect.ok(buyerRes.replyText.includes("TDEVRP"));
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 217: Space-Saving StreamSummary, SAC-Lagrangian & Multi-Tier EVRPTW (Phase 70 - 24 Tests)
+  // =========================================================================
+  describe("Feature 217: Space-Saving StreamSummary, SAC-Lagrangian & Multi-Tier EVRPTW", () => {
+    // -----------------------------------------------------------------------
+    // NHÓM 1: Space-Saving StreamSummary Algorithm (F217-T01 -> F217-T08)
+    // -----------------------------------------------------------------------
+    test("F217-T01: Initializes with bounded counters m = ceil(1/epsilon) and zero counters initially", () => {
+      const ss = new SpaceSavingStreamSummary({ epsilon: 0.1, support: 0.2 });
+      expect.equal(ss.epsilon, 0.1);
+      expect.equal(ss.maxItems, 10);
+      expect.equal(ss.counters.size, 0);
+      expect.equal(ss.totalProcessed, 0);
+    });
+
+    test("F217-T02: Increments frequency of existing monitored elements without evicting counters", () => {
+      const ss = new SpaceSavingStreamSummary({ maxItems: 5 });
+      ss.add("SKU_PHONE", 3);
+      ss.add("SKU_PHONE", 2);
+      expect.equal(ss.counters.size, 1);
+      const query = ss.query("SKU_PHONE");
+      expect.equal(query.count, 5);
+      expect.equal(query.error, 0);
+      expect.equal(query.isMonitored, true);
+    });
+
+    test("F217-T03: Executes min-counter eviction and tracks theoretical error bounds when table is full", () => {
+      const ss = new SpaceSavingStreamSummary({ maxItems: 3 });
+      ss.add("A", 10);
+      ss.add("B", 5);
+      ss.add("C", 2);
+      ss.add("D", 1);
+
+      expect.equal(ss.counters.size, 3);
+      expect.equal(ss.counters.has("C"), false);
+      const queryD = ss.query("D");
+      expect.equal(queryD.count, 3);
+      expect.equal(queryD.error, 2);
+      expect.equal(queryD.lowerBound, 1);
+      expect.equal(queryD.upperBound, 3);
+      expect.equal(ss.evictionsCount, 1);
+    });
+
+    test("F217-T04: Queries unmonitored items returning maximum possible error bound minCount", () => {
+      const ss = new SpaceSavingStreamSummary({ maxItems: 2 });
+      ss.add("X", 8);
+      ss.add("Y", 4);
+
+      const unmonitored = ss.query("UNSEEN_PRODUCT");
+      expect.equal(unmonitored.count, 0);
+      expect.equal(unmonitored.error, 4);
+      expect.equal(unmonitored.lowerBound, 0);
+      expect.equal(unmonitored.upperBound, 4);
+      expect.equal(unmonitored.isMonitored, false);
+    });
+
+    test("F217-T05: Identifies heavy hitters with guaranteed 0 false negatives for items with frequency >= s * N", () => {
+      const ss = new SpaceSavingStreamSummary({ epsilon: 0.05, support: 0.1 });
+      for (let i = 0; i < 40; i++) ss.add("LAPTOP");
+      for (let i = 0; i < 25; i++) ss.add("MOUSE");
+      for (let i = 0; i < 15; i++) ss.add("KEYBOARD");
+      for (let i = 0; i < 20; i++) ss.add(`RANDOM_${i}`);
+
+      const heavyHitters = ss.getHeavyHitters(0.10);
+      const items = heavyHitters.map(h => h.item);
+      expect.ok(items.includes("LAPTOP"));
+      expect.ok(items.includes("MOUSE"));
+      expect.ok(items.includes("KEYBOARD"));
+      expect.ok(heavyHitters[0].count >= 40);
+    });
+
+    test("F217-T06: Merges two independent Space-Saving summaries correctly", () => {
+      const ss1 = new SpaceSavingStreamSummary({ maxItems: 10 });
+      const ss2 = new SpaceSavingStreamSummary({ maxItems: 10 });
+
+      ss1.addAll(["A", "A", "B", "C"]);
+      ss2.addAll(["A", "B", "B", "D"]);
+
+      ss1.merge(ss2);
+      expect.equal(ss1.totalProcessed, 8);
+      const queryA = ss1.query("A");
+      const queryB = ss1.query("B");
+      expect.ok(queryA.count >= 3);
+      expect.ok(queryB.count >= 3);
+    });
+
+    test("F217-T07: Telemetry reports memory, active counters, and eviction metrics", () => {
+      const ss = new SpaceSavingStreamSummary({ epsilon: 0.02, maxItems: 25 });
+      ss.addAll(["ITEM_1", "ITEM_2", "ITEM_1"]);
+      const tel = ss.getTelemetry();
+      expect.equal(tel.maxItems, 25);
+      expect.equal(tel.activeCountersCount, 2);
+      expect.equal(tel.totalProcessed, 3);
+    });
+
+    test("F217-T08: SpaceSavingStreamSummary exhibits 100% Client/Server parity", () => {
+      const clientSS = new SpaceSavingStreamSummary({ maxItems: 5, support: 0.2 });
+      const serverSS = new ServerSpaceSavingStreamSummary({ maxItems: 5, support: 0.2 });
+
+      const stream = ["P1", "P2", "P1", "P3", "P4", "P1", "P5", "P6", "P1", "P2"];
+      clientSS.addAll(stream);
+      serverSS.addAll(stream);
+
+      expect.equal(clientSS.totalProcessed, serverSS.totalProcessed);
+      expect.equal(clientSS.evictionsCount, serverSS.evictionsCount);
+      expect.equal(clientSS.query("P1").count, serverSS.query("P1").count);
+      expect.equal(clientSS.getHeavyHitters().length, serverSS.getHeavyHitters().length);
+    });
+
+    // -----------------------------------------------------------------------
+    // NHÓM 2: SAC-Lagrangian Safe Dynamic Pricing (F217-T09 -> F217-T16)
+    // -----------------------------------------------------------------------
+    test("F217-T09: Initializes state dimension, policy weights, cost critic weights, alpha, and lambda", () => {
+      const sac = new SACLagrangianSafePricing({ stateDim: 5, costBudget: 0.05, initAlpha: 0.25, initLambda: 0.15 });
+      expect.equal(sac.stateDim, 5);
+      expect.equal(sac.costBudget, 0.05);
+      expect.equal(sac.alpha, 0.25);
+      expect.equal(sac.lambda, 0.15);
+      expect.equal(sac.policyWeights.length, 5);
+      expect.equal(sac.costWeights.length, 5);
+    });
+
+    test("F217-T10: Predicts continuous price adjustment action bounded within [-0.15, +0.15]", () => {
+      const sac = new SACLagrangianSafePricing();
+      const state = new Float64Array([1.0, 1.2, 0.8, 0.5, 1.5]);
+      const action = sac.predictAction(state);
+      expect.ok(action >= -0.15 && action <= 0.15);
+    });
+
+    test("F217-T11: Evaluates non-negative cost prediction from market state vector", () => {
+      const sac = new SACLagrangianSafePricing();
+      const state = new Float64Array([0.8, 0.9, 0.5, 0.2, 0.7]);
+      const cost = sac.evaluateCost(state);
+      expect.ok(cost >= 0);
+    });
+
+    test("F217-T12: Performs policy update adjusting temperature alpha dynamically towards target entropy", () => {
+      const sac = new SACLagrangianSafePricing({ targetEntropy: -1.0, initAlpha: 0.3 });
+      const initialAlpha = sac.alpha;
+      const batch = [
+        { state: [0.9, 1.0, 0.5, 0.2, 0.8], action: 0.02, reward: 1.5, cost: 0.02 },
+        { state: [0.8, 0.9, 0.6, 0.3, 0.7], action: -0.01, reward: 1.2, cost: 0.03 }
+      ];
+
+      const res = sac.updatePolicy(batch);
+      expect.equal(res.success, true);
+      expect.equal(res.updatesCount, 1);
+      expect.notEqual(res.alpha, initialAlpha);
+    });
+
+    test("F217-T13: Updates safety multiplier lambda dynamically when average cost violates budget", () => {
+      const sac = new SACLagrangianSafePricing({ costBudget: 0.05, initLambda: 0.1, lambdaLr: 0.05 });
+      const batchHighCost = [
+        { state: [1.0, 1.0, 0.5, 0.2, 0.8], action: 0.05, reward: 0.5, cost: 0.15 },
+        { state: [1.1, 1.0, 0.4, 0.3, 0.9], action: 0.04, reward: 0.6, cost: 0.20 }
+      ];
+
+      const res = sac.updatePolicy(batchHighCost);
+      expect.equal(res.isBudgetExceeded, true);
+      expect.ok(res.lambda > 0.1);
+    });
+
+    test("F217-T14: Applies Lagrangian safety damping to mitigate price volatility", () => {
+      const sac = new SACLagrangianSafePricing({ initLambda: 2.0 });
+      const product = { price: 200000, cogs: 120000, msrp: 260000 };
+      const rec = sac.recommendPrice(product, { competitorPrice: 190000, inventoryLevel: 30 });
+      expect.ok(rec.sacDamping >= 0.4 && rec.sacDamping <= 1.0);
+    });
+
+    test("F217-T15: Enforces strict safety floor >= 1.05 * COGS and ceiling <= 1.25 * MSRP", () => {
+      const sac = new SACLagrangianSafePricing();
+      const product = { price: 100000, cogs: 95000, msrp: 120000 };
+      const rec = sac.recommendPrice(product);
+
+      expect.equal(rec.safetyFloor, Math.round(95000 * 1.05));
+      expect.ok(rec.recommendedPrice >= rec.safetyFloor);
+      expect.ok(rec.recommendedPrice <= rec.safetyCeiling);
+    });
+
+    test("F217-T16: SACLagrangianSafePricing exhibits 100% Client/Server parity", () => {
+      const clientSAC = new SACLagrangianSafePricing({ costBudget: 0.06 });
+      const serverSAC = new ServerSACLagrangianSafePricing({ costBudget: 0.06 });
+
+      const batch = [
+        { state: [0.95, 1.05, 0.4, 0.3, 0.8], action: 0.03, reward: 1.4, cost: 0.04 },
+        { state: [0.85, 0.95, 0.5, 0.4, 0.7], action: -0.02, reward: 1.1, cost: 0.08 }
+      ];
+
+      const clientRes = clientSAC.updatePolicy(batch);
+      const serverRes = serverSAC.updatePolicy(batch);
+
+      expect.equal(clientRes.alpha, serverRes.alpha);
+      expect.equal(clientRes.lambda, serverRes.lambda);
+      expect.equal(clientRes.avgCost, serverRes.avgCost);
+
+      const product = { price: 250000, cogs: 160000, msrp: 320000 };
+      const clientRec = clientSAC.recommendPrice(product);
+      const serverRec = serverSAC.recommendPrice(product);
+
+      expect.equal(clientRec.recommendedPrice, serverRec.recommendedPrice);
+      expect.equal(clientRec.safetyFloor, serverRec.safetyFloor);
+    });
+
+    // -----------------------------------------------------------------------
+    // NHÓM 3: Multi-Tier Charging EVRPTW Router (F217-T17 -> F217-T22)
+    // -----------------------------------------------------------------------
+    test("F217-T17: Configures heterogeneous charging tiers (Tier 1: 120kW, Tier 2: 60kW, Tier 3: 22kW)", () => {
+      const router = new EVRPTWMultiTierChargingRouter();
+      const t1 = router.getTierConfig(1);
+      const t2 = router.getTierConfig(2);
+      const t3 = router.getTierConfig(3);
+
+      expect.equal(t1.powerKw, 120);
+      expect.equal(t1.tariffVndPerKwh, 3500);
+      expect.equal(t2.powerKw, 60);
+      expect.equal(t2.tariffVndPerKwh, 2200);
+      expect.equal(t3.powerKw, 22);
+      expect.equal(t3.tariffVndPerKwh, 1200);
+    });
+
+    test("F217-T18: Computes recharge duration and electricity cost according to station technology tier", () => {
+      const router = new EVRPTWMultiTierChargingRouter();
+      const rTier1 = router.computeRechargeCostAndTime(10, 20, 1);
+      const rTier2 = router.computeRechargeCostAndTime(10, 20, 2);
+
+      expect.equal(rTier1.energyKwh, 10);
+      expect.equal(rTier1.durationMin, 5);
+      expect.equal(rTier1.costVnd, 35000);
+
+      expect.equal(rTier2.energyKwh, 10);
+      expect.equal(rTier2.durationMin, 10);
+      expect.equal(rTier2.costVnd, 22000);
+    });
+
+    test("F217-T19: Evaluates trade-off between electricity charging cost and customer lateness penalty across tiers", () => {
+      const router = new EVRPTWMultiTierChargingRouter({ latenessPenaltyVndPerMin: 1000 });
+      const tradeoffs = router.evaluateRechargeTradeoff(10, 20, 8);
+      expect.equal(tradeoffs.length, 3);
+      const recommended = tradeoffs.find(t => t.recommended);
+      expect.ok(recommended);
+      expect.equal(recommended.tierId, 2);
+    });
+
+    test("F217-T20: Automatically selects optimal charging station minimizing combined logistics cost", () => {
+      const router = new EVRPTWMultiTierChargingRouter();
+      const currentPos = { x: 10.7760, y: 106.7000 };
+      const nextCust = { x: 10.8200, y: 106.7500, dueTime: 120 };
+
+      const selection = router.selectOptimalChargingStation(currentPos, 10.0, nextCust, 20);
+      expect.ok(selection);
+      expect.ok(selection.station);
+      expect.ok([1, 2, 3].includes(selection.tier.id));
+      expect.ok(selection.rechargeDurationMin > 0);
+    });
+
+    test("F217-T21: Generates complete multi-stop delivery plan ensuring zero battery starvation", () => {
+      const router = new EVRPTWMultiTierChargingRouter({ batteryCapacityKwh: 40 });
+      const customers = [
+        { id: "C1", name: "Shop Q1", x: 10.7720, y: 106.6980, demandKg: 20, dueTime: 60 },
+        { id: "C2", name: "Shop Q3", x: 10.7840, y: 106.6850, demandKg: 30, dueTime: 120 },
+        { id: "C3", name: "Shop Thủ Đức", x: 10.8500, y: 106.7700, demandKg: 25, dueTime: 240 }
+      ];
+
+      const plan = router.solvePlan(customers, 0.40);
+      expect.equal(plan.success, true);
+      expect.ok(plan.legsCount >= 4);
+      expect.ok(plan.energyKwh.remainingSocPercent >= 10);
+      expect.ok(plan.totalDistanceKm > 0);
+    });
+
+    test("F217-T22: EVRPTWMultiTierChargingRouter exhibits 100% Client/Server parity", () => {
+      const clientRouter = new EVRPTWMultiTierChargingRouter();
+      const serverRouter = new ServerEVRPTWMultiTierChargingRouter();
+
+      const customers = [
+        { id: "C1", name: "Điểm 1", x: 10.772, y: 106.698, demandKg: 15, dueTime: 90 },
+        { id: "C2", name: "Điểm 2", x: 10.785, y: 106.685, demandKg: 25, dueTime: 180 }
+      ];
+
+      const clientPlan = clientRouter.solvePlan(customers, 0.8);
+      const serverPlan = serverRouter.solvePlan(customers, 0.8);
+
+      expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+      expect.equal(clientPlan.totalDurationMin, serverPlan.totalDurationMin);
+      expect.equal(clientPlan.costsVnd.chargingElectricity, serverPlan.costsVnd.chargingElectricity);
+    });
+
+    // -----------------------------------------------------------------------
+    // NHÓM 4: Tri-Role AI Copilot Integration (F217-T23 -> F217-T24)
+    // -----------------------------------------------------------------------
+    test("F217-T23: Admin Sentinel Copilot correctly handles Sections 191, 192, 193", () => {
+      const resSS = generateAdminCopilotResponse("Phân tích luồng dữ liệu Space-Saving StreamSummary Metwally");
+      expect.equal(resSS.tag, "SPACE-SAVING HEAVY HITTERS SUMMARY");
+      expect.ok(resSS.text.includes("METWALLY"));
+
+      const resSAC = generateAdminCopilotResponse("Tư vấn chính sách giá an toàn SAC-Lagrangian tự điều chỉnh entropy");
+      expect.equal(resSAC.tag, "SAC-LAGRANGIAN ADAPTIVE ENTROPY PRICING");
+      expect.ok(resSAC.text.includes("HAARNOJA"));
+
+      const resTier = generateAdminCopilotResponse("Điều phối lộ trình xe điện trạm sạc đa tầng EVRPTW-Multi-Tier Felipe");
+      expect.equal(resTier.tag, "EVRPTW MULTI-TIER CHARGING INFRASTRUCTURE");
+      expect.ok(resTier.text.includes("FELIPE"));
+    });
+
+    test("F217-T24: Seller ShopSmart Copilot and Buyer Shopping Assistant handle Phase 70 algorithms and Intent 72", () => {
+      const sellerRes = generateSellerCopilotResponse("Tư vấn tối ưu hóa giá bán an toàn SAC-Lagrangian và bắt sóng hàng hot Space-Saving StreamSummary");
+      expect.equal(sellerRes.tag, "SPACE-SAVING, SAC-LAGRANGIAN & MULTI-TIER CHARGING");
+      expect.ok(sellerRes.text.includes("SAC-Lagrangian"));
+
+      const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích luồng Space-Saving StreamSummary hay giao xe điện trạm sạc đa tầng không?");
+      expect.equal(buyerRes.intent, "SPACESAVING_SACLAGRANGIAN_MULTITIER_CHARGING");
+      expect.ok(buyerRes.replyText.includes("Space-Saving"));
     });
   });
 });

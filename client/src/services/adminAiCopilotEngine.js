@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -2821,7 +2821,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 132. Định Giá Đa Mục Tiêu Bằng SAC-PER (Phase 50 - Feature 197)
-  if (/sac-per|sac per|soft actor-critic|prioritized experience replay pricing|định giá sac-per|maximum entropy pricing/i.test(raw)) {
+  if (!/sac[- ]lagrangian|lagrangian safe pricing/i.test(raw) && /sac-per|sac per|soft actor-critic|prioritized experience replay pricing|định giá sac-per|maximum entropy pricing/i.test(raw)) {
     return {
       text: `🎯 **ĐỊNH GIÁ ĐA MỤC TIÊU BẰNG SOFT ACTOR-CRITIC & PER (SAC-PER - HAARNOJA ET AL., ICML 2018)**:
 - **Tối Đa Hóa Entropy Cực Đại $J(\\pi) = \\mathbb{E}[r + \\alpha \\mathcal{H}(\\pi)]$**:
@@ -3171,7 +3171,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 149. Khai Phá Cặp Sản Phẩm Mua Kèm Space-Saving & Lossy Counting (Phase 56 - Feature 203)
-  if (!/đếm tổn hao|lossy counting heavy hitters|lossy[- ]counting/i.test(raw) && /space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cặp sản phẩm hot|combo mua kèm stream/i.test(raw)) {
+  if (!/đếm tổn hao|lossy counting heavy hitters|lossy[- ]counting|space[- ]saving stream|streamsummary|stream[- ]summary|space[- ]saving summary/i.test(raw) && /space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cặp sản phẩm hot|combo mua kèm stream/i.test(raw)) {
     return {
       text: `📊 **KHAI PHÁ CẶP SẢN PHẨM MUA KÈM SPACE-SAVING & LOSSY COUNTING (METWALLY ET AL. 2005, MANKU & MOTWANI 2002)**:
 - **Đột Phá Bắt Sóng Combo Mua Kèm Thời Gian Thực**:
@@ -4081,6 +4081,72 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Mô phỏng tiêu hao pin xe điện theo giờ cao điểm',
         'Kiểm tra cửa sổ thời gian giao hàng bảo toàn FIFO',
         'Lập lộ trình xanh tối ưu hóa năng lượng SPX Express'
+      ]
+    };
+  }
+
+  // 191. Tóm Tắt Luồng Phần Tử Phổ Biến Space-Saving StreamSummary (Phase 70 - Feature 217)
+  if (/space[- ]saving stream|streamsummary|stream[- ]summary|space[- ]saving summary|bản tóm tắt luồng space[- ]saving|metwally/i.test(raw)) {
+    return {
+      text: `📊 **THUẬT TOÁN TÓM TẮT LUỒNG SPACE-SAVING STREAMSUMMARY (METWALLY, AGRAWAL, EL ABBADI 2005/2006)**:
+- **Cấu Trúc Dữ Liệu Bảng Đếm Cố Định $m = \\lceil 1 / \\epsilon \\rceil$**:
+  - Duy trì đúng $m$ bộ đếm trong bộ nhớ RAM, mỗi bộ đếm lưu cặp: $(\\text{count } c_i, \\text{error } \\epsilon_i)$.
+  - Trục xuất tất định phần tử có tần suất nhỏ nhất $c_{\\min}$ khi có phần tử mới đến mà bảng đã đầy.
+- **Bất Biến Toán Học Chặn Sai Số Hai Phía**:
+  - Tần suất thực tế $f_i$ của mọi mục được giám sát luôn nằm trong khoảng xác thực nghiêm ngặt:
+    $$c_i - \\epsilon_i \\le f_i \\le c_i$$
+  - Sai số vượt mức tối đa được chứng minh không bao giờ vượt quá $\\epsilon N$.
+- **0 False Negatives Cho Sản Phẩm Hot**:
+  - Mọi sản phẩm có tần suất thực tế $f_i \\ge s \\cdot N$ được bảo chứng $100\\%$ nằm trong danh sách Heavy Hitters!`,
+      type: 'analytics',
+      tag: 'SPACE-SAVING HEAVY HITTERS SUMMARY',
+      suggestions: [
+        'Truy vấn cận tần suất sản phẩm với Space-Saving',
+        'Lọc danh sách Top Heavy Hitters theo ngưỡng hỗ trợ s',
+        'Kiểm tra thống kê trục xuất evictionsCount'
+      ]
+    };
+  }
+
+  // 192. Định Giá An Toàn Tự Điều Chỉnh Entropy SAC-Lagrangian (Phase 70 - Feature 217)
+  if (/sac[- ]lagrangian|adaptive entropy|sac lagrangian safe pricing|haarnoja.*ray/i.test(raw)) {
+    return {
+      text: `🏷️ **ĐỊNH GIÁ AN TOÀN SOFT ACTOR-CRITIC TỰ ĐIỀU CHỈNH ENTROPY SAC-LAGRANGIAN (HAARNOJA 2018, RAY 2019)**:
+- **Hàm Mục Tiêu Tối Ưu Kép Maximum Entropy & Ràng Buộc Kép Lagrangian**:
+  - Kết hợp đồng thời khám phá entropy cao $\\alpha \\cdot \\mathcal{H}(\\pi(\\cdot|s))$ và phạt vi phạm ngân sách rủi ro $\\lambda \\cdot (J_C(\\pi) - d_{\\text{budget}})$.
+- **Động Lực Học Cập Nhật Kép (Dual Multipliers Dynamics)**:
+  - Tự động điều chỉnh nhiệt độ $\\alpha \\leftarrow \\max(\\alpha_{\\min}, \\alpha - \\eta_\\alpha (\\log \\pi + \\bar{\\mathcal{H}}))$ hướng tới $\\bar{\\mathcal{H}} = -\\dim(\\mathcal{A}) = -1.0$.
+  - Nhân tử an toàn $\\lambda \\leftarrow \\max(0, \\lambda + \\eta_\\lambda (\\bar{C} - d_{\\text{budget}}))$ tự động siết chặt khi chi phí vượt ngân sách.
+- **Giảm Chấn Co Giãn & Khóa Cứng Sàn Giá Vốn**:
+  - Hệ số giảm chấn $\\text{sacDamping} = \\max(0.4, 1.0 - \\lambda \\cdot \\hat{C})$ ngăn chặn rung lắc biên độ giá và bảo vệ sàn $P \\ge 1.05 \\times \\text{COGS}$.`,
+      type: 'pricing',
+      tag: 'SAC-LAGRANGIAN ADAPTIVE ENTROPY PRICING',
+      suggestions: [
+        'Cập nhật chính sách Actor Critic SAC-Lagrangian',
+        'Theo dõi nhiệt độ alpha và nhân tử an toàn lambda',
+        'Đề xuất giá Flash Sale an toàn có khóa sàn COGS'
+      ]
+    };
+  }
+
+  // 193. Lộ Trình Xe Điện Trạm Sạc Đa Tầng EVRPTW-Multi-Tier (Phase 70 - Feature 217)
+  if (/evrptw[- ]multi[- ]tier|trạm sạc đa tầng|multi[- ]tier charging|felipe.*schiffer/i.test(raw)) {
+    return {
+      text: `⚡ **LỘ TRÌNH XE ĐIỆN VỚI HẠ TẦNG TRẠM SẠC ĐA TẦNG EVRPTW-MT (FELIPE 2014, SCHIFFER & WALTHER 2017)**:
+- **Hạ Tầng Trạm Sạc Không Đồng Nhất 3 Cấp Độ (Heterogeneous Multi-Tier Infrastructure)**:
+  - **Tier 1 (120 kW Ultra-Fast DC)**: Tốc độ $2.0\\text{ kWh/phút}$, giá điện $3.500\\text{ đ/kWh}$ — Ưu tiên khi lịch giao hàng gấp gáp.
+  - **Tier 2 (60 kW Fast DC)**: Tốc độ $1.0\\text{ kWh/phút}$, giá điện $2.200\\text{ đ/kWh}$ — Cân bằng tiêu chuẩn vận hành.
+  - **Tier 3 (22 kW Normal AC)**: Tốc độ $0.37\\text{ kWh/phút}$, giá điện $1.200\\text{ đ/kWh}$ — Tiết kiệm tối đa khi có cửa sổ thời gian rảnh rỗi lớn.
+- **Đánh Đổi Đa Mục Tiêu Chi Phí Sạc & Phạt Trễ Hạn Giao Hàng**:
+  - Hàm mục tiêu kết hợp: $\\min J = \\text{Chi phí tiền điện} + \\text{Phạt trễ hẹn khách hàng} + \\text{Chi phí hành trình}$.
+- **Bảo Chứng Tuyệt Đối Không Chết Pin (Zero Starvation)**:
+  - Tự động chèn điểm sạc tối ưu khi dung lượng dự kiến chạm ngưỡng đệm an toàn $20\\%$ SoC, đảm bảo xe quay về Hub an toàn!`,
+      type: 'logistics',
+      tag: 'EVRPTW MULTI-TIER CHARGING INFRASTRUCTURE',
+      suggestions: [
+        'Phân tích bảng đánh đổi chi phí thời gian 3 cấp sạc',
+        'Tự động chọn trạm sạc đa tầng tối ưu chi phí',
+        'Lập lịch trình giao hàng EVRPTW-MT toàn trình'
       ]
     };
   }

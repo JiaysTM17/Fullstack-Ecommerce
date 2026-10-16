@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -569,7 +569,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 28. Bắt Kịp Xu Hướng Bằng Thuật Toán Space-Saving Heavy Hitters (Phase 19 - Feature 166)
-  if (!/conservative|treap/i.test(raw) && /space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
+  if (!/conservative|treap|sac[- ]lagrangian|streamsummary|stream[- ]summary|multi[- ]tier/i.test(raw) && /space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
     return {
       text: `🔥 **BẮT KỊP XU HƯỚNG BÁN CHẠY BẰNG SPACE-SAVING HEAVY HITTERS (TOP-K STREAMING)**:
 - **Cơ chế bắt sóng Real-Time với bộ nhớ cố định $O(K)$**:
@@ -1312,7 +1312,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 65. Bộ Ba Thuật Toán Space-Saving Itemsets, CPO Safe Pricing & Xe Điện Sạc Mặt Trời EVRP-BDS (Phase 56 - Feature 203)
-  if (!/đếm tổn hao|lossy counting heavy hitters|spot|vrptw[- ]soft|lossy counting moments|mô-men tần suất|rcpo/i.test(raw) && /space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cpo pricing|cpo[- ]pricing|evrp-bds|sạc mặt trời|solar micro-hub/i.test(raw)) {
+  if (!/đếm tổn hao|lossy counting heavy hitters|spot|vrptw[- ]soft|lossy counting moments|mô-men tần suất|rcpo|sac[- ]lagrangian|streamsummary|stream[- ]summary|space[- ]saving stream|space[- ]saving summary|multi[- ]tier/i.test(raw) && /space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cpo pricing|cpo[- ]pricing|evrp-bds|sạc mặt trời|solar micro-hub/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN SPACE-SAVING, CPO PRICING & XE ĐIỆN SẠC MẶT TRỜI (${currentShop.name})**:
 - **Bắt sóng combo mua kèm bùng nổ Space-Saving & Lossy Counting**:
@@ -1587,6 +1587,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem top sản phẩm hot Lossy Counting',
         'Tư vấn định giá an toàn RCPO',
         'Theo dõi xe điện giao hàng giờ cao điểm SPX'
+      ]
+    };
+  }
+
+  // 79. Bộ Ba Thuật Toán Space-Saving StreamSummary, SAC-Lagrangian & Multi-Tier Charging (Phase 70 - Feature 217)
+  if (/space[- ]saving stream|streamsummary|stream[- ]summary|space[- ]saving summary|sac[- ]lagrangian|adaptive entropy|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 70 (${currentShop.name})**:
+- **Bắt sóng sản phẩm thịnh hành Space-Saving StreamSummary (Metwally 2005)**:
+  - Bảng đếm cố định $m = \\lceil 1 / \\epsilon \\rceil$ lưu vết chuẩn xác các mặt hàng có tần suất cao với độ sai số cận trên $c_i - \\epsilon_i \\le f_i \\le c_i$. Bảo đảm $0$ false negatives cho mọi SKU bão đơn của shop!
+- **Định giá học tăng cường an toàn SAC-Lagrangian (Haarnoja 2018, Ray 2019)**:
+  - Tự động điều chỉnh nhiệt độ entropy $\\alpha$ và nhân tử an toàn $\\lambda$ để khám phá mức giá tối ưu doanh thu. Hệ thống tự động giảm chấn biên độ co giãn và khóa cứng sàn an toàn $\\ge 1.05 \\times \\text{COGS}$ ngăn ngừa triệt để rủi ro bán dưới giá vốn!
+- **Giao vận trạm sạc đa tầng EVRPTW-MT (Felipe 2014, Schiffer & Walther 2017)**:
+  - Đội xe điện giao hàng SPX tối ưu hóa chi phí điện năng kết hợp hạn chế phạt trễ giờ bằng cách phân loại trạm sạc 3 cấp (Tier 1: 120kW Siêu Nhanh, Tier 2: 60kW Nhanh, Tier 3: 22kW Tiêu Chuẩn), đảm bảo kiện hàng của shop luôn đến tay khách hàng đúng cam kết!`,
+      type: 'recommendation',
+      tag: 'SPACE-SAVING, SAC-LAGRANGIAN & MULTI-TIER CHARGING',
+      suggestions: [
+        'Lọc top sản phẩm hot Space-Saving',
+        'Tư vấn định giá an toàn SAC-Lagrangian',
+        'Xem kế hoạch giao vận trạm sạc đa tầng SPX'
       ]
     };
   }
