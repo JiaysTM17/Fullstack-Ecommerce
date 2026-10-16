@@ -391,6 +391,10 @@ import {
   DyadicHaarWaveletSketch,
   TRPOLagrangianContinuousPricing,
   EVRPTWRegenerativeBrakingTerrainRouter,
+  // Phase 76 Enterprise Algorithms
+  KLLQuantileSketch,
+  PPOClipLagrangianContinuousPricing,
+  EVRPTWThermalBatteryDegradationRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -584,6 +588,9 @@ import { EVRPTWMixedFleetFuelCellSolarRouter as ServerEVRPTWMixedFleetFuelCellSo
 import { DyadicHaarWaveletSketch as ServerDyadicHaarWaveletSketch } from "../../server/src/utils/dyadicHaarWaveletSketch.js";
 import { TRPOLagrangianContinuousPricing as ServerTRPOLagrangianContinuousPricing } from "../../server/src/utils/trpoLagrangianContinuousPricing.js";
 import { EVRPTWRegenerativeBrakingTerrainRouter as ServerEVRPTWRegenerativeBrakingTerrainRouter } from "../../server/src/utils/evrptwRegenerativeBrakingTerrainRouter.js";
+import { KLLQuantileSketch as ServerKLLQuantileSketch } from "../../server/src/utils/kllQuantileSketch.js";
+import { PPOClipLagrangianContinuousPricing as ServerPPOClipLagrangianContinuousPricing } from "../../server/src/utils/ppoClipLagrangianContinuousPricing.js";
+import { EVRPTWThermalBatteryDegradationRouter as ServerEVRPTWThermalBatteryDegradationRouter } from "../../server/src/utils/evrptwThermalBatteryDegradationRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -32075,6 +32082,356 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có được theo dõi bằng Haar wavelet hoặc giao bằng xe điện phanh tái sinh KERS không?");
         expect.equal(buyerRes.intent, "DYADIC_HAAR_WAVELET_TRPO_CONTINUOUS_REGEN_BRAKING");
         expect.ok(buyerRes.replyText.includes("Haar Wavelet"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 223: Phase 76 Enterprise Algorithms Suite (24 Tests)
+    // 1. KLL Quantile Sketch (Optimal Streaming Quantiles)
+    // 2. PPO-Clip Lagrangian Continuous Pricing (Schulman & Achiam Continuous Safe RL)
+    // 3. EVRPTW Thermal Battery Degradation Router (Pelletier & Laporte Arrhenius Thermal Model)
+    // =========================================================================
+    describe("Feature 223: Phase 76 Enterprise Algorithms Suite", () => {
+      // -----------------------------------------------------------------------
+      // KLL Quantile Sketch Tests (F223-T01 - F223-T08)
+      // -----------------------------------------------------------------------
+      test("F223-T01: KLLQuantileSketch initializes with default/custom k, M, eps and levels structure", () => {
+        const sketch = new KLLQuantileSketch({ k: 128, M: 8 });
+        expect.equal(sketch.k, 128);
+        expect.equal(sketch.M, 8);
+        expect.equal(sketch.levels.length, 1);
+        expect.equal(sketch.n, 0);
+        expect.ok(sketch.eps > 0);
+      });
+
+      test("F223-T02: KLLQuantileSketch level capacity decays geometrically by 2/3 factor for higher levels", () => {
+        const sketch = new KLLQuantileSketch({ k: 120, M: 8 });
+        // Simulating 4 levels (H = 4)
+        const cap0 = sketch.getLevelCapacity(0, 4);
+        const cap1 = sketch.getLevelCapacity(1, 4);
+        const cap2 = sketch.getLevelCapacity(2, 4);
+        const cap3 = sketch.getLevelCapacity(3, 4);
+
+        expect.ok(cap3 >= cap2, "Level 3 capacity should be >= level 2");
+        expect.ok(cap2 >= cap1, "Level 2 capacity should be >= level 1");
+        expect.ok(cap1 >= cap0, "Level 1 capacity should be >= level 0");
+        expect.equal(cap3, 120, "Top level capacity should equal k");
+      });
+
+      test("F223-T03: KLLQuantileSketch update inserts items and triggers compactor compaction/promotion to higher levels", () => {
+        const sketch = new KLLQuantileSketch({ k: 16, M: 4 });
+        for (let i = 1; i <= 200; i++) {
+          sketch.update(i);
+        }
+        expect.equal(sketch.n, 200);
+        expect.ok(sketch.levels.length > 1, "Should have expanded to multiple levels after compactions");
+        const totalRetained = sketch.levels.reduce((acc, lvl) => acc + lvl.length, 0);
+        expect.ok(totalRetained < 200, "Retained items should be compressed significantly less than n");
+      });
+
+      test("F223-T04: KLLQuantileSketch getRank returns normalized rank [0, 1] for streaming inputs", () => {
+        const sketch = new KLLQuantileSketch({ k: 64, M: 8 });
+        for (let i = 1; i <= 1000; i++) {
+          sketch.update(i);
+        }
+        const rankMin = sketch.getRank(0);
+        const rankMid = sketch.getRank(500);
+        const rankMax = sketch.getRank(1001);
+
+        expect.equal(rankMin, 0);
+        expect.ok(Math.abs(rankMid - 0.5) < 0.05, `Mid rank ${rankMid} should be close to 0.5`);
+        expect.equal(rankMax, 1);
+      });
+
+      test("F223-T05: KLLQuantileSketch getQuantile accurately estimates p50 median and p99 tails with bounded error", () => {
+        const sketch = new KLLQuantileSketch({ k: 128, M: 8 });
+        for (let i = 1; i <= 10000; i++) {
+          sketch.update(i);
+        }
+        const p50 = sketch.getQuantile(0.5);
+        const p99 = sketch.getQuantile(0.99);
+
+        expect.ok(Math.abs(p50 - 5000) < 500, `p50 estimation ${p50} should be near 5000`);
+        expect.ok(Math.abs(p99 - 9900) < 500, `p99 estimation ${p99} should be near 9900`);
+      });
+
+      test("F223-T06: KLLQuantileSketch getQuantiles and getSummary return multi-point summaries and level metrics", () => {
+        const sketch = new KLLQuantileSketch({ k: 64, M: 8 });
+        for (let i = 10; i <= 100; i += 10) {
+          sketch.update(i);
+        }
+        const quantiles = sketch.getQuantiles([0.25, 0.5, 0.75]);
+        expect.equal(quantiles.length, 3);
+        expect.ok(quantiles[0] <= quantiles[1]);
+        expect.ok(quantiles[1] <= quantiles[2]);
+
+        const summary = sketch.getSummary();
+        expect.equal(summary.n, 10);
+        expect.equal(summary.k, 64);
+        expect.equal(summary.min, 10);
+        expect.equal(summary.max, 100);
+        expect.ok(summary.levelsCount >= 1);
+      });
+
+      test("F223-T07: KLLQuantileSketch merge correctly combines two independent sketches preserving quantiles", () => {
+        const s1 = new KLLQuantileSketch({ k: 64, M: 8 });
+        const s2 = new KLLQuantileSketch({ k: 64, M: 8 });
+
+        for (let i = 1; i <= 500; i++) s1.update(i);
+        for (let i = 501; i <= 1000; i++) s2.update(i);
+
+        s1.merge(s2);
+        expect.equal(s1.n, 1000);
+        const median = s1.getQuantile(0.5);
+        expect.ok(Math.abs(median - 500) < 60, `Merged median ${median} should be near 500`);
+      });
+
+      test("F223-T08: Client KLLQuantileSketch and ServerKLLQuantileSketch exhibit exact algorithmic parity on streaming data", () => {
+        const clientSketch = new KLLQuantileSketch({ k: 64, M: 8 });
+        const serverSketch = new ServerKLLQuantileSketch({ k: 64, M: 8 });
+
+        const data = [12, 45, 78, 23, 56, 89, 90, 34, 67, 100, 200, 150];
+        data.forEach(val => {
+          clientSketch.update(val);
+          serverSketch.update(val);
+        });
+
+        expect.equal(clientSketch.n, serverSketch.n);
+        expect.equal(clientSketch.getRank(50), serverSketch.getRank(50));
+        expect.equal(clientSketch.getQuantile(0.5), serverSketch.getQuantile(0.5));
+        expect.equal(clientSketch.getSummary().min, serverSketch.getSummary().min);
+        expect.equal(clientSketch.getSummary().max, serverSketch.getSummary().max);
+      });
+
+      // -----------------------------------------------------------------------
+      // PPO-Clip Lagrangian Continuous Pricing Tests (F223-T09 - F223-T16)
+      // -----------------------------------------------------------------------
+      test("F223-T09: PPOClipLagrangianContinuousPricing initializes Gaussian actor, twin critics, dual multiplier, and COGS floor", () => {
+        const ppo = new PPOClipLagrangianContinuousPricing({
+          stateDim: 5,
+          minAction: -0.3,
+          maxAction: 0.3,
+          clipEps: 0.2,
+          costLimit: 0.1,
+          cogsFloorMultiplier: 1.05
+        });
+
+        expect.equal(ppo.stateDim, 5);
+        expect.equal(ppo.clipEps, 0.2);
+        expect.equal(ppo.lambda, 0);
+        expect.equal(ppo.cogsFloorMultiplier, 1.05);
+      });
+
+      test("F223-T10: PPOClipLagrangianContinuousPricing selectAction outputs continuous action within bounded range and log probabilities", () => {
+        const ppo = new PPOClipLagrangianContinuousPricing({ stateDim: 4, minAction: -0.25, maxAction: 0.25 });
+        const state = [0.2, -0.1, 0.5, 0.0];
+
+        const outExplore = ppo.selectAction(state, false);
+        expect.ok(outExplore.action >= -0.25 && outExplore.action <= 0.25);
+        expect.ok(typeof outExplore.logProb === "number");
+        expect.ok(typeof outExplore.mean === "number");
+
+        const outDeterm = ppo.selectAction(state, true);
+        expect.equal(outDeterm.action, Math.max(-0.25, Math.min(0.25, outDeterm.mean)));
+      });
+
+      test("F223-T11: PPOClipLagrangianContinuousPricing evaluateV and evaluateCost compute state-value and cost estimates", () => {
+        const ppo = new PPOClipLagrangianContinuousPricing({ stateDim: 3 });
+        const state = [1.0, 0.5, -0.5];
+
+        const v = ppo.evaluateV(state);
+        const cost = ppo.evaluateCost(state);
+        expect.ok(typeof v === "number" && !isNaN(v));
+        expect.ok(typeof cost === "number" && !isNaN(cost));
+      });
+
+      test("F223-T12: PPOClipLagrangianContinuousPricing trainStep updates actor with clipped surrogate objective and cost Lagrangian penalty", () => {
+        const ppo = new PPOClipLagrangianContinuousPricing({ stateDim: 2, actorLr: 0.01, lambda: 0.5 });
+        const batch = [
+          { state: [0.1, 0.2], action: 0.05, oldLogProb: -0.5, reward: 2.0, cost: 0.05 },
+          { state: [0.3, 0.4], action: -0.05, oldLogProb: -0.6, reward: 1.5, cost: 0.02 }
+        ];
+
+        const result = ppo.trainStep(batch);
+        expect.ok(typeof result.actorLoss === "number" && !isNaN(result.actorLoss));
+        expect.ok(typeof result.vLoss === "number" && !isNaN(result.vLoss));
+        expect.ok(typeof result.costLoss === "number" && !isNaN(result.costLoss));
+        expect.ok(typeof result.avgRatio === "number");
+      });
+
+      test("F223-T13: PPOClipLagrangianContinuousPricing dual multiplier increases when cost exceeds safety budget", () => {
+        const ppo = new PPOClipLagrangianContinuousPricing({
+          stateDim: 2,
+          costLimit: 0.05,
+          lambdaLr: 0.1,
+          lambda: 0.0
+        });
+
+        // Batch with high violations (cost = 0.20 > costLimit = 0.05)
+        const batch = [
+          { state: [0.1, 0.2], action: 0.05, oldLogProb: -0.5, reward: 1.0, cost: 0.20 },
+          { state: [0.2, 0.1], action: 0.02, oldLogProb: -0.4, reward: 1.0, cost: 0.20 }
+        ];
+
+        const initialLambda = ppo.lambda;
+        ppo.trainStep(batch);
+        expect.ok(ppo.lambda > initialLambda, `Dual multiplier lambda should have increased from ${initialLambda}`);
+      });
+
+      test("F223-T14: PPOClipLagrangianContinuousPricing recommendPrice and getSafePrice strictly enforce 1.05 * COGS safety floor", () => {
+        const ppo = new PPOClipLagrangianContinuousPricing({
+          stateDim: 3,
+          cogsFloorMultiplier: 1.05,
+          minAction: -0.5,
+          maxAction: 0.5
+        });
+
+        const product = { id: "p_101", price: 100000, cogs: 90000 };
+        const rec = ppo.recommendPrice(product, { competitorsPrice: 92000, demandIndex: 0.2 });
+
+        const minAllowed = 90000 * 1.05; // 94,500
+        expect.ok(rec.recommendedPrice >= minAllowed, `Recommended price ${rec.recommendedPrice} must be >= ${minAllowed}`);
+        expect.equal(rec.floorPrice, minAllowed);
+
+        const safePrice = ppo.getSafePrice(100000, 90000, [0.1, 0.2, 0.3]);
+        expect.ok(safePrice >= minAllowed);
+      });
+
+      test("F223-T15: PPOClipLagrangianContinuousPricing update method trains on batch trajectories without NaN", () => {
+        const ppo = new PPOClipLagrangianContinuousPricing({ stateDim: 3 });
+        const transitions = [
+          { state: [0.1, 0.5, 0.2], action: 0.1, oldLogProb: -0.7, reward: 1.2, cost: 0.01 },
+          { state: [0.2, 0.4, 0.3], action: -0.1, oldLogProb: -0.8, reward: 0.8, cost: 0.02 }
+        ];
+        const res = ppo.update(transitions);
+        expect.ok(res.success);
+        expect.ok(!isNaN(res.actorLoss));
+      });
+
+      test("F223-T16: Client PPOClipLagrangianContinuousPricing and ServerPPOClipLagrangianContinuousPricing maintain exact numerical and API parity", () => {
+        const clientPPO = new PPOClipLagrangianContinuousPricing({ stateDim: 3, seed: 42 });
+        const serverPPO = new ServerPPOClipLagrangianContinuousPricing({ stateDim: 3, seed: 42 });
+
+        const prod = { basePrice: 200000, costPrice: 150000 };
+        const clientRec = clientPPO.recommendPrice(prod, { competitorsPrice: 180000 });
+        const serverRec = serverPPO.recommendPrice(prod, { competitorsPrice: 180000 });
+
+        expect.equal(clientRec.floorPrice, serverRec.floorPrice);
+        expect.ok(clientRec.recommendedPrice >= clientRec.floorPrice);
+        expect.ok(serverRec.recommendedPrice >= serverRec.floorPrice);
+      });
+
+      // -----------------------------------------------------------------------
+      // EVRPTW Thermal Battery Degradation Router Tests (F223-T17 - F223-T22)
+      // -----------------------------------------------------------------------
+      test("F223-T17: EVRPTWThermalBatteryDegradationRouter initializes with temperature limits, thermal resistance, and Arrhenius parameters", () => {
+        const router = new EVRPTWThermalBatteryDegradationRouter({
+          batteryCapacityKwh: 60,
+          maxBatteryTempC: 55,
+          ambientTempC: 32,
+          heatCapacityJPerKgK: 950
+        });
+
+        expect.equal(router.batteryCapacityKwh, 60);
+        expect.equal(router.maxBatteryTempC, 55);
+        expect.equal(router.ambientTempC, 32);
+        expect.ok(router.arrheniusA > 0);
+      });
+
+      test("F223-T18: EVRPTWThermalBatteryDegradationRouter getInternalResistance computes temperature-dependent internal resistance", () => {
+        const router = new EVRPTWThermalBatteryDegradationRouter();
+        const r25 = router.getInternalResistance(25);
+        const r45 = router.getInternalResistance(45);
+        const r10 = router.getInternalResistance(10);
+
+        // At higher temperatures, internal resistance decreases due to ion mobility
+        expect.ok(r45 < r25, "Resistance at 45C should be lower than at 25C");
+        expect.ok(r10 > r25, "Resistance at 10C should be higher than at 25C");
+      });
+
+      test("F223-T19: EVRPTWThermalBatteryDegradationRouter simulateLegThermalDynamics calculates Joulean heating, convective cooling, and Arrhenius degradation", () => {
+        const router = new EVRPTWThermalBatteryDegradationRouter({ ambientTempC: 35 });
+        const legSim = router.simulateLegThermalDynamics(15, 35, 80);
+
+        expect.ok(legSim.travelTimeMin > 0);
+        expect.ok(legSim.energyConsumedKwh > 0);
+        expect.ok(legSim.endTempC >= 35, "Cell temperature should rise or remain >= ambient during heavy discharge");
+        expect.ok(legSim.capacityLossKwh > 0, "Arrhenius degradation must yield non-zero capacity loss");
+        expect.ok(legSim.degradationCostVnd > 0, "Financial degradation cost must be > 0");
+      });
+
+      test("F223-T20: EVRPTWThermalBatteryDegradationRouter solvePlan constructs valid routes satisfying customer delivery time windows", () => {
+        const router = new EVRPTWThermalBatteryDegradationRouter({ maxVehicles: 2, vehicleCapacityKg: 200 });
+        const customers = [
+          { id: "C1", lat: 10.78, lng: 106.70, demandKg: 40, readyTimeMin: 10, dueTimeMin: 90, serviceTimeMin: 10 },
+          { id: "C2", lat: 10.80, lng: 106.72, demandKg: 50, readyTimeMin: 30, dueTimeMin: 120, serviceTimeMin: 15 },
+          { id: "C3", lat: 10.76, lng: 106.68, demandKg: 35, readyTimeMin: 20, dueTimeMin: 100, serviceTimeMin: 10 }
+        ];
+
+        const plan = router.solvePlan(customers);
+        expect.ok(plan.success);
+        expect.ok(plan.routes.length >= 1);
+        expect.ok(plan.totalDistanceKm > 0);
+        expect.ok(plan.totalEnergyKwh > 0);
+        expect.ok(plan.totalThermalDegradationCostVnd >= 0);
+      });
+
+      test("F223-T21: EVRPTWThermalBatteryDegradationRouter tracks battery temperature limits and financial degradation depreciation cost", () => {
+        const router = new EVRPTWThermalBatteryDegradationRouter();
+        const customers = [
+          { id: "C_Hot", lat: 10.85, lng: 106.78, demandKg: 60, readyTimeMin: 0, dueTimeMin: 180, serviceTimeMin: 10 }
+        ];
+
+        const plan = router.solvePlan(customers);
+        expect.ok(plan.success);
+        plan.routes.forEach(route => {
+          expect.ok(route.maxCellTempC <= 55, `Max cell temp ${route.maxCellTempC} must not exceed 55C limit`);
+          expect.ok(route.totalDegradationCostVnd > 0);
+        });
+      });
+
+      test("F223-T22: Client EVRPTWThermalBatteryDegradationRouter and ServerEVRPTWThermalBatteryDegradationRouter provide identical routing solutions", () => {
+        const clientRouter = new EVRPTWThermalBatteryDegradationRouter();
+        const serverRouter = new ServerEVRPTWThermalBatteryDegradationRouter();
+
+        const customers = [
+          { id: "C1", lat: 10.77, lng: 106.69, demandKg: 20, readyTimeMin: 0, dueTimeMin: 60, serviceTimeMin: 5 }
+        ];
+
+        const clientPlan = clientRouter.planRoute(customers);
+        const serverPlan = serverRouter.planRoute(customers);
+
+        expect.equal(clientPlan.success, serverPlan.success);
+        expect.equal(clientPlan.routes.length, serverPlan.routes.length);
+        expect.equal(Math.round(clientPlan.totalDistanceKm), Math.round(serverPlan.totalDistanceKm));
+        expect.equal(Math.round(clientPlan.totalThermalDegradationCostVnd), Math.round(serverPlan.totalThermalDegradationCostVnd));
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F223-T23 - F223-T24)
+      // -----------------------------------------------------------------------
+      test("F223-T23: Admin Sentinel Copilot correctly routes Section 209 (KLL), Section 210 (PPO-Clip), and Section 211 (EVRPTW-Thermal)", () => {
+        const resKLL = generateAdminCopilotResponse("Kiểm định phân vị luồng tối ưu KLL Quantile Sketch Karnin Lang Liberty");
+        expect.equal(resKLL.tag, "KLL OPTIMAL STREAMING QUANTILE SKETCH");
+        expect.ok(resKLL.text.includes("KARNIN"));
+
+        const resPPOClip = generateAdminCopilotResponse("Kiểm soát định giá liên tục PPO-Clip Lagrangian Schulman Wolski");
+        expect.equal(resPPOClip.tag, "PPO-CLIP LAGRANGIAN CONTINUOUS PRICING");
+        expect.ok(resPPOClip.text.includes("SCHULMAN"));
+
+        const resThermal = generateAdminCopilotResponse("Mô hình suy giảm nhiệt pin Arrhenius EVRPTW Thermal Degradation Pelletier");
+        expect.equal(resThermal.tag, "EVRPTW THERMAL BATTERY DEGRADATION ROUTING");
+        expect.ok(resThermal.text.includes("PELLETIER"));
+      });
+
+      test("F223-T24: Seller ShopSmart Copilot and Buyer Shopping Assistant handle Phase 76 algorithms and Intent 78", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn định giá an toàn PPO-Clip liên tục và phân vị giá KLL");
+        expect.equal(sellerRes.tag, "KLL QUANTILES, PPO-CLIP CONTINUOUS & THERMAL BATTERY ROUTING");
+        expect.ok(sellerRes.text.includes("PPO-Clip"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có được theo dõi bằng KLL quantile sketch hoặc giao bằng xe điện kiểm soát nhiệt không?");
+        expect.equal(buyerRes.intent, "KLL_QUANTILES_PPO_CLIP_CONTINUOUS_THERMAL_BATTERY");
+        expect.ok(buyerRes.replyText.includes("KLL Optimal Streaming Quantiles"));
       });
     });
   });

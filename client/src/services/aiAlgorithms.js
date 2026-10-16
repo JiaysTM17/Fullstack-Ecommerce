@@ -41350,6 +41350,734 @@ export class EVRPTWRegenerativeBrakingTerrainRouter {
   }
 }
 
+/**
+ * KLL Optimal Streaming Quantile Sketch (KLLQuantileSketch)
+ * 
+ * Theoretical Foundations:
+ * - Zohar Karnin, Kevin Lang, Edo Liberty (FOCS 2016) - Optimal Quantile Approximation
+ * - Edo Liberty, Michael Mitzenmacher, Justin Thaler, Jonathan Ullman (ESA 2016)
+ * - Kevin Lang (2018) - Even More Nearly Optimal Streaming Quantile Algorithm
+ */
+export class KLLQuantileSketch {
+  constructor(options = {}) {
+    this.k = Math.max(16, Math.floor(Number(options.k || 200)));
+    this.minCapacity = Math.max(4, Math.floor(Number(options.minCapacity || options.M || 8)));
+    this.M = this.minCapacity;
+    this.eps = Number((1.5 / Math.sqrt(this.k)).toFixed(4));
+    this.levels = [[]];
+    this.totalWeight = 0;
+    this.totalItems = 0;
+  }
+
+  get numLevels() {
+    return this.levels.length;
+  }
+
+  get size() {
+    return this.totalItems;
+  }
+
+  get n() {
+    return this.totalItems;
+  }
+
+  get weight() {
+    return this.totalWeight;
+  }
+
+  getLevelCapacity(h, H = this.levels.length) {
+    const depthFromTop = H - 1 - h;
+    const factor = Math.pow(2.0 / 3.0, depthFromTop);
+    return Math.max(this.minCapacity, Math.floor(this.k * factor));
+  }
+
+  update(value, weight = 1) {
+    const val = Number(value);
+    if (isNaN(val)) return;
+
+    const count = Math.max(1, Math.floor(Number(weight !== undefined ? weight : 1)));
+    this.totalItems += count;
+    this.totalWeight += count;
+
+    for (let i = 0; i < count; i++) {
+      this.levels[0].push(val);
+      if (this.levels[0].length >= this.getLevelCapacity(0)) {
+        this._compressLevel(0);
+      }
+    }
+  }
+
+  _compressLevel(h) {
+    if (h >= this.levels.length - 1) {
+      this.levels.push([]);
+    }
+
+    const currentLevel = this.levels[h];
+    currentLevel.sort((a, b) => a - b);
+
+    const offset = Math.random() < 0.5 ? 0 : 1;
+    const promoted = [];
+
+    for (let i = offset; i < currentLevel.length; i += 2) {
+      promoted.push(currentLevel[i]);
+    }
+
+    currentLevel.length = 0;
+    this.levels[h + 1].push(...promoted);
+
+    if (this.levels[h + 1].length >= this.getLevelCapacity(h + 1)) {
+      this._compressLevel(h + 1);
+    }
+  }
+
+  getWeightedItems() {
+    const items = [];
+    for (let h = 0; h < this.levels.length; h++) {
+      const w = 1 << h;
+      const lvl = this.levels[h];
+      for (let i = 0; i < lvl.length; i++) {
+        items.push({ value: lvl[i], weight: w });
+      }
+    }
+    items.sort((a, b) => a.value - b.value);
+    return items;
+  }
+
+  getRank(value) {
+    if (this.totalWeight <= 0) return 0;
+    const val = Number(value);
+
+    let rankWeight = 0;
+    let allLessOrEqual = true;
+    let anyItems = false;
+    for (let h = 0; h < this.levels.length; h++) {
+      const w = 1 << h;
+      const lvl = this.levels[h];
+      for (let i = 0; i < lvl.length; i++) {
+        anyItems = true;
+        if (lvl[i] <= val) {
+          rankWeight += w;
+        } else {
+          allLessOrEqual = false;
+        }
+      }
+    }
+    if (!anyItems) return 0;
+    if (allLessOrEqual) return 1.0;
+    return Math.min(1.0, Math.max(0.0, rankWeight / this.totalWeight));
+  }
+
+  getQuantile(q) {
+    if (this.totalWeight <= 0) return 0;
+    const targetRank = Math.max(0.0, Math.min(1.0, Number(q)));
+    const targetWeight = targetRank * this.totalWeight;
+
+    const items = this.getWeightedItems();
+    if (items.length === 0) return 0;
+
+    let accum = 0;
+    for (let i = 0; i < items.length; i++) {
+      accum += items[i].weight;
+      if (accum >= targetWeight) {
+        return items[i].value;
+      }
+    }
+    return items[items.length - 1].value;
+  }
+
+  getQuantiles(fractions = []) {
+    return fractions.map(q => this.getQuantile(q));
+  }
+
+  getSummary() {
+    return {
+      n: this.totalItems,
+      k: this.k,
+      totalItems: this.totalItems,
+      totalWeight: this.totalWeight,
+      numLevels: this.numLevels,
+      levelsCount: this.levels.length,
+      min: this.getQuantile(0.0),
+      p25: this.getQuantile(0.25),
+      median: this.getQuantile(0.50),
+      p75: this.getQuantile(0.75),
+      p90: this.getQuantile(0.90),
+      p95: this.getQuantile(0.95),
+      p99: this.getQuantile(0.99),
+      max: this.getQuantile(1.0)
+    };
+  }
+
+  merge(other) {
+    if (!other || !(other instanceof KLLQuantileSketch)) return this;
+
+    while (this.levels.length < other.levels.length) {
+      this.levels.push([]);
+    }
+
+    for (let h = 0; h < other.levels.length; h++) {
+      this.levels[h].push(...other.levels[h]);
+    }
+
+    this.totalItems += other.totalItems;
+    this.totalWeight += other.totalWeight;
+
+    for (let h = 0; h < this.levels.length; h++) {
+      if (this.levels[h].length >= this.getLevelCapacity(h)) {
+        this._compressLevel(h);
+      }
+    }
+
+    return this;
+  }
+
+  getTelemetry() {
+    let retainedItems = 0;
+    for (const lvl of this.levels) retainedItems += lvl.length;
+    return {
+      algorithm: "KLLQuantileSketch",
+      k: this.k,
+      numLevels: this.numLevels,
+      totalItems: this.totalItems,
+      retainedItems,
+      compressionRatioPct: this.totalItems > 0 ? Number(((retainedItems / this.totalItems) * 100).toFixed(2)) : 100.0,
+      epsilonGuarantee: Number((1.5 / Math.sqrt(this.k)).toFixed(4))
+    };
+  }
+}
+
+/**
+ * PPO-Clip with Continuous Action Space & Lagrangian Safety Constraints (PPOClipLagrangianContinuousPricing)
+ * 
+ * Theoretical Foundations:
+ * - John Schulman et al. (arXiv:1707.06347, 2017) - PPO-Clip
+ * - Joshua Achiam et al. (ICML 2017) - Constrained Policy Optimization
+ */
+export class PPOClipLagrangianContinuousPricing {
+  constructor(options = {}) {
+    this.stateDim = Math.max(2, Math.floor(Number(options.stateDim || 5)));
+    this.actionMax = Math.max(0.05, Math.min(0.50, Number(options.actionBound || 0.20)));
+    this.clipEps = Math.max(0.05, Math.min(0.40, Number(options.clipEps || 0.20)));
+    this.entropyCoeff = Math.max(0.0001, Number(options.entropyCoeff || 0.01));
+    this.costLimit = options.costLimit !== undefined ? Number(options.costLimit) : (options.costBudget !== undefined ? Number(options.costBudget) : 0.04);
+    this.costBudget = this.costLimit;
+    this.lambdaLr = options.lambdaLr !== undefined ? Number(options.lambdaLr) : (options.alphaLambda !== undefined ? Number(options.alphaLambda) : 0.02);
+    this.alphaLambda = this.lambdaLr;
+    this.cogsFloorMultiplier = Number(options.cogsFloorMultiplier || 1.05);
+
+    if (options.minAction !== undefined || options.maxAction !== undefined) {
+      this.actionMax = Math.max(Math.abs(Number(options.minAction) || 0.2), Math.abs(Number(options.maxAction) || 0.2));
+    }
+
+    this.actorLr = Math.max(0.001, Number(options.actorLr || 0.02));
+    this.criticLr = Math.max(0.001, Number(options.criticLr || 0.03));
+    this.gamma = Math.max(0.8, Math.min(0.99, Number(options.gamma || 0.95)));
+
+    this.policyWeights = new Float64Array(this.stateDim);
+    const initWeights = [0.04, -0.02, 0.03, -0.01, 0.02];
+    for (let i = 0; i < this.stateDim; i++) {
+      this.policyWeights[i] = i < initWeights.length ? initWeights[i] : 0.01;
+    }
+    this.logStd = -0.7;
+    this.std = Math.exp(this.logStd);
+
+    this.valueWeights = new Float64Array(this.stateDim);
+    this.costWeights = new Float64Array(this.stateDim);
+
+    this.lambda = Number(options.lambda !== undefined ? options.lambda : 0.0);
+    this.trainSteps = 0;
+  }
+
+  _dot(w, s) {
+    let sum = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      sum += (w[i] || 0) * (s[i] || 0);
+    }
+    return sum;
+  }
+
+  _logProb(a, mu) {
+    const varStd = this.std * this.std;
+    const diff = a - mu;
+    return -0.5 * Math.log(2 * Math.PI) - this.logStd - (diff * diff) / (2 * varStd);
+  }
+
+  selectAction(state, deterministic = false) {
+    const mu = this._dot(this.policyWeights, state);
+    let chosenA = mu;
+    if (!deterministic) {
+      const u1 = Math.max(1e-7, Math.random());
+      const u2 = Math.random();
+      const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      chosenA = mu + this.std * z;
+    }
+    const clampedA = Math.max(-this.actionMax, Math.min(this.actionMax, chosenA));
+    const logP = this._logProb(clampedA, mu);
+
+    const result = {
+      action: clampedA,
+      logProb: logP,
+      mean: mu,
+      valueOf() { return clampedA; },
+      toString() { return String(clampedA); },
+      [Symbol.toPrimitive](hint) {
+        if (hint === 'string') return String(clampedA);
+        return clampedA;
+      }
+    };
+    return result;
+  }
+
+  evaluateV(state) {
+    return this._dot(this.valueWeights, state);
+  }
+
+  evaluateCost(state) {
+    return Math.max(0, this._dot(this.costWeights, state));
+  }
+
+  trainStep(batch = []) {
+    if (!Array.isArray(batch) || batch.length === 0) {
+      return { success: false, trained: false, reason: "EMPTY_BATCH" };
+    }
+
+    this.trainSteps++;
+    const N = batch.length;
+    const states = [];
+    const actions = new Float64Array(N);
+    const oldLogProbs = new Float64Array(N);
+    const advantages = new Float64Array(N);
+    const costAdvantages = new Float64Array(N);
+    let totalCost = 0;
+    let totalVLoss = 0;
+    let totalCostLoss = 0;
+
+    for (let i = 0; i < N; i++) {
+      const t = batch[i];
+      const s = new Float64Array(this.stateDim);
+      const sNext = new Float64Array(this.stateDim);
+      for (let j = 0; j < this.stateDim; j++) {
+        s[j] = Number(t.state ? t.state[j] : 0) || 0;
+        sNext[j] = Number(t.nextState ? t.nextState[j] : 0) || 0;
+      }
+      states.push(s);
+
+      const a = Number(t.action || 0);
+      actions[i] = a;
+      const muOld = this._dot(this.policyWeights, s);
+      oldLogProbs[i] = t.oldLogProb !== undefined ? Number(t.oldLogProb) : this._logProb(a, muOld);
+
+      const r = Number(t.reward || 0);
+      const c = Math.max(0, Number(t.cost || 0));
+      totalCost += c;
+
+      const v = this.evaluateV(s);
+      const vNext = t.done ? 0 : this.evaluateV(sNext);
+      const tdReward = r + this.gamma * vNext - v;
+      advantages[i] = tdReward;
+      totalVLoss += tdReward * tdReward;
+
+      const vc = this.evaluateCost(s);
+      const vcNext = t.done ? 0 : this.evaluateCost(sNext);
+      const tdCost = c + this.gamma * vcNext - vc;
+      costAdvantages[i] = tdCost;
+      totalCostLoss += tdCost * tdCost;
+
+      for (let j = 0; j < this.stateDim; j++) {
+        this.valueWeights[j] += (this.criticLr * tdReward * s[j]) / N;
+        this.costWeights[j] += (this.criticLr * tdCost * s[j]) / N;
+      }
+    }
+
+    const varStd = this.std * this.std;
+    let clipCount = 0;
+    let totalActorLoss = 0;
+    let totalRatio = 0;
+
+    for (let i = 0; i < N; i++) {
+      const s = states[i];
+      const a = actions[i];
+      const mu = this._dot(this.policyWeights, s);
+      const newLogProb = this._logProb(a, mu);
+      const ratio = Math.exp(Math.max(-10, Math.min(10, newLogProb - oldLogProbs[i])));
+      totalRatio += ratio;
+
+      const advTotal = advantages[i] - this.lambda * costAdvantages[i];
+      const surr1 = ratio * advTotal;
+      const clampedRatio = Math.max(1.0 - this.clipEps, Math.min(1.0 + this.clipEps, ratio));
+      const surr2 = clampedRatio * advTotal;
+
+      totalActorLoss += -Math.min(surr1, surr2);
+
+      if (Math.abs(ratio - 1.0) > this.clipEps) clipCount++;
+
+      const gradWeight = surr1 <= surr2 ? ratio : 0.0;
+      const gradLogPi = (a - mu) / varStd;
+
+      for (let j = 0; j < this.stateDim; j++) {
+        const ppoGrad = (gradWeight * advTotal * gradLogPi * s[j]) / N;
+        this.policyWeights[j] += this.actorLr * ppoGrad;
+      }
+    }
+
+    const avgCost = totalCost / N;
+    const costViolation = avgCost - this.costBudget;
+    this.lambda = Math.max(0.0, this.lambda + this.alphaLambda * costViolation);
+
+    return {
+      success: true,
+      trained: true,
+      actorLoss: totalActorLoss / N,
+      vLoss: totalVLoss / N,
+      costLoss: totalCostLoss / N,
+      avgRatio: totalRatio / N,
+      avgCost,
+      lambda: this.lambda,
+      clippedRatioPct: Number(((clipCount / N) * 100).toFixed(1)),
+      trainSteps: this.trainSteps
+    };
+  }
+
+  update(batch) {
+    return this.trainStep(batch);
+  }
+
+  recommendPrice(product = {}, marketContext = {}) {
+    const currentPrice = Math.max(1000, Number(product.price || product.basePrice || 100000));
+    const cogs = Math.max(500, Number(product.cogs || product.costPrice || currentPrice * 0.70));
+    const msrp = Math.max(currentPrice, Number(product.msrp || currentPrice * 1.30));
+
+    const competitorPrice = Number(marketContext.competitorPrice || currentPrice);
+    const stock = Number(marketContext.inventoryLevel || 50);
+    const capacity = Math.max(1, Number(marketContext.inventoryCapacity || 100));
+    const salesVelocity = Number(marketContext.salesVelocity || 1.0);
+    const demandIndex = Number(marketContext.demandIndex || 1.0);
+
+    const state = [
+      Number((currentPrice / msrp).toFixed(4)),
+      Number((competitorPrice / currentPrice).toFixed(4)),
+      Number((stock / capacity).toFixed(4)),
+      Number(Math.min(3.0, salesVelocity / 10.0).toFixed(4)),
+      Number(Math.min(3.0, demandIndex).toFixed(4))
+    ];
+
+    const rawActionObj = this.selectAction(state, true);
+    const rawAction = typeof rawActionObj === "number" ? rawActionObj : rawActionObj.action;
+    const costPred = this.evaluateCost(state);
+
+    const lagrangianDamping = Math.max(0.30, 1.0 - this.lambda * costPred);
+    const safeAction = rawAction * lagrangianDamping;
+
+    const rawPrice = currentPrice * (1.0 + safeAction);
+    const safetyFloor = Math.round(cogs * this.cogsFloorMultiplier);
+    const safetyCeiling = Math.round(msrp * 1.25);
+
+    const safePrice = Math.round(Math.max(safetyFloor, Math.min(safetyCeiling, rawPrice)));
+    const priceAdjustmentPct = Number((((safePrice - currentPrice) / currentPrice) * 100).toFixed(2));
+    const grossMarginVnd = safePrice - cogs;
+    const grossMarginPct = Number(((grossMarginVnd / safePrice) * 100).toFixed(2));
+
+    return {
+      currentPrice,
+      recommendedPrice: safePrice,
+      action: Number(safeAction.toFixed(4)),
+      floorPrice: safetyFloor,
+      safetyFloor,
+      safetyCeiling,
+      isFloorBounded: safePrice === safetyFloor,
+      isCeilingBounded: safePrice === safetyCeiling,
+      cogs,
+      priceAdjustmentPct,
+      grossMarginVnd,
+      grossMarginPct,
+      lambda: Number(this.lambda.toFixed(4)),
+      costPredicted: Number(costPred.toFixed(4)),
+      isBudgetExceeded: costPred > this.costBudget
+    };
+  }
+
+  getSafePrice(basePrice, cogs, state) {
+    const res = this.recommendPrice({ price: basePrice, cogs, msrp: basePrice * 1.30 });
+    return res.recommendedPrice;
+  }
+
+  getTelemetry() {
+    return {
+      algorithm: "PPOClipLagrangianContinuousPricing",
+      stateDim: this.stateDim,
+      actionBound: this.actionMax,
+      clipEps: this.clipEps,
+      lambda: this.lambda,
+      costBudget: this.costBudget,
+      trainSteps: this.trainSteps
+    };
+  }
+}
+
+/**
+ * EVRPTW with Electro-Thermal Battery Dynamics & Arrhenius Degradation (EVRPTWThermalBatteryDegradationRouter)
+ * 
+ * Theoretical Foundations:
+ * - G. Suri, S. Onori (IEEE Trans. Control Syst. Technol. 2016)
+ * - E. Redondo-Iglesias et al. (Batteries 2018)
+ * - J. Pelletier, O. Jabali, G. Laporte (Transp. Res. Part B 2017)
+ */
+export class EVRPTWThermalBatteryDegradationRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || {
+      id: "DEPOT_THERMAL_SPX_CENTRAL",
+      name: "SPX Express Thermal Battery Fleet Central Hub",
+      x: 10.7769,
+      y: 106.7009
+    };
+
+    this.batteryCapacityKwh = Math.max(10.0, Number(options.batteryCapacityKwh || 36.0));
+    this.ambientTempC = Number(options.ambientTempC !== undefined ? options.ambientTempC : 32.0);
+    this.initialCellTempC = Number(options.initialCellTempC !== undefined ? options.initialCellTempC : 30.0);
+    this.maxBatteryTempC = Math.max(45.0, Number(options.maxBatteryTempC || options.maxCellTempC || 55.0));
+    this.maxCellTempC = this.maxBatteryTempC;
+    this.maxPayloadKg = Math.max(50.0, Number(options.maxPayloadKg || 350.0));
+    this.nominalCurrentA = Math.max(10.0, Number(options.nominalCurrentA || 60.0));
+    this.nominalVoltageV = Math.max(48.0, Number(options.nominalVoltageV || 400.0));
+    this.baseConsumptionKwhPerKm = Math.max(0.05, Number(options.baseConsumptionKwhPerKm || 0.18));
+    this.replacementCostPerKwh = Math.max(100000, Number(options.replacementCostPerKwh || 2800000));
+    this.avgSpeedKmh = Math.max(15.0, Number(options.avgSpeedKmh || 36.0));
+    this.travelSpeedKmMin = this.avgSpeedKmh / 60.0;
+
+    this.R0 = 0.045;
+    this.TrefK = 298.15;
+    this.Rgas = 8.314;
+    this.Ea = 28000.0;
+    this.ER = 18000.0;
+    this.mCp = 18000.0;
+    this.hA = 35.0;
+    this.Adeg = 0.0005;
+    this.arrheniusA = this.Adeg;
+  }
+
+  calculateDistanceKm(p1, p2) {
+    if (!p1 || !p2) return 0;
+    const p1x = Number(p1.x !== undefined ? p1.x : p1.lat);
+    const p1y = Number(p1.y !== undefined ? p1.y : p1.lng);
+    const p2x = Number(p2.x !== undefined ? p2.x : p2.lat);
+    const p2y = Number(p2.y !== undefined ? p2.y : p2.lng);
+    const dx = (p1x || 0) - (p2x || 0);
+    const dy = (p1y || 0) - (p2y || 0);
+    return Math.sqrt(dx * dx + dy * dy) * 111.0;
+  }
+
+  getInternalResistance(tempC) {
+    const tempK = tempC + 273.15;
+    return this.R0 * Math.exp((this.ER / this.Rgas) * (1.0 / tempK - 1.0 / this.TrefK));
+  }
+
+  simulateLegThermalDynamics(distanceKm, currentTempC, payloadKg = 0) {
+    const travelTimeMin = distanceKm > 0 ? (distanceKm / this.travelSpeedKmMin) : 0;
+    if (distanceKm <= 0) {
+      return {
+        travelTimeMin: 0,
+        energyConsumedKwh: 0,
+        energyKwh: 0,
+        endTempC: currentTempC,
+        finalTempC: currentTempC,
+        avgCurrentA: 0,
+        capacityLossKwh: 0,
+        degradationCostVnd: 0,
+        degCostVnd: 0
+      };
+    }
+
+    const durationHours = distanceKm / this.avgSpeedKmh;
+    const durationSeconds = durationHours * 3600.0;
+    const payloadFactor = 1.0 + (Math.max(0, payloadKg) / this.maxPayloadKg) * 0.15;
+    const energyKwh = distanceKm * this.baseConsumptionKwhPerKm * payloadFactor;
+
+    const powerW = (energyKwh * 1000.0) / durationHours;
+    const currentA = powerW / this.nominalVoltageV;
+
+    const Rint = this.getInternalResistance(currentTempC);
+    const Qgen = currentA * currentA * Rint;
+    const steadyStateTempC = this.ambientTempC + Qgen / this.hA;
+    const tau = this.mCp / this.hA;
+    const finalTempC = steadyStateTempC + (currentTempC - steadyStateTempC) * Math.exp(-durationSeconds / tau);
+
+    const avgTempC = (currentTempC + finalTempC) / 2.0;
+    const avgTempK = avgTempC + 273.15;
+    const stressRatio = Math.max(0.5, currentA / this.nominalCurrentA);
+    const tempFactor = Math.exp((this.Ea / this.Rgas) * (1.0 / this.TrefK - 1.0 / avgTempK));
+    const kDecay = this.Adeg * tempFactor * Math.pow(stressRatio, 1.4);
+
+    const capacityLossKwh = kDecay * durationHours * (this.batteryCapacityKwh / 100.0);
+    const degCostVnd = capacityLossKwh * this.replacementCostPerKwh;
+
+    return {
+      travelTimeMin: Number(travelTimeMin.toFixed(2)),
+      energyConsumedKwh: Number(energyKwh.toFixed(4)),
+      energyKwh: Number(energyKwh.toFixed(4)),
+      endTempC: Number(finalTempC.toFixed(2)),
+      finalTempC: Number(finalTempC.toFixed(2)),
+      avgCurrentA: Number(currentA.toFixed(2)),
+      capacityLossKwh: Number(capacityLossKwh.toFixed(6)),
+      degradationCostVnd: Math.round(degCostVnd),
+      degCostVnd: Math.round(degCostVnd)
+    };
+  }
+
+  solvePlan(customers = [], options = {}) {
+    if (!Array.isArray(customers) || customers.length === 0) {
+      return {
+        success: false,
+        reason: "NO_CUSTOMERS",
+        routes: [],
+        totalDistanceKm: 0,
+        totalEnergyKwh: 0,
+        totalCapacityLossKwh: 0,
+        totalThermalDegradationCostVnd: 0
+      };
+    }
+
+    const pending = customers.map(c => ({
+      ...c,
+      x: Number(c.x !== undefined ? c.x : c.lat !== undefined ? c.lat : 0),
+      y: Number(c.y !== undefined ? c.y : c.lng !== undefined ? c.lng : 0),
+      demand: Math.max(1, Number(c.demand !== undefined ? c.demand : c.demandKg !== undefined ? c.demandKg : 5)),
+      readyTime: Number(c.readyTime !== undefined ? c.readyTime : c.readyTimeMin !== undefined ? c.readyTimeMin : 0),
+      dueTime: Number(c.dueTime !== undefined ? c.dueTime : c.dueTimeMin !== undefined ? c.dueTimeMin : 480),
+      serviceTimeMin: Number(c.serviceTimeMin !== undefined ? c.serviceTimeMin : 10)
+    }));
+
+    let currentLoc = { ...this.depot };
+    let currentTimeMin = 0;
+    let currentBatteryKwh = this.batteryCapacityKwh;
+    let currentTempC = this.initialCellTempC;
+    let totalPayload = pending.reduce((sum, c) => sum + c.demand, 0);
+
+    const legs = [];
+    let totalDistanceKm = 0;
+    let totalEnergyKwh = 0;
+    let totalCapacityLossKwh = 0;
+    let totalDegCostVnd = 0;
+
+    while (pending.length > 0) {
+      let bestIdx = 0;
+      let minCost = Infinity;
+
+      for (let i = 0; i < pending.length; i++) {
+        const c = pending[i];
+        const dist = this.calculateDistanceKm(currentLoc, c);
+        const arrival = currentTimeMin + (dist / this.travelSpeedKmMin);
+        const wait = Math.max(0, c.readyTime - arrival);
+        const lateness = Math.max(0, arrival - c.dueTime);
+
+        const thermalPrev = this.simulateLegThermalDynamics(dist, currentTempC, totalPayload);
+        const tempPenalty = thermalPrev.finalTempC > this.maxCellTempC ? 500 : 0;
+        const cost = dist * 1.5 + wait * 0.2 + lateness * 20.0 + (thermalPrev.degCostVnd / 1000.0) + tempPenalty;
+
+        if (cost < minCost) {
+          minCost = cost;
+          bestIdx = i;
+        }
+      }
+
+      const nextCust = pending.splice(bestIdx, 1)[0];
+      const dist = this.calculateDistanceKm(currentLoc, nextCust);
+      const travelMin = dist / this.travelSpeedKmMin;
+      const arrivalMin = currentTimeMin + travelMin;
+      const startServiceMin = Math.max(arrivalMin, nextCust.readyTime);
+      const departureMin = startServiceMin + nextCust.serviceTimeMin;
+
+      const legSim = this.simulateLegThermalDynamics(dist, currentTempC, totalPayload);
+      totalDistanceKm += dist;
+      totalEnergyKwh += legSim.energyKwh;
+      totalCapacityLossKwh += legSim.capacityLossKwh;
+      totalDegCostVnd += legSim.degCostVnd;
+
+      currentBatteryKwh = Math.max(0, currentBatteryKwh - legSim.energyKwh);
+      currentTempC = legSim.finalTempC;
+      totalPayload = Math.max(0, totalPayload - nextCust.demand);
+
+      legs.push({
+        type: "CUSTOMER_DELIVERY",
+        customerId: nextCust.id,
+        name: nextCust.name || nextCust.id,
+        distanceKm: Number(dist.toFixed(3)),
+        arrivalMin: Number(arrivalMin.toFixed(2)),
+        energyKwh: legSim.energyKwh,
+        cellTempC: legSim.finalTempC,
+        capacityLossKwh: legSim.capacityLossKwh,
+        degCostVnd: legSim.degCostVnd,
+        batteryKwh: Number(currentBatteryKwh.toFixed(3)),
+        batterySocPct: Number(((currentBatteryKwh / this.batteryCapacityKwh) * 100).toFixed(1))
+      });
+
+      currentTimeMin = departureMin;
+      currentLoc = { x: nextCust.x, y: nextCust.y };
+    }
+
+    const returnDist = this.calculateDistanceKm(currentLoc, this.depot);
+    const returnSim = this.simulateLegThermalDynamics(returnDist, currentTempC, 0);
+    totalDistanceKm += returnDist;
+    totalEnergyKwh += returnSim.energyKwh;
+    totalCapacityLossKwh += returnSim.capacityLossKwh;
+    totalDegCostVnd += returnSim.degCostVnd;
+
+    currentBatteryKwh = Math.max(0, currentBatteryKwh - returnSim.energyKwh);
+    currentTempC = returnSim.finalTempC;
+
+    legs.push({
+      type: "DEPOT_RETURN",
+      depotId: this.depot.id,
+      distanceKm: Number(returnDist.toFixed(3)),
+      energyKwh: returnSim.energyKwh,
+      cellTempC: returnSim.finalTempC,
+      capacityLossKwh: returnSim.capacityLossKwh,
+      degCostVnd: returnSim.degCostVnd,
+      batteryKwh: Number(currentBatteryKwh.toFixed(3)),
+      batterySocPct: Number(((currentBatteryKwh / this.batteryCapacityKwh) * 100).toFixed(1))
+    });
+
+    const maxTempInPlan = Math.max(this.initialCellTempC, ...legs.map(l => l.cellTempC || 0));
+
+    return {
+      success: true,
+      routes: [
+        {
+          vehicleId: "SPX_THERMAL_EV_01",
+          legs,
+          routeDistanceKm: Number(totalDistanceKm.toFixed(3)),
+          routeEnergyKwh: Number(totalEnergyKwh.toFixed(4)),
+          finalBatterySocPct: Number(((currentBatteryKwh / this.batteryCapacityKwh) * 100).toFixed(1)),
+          finalCellTempC: currentTempC,
+          maxCellTempC: maxTempInPlan,
+          capacityLossKwh: Number(totalCapacityLossKwh.toFixed(6)),
+          thermalDegradationCostVnd: totalDegCostVnd,
+          totalDegradationCostVnd: totalDegCostVnd
+        }
+      ],
+      totalDistanceKm: Number(totalDistanceKm.toFixed(3)),
+      totalEnergyKwh: Number(totalEnergyKwh.toFixed(4)),
+      totalCapacityLossKwh: Number(totalCapacityLossKwh.toFixed(6)),
+      totalThermalDegradationCostVnd: totalDegCostVnd,
+      legsCount: legs.length,
+      routeLegs: legs
+    };
+  }
+
+  planRoute(customers, options) {
+    return this.solvePlan(customers, options);
+  }
+
+  getTelemetry() {
+    return {
+      algorithm: "EVRPTWThermalBatteryDegradationRouter",
+      ambientTempC: this.ambientTempC,
+      batteryCapacityKwh: this.batteryCapacityKwh,
+      nominalVoltageV: this.nominalVoltageV,
+      replacementCostPerKwh: this.replacementCostPerKwh
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -41727,6 +42455,10 @@ export default {
   DyadicHaarWaveletSketch,
   TRPOLagrangianContinuousPricing,
   EVRPTWRegenerativeBrakingTerrainRouter,
+  // Phase 76 Enterprise Algorithms
+  KLLQuantileSketch,
+  PPOClipLagrangianContinuousPricing,
+  EVRPTWThermalBatteryDegradationRouter,
 };
 
 

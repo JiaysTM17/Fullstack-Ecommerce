@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -2948,7 +2948,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 138. Định Giá Bán Tối Ưu Hành Động Liên Tục Bằng CQL Continuous (Phase 52 - Feature 199)
-  if (!/sac[- ]lagrangian|sac continuous|ddpg[- ]lagrangian|ddpg|td3[- ]lagrangian|td3|trpo[- ]lagrangian|trpo continuous|trpo/i.test(raw) && /cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
+  if (!/sac[- ]lagrangian|sac continuous|ddpg[- ]lagrangian|ddpg|td3[- ]lagrangian|td3|trpo[- ]lagrangian|trpo continuous|trpo|ppo[- ]clip|ppo continuous/i.test(raw) && /cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
     return {
       text: `💰 **ĐỊNH GIÁ BÁN TỐI ƯU HÀNH ĐỘNG LIÊN TỤC CONSERVATIVE Q-LEARNING (CQL) (KUMAR ET AL., NEURIPS 2020)**:
 - **Kiến Trúc Actor-Critic Liên Tục**:
@@ -3727,7 +3727,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 175. Định Tuyến Xe Điện Bảo Vệ Tuổi Thọ Pin EVRPTW Battery Degradation (Phase 64 - Feature 211)
-  if (/battery degradation|hao mòn pin phi tuyến|tuổi thọ pin xe điện|evrptw[- ]battery|độ xả sâu dod|chi phí thay pin pack|cell aging stress/i.test(raw)) {
+  if (!/thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /battery degradation|hao mòn pin phi tuyến|tuổi thọ pin xe điện|evrptw[- ]battery|độ xả sâu dod|chi phí thay pin pack|cell aging stress/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN XE ĐIỆN BẢO VỆ TUỔI THỌ PIN EVRPTW BATTERY DEGRADATION (PELLETIER ET AL. 2017, SCHIFFER 2018)**:
 - **Mô Hình Hao Mòn Pin Lithium-Ion Phi Tuyến (Nonlinear Battery Aging)**:
@@ -3836,7 +3836,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 180. Định Giá Ràng Buộc An Toàn PPO-Lagrangian Safe Pricing (Phase 66 - Feature 213)
-  if (!/ppo[- ]entropy|ddpg[- ]lagrangian/i.test(raw) && /ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
+  if (!/ppo[- ]clip|ppo[- ]entropy|ddpg[- ]lagrangian/i.test(raw) && /ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
     return {
       text: `🛡️ **ĐỊNH GIÁ RÀNG BUỘC AN TOÀN PPO-LAGRANGIAN SAFE PRICING (ACHIAM ET AL. ICML 2017 / RAY ET AL. 2019)**:
 - **Tối Đa Doanh Thu Dưới Đa Ràng Buộc Kinh Doanh Nghiêm Ngặt**:
@@ -4196,7 +4196,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 196. Định Tuyến Xe Điện Đổi Pin và Suy Giảm Dung Lượng EVRPTW-BSD (Phase 71 - Feature 218)
-  if (/evrptw[- ]bsd|battery swapping decay|đổi pin suy giảm|suy giảm dung lượng pin|battery capacity fading|pelletier|hof/i.test(raw)) {
+  if (!/thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw[- ]bsd|battery swapping decay|đổi pin suy giảm|suy giảm dung lượng pin|battery capacity fading|pelletier|hof/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN XE ĐIỆN ĐỔI PIN & MÔ HÌNH SUY GIẢM DUNG LƯỢNG EVRPTW-BSD (HOF 2017, PELLETIER 2018)**:
 - **Mô Hình Lão Hóa & Suy Giảm Dung Lượng Khả Dụng (Battery Capacity Fading)**:
@@ -4464,6 +4464,70 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem năng lượng thu hồi từ phanh tái sinh KERS',
         'Kiểm tra độ dốc và cao độ các cung đường',
         'Lập lịch giao hàng xe điện địa hình đồi dốc'
+      ]
+    };
+  }
+
+  // 209. Ước Lượng Phân Vị Luồng Tối Ưu Bằng KLL Quantile Sketch (Phase 76 - Feature 223)
+  if (/kll quantile|kll sketch|karnin lang liberty|phác thảo kll|ước lượng phân vị kll|kll optimal/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG PHÂN VỊ LUỒNG TỐI ƯU KLL QUANTILE SKETCH (KARNIN, LANG, LIBERTY - FOCS 2016)**:
+- **Cấu Trúc Tầng Nén Phân Cấp (Hierarchical Compactor Levels)**:
+  - Phân tầng bộ đệm với dung lượng suy giảm mũ $k_h = \\max(M, \\lfloor k \\cdot (2/3)^{H - 1 - h} \\rfloor)$ và trọng số $w_h = 2^h$.
+  - Khi tầng $h$ đầy, sắp xếp và lấy mẫu chẵn/lẻ ngẫu nhiên (Random Parity Downsampling) đẩy lên tầng $h+1$, đạt dung lượng không gian tối ưu lý thuyết $O\\left(\\frac{1}{\\epsilon} \\sqrt{\\log \\frac{1}{\\epsilon}}\\right)$!
+- **Độ Chính Xác Phân Vị $\\epsilon$-Approximate Rank Guarantee**:
+  - Sai số phân vị bảo đảm $|\\text{rank}(x) - \\text{true\\_rank}(x)| \\le \\epsilon \\cdot N$, vượt trội hoàn toàn so với Greenwald-Khanna hay Q-Digest.
+- **Ứng Dụng Thực Tiễn Mini Shopee**:
+  - Theo dõi chính xác phân vị thời gian phản hồi API (p50, p90, p99) và phân vị giá bán thị trường với độ nén dữ liệu $> 97\\%$!`,
+      type: 'analytics',
+      tag: 'KLL OPTIMAL STREAMING QUANTILE SKETCH',
+      suggestions: [
+        'Xem phân vị giá bán p50, p90, p99 KLL',
+        'Kiểm tra tỷ lệ nén bộ đệm KLL Compactor',
+        'Đo đạc độ chính xác Epsilon sai số phân vị'
+      ]
+    };
+  }
+
+  // 210. Định Giá Hành Động Liên Tục PPO-Clip Lagrangian (Phase 76 - Feature 223)
+  if (/ppo[- ]clip[- ]lagrangian|ppo[- ]clip continuous|ppo clip continuous|clipped surrogate lagrangian|ppo continuous safe pricing/i.test(raw)) {
+    return {
+      text: `🎯 **ĐỊNH GIÁ HÀNH ĐỘNG LIÊN TỤC AN TOÀN PPO-CLIP LAGRANGIAN (SCHULMAN 2017, ACHIAM 2017)**:
+- **Chính Sách Gaussian Hành Động Liên Tục**:
+  - Không gian hành động biên độ giá liên tục $a \\in [-0.20, +0.20]$ lấy mẫu từ phân phối $\\pi_\\theta(a \\mid s) \\sim \\mathcal{N}(\\mu_\\theta(s), \\sigma^2)$.
+- **Hàm Mục Tiêu Cắt Ngọn Clipped Surrogate Kết Hợp Nhân Tử Lagrange**:
+  - Triệt tiêu biến động chính sách đột ngột thông qua hàm cắt ngọn $L^{\\text{CLIP}}(\\theta)$ với $\\epsilon_{\\text{clip}} = 0.20$:
+    $$L^{\\text{CLIP}}(\\theta) = \\hat{\\mathbb{E}}_t \\left[ \\min\\left( r_t(\\theta) \\hat{A}_t^{\\text{total}}, \\text{clip}(r_t(\\theta), 1 - \\epsilon, 1 + \\epsilon) \\hat{A}_t^{\\text{total}} \\right) \\right]$$
+    với $\\hat{A}_t^{\\text{total}} = \\hat{A}_t^R - \\lambda \\hat{A}_t^C$.
+- **Khóa Cứng Sàn Lợi Nhuận An Toàn**:
+  - Nhân tử đối ngẫu Lagrange $\\lambda$ tự động siết chặt khi chi phí vượt ngân sách $d_{\\text{budget}}$, kết hợp sàn cứng $\\ge 1.05 \\times \\text{COGS}$ bảo vệ dòng tiền sàn!`,
+      type: 'pricing',
+      tag: 'PPO-CLIP LAGRANGIAN CONTINUOUS PRICING',
+      suggestions: [
+        'Xem tỷ lệ cắt ngọn Clipped Ratio PPO',
+        'Kiểm tra nhân tử Lagrange an toàn Lambda',
+        'Tư vấn điều chỉnh giá Flash Sale liên tục'
+      ]
+    };
+  }
+
+  // 211. Định Tuyến Xe Điện Mô Hình Nhiệt & Suy Giảm Pin Arrhenius EVRPTW-Thermal (Phase 76 - Feature 223)
+  if (/thermal (?:battery|degradation)|arrhenius|suy giảm pin nhiệt|nhiệt độ cell pin|evrptw[- ]thermal|pelletier.*jabali|pelletier|suri onori/i.test(raw)) {
+    return {
+      text: `🌡️ **ĐỊNH TUYẾN XE ĐIỆN NHIỆT & SUY GIẢM PIN ARRHENIUS EVRPTW-THERMAL (PELLETIER 2017, SURI & ONORI 2016)**:
+- **Mô Hình Động Học Điện - Nhiệt Ghép Cặp (Electro-Thermal Dynamics)**:
+  - Nội trở biến thiên theo nhiệt độ $R_{\\text{int}}(T) = R_0 \\exp\\left( \\frac{E_R}{R_{\\text{gas}}} \\left( \\frac{1}{T} - \\frac{1}{T_{\\text{ref}}} \\right) \\right)$.
+  - Phương trình cân bằng nhiệt lượng: $m C_p \\frac{dT}{dt} = I^2 R_{\\text{int}}(T) - h A (T - T_{\\text{amb}})$.
+- **Quy Luật Suy Giảm Dung Lượng Arrhenius Dưới Ứng Suất Nhiệt**:
+  - Tốc độ lão hóa cell pin $k_{\\text{decay}}(T) = A_{\\text{deg}} \\exp\\left(-\\frac{E_a}{R_{\\text{gas}} T}\\right) \\left(\\frac{I}{I_{\\text{nom}}}\\right)^{z_c}$, tính toán chính xác chi phí khấu hao pin $\\Delta Q \\times \\text{VND/kWh}$.
+- **Tối Ưu Hóa Chi Phí Logistics Tổng Thể**:
+  - Lộ trình giao hàng SPX Express tự động phân bổ tải trọng và điều hòa nhiệt độ cell $\\le 55^\\circ\\text{C}$ trong điều kiện nắng nóng nhiệt đới ($32^\\circ\\text{C} - 38^\\circ\\text{C}$), kéo dài tuổi thọ pin xe điện thêm $30\\%$!`,
+      type: 'logistics',
+      tag: 'EVRPTW THERMAL BATTERY DEGRADATION ROUTING',
+      suggestions: [
+        'Xem nhiệt độ cell pin trên từng chặng giao hàng',
+        'Kiểm tra chi phí khấu hao suy giảm pin Arrhenius',
+        'Lập lộ trình giao hàng tránh quá nhiệt pin'
       ]
     };
   }

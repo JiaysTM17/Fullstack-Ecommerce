@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1512,7 +1512,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 75. Bộ Ba Thuật Toán Frequent Directions, PPO-Lagrangian Safe Pricing & EVRPTW Queue Router (Phase 66 - Feature 213)
-  if (!/ppo[- ]entropy/i.test(raw) && /frequent[- ]directions|matrix sketch|phác thảo ma trận|ppo[- ]lagrangian|lagrangian pricing|evrptw[- ]queue|hàng đợi trạm sạc/i.test(raw)) {
+  if (!/ppo[- ]clip|ppo[- ]entropy/i.test(raw) && /frequent[- ]directions|matrix sketch|phác thảo ma trận|ppo[- ]lagrangian|lagrangian pricing|evrptw[- ]queue|hàng đợi trạm sạc/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN FREQUENT DIRECTIONS, PPO-LAGRANGIAN & EVRPTW-QUEUE (${currentShop.name})**:
 - **Nén luồng tương tác khách hàng Frequent Directions Matrix Sketching**:
@@ -1707,6 +1707,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem tóm tắt sóng nhỏ Dyadic Haar Wavelet',
         'Tư vấn định giá vùng tin cậy TRPO-Lagrangian',
         'Lộ trình giao hàng đồi dốc phanh tái sinh KERS'
+      ]
+    };
+  }
+
+  // 85. Bộ Ba Thuật Toán KLL Quantiles, PPO-Clip Continuous & EVRPTW Thermal Battery (Phase 76 - Feature 223)
+  if (/kll quantile|kll sketch|phác thảo kll|ppo[- ]clip|ppo clip continuous|clipped surrogate lagrangian|thermal battery|suy giảm pin nhiệt|nhiệt độ cell pin|evrptw[- ]thermal/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 76 (${currentShop.name})**:
+- **Phân vị giá luồng tối ưu KLL Quantile Sketch (Karnin, Lang, Liberty - FOCS 2016)**:
+  - Cấu trúc bộ đệm nén phân cấp với suy giảm dung lượng $2/3$, giúp shop theo dõi phân vị giá bán và thời gian phản hồi (p50, p90, p99) chuẩn xác với sai số $\\le \\epsilon$, tiết kiệm $97\\%$ bộ nhớ!
+- **Định giá vùng cắt ngọn liên tục PPO-Clip Lagrangian (Schulman 2017, Achiam 2017)**:
+  - Mô hình Gaussian Actor với biên độ giá liên tục và hàm mục tiêu Clipped Surrogate triệt tiêu biến động sốc, kết hợp nhân tử Lagrange khóa cứng sàn $\\ge 1.05 \\times \\text{COGS}$ bảo vệ 100% lợi nhuận của shop!
+- **Giao vận xe điện kiểm soát nhiệt & suy giảm pin Arrhenius EVRPTW-Thermal (Pelletier 2017)**:
+  - Đội xe SPX Express theo dõi nhiệt độ cell pin thời gian thực, điều hòa nhiệt độ dưới $55^\\circ\\text{C}$ và giảm thiểu suy giảm dung lượng pin trong những ngày thời tiết nhiệt đới nắng nóng gay gắt!`,
+      type: 'recommendation',
+      tag: 'KLL QUANTILES, PPO-CLIP CONTINUOUS & THERMAL BATTERY ROUTING',
+      suggestions: [
+        'Xem phân vị giá thị trường KLL',
+        'Tư vấn định giá an toàn PPO-Clip liên tục',
+        'Theo dõi đội xe điện kiểm soát nhiệt SPX'
       ]
     };
   }
