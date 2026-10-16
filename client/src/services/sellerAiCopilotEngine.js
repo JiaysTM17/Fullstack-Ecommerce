@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal|gk[- ]mergeable|mergeable.*quantile|safe[- ]sac|active cooling|btms/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1727,6 +1727,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem phân vị giá thị trường KLL',
         'Tư vấn định giá an toàn PPO-Clip liên tục',
         'Theo dõi đội xe điện kiểm soát nhiệt SPX'
+      ]
+    };
+  }
+
+  // 86. Bộ Ba Thuật Toán GK Mergeable, Safe SAC Continuous & Active Battery Cooling (Phase 77 - Feature 224)
+  if (/gk[- ]mergeable|gk.*mergeable|greenwald[- ]khanna mergeable|phân vị khả hợp|safe[- ]sac|safe sac continuous|active cooling|btms|làm mát chủ động|evrptw[- ]active[- ]cooling/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 77 (${currentShop.name})**:
+- **Tóm tắt phân vị luồng tất định khả hợp GK Mergeable Sketch (Greenwald-Khanna 2001, Agarwal 2013)**:
+  - Cấu trúc bộ ba $(v, g, \\Delta)$ với bảo chứng bất biến $g + \\Delta \\le 2\\epsilon n$, cho phép shop hợp nhất số liệu phân vị giá và độ trễ từ nhiều kênh bán hàng mà không mất độ chính xác!
+- **Định giá Soft Actor-Critic an toàn tự động chỉnh nhiệt độ Safe SAC Lagrangian (Haarnoja 2018, Ray 2019)**:
+  - Tự động thích ứng tham số entropy $\\alpha$ và sử dụng Twin Critics kết hợp nhân tử Lagrange khóa cứng sàn $\\ge 1.05 \\times \\text{COGS}$, tối đa hóa doanh thu và bảo toàn 100% biên lợi nhuận gộp!
+- **Giao hàng xe điện làm mát pin chủ động EVRPTW Active Cooling BTMS (Park & Jung 2013, Xu 2021)**:
+  - Đội xe SPX Express trang bị hệ thống điều hòa nhiệt chủ động, kích hoạt làm mát khi cell $> 35^\\circ\\text{C}$, giảm tới $60\\%$ chi phí hao mòn pin và loại trừ rủi ro quá nhiệt trong mùa hè nhiệt đới!`,
+      type: 'recommendation',
+      tag: 'GK MERGEABLE, SAFE SAC CONTINUOUS & ACTIVE COOLING ROUTING',
+      suggestions: [
+        'Xem phân vị giá hợp nhất GK Mergeable',
+        'Tư vấn định giá an toàn Safe SAC liên tục',
+        'Theo dõi đội xe điện làm mát chủ động BTMS'
       ]
     };
   }

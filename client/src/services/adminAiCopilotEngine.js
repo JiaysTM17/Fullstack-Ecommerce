@@ -2298,7 +2298,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 105. Tối Ưu Hóa Xả Hàng Tồn Kho Cận Hạn Bằng Soft Actor-Critic (SAC) (Phase 41 - Feature 188)
-  if (!/sac[- ]auto|bidding|đấu thầu|sac-per|sac per/i.test(raw) && /sac markdown|soft actor[- ]critic|xả hàng cận hạn sac|maximum entropy rl|polyak markdown|hạ giá thanh lý/i.test(raw)) {
+  if (!/safe[- ]sac|sac[- ]lagrangian|lagrangian|sac[- ]auto|bidding|đấu thầu|sac-per|sac per/i.test(raw) && /sac markdown|soft actor[- ]critic|xả hàng cận hạn sac|maximum entropy rl|polyak markdown|hạ giá thanh lý/i.test(raw)) {
     return {
       text: `📉 **TỐI ƯU HÓA XẢ HÀNG TỒN KHO CẬN HẠN BẰNG SOFT ACTOR-CRITIC (SAC - HAARNOJA 2018)**:
 - **Nguyên lý Tối Đa Hóa Entropy Tự Do (Maximum Entropy Reinforcement Learning)**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3366,7 +3366,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 158. Giám Sát Phân Vị Độ Trễ & Phân Bố Đơn Hàng GK Quantile Summary (Phase 59 - Feature 206)
-  if (/gk[- ]quantile|gk quantile|greenwald|phân vị gk|độ trễ p99|phân vị độ trễ/i.test(raw)) {
+  if (!/mergeable|gk.*mergeable/i.test(raw) && /gk[- ]quantile|gk quantile|greenwald|phân vị gk|độ trễ p99|phân vị độ trễ/i.test(raw)) {
     return {
       text: `📊 **TỔNG HỢP PHÂN VỊ TẤT ĐỊNH STREAMING GK QUANTILE SUMMARY (GREENWALD-KHANNA SIGMOD 2001)**:
 - **Nguyên lý Thuật toán Định lượng $(\\varepsilon)$-Approximate**:
@@ -3727,7 +3727,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 175. Định Tuyến Xe Điện Bảo Vệ Tuổi Thọ Pin EVRPTW Battery Degradation (Phase 64 - Feature 211)
-  if (!/thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /battery degradation|hao mòn pin phi tuyến|tuổi thọ pin xe điện|evrptw[- ]battery|độ xả sâu dod|chi phí thay pin pack|cell aging stress/i.test(raw)) {
+  if (!/active cooling|btms|làm mát chủ động|park.*jung|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /battery degradation|hao mòn pin phi tuyến|tuổi thọ pin xe điện|evrptw[- ]battery|độ xả sâu dod|chi phí thay pin pack|cell aging stress/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN XE ĐIỆN BẢO VỆ TUỔI THỌ PIN EVRPTW BATTERY DEGRADATION (PELLETIER ET AL. 2017, SCHIFFER 2018)**:
 - **Mô Hình Hao Mòn Pin Lithium-Ion Phi Tuyến (Nonlinear Battery Aging)**:
@@ -4109,7 +4109,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 192. Định Giá An Toàn Tự Điều Chỉnh Entropy SAC-Lagrangian (Phase 70 - Feature 217)
-  if (!/sac.*(continuous|liên tục)|achiam|sac[- ]lagrangian continuous|sac continuous safe pricing/i.test(raw) && /sac[- ]lagrangian|adaptive entropy|sac lagrangian safe pricing|haarnoja.*ray/i.test(raw)) {
+  if (!/safe[- ]sac|sac.*(continuous|liên tục)|(continuous|liên tục).*sac|achiam|sac[- ]lagrangian continuous|sac continuous safe pricing/i.test(raw) && /sac[- ]lagrangian|adaptive entropy|sac lagrangian safe pricing|haarnoja.*ray/i.test(raw)) {
     return {
       text: `🏷️ **ĐỊNH GIÁ AN TOÀN SOFT ACTOR-CRITIC TỰ ĐIỀU CHỈNH ENTROPY SAC-LAGRANGIAN (HAARNOJA 2018, RAY 2019)**:
 - **Hàm Mục Tiêu Tối Ưu Kép Maximum Entropy & Ràng Buộc Kép Lagrangian**:
@@ -4196,7 +4196,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 196. Định Tuyến Xe Điện Đổi Pin và Suy Giảm Dung Lượng EVRPTW-BSD (Phase 71 - Feature 218)
-  if (!/thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw[- ]bsd|battery swapping decay|đổi pin suy giảm|suy giảm dung lượng pin|battery capacity fading|pelletier|hof/i.test(raw)) {
+  if (!/active cooling|btms|làm mát chủ động|park.*jung|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw[- ]bsd|battery swapping decay|đổi pin suy giảm|suy giảm dung lượng pin|battery capacity fading|pelletier|hof/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN XE ĐIỆN ĐỔI PIN & MÔ HÌNH SUY GIẢM DUNG LƯỢNG EVRPTW-BSD (HOF 2017, PELLETIER 2018)**:
 - **Mô Hình Lão Hóa & Suy Giảm Dung Lượng Khả Dụng (Battery Capacity Fading)**:
@@ -4364,7 +4364,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 204. Định Giá Soft Actor-Critic Liên Tục Với Ràng Buộc Lagrange SAC-Lagrangian Continuous (Phase 74 - Feature 221)
-  if (/sac[- ]lagrangian[ -](continuous|liên tục)|(continuous|liên tục)[ -].*sac[- ]lagrangian|sac continuous safe pricing|soft actor[- ]critic continuous lagrangian|haarnoja.*achiam/i.test(raw)) {
+  if (!/safe[- ]sac|safe sac lagrangian/i.test(raw) && (/sac[- ]lagrangian[ -](continuous|liên tục)|(continuous|liên tục)[ -].*sac[- ]lagrangian|sac continuous safe pricing|soft actor[- ]critic continuous lagrangian|haarnoja.*achiam/i.test(raw))) {
     return {
       text: `💰 **ĐỊNH GIÁ SOFT ACTOR-CRITIC LIÊN TỤC RÀNG BUỘC LAGRANGE (HAARNOJA ICML 2018, ACHIAM 2017)**:
 - **Mạng Actor Gaussian Tái Tham Số Hóa (Reparameterized Gaussian Actor)**:
@@ -4512,7 +4512,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 211. Định Tuyến Xe Điện Mô Hình Nhiệt & Suy Giảm Pin Arrhenius EVRPTW-Thermal (Phase 76 - Feature 223)
-  if (/thermal (?:battery|degradation)|arrhenius|suy giảm pin nhiệt|nhiệt độ cell pin|evrptw[- ]thermal|pelletier.*jabali|pelletier|suri onori/i.test(raw)) {
+  if (!/active cooling|btms|làm mát chủ động|park.*jung/i.test(raw) && /thermal (?:battery|degradation)|arrhenius|suy giảm pin nhiệt|nhiệt độ cell pin|evrptw[- ]thermal|pelletier.*jabali|pelletier|suri onori/i.test(raw)) {
     return {
       text: `🌡️ **ĐỊNH TUYẾN XE ĐIỆN NHIỆT & SUY GIẢM PIN ARRHENIUS EVRPTW-THERMAL (PELLETIER 2017, SURI & ONORI 2016)**:
 - **Mô Hình Động Học Điện - Nhiệt Ghép Cặp (Electro-Thermal Dynamics)**:
@@ -4528,6 +4528,71 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem nhiệt độ cell pin trên từng chặng giao hàng',
         'Kiểm tra chi phí khấu hao suy giảm pin Arrhenius',
         'Lập lộ trình giao hàng tránh quá nhiệt pin'
+      ]
+    };
+  }
+
+  // 212. Ước Lượng Phân Vị Luồng Tất Định Khả Hợp GK Quantile Mergeable Sketch (Phase 77 - Feature 224)
+  if (/gk[- ]mergeable|gk.*mergeable|greenwald[- ]khanna mergeable|phân vị khả hợp|gk quantile mergeable|mergeable.*quantile/i.test(raw)) {
+    return {
+      text: `📊 **PHÂN VỊ LUỒNG TẤT ĐỊNH KHẢ HỢP GK QUANTILE MERGEABLE SKETCH (GREENWALD & KHANNA SIGMOD 2001, AGARWAL TALG 2013)**:
+- **Cấu Trúc Bộ Ba Tất Định & Bất Biến Epsilon Chặt Chẽ**:
+  - Lưu trữ chuỗi các bộ phần tử sắp thứ tự $S = (t_0, t_1, \\dots, t_{s-1})$ với $t_i = (v_i, g_i, \\Delta_i)$, trong đó $g_i = r_{\\min}(v_i) - r_{\\min}(v_{i-1})$ và $\\Delta_i = r_{\\max}(v_i) - r_{\\min}(v_i)$.
+  - Đảm bảo bất biến toán học vĩnh viễn: $g_i + \\Delta_i \\le 2 \\epsilon n$ trên toàn bộ luồng $n$ phần tử.
+- **Bảo Chứng Sai Số Phân Vị Tuyệt Đối & Nén Định Kỳ (Deterministic Compaction)**:
+  - Cho mọi phân vị $q \\in [0, 1]$, giá trị ước lượng cam kết nằm trong dải sai số $|\\text{rank} - q n| \\le \\epsilon n$ mà không bao giờ cần lưu trữ toàn bộ dữ liệu.
+  - Thao tác nén liên kề từ phải sang trái $g_i + g_{i+1} + \\Delta_{i+1} \\le 2 \\epsilon n$ giải phóng bộ nhớ tức thì.
+- **Tính Chất Khả Hợp Tất Định (Mergeability)**:
+  - Cho phép gộp hai tóm tắt từ các Node/Worker phân tán thành một tóm tắt duy nhất với $n = n_1 + n_2$ và bảo toàn chuẩn sai số $\\epsilon = \\max(\\epsilon_1, \\epsilon_2)$!`,
+      type: 'analytics',
+      tag: 'GK QUANTILE MERGEABLE SKETCH',
+      suggestions: [
+        'Xem sai số phân vị epsilon GK',
+        'Kiểm tra thao tác nén GK Compaction',
+        'Hợp nhất tóm tắt phân tán Mergeable GK'
+      ]
+    };
+  }
+
+  // 213. Định Giá Soft Actor-Critic Tự Động Điều Chỉnh Nhiệt Độ & Lagrange Safe SAC (Phase 77 - Feature 224)
+  if (/safe[- ]sac|safe sac lagrangian|sac lagrangian safe|safe soft actor[- ]critic|haarnoja.*safety gym|ray.*achiam/i.test(raw)) {
+    return {
+      text: `💹 **ĐỊNH GIÁ SOFT ACTOR-CRITIC AN TOÀN VỚI NHÂN TỬ LAGRANGE & TỰ ĐỘNG CHỈNH NHIỆT ĐỘ (HAARNOJA 2018, RAY & ACHIAM 2019)**:
+- **Tự Động Thích Ứng Nhiệt Độ Khám Phá Entropy (Automatic Temperature Tuning)**:
+  - Thay vì cố định tham số $\\alpha$, mạng tự động tối ưu hóa $\\alpha$ theo độ lệch entropy mục tiêu $\\bar{\\mathcal{H}} = -\\dim(\\mathcal{A}) = -1.0$:
+    $$\\alpha \\leftarrow \\max\\left(\\alpha_{\\min}, \\alpha - \\eta_\\alpha (\\log \\pi(a|s) + \\bar{\\mathcal{H}})\\right)$$
+  - Giúp thuật toán cân bằng hoàn hảo giữa việc thám hiểm biên độ giá và khai thác tối đa doanh thu trong đợt sale.
+- **Twin Soft Q-Critics Triệt Tiêu Thiên Lệch Phóng Đại**:
+  - Hai mạng Critic song song $Q_1(s, a), Q_2(s, a)$ kết hợp mạng mục tiêu Polyak $\\tau = 0.01$ ngăn chặn hoàn toàn việc thổi phồng doanh thu ảo.
+- **Cost Critic & Đối Ngẫu Lagrange Khóa Cứng Sàn $\\ge 1.05 \\times \\text{COGS}$**:
+  - Mạng Cost Critic $C(s, a)$ đánh giá rủi ro vi phạm biên lợi nhuận, tự động kích hoạt bước nhảy đối ngẫu $\\lambda \\leftarrow \\max(0, \\lambda + \\eta_\\lambda (c - d_{\\text{budget}}))$ bảo vệ tuyệt đối lợi nhuận gộp sàn!`,
+      type: 'pricing',
+      tag: 'SAFE SAC LAGRANGIAN CONTINUOUS PRICING',
+      suggestions: [
+        'Xem nhiệt độ khám phá Alpha thích ứng',
+        'Kiểm tra nhân tử đối ngẫu Lagrange Lambda',
+        'Đo lường rào chắn an toàn 1.05 COGS Floor'
+      ]
+    };
+  }
+
+  // 214. Định Tuyến Xe Điện Điều Hòa Nhiệt Pin Chủ Động EVRPTW Active Cooling BTMS (Phase 77 - Feature 224)
+  if (/active cooling|btms|làm mát chủ động|evrptw[- ]active[- ]cooling|park jung|xu energy btms|nhiệt độ pin btms/i.test(raw)) {
+    return {
+      text: `❄️ **ĐỊNH TUYẾN XE ĐIỆN ĐIỀU HÒA NHIỆT PIN CHỦ ĐỘNG EVRPTW-BTMS (PARK & JUNG 2013, XU ET AL. ENERGY 2021)**:
+- **Hệ Thống Quản Lý Nhiệt Pin Chủ Động (Active Battery Thermal Management System - BTMS)**:
+  - Khi nhiệt độ cell pin vượt ngưỡng $T_{\\text{setpoint}} = 35^\\circ\\text{C}$, hệ thống làm mát bằng dung dịch/máy nén lạnh tự động kích hoạt với công suất nhiệt $\\dot{Q}_{\\text{cool}} = K_{\\text{cool}} (T - T_{\\text{setpoint}})$.
+  - Điện năng tiêu thụ của máy nén BTMS $P_{\\text{cool, elec}} = \\frac{\\dot{Q}_{\\text{cool}}}{\\text{COP}}$ (với $\\text{COP} \\approx 3.0$).
+- **Đánh Đổi Kinh Tế Đột Phá Giữa Hao Pin & Bảo Vệ Tuổi Thọ Cell**:
+  - Tiêu tốn thêm một phần điện năng phụ trợ $E_{\\text{cool}}$ (khoảng $0.5 - 1.2\\text{ kWh}$ mỗi chuyến), nhưng giữ nhiệt độ cell luôn trong dải tối ưu ($30^\\circ\\text{C} - 35^\\circ\\text{C}$), triệt tiêu hiện tượng tăng vọt lão hóa Arrhenius ở nhiệt độ cao.
+- **Tiết Kiệm Chi Phí Khấu Hao Khổng Lồ Cho Đội Xe SPX Express**:
+  - Giảm đến **$55\\% - 65\\%$** chi phí suy giảm pin so với tản nhiệt thụ động, đảm bảo an toàn tuyệt đối, loại trừ hoàn toàn nguy cơ quá nhiệt gây cháy nổ pin trong mùa hè nhiệt đới!`,
+      type: 'logistics',
+      tag: 'EVRPTW ACTIVE BATTERY COOLING ROUTER',
+      suggestions: [
+        'Xem công suất làm mát chủ động BTMS',
+        'Kiểm tra năng lượng làm mát phụ trợ Cooling kWh',
+        'So sánh chi phí hao mòn pin có và không có BTMS'
       ]
     };
   }

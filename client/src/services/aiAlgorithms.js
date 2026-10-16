@@ -42078,6 +42078,770 @@ export class EVRPTWThermalBatteryDegradationRouter {
   }
 }
 
+// =========================================================================
+// PHASE 77 ENTERPRISE ALGORITHMS
+// =========================================================================
+
+/**
+ * Greenwald-Khanna Deterministic Streaming Quantile Sketch (GKQuantileMergeableSketch)
+ * Michael Greenwald, Sanjeev Khanna (ACM SIGMOD 2001)
+ */
+export class GKQuantileMergeableSketch {
+  constructor(options = {}) {
+    const rawEps = options.epsilon !== undefined ? options.epsilon : (options.eps !== undefined ? options.eps : 0.01);
+    this.epsilon = Math.min(0.5, Math.max(0.0001, Number(rawEps)));
+    this.eps = this.epsilon;
+
+    this.entries = [];
+    this.totalCount = 0;
+    this.minVal = Infinity;
+    this.maxVal = -Infinity;
+  }
+
+  get n() {
+    return this.totalCount;
+  }
+
+  get size() {
+    return this.entries.length;
+  }
+
+  get min() {
+    return this.totalCount === 0 ? null : this.minVal;
+  }
+
+  get max() {
+    return this.totalCount === 0 ? null : this.maxVal;
+  }
+
+  insert(x) {
+    const val = Number(x);
+    if (!Number.isFinite(val)) return;
+
+    if (val < this.minVal) this.minVal = val;
+    if (val > this.maxVal) this.maxVal = val;
+
+    const threshold = Math.floor(2 * this.epsilon * this.totalCount);
+
+    if (this.entries.length === 0) {
+      this.entries.push({ v: val, g: 1, delta: 0 });
+      this.totalCount = 1;
+      return;
+    }
+
+    let low = 0;
+    let high = this.entries.length;
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2);
+      if (this.entries[mid].v <= val) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+
+    const insertIdx = low;
+
+    if (insertIdx === 0) {
+      this.entries.unshift({ v: val, g: 1, delta: 0 });
+    } else if (insertIdx === this.entries.length) {
+      this.entries.push({ v: val, g: 1, delta: 0 });
+    } else {
+      this.entries.splice(insertIdx, 0, {
+        v: val,
+        g: 1,
+        delta: Math.max(0, threshold)
+      });
+    }
+
+    this.totalCount += 1;
+
+    const compressPeriod = Math.max(10, Math.floor(1 / (2 * this.epsilon)));
+    if (this.totalCount % compressPeriod === 0) {
+      this.compress();
+    }
+  }
+
+  compress() {
+    if (this.entries.length <= 2) return;
+
+    const maxCapacity = Math.floor(2 * this.epsilon * this.totalCount);
+
+    for (let i = this.entries.length - 2; i >= 1; i--) {
+      const curr = this.entries[i];
+      const next = this.entries[i + 1];
+
+      if (curr.g + next.g + next.delta <= maxCapacity) {
+        next.g += curr.g;
+        this.entries.splice(i, 1);
+      }
+    }
+  }
+
+  query(q) {
+    if (this.totalCount === 0 || this.entries.length === 0) return null;
+
+    const clampedQ = Math.max(0, Math.min(1, Number(q)));
+    if (clampedQ === 0) return this.minVal;
+    if (clampedQ === 1) return this.maxVal;
+
+    const targetRank = Math.ceil(clampedQ * this.totalCount);
+    const epsRank = this.epsilon * this.totalCount;
+
+    let cumulativeG = 0;
+    let bestVal = this.entries[0].v;
+    let minDiff = Infinity;
+
+    for (let i = 0; i < this.entries.length; i++) {
+      cumulativeG += this.entries[i].g;
+      const rMin = cumulativeG;
+      const rMax = cumulativeG + this.entries[i].delta;
+      const estRank = (rMin + rMax) / 2;
+
+      const diff = Math.abs(estRank - targetRank);
+      if (diff < minDiff) {
+        minDiff = diff;
+        bestVal = this.entries[i].v;
+      }
+
+      if (rMax >= targetRank - epsRank && rMin <= targetRank + epsRank) {
+        if (diff <= epsRank) {
+          return this.entries[i].v;
+        }
+      }
+    }
+
+    return bestVal;
+  }
+
+  getQuantile(q) {
+    return this.query(q);
+  }
+
+  getRank(x) {
+    if (this.totalCount === 0 || this.entries.length === 0) return 0;
+    const val = Number(x);
+
+    if (val < this.minVal) return 0;
+    if (val >= this.maxVal) return 1;
+
+    let cumulativeG = 0;
+    let bestEstimatedRank = 0;
+
+    for (let i = 0; i < this.entries.length; i++) {
+      if (this.entries[i].v <= val) {
+        cumulativeG += this.entries[i].g;
+        bestEstimatedRank = cumulativeG + this.entries[i].delta / 2;
+      } else {
+        break;
+      }
+    }
+
+    return Math.max(0, Math.min(1, bestEstimatedRank / this.totalCount));
+  }
+
+  getRankBounds(x) {
+    if (this.totalCount === 0 || this.entries.length === 0) {
+      return { rMin: 0, rMax: 0, estimatedRank: 0, normalizedRank: 0 };
+    }
+    const val = Number(x);
+    let cumulativeG = 0;
+    let rMin = 0;
+    let rMax = 0;
+
+    for (let i = 0; i < this.entries.length; i++) {
+      if (this.entries[i].v <= val) {
+        cumulativeG += this.entries[i].g;
+        rMin = cumulativeG;
+        rMax = cumulativeG + this.entries[i].delta;
+      } else {
+        break;
+      }
+    }
+
+    const estimatedRank = (rMin + rMax) / 2;
+    return {
+      rMin,
+      rMax,
+      estimatedRank,
+      normalizedRank: Number((estimatedRank / this.totalCount).toFixed(4)),
+      errorMargin: this.epsilon * this.totalCount
+    };
+  }
+
+  getQuantileSummary(quantiles = [0.25, 0.5, 0.75, 0.9, 0.95, 0.99]) {
+    const summary = {
+      n: this.totalCount,
+      size: this.entries.length,
+      epsilon: this.epsilon,
+      min: this.minVal === Infinity ? 0 : this.minVal,
+      max: this.maxVal === -Infinity ? 0 : this.maxVal,
+      quantiles: {}
+    };
+
+    for (const q of quantiles) {
+      const qKey = `p${Math.round(q * 100)}`;
+      summary.quantiles[qKey] = this.query(q);
+    }
+
+    return summary;
+  }
+
+  merge(other) {
+    if (!other || other.totalCount === 0) return this;
+    if (this.totalCount === 0) {
+      this.entries = other.entries.map(e => ({ ...e }));
+      this.totalCount = other.totalCount;
+      this.minVal = other.minVal;
+      this.maxVal = other.maxVal;
+      this.epsilon = other.epsilon;
+      this.eps = this.epsilon;
+      return this;
+    }
+
+    const combined = [];
+    let i = 0;
+    let j = 0;
+
+    while (i < this.entries.length && j < other.entries.length) {
+      if (this.entries[i].v <= other.entries[j].v) {
+        combined.push({ ...this.entries[i] });
+        i++;
+      } else {
+        combined.push({ ...other.entries[j] });
+        j++;
+      }
+    }
+
+    while (i < this.entries.length) {
+      combined.push({ ...this.entries[i] });
+      i++;
+    }
+    while (j < other.entries.length) {
+      combined.push({ ...other.entries[j] });
+      j++;
+    }
+
+    this.entries = combined;
+    this.totalCount += other.totalCount;
+    this.minVal = Math.min(this.minVal, other.minVal);
+    this.maxVal = Math.max(this.maxVal, other.maxVal);
+    this.epsilon = Math.max(this.epsilon, other.epsilon);
+    this.eps = this.epsilon;
+
+    this.compress();
+    return this;
+  }
+}
+
+/**
+ * Safe Soft Actor-Critic with Lagrangian Constraints (SafeSACLagrangianContinuousPricing)
+ */
+export class SafeSACLagrangianContinuousPricing {
+  constructor(options = {}) {
+    this.stateDim = options.stateDim || 5;
+    this.gamma = options.gamma !== undefined ? options.gamma : 0.98;
+    this.tau = options.tau !== undefined ? options.tau : 0.01;
+    this.costBudget = options.costBudget !== undefined ? options.costBudget : 0.02;
+
+    this.lrActor = options.lrActor || 0.005;
+    this.lrCritic = options.lrCritic || 0.01;
+    this.lrDual = options.lrDual || 0.02;
+    this.lrAlpha = options.lrAlpha || 0.01;
+
+    this.targetEntropy = options.targetEntropy !== undefined ? options.targetEntropy : -1.0;
+    const initialAlpha = Math.max(0.01, options.alpha || 0.2);
+    this.logAlpha = Math.log(initialAlpha);
+    this.lambda = Math.max(0, options.lambda || 0.0);
+
+    this.wMean = new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.bMean = 0.0;
+    this.wLogStd = new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.05);
+    this.bLogStd = -0.5;
+
+    this.dimQA = this.stateDim + 1;
+    this.wQ1 = new Array(this.dimQA).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.bQ1 = 0.0;
+    this.wQ2 = new Array(this.dimQA).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.bQ2 = 0.0;
+
+    this.wQ1Target = [...this.wQ1];
+    this.bQ1Target = this.bQ1;
+    this.wQ2Target = [...this.wQ2];
+    this.bQ2Target = this.bQ2;
+
+    this.wC = new Array(this.dimQA).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.bC = 0.0;
+    this.wCTarget = [...this.wC];
+    this.bCTarget = this.bC;
+
+    this.stepCount = 0;
+  }
+
+  get alpha() {
+    return Math.exp(this.logAlpha);
+  }
+
+  _gaussianLogProb(u, mean, std) {
+    const varSq = std * std;
+    return -0.5 * Math.log(2 * Math.PI) - Math.log(std) - ((u - mean) * (u - mean)) / (2 * varSq);
+  }
+
+  _evalQ(weights, bias, state, action) {
+    let sum = bias;
+    for (let i = 0; i < this.stateDim; i++) {
+      sum += weights[i] * state[i];
+    }
+    sum += weights[this.stateDim] * action;
+    return sum;
+  }
+
+  selectAction(state, evaluate = false) {
+    let mean = this.bMean;
+    let logStd = this.bLogStd;
+    for (let i = 0; i < this.stateDim; i++) {
+      mean += this.wMean[i] * state[i];
+      logStd += this.wLogStd[i] * state[i];
+    }
+    logStd = Math.max(-5, Math.min(2, logStd));
+    const std = Math.exp(logStd);
+
+    let u;
+    if (evaluate) {
+      u = mean;
+    } else {
+      const u1 = Math.max(1e-7, Math.random());
+      const u2 = Math.random();
+      const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      u = mean + std * z;
+    }
+
+    const action = Math.tanh(u);
+    const rawLogProb = this._gaussianLogProb(u, mean, std);
+    const squashedLogProb = rawLogProb - Math.log(Math.max(1e-6, 1 - action * action));
+
+    const result = {
+      action: Number(action.toFixed(5)),
+      rawU: u,
+      mean: Number(mean.toFixed(5)),
+      std: Number(std.toFixed(5)),
+      logProb: Number(squashedLogProb.toFixed(5)),
+      alpha: Number(this.alpha.toFixed(5)),
+      lambda: Number(this.lambda.toFixed(5)),
+      valueOf() {
+        return this.action;
+      },
+      [Symbol.toPrimitive](hint) {
+        if (hint === "number") return this.action;
+        return `[SafeSAC a=${this.action.toFixed(4)}, p=${this.action}]`;
+      }
+    };
+
+    return result;
+  }
+
+  update(batch) {
+    const { state, action, reward, cost, nextState, done = false } = batch;
+    this.stepCount += 1;
+
+    const nextActObj = this.selectAction(nextState, false);
+    const aNext = nextActObj.action;
+    const logProbNext = nextActObj.logProb;
+
+    const q1Targ = this._evalQ(this.wQ1Target, this.bQ1Target, nextState, aNext);
+    const q2Targ = this._evalQ(this.wQ2Target, this.bQ2Target, nextState, aNext);
+    const minQTarg = Math.min(q1Targ, q2Targ);
+
+    const discount = done ? 0 : this.gamma;
+    const targetQ = reward + discount * (minQTarg - this.alpha * logProbNext);
+
+    const q1Curr = this._evalQ(this.wQ1, this.bQ1, state, action);
+    const q2Curr = this._evalQ(this.wQ2, this.bQ2, state, action);
+
+    const errQ1 = q1Curr - targetQ;
+    const errQ2 = q2Curr - targetQ;
+
+    for (let i = 0; i < this.stateDim; i++) {
+      this.wQ1[i] -= this.lrCritic * errQ1 * state[i];
+      this.wQ2[i] -= this.lrCritic * errQ2 * state[i];
+    }
+    this.wQ1[this.stateDim] -= this.lrCritic * errQ1 * action;
+    this.wQ2[this.stateDim] -= this.lrCritic * errQ2 * action;
+    this.bQ1 -= this.lrCritic * errQ1;
+    this.bQ2 -= this.lrCritic * errQ2;
+
+    const cTarg = this._evalQ(this.wCTarget, this.bCTarget, nextState, aNext);
+    const targetC = cost + discount * cTarg;
+    const cCurr = this._evalQ(this.wC, this.bC, state, action);
+    const errC = cCurr - targetC;
+
+    for (let i = 0; i < this.stateDim; i++) {
+      this.wC[i] -= this.lrCritic * errC * state[i];
+    }
+    this.wC[this.stateDim] -= this.lrCritic * errC * action;
+    this.bC -= this.lrCritic * errC;
+
+    const currActObj = this.selectAction(state, false);
+    const aPred = currActObj.action;
+    const logProbPred = currActObj.logProb;
+
+    const dQ1da = this.wQ1[this.stateDim];
+    const dQ2da = this.wQ2[this.stateDim];
+    const dQda = q1Curr <= q2Curr ? dQ1da : dQ2da;
+    const dCda = this.wC[this.stateDim];
+
+    const gradAction = dQda - this.lambda * dCda;
+    const da_du = Math.max(0.01, 1 - aPred * aPred);
+    const effectiveGrad = gradAction * da_du;
+
+    for (let i = 0; i < this.stateDim; i++) {
+      this.wMean[i] += this.lrActor * effectiveGrad * state[i];
+      this.wLogStd[i] += this.lrActor * (this.alpha - 0.1) * state[i];
+    }
+    this.bMean += this.lrActor * effectiveGrad;
+    this.bLogStd += this.lrActor * (this.alpha - 0.1);
+    this.bLogStd = Math.max(-5, Math.min(2, this.bLogStd));
+
+    const alphaLossGrad = -(logProbPred + this.targetEntropy);
+    this.logAlpha -= this.lrAlpha * alphaLossGrad;
+    this.logAlpha = Math.max(-5, Math.min(2, this.logAlpha));
+
+    const costViolation = cost - this.costBudget;
+    this.lambda = Math.max(0, this.lambda + this.lrDual * costViolation);
+
+    for (let i = 0; i < this.dimQA; i++) {
+      this.wQ1Target[i] = this.tau * this.wQ1[i] + (1 - this.tau) * this.wQ1Target[i];
+      this.wQ2Target[i] = this.tau * this.wQ2[i] + (1 - this.tau) * this.wQ2Target[i];
+      this.wCTarget[i] = this.tau * this.wC[i] + (1 - this.tau) * this.wCTarget[i];
+    }
+    this.bQ1Target = this.tau * this.bQ1 + (1 - this.tau) * this.bQ1Target;
+    this.bQ2Target = this.tau * this.bQ2 + (1 - this.tau) * this.bQ2Target;
+    this.bCTarget = this.tau * this.bC + (1 - this.tau) * this.bCTarget;
+
+    return {
+      lossQ1: Number((errQ1 * errQ1).toFixed(5)),
+      lossQ2: Number((errQ2 * errQ2).toFixed(5)),
+      lossCost: Number((errC * errC).toFixed(5)),
+      alpha: Number(this.alpha.toFixed(5)),
+      lambda: Number(this.lambda.toFixed(5)),
+      qEst: Number(minQTarg.toFixed(4)),
+      cEst: Number(cCurr.toFixed(4))
+    };
+  }
+
+  recommendPrice(context) {
+    const cogs = Math.max(1000, Number(context.cogs || 100000));
+    const basePrice = Math.max(cogs, Number(context.basePrice || cogs * 1.3));
+    const competitorPrice = Number(context.competitorPrice || basePrice);
+    const inventory = Math.max(0, Number(context.inventory || 100));
+    const targetInventory = Math.max(1, Number(context.targetInventory || 100));
+    const elasticity = Math.max(0.1, Number(context.priceElasticity || 1.5));
+    const hour = Math.max(0, Math.min(23, Number(context.hourOfDay || 12)));
+    const minMarkup = Math.max(1.01, Number(context.minMarkup || 1.05));
+
+    const state = [
+      Math.min(2.0, cogs / basePrice),
+      Math.min(2.0, competitorPrice / basePrice),
+      Math.min(2.0, inventory / targetInventory),
+      Math.min(2.0, elasticity / 3.0),
+      hour / 24.0
+    ];
+
+    const actRes = this.selectAction(state, true);
+    const a = actRes.action;
+
+    const pMin = cogs * 0.95;
+    const pMax = basePrice * 1.5;
+    const rawPrice = pMin + ((1 + a) / 2) * (pMax - pMin);
+
+    const safeFloorPrice = Math.round(cogs * minMarkup);
+    const recommendedPrice = Math.max(safeFloorPrice, Math.round(rawPrice));
+
+    const expectedMargin = recommendedPrice - cogs;
+    const grossMarginRate = Number((expectedMargin / recommendedPrice).toFixed(4));
+    const expectedDemand = Math.max(1, Math.round(100 * Math.pow(basePrice / recommendedPrice, elasticity)));
+    const expectedRevenue = recommendedPrice * expectedDemand;
+
+    const safetyCost = Math.max(0, safeFloorPrice - rawPrice);
+    const isSafe = rawPrice >= safeFloorPrice;
+
+    return {
+      recommendedPrice,
+      rawPrice: Math.round(rawPrice),
+      safeFloorPrice,
+      isSafe,
+      safetyCost: Math.round(safetyCost),
+      expectedMargin,
+      grossMarginRate,
+      expectedDemand,
+      expectedRevenue,
+      actorAction: a,
+      alphaTemperature: Number(this.alpha.toFixed(4)),
+      lagrangianMultiplier: Number(this.lambda.toFixed(4)),
+      costBudget: this.costBudget,
+      summary: `Safe SAC continuous price: ${recommendedPrice.toLocaleString("vi-VN")} VND (Margin: ${(grossMarginRate * 100).toFixed(1)}%, alpha=${this.alpha.toFixed(3)}, lambda=${this.lambda.toFixed(3)})`
+    };
+  }
+}
+
+/**
+ * EVRPTW with Active Battery Thermal Management System (BTMS) Cooling Dynamics
+ * (EVRPTWActiveCoolingRouter)
+ */
+export class EVRPTWActiveCoolingRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || { x: 0, y: 0, lat: 10.7769, lng: 106.7009 };
+    this.batteryCapacityKwh = options.batteryCapacityKwh || 75;
+    this.vehicleCapacityKg = options.vehicleCapacityKg || 1000;
+    this.ambientTempC = options.ambientTempC !== undefined ? options.ambientTempC : 32;
+    this.coolingSetpointC = options.coolingSetpointC !== undefined ? options.coolingSetpointC : 35;
+    this.cop = options.cop || 3.0;
+    this.electricityRateVnd = options.electricityRateVnd || 3200;
+    this.batteryCostVnd = options.batteryCostVnd || 220000000;
+    this.maxCellTempC = options.maxCellTempC || 50;
+
+    this.massKg = 450;
+    this.specificHeat = 950;
+    this.hA = 35;
+    this.r0 = 0.045;
+    this.bR = 1200;
+    this.kCool = 450;
+    this.tRefK = 298.15;
+
+    this.aDeg = 0.0003;
+    this.eaOverR = 2600;
+    this.zC = 1.15;
+    this.nominalCurrent = 55;
+    this.nominalVoltage = 380;
+  }
+
+  _computeDistanceKm(p1, p2) {
+    if (p1.lat !== undefined && p1.lng !== undefined && p2.lat !== undefined && p2.lng !== undefined) {
+      const R = 6371;
+      const dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
+      const dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((p1.lat * Math.PI) / 180) * Math.cos((p2.lat * Math.PI) / 180) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Number((R * c).toFixed(2));
+    }
+
+    const dx = (p2.x !== undefined ? p2.x : 0) - (p1.x !== undefined ? p1.x : 0);
+    const dy = (p2.y !== undefined ? p2.y : 0) - (p1.y !== undefined ? p1.y : 0);
+    return Number(Math.sqrt(dx * dx + dy * dy).toFixed(2));
+  }
+
+  _simulateLegThermalDynamics(from, to, currentTempC, currentPayload = 0, speedKmh = 40) {
+    const distanceKm = Math.max(0.1, this._computeDistanceKm(from, to));
+    const travelTimeHours = distanceKm / speedKmh;
+    const travelTimeSec = travelTimeHours * 3600;
+
+    const payloadFactor = 1 + (currentPayload / this.vehicleCapacityKg) * 0.25;
+    const drivingEnergyKwh = distanceKm * 0.18 * payloadFactor;
+
+    const currentA = (drivingEnergyKwh * 1000 * 3600) / (this.nominalVoltage * travelTimeSec);
+
+    let tempK = currentTempC + 273.15;
+    const ambK = this.ambientTempC + 273.15;
+    const setpointK = this.coolingSetpointC + 273.15;
+
+    const dt = 10;
+    const steps = Math.max(1, Math.floor(travelTimeSec / dt));
+    let coolingEnergyJoules = 0;
+
+    for (let step = 0; step < steps; step++) {
+      const rInt = this.r0 * Math.exp(this.bR * (1 / tempK - 1 / this.tRefK));
+      const qGen = currentA * currentA * rInt;
+      const qDiss = this.hA * (tempK - ambK);
+
+      let qCool = 0;
+      if (tempK > setpointK) {
+        qCool = this.kCool * (tempK - setpointK);
+        const pElecCool = qCool / this.cop;
+        coolingEnergyJoules += pElecCool * dt;
+      }
+
+      const qNet = qGen - qDiss - qCool;
+      const dT = (qNet * dt) / (this.massKg * this.specificHeat);
+      tempK += dT;
+    }
+
+    const finalTempC = tempK - 273.15;
+    const coolingEnergyKwh = coolingEnergyJoules / (3600 * 1000);
+    const totalEnergyKwh = drivingEnergyKwh + coolingEnergyKwh;
+
+    const arrheniusFactor = Math.exp((this.eaOverR) * (1 / this.tRefK - 1 / tempK));
+    const currentStress = Math.pow(Math.max(0.1, currentA / this.nominalCurrent), this.zC);
+    const degFraction = this.aDeg * arrheniusFactor * currentStress * (distanceKm / 100);
+    const degradationCostVnd = Math.round(degFraction * this.batteryCostVnd);
+
+    return {
+      distanceKm,
+      travelTimeHours,
+      finalTempC: Number(finalTempC.toFixed(2)),
+      drivingEnergyKwh: Number(drivingEnergyKwh.toFixed(4)),
+      coolingEnergyKwh: Number(coolingEnergyKwh.toFixed(4)),
+      totalEnergyKwh: Number(totalEnergyKwh.toFixed(4)),
+      degradationCostVnd
+    };
+  }
+
+  planRoute(customers = []) {
+    if (!customers || customers.length === 0) {
+      return {
+        success: true,
+        routes: [],
+        totalDistanceKm: 0,
+        totalDrivingEnergyKwh: 0,
+        totalCoolingEnergyKwh: 0,
+        totalThermalDegradationCostVnd: 0,
+        totalCostVnd: 0,
+        maxCellTempCelsius: this.ambientTempC,
+        message: "No delivery customers provided"
+      };
+    }
+
+    const unvisited = [...customers].sort((a, b) => {
+      const eA = a.readyTime !== undefined ? a.readyTime : (a.twStart || 0);
+      const eB = b.readyTime !== undefined ? b.readyTime : (b.twStart || 0);
+      if (eA !== eB) return eA - eB;
+      return this._computeDistanceKm(this.depot, a) - this._computeDistanceKm(this.depot, b);
+    });
+
+    const routes = [];
+    let overallDistance = 0;
+    let overallDrivingEnergy = 0;
+    let overallCoolingEnergy = 0;
+    let overallDegradationCost = 0;
+    let peakCellTemp = this.ambientTempC;
+
+    while (unvisited.length > 0) {
+      const currentRoute = {
+        vehicleId: `EV_BTMS_${routes.length + 1}`,
+        stops: [],
+        routeDistanceKm: 0,
+        routeDrivingEnergyKwh: 0,
+        routeCoolingEnergyKwh: 0,
+        routeDegradationCostVnd: 0,
+        maxRouteTempC: this.ambientTempC
+      };
+
+      let currentLoc = this.depot;
+      let currentPayload = 0;
+      let currentTime = 8.0;
+      let cellTempC = this.ambientTempC;
+      let routeEnergyLeftKwh = this.batteryCapacityKwh * 0.9;
+
+      for (let i = 0; i < unvisited.length; i++) {
+        const candidate = unvisited[i];
+        const demand = candidate.demandKg || candidate.demand || 50;
+
+        if (currentPayload + demand <= this.vehicleCapacityKg) {
+          const simLeg = this._simulateLegThermalDynamics(currentLoc, candidate, cellTempC, currentPayload);
+
+          if (routeEnergyLeftKwh >= simLeg.totalEnergyKwh + 5.0) {
+            const arrTime = currentTime + simLeg.travelTimeHours;
+            const twEnd = candidate.dueTime !== undefined ? candidate.dueTime : (candidate.twEnd || 18.0);
+
+            if (arrTime <= twEnd) {
+              const twStart = candidate.readyTime !== undefined ? candidate.readyTime : (candidate.twStart || 0);
+              const serviceDuration = (candidate.serviceTime || 15) / 60;
+              const departureTime = Math.max(arrTime, twStart) + serviceDuration;
+
+              currentRoute.stops.push({
+                customerId: candidate.id || `CUST_${candidate.name || i}`,
+                arrivedAt: Number(arrTime.toFixed(2)),
+                departedAt: Number(departureTime.toFixed(2)),
+                distanceLegKm: simLeg.distanceKm,
+                drivingEnergyKwh: simLeg.drivingEnergyKwh,
+                coolingEnergyKwh: simLeg.coolingEnergyKwh,
+                cellTempCelsius: simLeg.finalTempC,
+                degradationCostVnd: simLeg.degradationCostVnd
+              });
+
+              currentRoute.routeDistanceKm += simLeg.distanceKm;
+              currentRoute.routeDrivingEnergyKwh += simLeg.drivingEnergyKwh;
+              currentRoute.routeCoolingEnergyKwh += simLeg.coolingEnergyKwh;
+              currentRoute.routeDegradationCostVnd += simLeg.degradationCostVnd;
+              if (simLeg.finalTempC > currentRoute.maxRouteTempC) {
+                currentRoute.maxRouteTempC = simLeg.finalTempC;
+              }
+
+              currentLoc = candidate;
+              currentPayload += demand;
+              currentTime = departureTime;
+              cellTempC = simLeg.finalTempC;
+              routeEnergyLeftKwh -= simLeg.totalEnergyKwh;
+
+              unvisited.splice(i, 1);
+              i--;
+            }
+          }
+        }
+      }
+
+      const returnLeg = this._simulateLegThermalDynamics(currentLoc, this.depot, cellTempC, 0);
+      currentRoute.routeDistanceKm += returnLeg.distanceKm;
+      currentRoute.routeDrivingEnergyKwh += returnLeg.drivingEnergyKwh;
+      currentRoute.routeCoolingEnergyKwh += returnLeg.coolingEnergyKwh;
+      currentRoute.routeDegradationCostVnd += returnLeg.degradationCostVnd;
+      if (returnLeg.finalTempC > currentRoute.maxRouteTempC) {
+        currentRoute.maxRouteTempC = returnLeg.finalTempC;
+      }
+
+      currentRoute.routeDistanceKm = Number(currentRoute.routeDistanceKm.toFixed(2));
+      currentRoute.routeDrivingEnergyKwh = Number(currentRoute.routeDrivingEnergyKwh.toFixed(4));
+      currentRoute.routeCoolingEnergyKwh = Number(currentRoute.routeCoolingEnergyKwh.toFixed(4));
+
+      routes.push(currentRoute);
+
+      overallDistance += currentRoute.routeDistanceKm;
+      overallDrivingEnergy += currentRoute.routeDrivingEnergyKwh;
+      overallCoolingEnergy += currentRoute.routeCoolingEnergyKwh;
+      overallDegradationCost += currentRoute.routeDegradationCostVnd;
+      if (currentRoute.maxRouteTempC > peakCellTemp) {
+        peakCellTemp = currentRoute.maxRouteTempC;
+      }
+
+      if (currentRoute.stops.length === 0 && unvisited.length > 0) {
+        const forced = unvisited.shift();
+        routes.push({
+          vehicleId: `EV_BTMS_EMERGENCY_${routes.length + 1}`,
+          stops: [{ customerId: forced.id || "CUST_EMERGENCY", note: "Dedicated emergency dispatch" }],
+          routeDistanceKm: 15,
+          routeDrivingEnergyKwh: 3.5,
+          routeCoolingEnergyKwh: 0.8,
+          routeDegradationCostVnd: 500,
+          maxRouteTempC: this.ambientTempC + 2
+        });
+        overallDistance += 15;
+        overallDrivingEnergy += 3.5;
+        overallCoolingEnergy += 0.8;
+        overallDegradationCost += 500;
+      }
+    }
+
+    const totalElectricityCostVnd = Math.round((overallDrivingEnergy + overallCoolingEnergy) * this.electricityRateVnd);
+    const totalCostVnd = totalElectricityCostVnd + overallDegradationCost;
+
+    return {
+      success: true,
+      routes,
+      totalDistanceKm: Number(overallDistance.toFixed(2)),
+      totalDrivingEnergyKwh: Number(overallDrivingEnergy.toFixed(4)),
+      totalCoolingEnergyKwh: Number(overallCoolingEnergy.toFixed(4)),
+      totalElectricityCostVnd,
+      totalThermalDegradationCostVnd: overallDegradationCost,
+      totalCostVnd,
+      maxCellTempCelsius: Number(peakCellTemp.toFixed(2)),
+      isThermallySafe: peakCellTemp <= this.maxCellTempC,
+      summary: `Planned ${routes.length} active BTMS cooled routes (${overallDistance.toFixed(1)} km, ${overallCoolingEnergy.toFixed(2)} kWh cooling energy, peak temp ${peakCellTemp.toFixed(1)}°C)`
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -42459,6 +43223,10 @@ export default {
   KLLQuantileSketch,
   PPOClipLagrangianContinuousPricing,
   EVRPTWThermalBatteryDegradationRouter,
+  // Phase 77 Enterprise Algorithms
+  GKQuantileMergeableSketch,
+  SafeSACLagrangianContinuousPricing,
+  EVRPTWActiveCoolingRouter,
 };
 
 

@@ -1092,7 +1092,7 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 61. Phân Vị GK Quantile, Giá Tối Ưu IQL & Giao Vận Thích Ứng Thu Phí MDVRPTW (GK_IQL_ROAD_PRICING)
-  if (/gk[- ]quantile|gk quantile|phân vị gk|iql|implicit q[- ]learning|road[- ]pricing|mdvrptw|thu phí nội đô|phí chống ùn tắc|vành đai 1|vành đai 2/i.test(lower)) {
+  if (!/mergeable|gk.*mergeable/i.test(lower) && /gk[- ]quantile|gk quantile|phân vị gk|iql|implicit q[- ]learning|road[- ]pricing|mdvrptw|thu phí nội đô|phí chống ùn tắc|vành đai 1|vành đai 2/i.test(lower)) {
     return {
       intent: 'GK_IQL_ROAD_PRICING',
       replyText: `**[PHÂN VỊ ĐƠN HÀNG GK QUANTILE, GIÁ BẢO ĐẢM IQL & GIAO HÀNG THÔNG MINH MDVRPTW]:**\n\n• **Thống kê phân vị đơn hàng chuẩn xác (GK Quantile)**: Công nghệ tóm tắt dòng dữ liệu tất định giúp Mini Shopee thiết lập các mức giá Flash Sale và hạn mức giảm giá Freeship sát nhất với túi tiền của bạn!\n• **Giá sốc công bằng được bảo chứng (IQL Dynamic Pricing)**: AI học trực tiếp từ giao dịch thực tế mà không đưa ra các mức giá thăm dò ảo, cam kết bạn luôn nhận được mức giảm sâu nhất mà chất lượng sản phẩm vẫn được đảm bảo.\n• **Giao hàng thông suốt không ngại giờ cao điểm (MDVRPTW Road Pricing)**: Đội xe bưu tá SPX Express từ 3 Hub ngoại vi (Tây Hồ, Cầu Giấy, Hoàng Mai) chủ động điều phối lộ trình né khung giờ thu phí chống ùn tắc nội đô, vừa giữ cước phí ship hạt dẻ vừa giao hàng đúng giờ cam kết!`,
@@ -1245,11 +1245,20 @@ export function generateAiChatResponse(firstArg, secondArg = {}) {
   }
 
   // 78. Phân Vị Luồng KLL, Giá Cắt Ngọn PPO-Clip Liên Tục & Xe Điện Kiểm Soát Nhiệt EVRPTW-Thermal (KLL_QUANTILES_PPO_CLIP_CONTINUOUS_THERMAL_BATTERY)
-  if (/kll quantile|kll sketch|phác thảo kll|ppo[- ]clip|ppo clip continuous|clipped surrogate lagrangian|thermal battery|suy giảm pin nhiệt|nhiệt độ cell pin|evrptw[- ]thermal/i.test(lower)) {
+  if (!/active cooling|btms|làm mát chủ động/i.test(lower) && /kll quantile|kll sketch|phác thảo kll|ppo[- ]clip|ppo clip continuous|clipped surrogate lagrangian|thermal battery|suy giảm pin nhiệt|nhiệt độ cell pin|evrptw[- ]thermal/i.test(lower)) {
     return {
       intent: 'KLL_QUANTILES_PPO_CLIP_CONTINUOUS_THERMAL_BATTERY',
       replyText: `**[PHÂN VỊ LUỒNG KLL, GIÁ PPO-CLIP LIÊN TỤC & XE ĐIỆN KIỂM SOÁT NHIỆT EVRPTW-THERMAL]:**\n\n• **Bắt trọn phân vị giá rẻ chuẩn xác (KLL Optimal Streaming Quantiles)**: Cấu trúc bộ đệm tầng phân cấp nén dữ liệu đạt độ chính xác tối ưu toán học, giúp bạn luôn xác định đúng phân vị giá sàn và các tầng giá Flash Sale rẻ nhất thị trường!\n• **Mua sắm an tâm với giá bình ổn cắt ngọn (PPO-Clip Continuous Safe Pricing)**: Mô hình học tăng cường chính sách liên tục cắt ngọn biên độ dao động, kết hợp nhân tử đối ngẫu Lagrange khóa cứng sàn an toàn $\\ge 1.05 \\times \\text{COGS}$, mang lại mức giá ưu đãi thực chất không ảo giá!\n• **Giao hàng bền bỉ trong nắng nóng nhiệt đới (EVRPTW Thermal Battery Degradation)**: Đội xe máy điện SPX Express thế hệ mới chủ động kiểm soát nhiệt độ cell pin dưới $55^\\circ\\text{C}$ và giảm thiểu suy giảm dung lượng theo định luật Arrhenius, đảm bảo bưu kiện của bạn luôn được giao hỏa tốc an toàn dù giữa trưa hè nắng gắt!`,
       suggestions: ['Khám phá phân vị giá KLL', 'Xem giá an toàn PPO-Clip liên tục', 'Theo dõi xe điện kiểm soát nhiệt SPX'],
+    };
+  }
+
+  // 79. Phân Vị Luồng GK Khả Hợp, Giá An Toàn Safe SAC Liên Tục & Xe Điện Làm Mát Chủ Động EVRPTW-BTMS (GK_MERGEABLE_SAFE_SAC_CONTINUOUS_ACTIVE_COOLING)
+  if (/gk[- ]mergeable|gk.*mergeable|greenwald[- ]khanna mergeable|phân vị khả hợp|safe[- ]sac|safe sac continuous|active cooling|btms|làm mát chủ động|evrptw[- ]active[- ]cooling/i.test(lower)) {
+    return {
+      intent: 'GK_MERGEABLE_SAFE_SAC_CONTINUOUS_ACTIVE_COOLING',
+      replyText: `**[PHÂN VỊ LUỒNG GK KHẢ HỢP, GIÁ AN TOÀN SAFE SAC LIÊN TỤC & XE ĐIỆN LÀM MÁT CHỦ ĐỘNG EVRPTW-BTMS]:**\n\n• **Bắt trọn phân vị giá rẻ tất định (GK Quantile Mergeable Sketch)**: Cấu trúc tóm tắt dữ liệu tất định Greenwald-Khanna với bảo chứng sai số $\\epsilon$ chặt chẽ, cho phép hệ thống hợp nhất dữ liệu giá từ nhiều luồng để tìm ra mức giá hời nhất cho bạn!\n• **Mua sắm với giá bình ổn tự động chỉnh nhiệt độ (Safe SAC Lagrangian Continuous Pricing)**: Mô hình Soft Actor-Critic an toàn tự động điều chỉnh nhiệt độ khám phá $\\alpha$ và khóa cứng giá sàn an toàn $\\ge 1.05 \\times \\text{COGS}$, mang lại mức giá ưu đãi hấp dẫn mà hoàn toàn minh bạch và bình ổn!\n• **Giao hàng hỏa tốc với xe điện làm mát pin chủ động (EVRPTW Active Battery Cooling BTMS)**: Đội xe máy điện SPX Express tích hợp hệ thống điều hòa nhiệt chủ động giữ pin luôn mát mẻ dưới $35^\\circ\\text{C}$, giảm $60\\%$ chi phí hao mòn pin và đảm bảo kiện hàng được giao hỏa tốc đến tận tay bạn an toàn tuyệt đối!`,
+      suggestions: ['Khám phá phân vị giá GK Mergeable', 'Xem giá an toàn Safe SAC liên tục', 'Theo dõi xe điện làm mát chủ động SPX'],
     };
   }
 

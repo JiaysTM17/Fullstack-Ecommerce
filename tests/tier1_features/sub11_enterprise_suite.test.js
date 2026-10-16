@@ -395,6 +395,10 @@ import {
   KLLQuantileSketch,
   PPOClipLagrangianContinuousPricing,
   EVRPTWThermalBatteryDegradationRouter,
+  // Phase 77 Enterprise Algorithms
+  GKQuantileMergeableSketch,
+  SafeSACLagrangianContinuousPricing,
+  EVRPTWActiveCoolingRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -591,6 +595,9 @@ import { EVRPTWRegenerativeBrakingTerrainRouter as ServerEVRPTWRegenerativeBraki
 import { KLLQuantileSketch as ServerKLLQuantileSketch } from "../../server/src/utils/kllQuantileSketch.js";
 import { PPOClipLagrangianContinuousPricing as ServerPPOClipLagrangianContinuousPricing } from "../../server/src/utils/ppoClipLagrangianContinuousPricing.js";
 import { EVRPTWThermalBatteryDegradationRouter as ServerEVRPTWThermalBatteryDegradationRouter } from "../../server/src/utils/evrptwThermalBatteryDegradationRouter.js";
+import { GKQuantileMergeableSketch as ServerGKQuantileMergeableSketch } from "../../server/src/utils/gkQuantileMergeableSketch.js";
+import { SafeSACLagrangianContinuousPricing as ServerSafeSACLagrangianContinuousPricing } from "../../server/src/utils/safeSACLagrangianContinuousPricing.js";
+import { EVRPTWActiveCoolingRouter as ServerEVRPTWActiveCoolingRouter } from "../../server/src/utils/evrptwActiveCoolingRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -32432,6 +32439,370 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có được theo dõi bằng KLL quantile sketch hoặc giao bằng xe điện kiểm soát nhiệt không?");
         expect.equal(buyerRes.intent, "KLL_QUANTILES_PPO_CLIP_CONTINUOUS_THERMAL_BATTERY");
         expect.ok(buyerRes.replyText.includes("KLL Optimal Streaming Quantiles"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 224: Greenwald-Khanna Mergeable Quantiles, Safe SAC Lagrangian Continuous Pricing & Active Cooling BTMS EVRPTW (Phase 77)
+    // =========================================================================
+    describe("Feature 224: GK Mergeable Quantile Sketch, Safe SAC Lagrangian & Active BTMS EVRPTW (Phase 77)", () => {
+      // -----------------------------------------------------------------------
+      // Greenwald-Khanna Deterministic Streaming Quantiles (F224-T01 - F224-T08)
+      // -----------------------------------------------------------------------
+      test("F224-T01: GKQuantileMergeableSketch initializes with valid epsilon and empty state", () => {
+        const sketch = new GKQuantileMergeableSketch({ epsilon: 0.02 });
+        expect.equal(sketch.epsilon, 0.02);
+        expect.equal(sketch.n, 0);
+        expect.equal(sketch.size, 0);
+        expect.equal(sketch.min, null);
+        expect.equal(sketch.max, null);
+        expect.equal(sketch.query(0.5), null);
+      });
+
+      test("F224-T02: GK sketch enforces invariant g_i + delta_i <= 2 * eps * n across monotonic insertions", () => {
+        const eps = 0.05;
+        const sketch = new GKQuantileMergeableSketch({ epsilon: eps });
+        for (let i = 1; i <= 200; i++) {
+          sketch.insert(i * 10);
+        }
+        expect.equal(sketch.n, 200);
+        expect.equal(sketch.min, 10);
+        expect.equal(sketch.max, 2000);
+
+        const maxThreshold = Math.floor(2 * eps * sketch.n);
+        for (const entry of sketch.entries) {
+          expect.ok(entry.g + entry.delta <= maxThreshold + 1);
+        }
+      });
+
+      test("F224-T03: GK sketch periodic compression merges adjacent tuples and retains extremes", () => {
+        const sketch = new GKQuantileMergeableSketch({ epsilon: 0.04 });
+        for (let i = 0; i < 500; i++) {
+          sketch.insert(Math.sin(i) * 100);
+        }
+        const preSize = sketch.size;
+        sketch.compress();
+        expect.ok(sketch.size <= preSize);
+        expect.ok(sketch.size < sketch.n);
+        expect.equal(sketch.entries[0].v, sketch.min);
+        expect.equal(sketch.entries[sketch.entries.length - 1].v, sketch.max);
+      });
+
+      test("F224-T04: GK sketch accurately estimates quantiles (p25, median p50, p75, p95, p99)", () => {
+        const sketch = new GKQuantileMergeableSketch({ epsilon: 0.02 });
+        const items = [];
+        for (let i = 1; i <= 1000; i++) {
+          items.push(i);
+          sketch.insert(i);
+        }
+        const p25 = sketch.query(0.25);
+        const p50 = sketch.query(0.50);
+        const p75 = sketch.query(0.75);
+        const p95 = sketch.query(0.95);
+        const p99 = sketch.query(0.99);
+
+        expect.ok(Math.abs(p25 - 250) <= 25);
+        expect.ok(Math.abs(p50 - 500) <= 25);
+        expect.ok(Math.abs(p75 - 750) <= 25);
+        expect.ok(Math.abs(p95 - 950) <= 25);
+        expect.ok(Math.abs(p99 - 990) <= 25);
+      });
+
+      test("F224-T05: GK sketch calculates accurate normalized rank and rank bounds", () => {
+        const sketch = new GKQuantileMergeableSketch({ epsilon: 0.02 });
+        for (let i = 1; i <= 500; i++) {
+          sketch.insert(i * 2);
+        }
+        const rank = sketch.getRank(500);
+        expect.ok(Math.abs(rank - 0.50) <= 0.05);
+
+        const bounds = sketch.getRankBounds(500);
+        expect.ok(bounds.rMin <= bounds.estimatedRank);
+        expect.ok(bounds.rMax >= bounds.estimatedRank);
+        expect.equal(sketch.getRank(-10), 0);
+        expect.equal(sketch.getRank(2000), 1);
+      });
+
+      test("F224-T06: GK sketch exports multi-quantile summary", () => {
+        const sketch = new GKQuantileMergeableSketch({ epsilon: 0.03 });
+        for (let i = 1; i <= 300; i++) {
+          sketch.insert(i * 5000);
+        }
+        const summary = sketch.getQuantileSummary();
+        expect.equal(summary.n, 300);
+        expect.equal(summary.min, 5000);
+        expect.equal(summary.max, 1500000);
+        expect.ok(summary.quantiles.p50 > 0);
+        expect.ok(summary.quantiles.p95 > summary.quantiles.p50);
+      });
+
+      test("F224-T07: GK sketch merge combines two independent sketches preserving epsilon guarantee", () => {
+        const sketchA = new GKQuantileMergeableSketch({ epsilon: 0.02 });
+        const sketchB = new GKQuantileMergeableSketch({ epsilon: 0.02 });
+        for (let i = 1; i <= 200; i++) sketchA.insert(i);
+        for (let i = 201; i <= 400; i++) sketchB.insert(i);
+
+        sketchA.merge(sketchB);
+        expect.equal(sketchA.n, 400);
+        expect.equal(sketchA.min, 1);
+        expect.equal(sketchA.max, 400);
+
+        const median = sketchA.query(0.5);
+        expect.ok(Math.abs(median - 200) <= 20);
+      });
+
+      test("F224-T08: Client and Server GK Quantile Sketches exhibit 100% bidirectional parity", () => {
+        const clientSketch = new GKQuantileMergeableSketch({ epsilon: 0.02 });
+        const serverSketch = new ServerGKQuantileMergeableSketch({ epsilon: 0.02 });
+
+        const values = [120, 45, 680, 230, 950, 410, 15, 330, 770, 560];
+        values.forEach(v => {
+          clientSketch.insert(v);
+          serverSketch.insert(v);
+        });
+
+        expect.equal(clientSketch.n, serverSketch.n);
+        expect.equal(clientSketch.min, serverSketch.min);
+        expect.equal(clientSketch.max, serverSketch.max);
+        expect.equal(clientSketch.query(0.5), serverSketch.query(0.5));
+        expect.equal(clientSketch.query(0.9), serverSketch.query(0.9));
+        expect.equal(clientSketch.getRank(500), serverSketch.getRank(500));
+      });
+
+      // -----------------------------------------------------------------------
+      // Safe Soft Actor-Critic with Lagrangian Constraints (F224-T09 - F224-T16)
+      // -----------------------------------------------------------------------
+      test("F224-T09: SafeSACLagrangianContinuousPricing initializes actor, twin critics, and target networks", () => {
+        const pricer = new SafeSACLagrangianContinuousPricing({ stateDim: 5, alpha: 0.2, targetEntropy: -1.0 });
+        expect.equal(pricer.stateDim, 5);
+        expect.ok(Math.abs(pricer.alpha - 0.2) < 0.01);
+        expect.equal(pricer.lambda, 0);
+        expect.equal(pricer.wQ1.length, 6);
+        expect.equal(pricer.wQ2.length, 6);
+        expect.equal(pricer.wC.length, 6);
+      });
+
+      test("F224-T10: Safe SAC selectAction generates continuous action in [-1, 1] with Jacobian correction", () => {
+        const pricer = new SafeSACLagrangianContinuousPricing();
+        const state = [0.8, 1.0, 0.7, 0.5, 0.5];
+        const res = pricer.selectAction(state, false);
+
+        expect.ok(res.action >= -1.0 && res.action <= 1.0);
+        expect.ok(Number.isFinite(res.logProb));
+        expect.ok(Number.isFinite(res.mean));
+        expect.ok(res.std > 0);
+      });
+
+      test("F224-T11: Safe SAC action object supports numeric coercion and primitive conversion", () => {
+        const pricer = new SafeSACLagrangianContinuousPricing();
+        const state = [0.6, 0.9, 0.8, 0.4, 0.3];
+        const actObj = pricer.selectAction(state, true);
+
+        expect.equal(typeof Number(actObj), "number");
+        expect.ok(actObj >= -1.0 && actObj <= 1.0);
+        expect.equal(+actObj, actObj.action);
+      });
+
+      test("F224-T12: Safe SAC update performs twin critic loss calculation and Polyak moving average", () => {
+        const pricer = new SafeSACLagrangianContinuousPricing();
+        const state = [0.7, 1.1, 0.5, 0.6, 0.4];
+        const nextState = [0.68, 1.05, 0.48, 0.6, 0.45];
+        const act = pricer.selectAction(state);
+
+        const stats = pricer.update({
+          state,
+          action: act.action,
+          reward: 12.5,
+          cost: 0.01,
+          nextState,
+          done: false
+        });
+
+        expect.ok(Number.isFinite(stats.lossQ1));
+        expect.ok(Number.isFinite(stats.lossQ2));
+        expect.ok(Number.isFinite(stats.lossCost));
+        expect.equal(pricer.stepCount, 1);
+      });
+
+      test("F224-T13: Safe SAC automatically adjusts entropy temperature alpha toward target entropy", () => {
+        const pricer = new SafeSACLagrangianContinuousPricing({ alpha: 0.3, lrAlpha: 0.05, targetEntropy: -1.0 });
+        const state = [0.5, 1.0, 0.6, 0.5, 0.5];
+
+        for (let i = 0; i < 5; i++) {
+          const act = pricer.selectAction(state);
+          pricer.update({
+            state,
+            action: act.action,
+            reward: 10,
+            cost: 0,
+            nextState: state,
+            done: false
+          });
+        }
+        expect.ok(Number.isFinite(pricer.alpha));
+        expect.ok(pricer.alpha > 0);
+      });
+
+      test("F224-T14: Safe SAC updates Lagrangian multiplier lambda when cost exceeds budget", () => {
+        const pricer = new SafeSACLagrangianContinuousPricing({ costBudget: 0.02, lrDual: 0.1 });
+        expect.equal(pricer.lambda, 0);
+
+        const state = [1.2, 0.8, 0.2, 0.9, 0.8];
+        pricer.update({
+          state,
+          action: -0.5,
+          reward: 5,
+          cost: 0.10,
+          nextState: state,
+          done: false
+        });
+
+        expect.ok(pricer.lambda > 0);
+      });
+
+      test("F224-T15: Safe SAC recommendPrice strictly enforces 1.05 * COGS safety floor", () => {
+        const pricer = new SafeSACLagrangianContinuousPricing();
+        const recommendation = pricer.recommendPrice({
+          cogs: 100000,
+          basePrice: 130000,
+          competitorPrice: 125000,
+          inventory: 80,
+          targetInventory: 100,
+          minMarkup: 1.05
+        });
+
+        expect.equal(recommendation.safeFloorPrice, 105000);
+        expect.ok(recommendation.recommendedPrice >= 105000);
+        expect.ok(recommendation.grossMarginRate >= 0.045);
+        expect.equal(recommendation.isSafe, true);
+      });
+
+      test("F224-T16: Client and Server Safe SAC pricers exhibit 100% bidirectional parity", () => {
+        const clientPricer = new SafeSACLagrangianContinuousPricing();
+        const serverPricer = new ServerSafeSACLagrangianContinuousPricing();
+
+        const ctx = {
+          cogs: 200000,
+          basePrice: 280000,
+          competitorPrice: 270000,
+          inventory: 50,
+          targetInventory: 50
+        };
+
+        const clientRec = clientPricer.recommendPrice(ctx);
+        const serverRec = serverPricer.recommendPrice(ctx);
+
+        expect.equal(clientRec.safeFloorPrice, serverRec.safeFloorPrice);
+        expect.ok(clientRec.recommendedPrice >= clientRec.safeFloorPrice);
+        expect.ok(serverRec.recommendedPrice >= serverRec.safeFloorPrice);
+      });
+
+      // -----------------------------------------------------------------------
+      // Active Battery Thermal Management EVRPTW Router (F224-T17 - F224-T22)
+      // -----------------------------------------------------------------------
+      test("F224-T17: EVRPTWActiveCoolingRouter initializes with thermal parameters and depot", () => {
+        const router = new EVRPTWActiveCoolingRouter({
+          ambientTempC: 32,
+          coolingSetpointC: 35,
+          cop: 3.0,
+          batteryCapacityKwh: 75
+        });
+        expect.equal(router.ambientTempC, 32);
+        expect.equal(router.coolingSetpointC, 35);
+        expect.equal(router.cop, 3.0);
+        expect.equal(router.batteryCapacityKwh, 75);
+      });
+
+      test("F224-T18: Distance calculation supports both Euclidean and GPS Haversine coordinates", () => {
+        const router = new EVRPTWActiveCoolingRouter();
+        const distEuc = router._computeDistanceKm({ x: 0, y: 0 }, { x: 3, y: 4 });
+        expect.equal(distEuc, 5.0);
+
+        const distGps = router._computeDistanceKm(
+          { lat: 21.0285, lng: 105.8542 },
+          { lat: 10.7769, lng: 106.7009 }
+        );
+        expect.ok(distGps > 1100 && distGps < 1200);
+      });
+
+      test("F224-T19: Thermal simulation engages active BTMS cooling power when cell temp exceeds setpoint", () => {
+        const router = new EVRPTWActiveCoolingRouter({ ambientTempC: 35, coolingSetpointC: 35 });
+        const leg = router._simulateLegThermalDynamics({ x: 0, y: 0 }, { x: 30, y: 0 }, 36, 500, 50);
+
+        expect.ok(leg.coolingEnergyKwh > 0);
+        expect.ok(leg.drivingEnergyKwh > 0);
+        expect.ok(leg.totalEnergyKwh > leg.drivingEnergyKwh);
+        expect.ok(leg.finalTempC <= 45);
+      });
+
+      test("F224-T20: Arrhenius degradation cost reflects distance and thermal stress", () => {
+        const router = new EVRPTWActiveCoolingRouter({ ambientTempC: 30, coolingSetpointC: 35 });
+        const legShort = router._simulateLegThermalDynamics({ x: 0, y: 0 }, { x: 10, y: 0 }, 30, 200);
+        const legLong = router._simulateLegThermalDynamics({ x: 0, y: 0 }, { x: 50, y: 0 }, 30, 200);
+
+        expect.ok(legLong.degradationCostVnd > legShort.degradationCostVnd);
+      });
+
+      test("F224-T21: EVRPTWActiveCoolingRouter plans multi-stop delivery routes under payload and time windows", () => {
+        const router = new EVRPTWActiveCoolingRouter({ ambientTempC: 32, coolingSetpointC: 35 });
+        const customers = [
+          { id: "C1", x: 10, y: 5, demandKg: 150, readyTime: 8.5, dueTime: 12.0 },
+          { id: "C2", x: 15, y: 10, demandKg: 200, readyTime: 9.0, dueTime: 14.0 },
+          { id: "C3", x: 5, y: 15, demandKg: 100, readyTime: 9.5, dueTime: 16.0 }
+        ];
+
+        const plan = router.planRoute(customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.routes.length >= 1);
+        expect.ok(plan.totalDistanceKm > 0);
+        expect.ok(plan.totalCoolingEnergyKwh >= 0);
+        expect.equal(plan.isThermallySafe, true);
+      });
+
+      test("F224-T22: Client and Server EVRPTW Active Cooling Routers exhibit 100% bidirectional parity", () => {
+        const clientRouter = new EVRPTWActiveCoolingRouter({ ambientTempC: 32, coolingSetpointC: 35 });
+        const serverRouter = new ServerEVRPTWActiveCoolingRouter({ ambientTempC: 32, coolingSetpointC: 35 });
+
+        const customers = [
+          { id: "C1", x: 8, y: 6, demandKg: 120, readyTime: 8.5, dueTime: 13.0 },
+          { id: "C2", x: 12, y: 9, demandKg: 180, readyTime: 9.0, dueTime: 15.0 }
+        ];
+
+        const clientPlan = clientRouter.planRoute(customers);
+        const serverPlan = serverRouter.planRoute(customers);
+
+        expect.equal(clientPlan.success, serverPlan.success);
+        expect.equal(clientPlan.routes.length, serverPlan.routes.length);
+        expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+        expect.equal(clientPlan.totalCoolingEnergyKwh, serverPlan.totalCoolingEnergyKwh);
+        expect.equal(clientPlan.totalThermalDegradationCostVnd, serverPlan.totalThermalDegradationCostVnd);
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F224-T23 - F224-T24)
+      // -----------------------------------------------------------------------
+      test("F224-T23: Admin Sentinel Copilot correctly routes Section 212 (GK Mergeable), Section 213 (Safe SAC), and Section 214 (EVRPTW-BTMS)", () => {
+        const resGK = generateAdminCopilotResponse("Kiểm định phân vị luồng khả hợp GK Quantile Mergeable Sketch Greenwald Khanna");
+        expect.equal(resGK.tag, "GK QUANTILE MERGEABLE SKETCH");
+        expect.ok(resGK.text.includes("GREENWALD"));
+
+        const resSafeSAC = generateAdminCopilotResponse("Kiểm soát định giá liên tục Safe SAC Lagrangian Soft Actor-Critic tự động nhiệt độ");
+        expect.equal(resSafeSAC.tag, "SAFE SAC LAGRANGIAN CONTINUOUS PRICING");
+        expect.ok(resSafeSAC.text.includes("HAARNOJA"));
+
+        const resBTMS = generateAdminCopilotResponse("Điều hòa nhiệt pin chủ động EVRPTW Active Cooling BTMS Park Jung");
+        expect.equal(resBTMS.tag, "EVRPTW ACTIVE BATTERY COOLING ROUTER");
+        expect.ok(resBTMS.text.includes("BTMS"));
+      });
+
+      test("F224-T24: Seller ShopSmart Copilot and Buyer Shopping Assistant handle Phase 77 algorithms and Intent 79", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn phân vị khả hợp GK Mergeable và định giá Safe SAC liên tục");
+        expect.equal(sellerRes.tag, "GK MERGEABLE, SAFE SAC CONTINUOUS & ACTIVE COOLING ROUTING");
+        expect.ok(sellerRes.text.includes("Safe SAC"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có phân vị giá GK khả hợp hoặc giao bằng xe điện làm mát pin chủ động BTMS không?");
+        expect.equal(buyerRes.intent, "GK_MERGEABLE_SAFE_SAC_CONTINUOUS_ACTIVE_COOLING");
+        expect.ok(buyerRes.replyText.includes("GK Quantile Mergeable Sketch"));
       });
     });
   });
