@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1312,7 +1312,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 65. Bộ Ba Thuật Toán Space-Saving Itemsets, CPO Safe Pricing & Xe Điện Sạc Mặt Trời EVRP-BDS (Phase 56 - Feature 203)
-  if (!/đếm tổn hao|lossy counting heavy hitters|spot|vrptw[- ]soft/i.test(raw) && /space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cpo pricing|cpo[- ]pricing|evrp-bds|sạc mặt trời|solar micro-hub/i.test(raw)) {
+  if (!/đếm tổn hao|lossy counting heavy hitters|spot|vrptw[- ]soft|lossy counting moments|mô-men tần suất|rcpo/i.test(raw) && /space[- ]saving|lossy counting|frequent itemsets|mua kèm luồng|cpo pricing|cpo[- ]pricing|evrp-bds|sạc mặt trời|solar micro-hub/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN SPACE-SAVING, CPO PRICING & XE ĐIỆN SẠC MẶT TRỜI (${currentShop.name})**:
 - **Bắt sóng combo mua kèm bùng nổ Space-Saving & Lossy Counting**:
@@ -1432,7 +1432,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 71. Bộ Ba Thuật Toán Lossy Counting Heavy Hitters, SPOT Pricing & Định Tuyến Cửa Sổ Mềm VRPTW-Soft (Phase 62 - Feature 209)
-  if (!/misra|gries|laplacian|vrptw[- ]stochastic/i.test(raw) && /lossy[- ]counting|heavy hitters stream|spot|spot pricing|supported policy|mật độ dữ liệu hành động|soft time window|cửa sổ mềm|vrptw[- ]soft/i.test(raw)) {
+  if (!/misra|gries|laplacian|vrptw[- ]stochastic|lossy counting moments|mô-men tần suất|rcpo/i.test(raw) && /lossy[- ]counting|heavy hitters stream|spot|spot pricing|supported policy|mật độ dữ liệu hành động|soft time window|cửa sổ mềm|vrptw[- ]soft/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN LOSSY COUNTING, SPOT PRICING & ĐỊNH TUYẾN CỬA SỔ MỀM VRPTW-SOFT (${currentShop.name})**:
 - **Bắt trọn sản phẩm bão đơn Lossy Counting Heavy Hitters**:
@@ -1567,6 +1567,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem tần suất chuyển đổi cửa sổ trượt DGIM',
         'Tư vấn định giá phòng ngừa rủi ro WCSAC',
         'Theo dõi tiến độ giao hàng xe điện sạc phi tuyến SPX'
+      ]
+    };
+  }
+
+  // 78. Bộ Ba Thuật Toán Lossy Counting Moments, RCPO Safe Pricing & TDEVRP Green Routing (Phase 69 - Feature 216)
+  if (/lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|basso/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 69 (${currentShop.name})**:
+- **Bắt trọn sản phẩm hot với Lossy Counting Moments (Manku & Motwani 2002)**:
+  - Cắt tỉa định kỳ theo độ rộng bucket $w = \\lceil 1 / \\epsilon \\rceil$, theo dõi chính xác các mặt hàng có tần suất $\\ge s \\cdot N$ (0 false negatives) và ước tính năng lượng mô-men $F_2 = \\sum f_i^2$, giúp shop phát hiện ngay các sản phẩm đang bùng nổ nhu cầu!
+- **Định giá học tăng cường đa thang thời gian RCPO Safe Pricing (Tessler et al. ICLR 2019)**:
+  - Tối ưu hóa doanh thu dưới ràng buộc chi phí an toàn bằng kỹ thuật Stochastic Approximation 2 thang thời gian (Fast timescale $\\alpha_k$ cho Actor, Slow timescale $\\beta_k$ cho nhân tử $\\lambda$). Luôn khóa sàn giá an toàn $\\ge 1.05 \\times \\text{COGS}$ triệt tiêu mọi rủi ro bán lỗ!
+- **Giao vận xe điện phụ thuộc giao thông đô thị TDEVRP (Basso et al. 2019 / Ichoua 2003)**:
+  - Đội xe điện SPX Express điều phối lộ trình linh hoạt theo 5 khung giờ giao thông thực tế, bảo toàn tiên đề FIFO và tích hợp tải phụ tiêu thụ năng lượng khi kẹt xe, cam kết đơn hàng của shop giao đến tay khách đúng hẹn!`,
+      type: 'recommendation',
+      tag: 'LOSSY COUNTING, RCPO PRICING & TDEVRP ROUTER',
+      suggestions: [
+        'Xem top sản phẩm hot Lossy Counting',
+        'Tư vấn định giá an toàn RCPO',
+        'Theo dõi xe điện giao hàng giờ cao điểm SPX'
       ]
     };
   }

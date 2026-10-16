@@ -363,6 +363,10 @@ import {
   DGIMSlidingWindow,
   WCSACRiskPricing,
   EVRPTWNonlinearChargingRouter,
+  // Phase 69 Enterprise Algorithms
+  LossyCountingFrequencyMoments,
+  RCPOConstrainedPricing,
+  VRPTWTimeDependentGreenRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -535,6 +539,9 @@ import { VRPTWTandemDroneRouter as ServerVRPTWTandemDroneRouter } from "../../se
 import { DGIMSlidingWindow as ServerDGIMSlidingWindow } from "../../server/src/utils/dgimSlidingWindow.js";
 import { WCSACRiskPricing as ServerWCSACRiskPricing } from "../../server/src/utils/wcsacRiskPricing.js";
 import { EVRPTWNonlinearChargingRouter as ServerEVRPTWNonlinearChargingRouter } from "../../server/src/utils/evrptwNonlinearChargingRouter.js";
+import { LossyCountingFrequencyMoments as ServerLossyCountingFrequencyMoments } from "../../server/src/utils/lossyCountingFrequencyMoments.js";
+import { RCPOConstrainedPricing as ServerRCPOConstrainedPricing } from "../../server/src/utils/rcpoConstrainedPricing.js";
+import { VRPTWTimeDependentGreenRouter as ServerVRPTWTimeDependentGreenRouter } from "../../server/src/utils/vrptwTimeDependentGreenRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -29676,6 +29683,322 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const buyerRes = generateAiChatResponse("Đơn hàng của mình có được giao bằng xe điện sạc phi tuyến CC-CV hay định giá an toàn WCSAC không?");
       expect.equal(buyerRes.intent, "DGIM_WCSAC_NONLINEAR_CHARGING");
       expect.ok(buyerRes.replyText.includes("EVRPTW-NL"));
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 216: ENTERPRISE SUITE PHASE 69 ALGORITHMS
+  // - LossyCountingFrequencyMoments (Manku-Motwani 2002 Stream Moments)
+  // - RCPOConstrainedPricing (Reward Constrained Policy Optimization ICLR 2019)
+  // - VRPTWTimeDependentGreenRouter (TDEVRP Flexible Traffic Speed Profiles)
+  // - Tri-Role AI Copilot Knowledge Integration
+  // =========================================================================
+  describe("Feature 216: Enterprise Suite Phase 69 Algorithms", () => {
+    // -----------------------------------------------------------------------
+    // LOSSY COUNTING FREQUENCY MOMENTS (F216-T01 to F216-T08)
+    // -----------------------------------------------------------------------
+    test("F216-T01: LossyCountingFrequencyMoments initializes with correct bucket width and support", () => {
+      const lc = new LossyCountingFrequencyMoments({ epsilon: 0.02, support: 0.1 });
+      expect.equal(lc.epsilon, 0.02);
+      expect.equal(lc.support, 0.1);
+      expect.equal(lc.bucketWidth, 50); // ceil(1 / 0.02) = 50
+      expect.equal(lc.totalProcessed, 0);
+      expect.equal(lc.currentBucket, 1);
+    });
+
+    test("F216-T02: LossyCountingFrequencyMoments tracks item entry with invariant f and delta", () => {
+      const lc = new LossyCountingFrequencyMoments({ epsilon: 0.1 }); // width = 10
+      lc.add("SKU_IPHONE_15");
+      const entry = lc.entries.get("SKU_IPHONE_15");
+      expect.ok(entry);
+      expect.equal(entry.f, 1);
+      expect.equal(entry.delta, 0); // delta = currentBucket - 1 = 0
+    });
+
+    test("F216-T03: LossyCountingFrequencyMoments prunes items with f + delta <= currentBucket at boundaries", () => {
+      const lc = new LossyCountingFrequencyMoments({ epsilon: 0.2 }); // width = 5
+      // Add rare item once
+      lc.add("RARE_ITEM");
+      // Add 4 different items to complete bucket 1 (total = 5)
+      for (let i = 0; i < 4; i++) {
+        lc.add(`FILLER_${i}`);
+      }
+      // At boundary 5, currentBucket = 1.
+      // Now add 5 items in bucket 2 to reach total = 10, currentBucket = 2
+      for (let i = 0; i < 5; i++) {
+        lc.add(`FILLER_B2_${i}`);
+      }
+      // RARE_ITEM had f=1, delta=0 => f + delta = 1 <= 2 => must be pruned!
+      expect.equal(lc.entries.has("RARE_ITEM"), false);
+      expect.ok(lc.prunesCount >= 2);
+    });
+
+    test("F216-T04: LossyCountingFrequencyMoments query returns frequency bounds", () => {
+      const lc = new LossyCountingFrequencyMoments({ epsilon: 0.05 });
+      for (let i = 0; i < 20; i++) {
+        lc.add("HOT_DEAL");
+      }
+      const q = lc.query("HOT_DEAL");
+      expect.equal(q.estimatedFreq, 20);
+      expect.equal(q.lowerBound, 20);
+      expect.ok(q.upperBound >= 20);
+
+      // Unseen item
+      const unseen = lc.query("NON_EXISTENT");
+      expect.equal(unseen.estimatedFreq, 0);
+      expect.equal(unseen.lowerBound, 0);
+    });
+
+    test("F216-T05: LossyCountingFrequencyMoments guarantees 0 false negatives for heavy hitters", () => {
+      const lc = new LossyCountingFrequencyMoments({ epsilon: 0.05, support: 0.2 }); // threshold 20%
+      // 100 items total: 30 for "TOP_SELLER", others scattered
+      for (let i = 0; i < 30; i++) lc.add("TOP_SELLER");
+      for (let i = 0; i < 70; i++) lc.add(`RANDOM_${i}`);
+
+      const heavyHitters = lc.getHeavyHitters();
+      expect.ok(heavyHitters.length >= 1);
+      expect.equal(heavyHitters[0].item, "TOP_SELLER");
+      expect.equal(heavyHitters[0].frequency, 30);
+      expect.ok(heavyHitters[0].supportPct >= 20);
+    });
+
+    test("F216-T06: LossyCountingFrequencyMoments estimateSecondMoment computes F2 energy", () => {
+      const lc = new LossyCountingFrequencyMoments({ epsilon: 0.1 });
+      for (let i = 0; i < 10; i++) lc.add("A");
+      for (let i = 0; i < 5; i++) lc.add("B");
+      // F2 should be approx 10^2 + 5^2 = 125
+      const f2 = lc.estimateSecondMoment();
+      expect.ok(f2 >= 100);
+    });
+
+    test("F216-T07: LossyCountingFrequencyMoments getTelemetry returns stream telemetry", () => {
+      const lc = new LossyCountingFrequencyMoments({ epsilon: 0.05, support: 0.1 });
+      for (let i = 0; i < 50; i++) lc.add(`ITEM_${i % 5}`);
+      const tel = lc.getTelemetry();
+      expect.equal(tel.epsilon, 0.05);
+      expect.equal(tel.totalProcessed, 50);
+      expect.ok(tel.activeEntriesCount > 0);
+      expect.ok(tel.estimatedF2Moment > 0);
+    });
+
+    test("F216-T08: LossyCountingFrequencyMoments exhibits 100% Client/Server parity", () => {
+      const clientLC = new LossyCountingFrequencyMoments({ epsilon: 0.05, support: 0.15 });
+      const serverLC = new ServerLossyCountingFrequencyMoments({ epsilon: 0.05, support: 0.15 });
+
+      const stream = ["P1", "P2", "P1", "P1", "P3", "P1", "P2", "P4", "P1", "P5", "P1", "P2"];
+      clientLC.addAll(stream);
+      serverLC.addAll(stream);
+
+      expect.equal(clientLC.query("P1").estimatedFreq, serverLC.query("P1").estimatedFreq);
+      expect.equal(clientLC.query("P2").estimatedFreq, serverLC.query("P2").estimatedFreq);
+      expect.equal(clientLC.estimateSecondMoment(), serverLC.estimateSecondMoment());
+      expect.equal(clientLC.getHeavyHitters().length, serverLC.getHeavyHitters().length);
+      expect.equal(clientLC.prunesCount, serverLC.prunesCount);
+    });
+
+    // -----------------------------------------------------------------------
+    // RCPO CONSTRAINED PRICING (F216-T09 to F216-T16)
+    // -----------------------------------------------------------------------
+    test("F216-T09: RCPOConstrainedPricing initializes with multi-timescale learning rates", () => {
+      const rcpo = new RCPOConstrainedPricing({ costBudget: 0.05, actorLr: 0.04, lambdaLr: 0.002 });
+      expect.equal(rcpo.costBudget, 0.05);
+      expect.equal(rcpo.actorLr, 0.04);
+      expect.equal(rcpo.lambdaLr, 0.002);
+      expect.ok(rcpo.lambdaLr < rcpo.actorLr); // Slow timescale beta << fast timescale alpha
+      expect.ok(rcpo.lambda >= 0);
+    });
+
+    test("F216-T10: RCPOConstrainedPricing evaluateCost predicts non-negative constraint cost", () => {
+      const rcpo = new RCPOConstrainedPricing();
+      const state = new Float64Array([1.0, 1.0, 0.5, 0.2, 1.0]);
+      const cost = rcpo.evaluateCost(state);
+      expect.ok(cost >= 0);
+    });
+
+    test("F216-T11: RCPOConstrainedPricing updates policy and Lagrange multiplier with projection", () => {
+      const rcpo = new RCPOConstrainedPricing({ costBudget: 0.04, initLambda: 0.1 });
+      const batch = [
+        { state: [1.0, 0.95, 0.4, 0.3, 1.2], action: 0.04, reward: 0.85, cost: 0.15 },
+        { state: [0.9, 1.05, 0.6, 0.2, 0.8], action: -0.02, reward: 0.60, cost: 0.08 }
+      ];
+      const res = rcpo.updatePolicy(batch);
+      expect.equal(res.success, true);
+      expect.equal(res.updatesCount, 1);
+      expect.ok(res.avgCost > 0);
+      expect.ok(res.lambda >= 0);
+    });
+
+    test("F216-T12: RCPOConstrainedPricing recommendPrice applies penalty damping", () => {
+      const rcpo = new RCPOConstrainedPricing();
+      const product = { price: 150000, cogs: 90000, msrp: 200000 };
+      const market = { competitorPrice: 145000, inventoryLevel: 40, salesVelocity: 1.5 };
+      const rec = rcpo.recommendPrice(product, market);
+      expect.ok(rec.recommendedPrice >= rec.safetyFloor);
+      expect.ok(rec.recommendedPrice <= rec.safetyCeiling);
+      expect.ok(rec.rcpoDamping >= 0.4 && rec.rcpoDamping <= 1.0);
+      expect.ok(rec.grossMarginPct > 0);
+    });
+
+    test("F216-T13: RCPOConstrainedPricing strictly enforces COGS safety floor (1.05 * COGS)", () => {
+      const rcpo = new RCPOConstrainedPricing();
+      const product = { price: 30000, cogs: 35000, msrp: 50000 };
+      const rec = rcpo.recommendPrice(product, {});
+      expect.ok(rec.recommendedPrice >= rec.safetyFloor);
+      expect.equal(rec.recommendedPrice, Math.round(35000 * 1.05));
+      expect.equal(rec.isFloorBounded, true);
+    });
+
+    test("F216-T14: RCPOConstrainedPricing bounds recommendation within MSRP ceiling", () => {
+      const rcpo = new RCPOConstrainedPricing();
+      const product = { price: 100000, cogs: 40000, msrp: 110000 };
+      const rec = rcpo.recommendPrice(product, { demandIndex: 3.0, competitorPrice: 200000 });
+      expect.ok(rec.recommendedPrice <= rec.safetyCeiling);
+      expect.equal(rec.safetyCeiling, Math.round(110000 * 1.25));
+    });
+
+    test("F216-T15: RCPOConstrainedPricing handles empty update batch gracefully", () => {
+      const rcpo = new RCPOConstrainedPricing();
+      const res = rcpo.updatePolicy([]);
+      expect.equal(res.success, false);
+      expect.equal(res.reason, "EMPTY_BATCH");
+    });
+
+    test("F216-T16: RCPOConstrainedPricing exhibits 100% Client/Server parity", () => {
+      const clientRCPO = new RCPOConstrainedPricing({ costBudget: 0.05, initLambda: 0.15 });
+      const serverRCPO = new ServerRCPOConstrainedPricing({ costBudget: 0.05, initLambda: 0.15 });
+
+      const prod = { price: 280000, cogs: 160000, msrp: 350000 };
+      const market = { competitorPrice: 275000, inventoryLevel: 35, demandIndex: 1.2 };
+
+      const clientRec = clientRCPO.recommendPrice(prod, market);
+      const serverRec = serverRCPO.recommendPrice(prod, market);
+
+      expect.equal(clientRec.recommendedPrice, serverRec.recommendedPrice);
+      expect.equal(clientRec.safetyFloor, serverRec.safetyFloor);
+      expect.equal(clientRec.rcpoDamping, serverRec.rcpoDamping);
+      expect.equal(clientRec.predictedCost, serverRec.predictedCost);
+    });
+
+    // -----------------------------------------------------------------------
+    // VRPTW TIME-DEPENDENT GREEN ROUTER (F216-T17 to F216-T22)
+    // -----------------------------------------------------------------------
+    test("F216-T17: VRPTWTimeDependentGreenRouter computes dynamic speed factors across 5 periods", () => {
+      const router = new VRPTWTimeDependentGreenRouter();
+
+      // 08:00 (480 min): Morning peak => 0.50
+      expect.equal(router.getTrafficProfile(480).speedFactor, 0.50);
+      expect.equal(router.getTrafficProfile(480).trafficState, "MORNING_RUSH");
+
+      // 12:00 (720 min): Day flow => 1.00
+      expect.equal(router.getTrafficProfile(720).speedFactor, 1.00);
+      expect.equal(router.getTrafficProfile(720).trafficState, "DAY_FLOW");
+
+      // 18:00 (1080 min): Evening rush => 0.45
+      expect.equal(router.getTrafficProfile(1080).speedFactor, 0.45);
+      expect.equal(router.getTrafficProfile(1080).trafficState, "EVENING_RUSH");
+
+      // 20:30 (1230 min): Late evening => 0.90
+      expect.equal(router.getTrafficProfile(1230).speedFactor, 0.90);
+      expect.equal(router.getTrafficProfile(1230).trafficState, "LATE_EVENING");
+
+      // 02:00 (120 min): Night off-peak => 1.25
+      expect.equal(router.getTrafficProfile(120).speedFactor, 1.25);
+      expect.equal(router.getTrafficProfile(120).trafficState, "NIGHT_OFF_PEAK");
+    });
+
+    test("F216-T18: VRPTWTimeDependentGreenRouter preserves FIFO property", () => {
+      const router = new VRPTWTimeDependentGreenRouter();
+      const dist = 10; // km
+      // Dep 1: 08:30 (510 min, morning rush v = 0.3 km/min) => arr = 510 + 33.33 = 543.33
+      // Dep 2: 09:05 (545 min, day flow v = 0.6 km/min) => arr = 545 + 16.67 = 561.67
+      const m1 = router.computeEdgeMetrics(dist, 510);
+      const m2 = router.computeEdgeMetrics(dist, 545);
+      const arr1 = 510 + m1.travelTimeMin;
+      const arr2 = 545 + m2.travelTimeMin;
+      expect.ok(arr1 <= arr2);
+    });
+
+    test("F216-T19: VRPTWTimeDependentGreenRouter computes energy with congestion and auxiliary draw", () => {
+      const router = new VRPTWTimeDependentGreenRouter({
+        baseConsumptionPerKm: 0.32,
+        auxiliaryDrawKwhPerMin: 0.015,
+        freeSpeedKmMin: 0.6
+      });
+
+      // Free flow at noon (12:00 = 720 min, speedFactor = 1.0)
+      const freeMetrics = router.computeEdgeMetrics(10, 720);
+      // Rush hour at 18:00 (1080 min, speedFactor = 0.45)
+      const rushMetrics = router.computeEdgeMetrics(10, 1080);
+
+      expect.ok(rushMetrics.travelTimeMin > freeMetrics.travelTimeMin);
+      expect.ok(rushMetrics.energyKwh > freeMetrics.energyKwh);
+    });
+
+    test("F216-T20: VRPTWTimeDependentGreenRouter plans multi-customer green delivery routes", () => {
+      const router = new VRPTWTimeDependentGreenRouter();
+      const customers = [
+        { id: "C1", name: "Quận 1", x: 10.78, y: 106.70, demandKg: 15, timeWindow: [480, 600] },
+        { id: "C2", name: "Quận 3", x: 10.79, y: 106.69, demandKg: 20, timeWindow: [500, 660] }
+      ];
+
+      const plan = router.optimizeTimeDependentRoutes(customers, 480);
+      expect.ok(plan.vehiclesUsed >= 1);
+      expect.equal(plan.summary.totalCustomers, 2);
+      expect.ok(plan.summary.totalDistanceKm > 0);
+      expect.ok(plan.summary.totalEnergyKwh > 0);
+    });
+
+    test("F216-T21: VRPTWTimeDependentGreenRouter handles empty customers list safely", () => {
+      const router = new VRPTWTimeDependentGreenRouter();
+      const emptyPlan = router.optimizeTimeDependentRoutes([]);
+      expect.equal(emptyPlan.summary.totalCustomers, 0);
+      expect.equal(emptyPlan.routes.length, 0);
+      expect.equal(emptyPlan.summary.totalDistanceKm, 0);
+    });
+
+    test("F216-T22: VRPTWTimeDependentGreenRouter exhibits 100% Client/Server parity", () => {
+      const clientRouter = new VRPTWTimeDependentGreenRouter();
+      const serverRouter = new ServerVRPTWTimeDependentGreenRouter();
+
+      const customers = [
+        { id: "C1", name: "Điểm A", x: 10.77, y: 106.71, demandKg: 18, timeWindow: [540, 720] },
+        { id: "C2", name: "Điểm B", x: 10.80, y: 106.72, demandKg: 22, timeWindow: [600, 800] }
+      ];
+
+      const clientPlan = clientRouter.optimizeTimeDependentRoutes(customers, 540);
+      const serverPlan = serverRouter.optimizeTimeDependentRoutes(customers, 540);
+
+      expect.equal(clientPlan.summary.totalCustomers, serverPlan.summary.totalCustomers);
+      expect.equal(clientPlan.summary.totalDistanceKm, serverPlan.summary.totalDistanceKm);
+      expect.equal(clientPlan.summary.totalDurationMin, serverPlan.summary.totalDurationMin);
+      expect.equal(clientPlan.summary.totalEnergyKwh, serverPlan.summary.totalEnergyKwh);
+    });
+
+    // -----------------------------------------------------------------------
+    // TRI-ROLE AI COPILOT KNOWLEDGE INTEGRATION (ADMIN, SELLER, BUYER)
+    // -----------------------------------------------------------------------
+    test("F216-T23: Admin Sentinel Copilot correctly handles Sections 188, 189, 190", () => {
+      const resLC = generateAdminCopilotResponse("Thuật toán Lossy Counting Moments đếm mô-men tần suất F2");
+      expect.equal(resLC.tag, "LOSSY COUNTING FREQUENCY MOMENTS");
+      expect.ok(resLC.text.includes("CORMODE"));
+
+      const resRCPO = generateAdminCopilotResponse("Tư vấn định giá học tăng cường đa thang thời gian RCPO");
+      expect.equal(resRCPO.tag, "RCPO CONSTRAINED PRICING");
+      expect.ok(resRCPO.text.includes("TESSLER"));
+
+      const resGreen = generateAdminCopilotResponse("Lập lộ trình xe điện phụ thuộc giờ cao điểm VRPTW-TD-Green Basso");
+      expect.equal(resGreen.tag, "VRPTW TIME-DEPENDENT GREEN ROUTER");
+      expect.ok(resGreen.text.includes("BASSO"));
+    });
+
+    test("F216-T24: Seller ShopSmart Copilot and Buyer Assistant handle Phase 69 algorithms and intents", () => {
+      const sellerRes = generateSellerCopilotResponse("Tư vấn định giá an toàn RCPO và bắt sóng hàng hot Lossy Counting Moments");
+      expect.equal(sellerRes.tag, "LOSSY COUNTING, RCPO PRICING & TDEVRP ROUTER");
+      expect.ok(sellerRes.text.includes("RCPO Safe Pricing"));
+
+      const buyerRes = generateAiChatResponse("Đơn hàng của mình có được bưu tá xe điện né giờ cao điểm hay định giá RCPO không?");
+      expect.equal(buyerRes.intent, "LOSSY_MOMENTS_RCPO_TDEVRP");
+      expect.ok(buyerRes.replyText.includes("TDEVRP"));
     });
   });
 });

@@ -35986,6 +35986,500 @@ export class EVRPTWNonlinearChargingRouter {
   }
 }
 
+export class LossyCountingFrequencyMoments {
+  constructor(options = {}) {
+    this.epsilon = Math.max(0.001, Math.min(0.2, Number(options.epsilon || 0.01)));
+    this.support = Math.max(this.epsilon, Math.min(0.5, Number(options.support || 0.05)));
+    this.bucketWidth = Math.max(5, Math.ceil(1.0 / this.epsilon));
+
+    this.entries = new Map();
+    this.totalProcessed = 0;
+    this.currentBucket = 1;
+    this.prunesCount = 0;
+  }
+
+  add(item, count = 1) {
+    if (item === undefined || item === null) return;
+    const key = String(item).trim();
+    if (!key) return;
+
+    const kCount = Math.max(1, Math.floor(Number(count) || 1));
+
+    for (let c = 0; c < kCount; c++) {
+      this.totalProcessed++;
+      this.currentBucket = Math.ceil(this.totalProcessed / this.bucketWidth);
+
+      const existing = this.entries.get(key);
+      if (existing) {
+        existing.f++;
+      } else {
+        this.entries.set(key, { f: 1, delta: this.currentBucket - 1 });
+      }
+
+      if (this.totalProcessed % this.bucketWidth === 0) {
+        this._prune();
+      }
+    }
+  }
+
+  addAll(items) {
+    if (!Array.isArray(items)) return;
+    for (let i = 0; i < items.length; i++) {
+      this.add(items[i]);
+    }
+  }
+
+  _prune() {
+    this.prunesCount++;
+    for (const [key, entry] of this.entries.entries()) {
+      if (entry.f + entry.delta <= this.currentBucket) {
+        this.entries.delete(key);
+      }
+    }
+  }
+
+  query(item) {
+    const key = String(item || '').trim();
+    const entry = this.entries.get(key);
+    if (!entry) {
+      const maxPossible = Math.floor(this.epsilon * this.totalProcessed);
+      return {
+        estimatedFreq: 0,
+        lowerBound: 0,
+        upperBound: maxPossible,
+        errorBound: maxPossible
+      };
+    }
+
+    return {
+      estimatedFreq: entry.f,
+      lowerBound: entry.f,
+      upperBound: entry.f + entry.delta,
+      errorBound: entry.delta
+    };
+  }
+
+  getHeavyHitters(customSupport = this.support) {
+    const s = Math.max(this.epsilon, Math.min(1.0, Number(customSupport) || this.support));
+    const threshold = s * this.totalProcessed;
+    const results = [];
+
+    for (const [item, entry] of this.entries.entries()) {
+      if (entry.f >= (threshold - this.epsilon * this.totalProcessed)) {
+        const supportPct = this.totalProcessed > 0 ? Number(((entry.f / this.totalProcessed) * 100).toFixed(2)) : 0;
+        results.push({
+          item,
+          frequency: entry.f,
+          supportPct,
+          delta: entry.delta
+        });
+      }
+    }
+
+    return results.sort((a, b) => b.frequency - a.frequency);
+  }
+
+  estimateSecondMoment() {
+    let f2 = 0;
+    for (const entry of this.entries.values()) {
+      f2 += entry.f * entry.f;
+    }
+    return f2;
+  }
+
+  getTelemetry() {
+    return {
+      epsilon: this.epsilon,
+      support: this.support,
+      bucketWidth: this.bucketWidth,
+      totalProcessed: this.totalProcessed,
+      currentBucket: this.currentBucket,
+      activeEntriesCount: this.entries.size,
+      prunesCount: this.prunesCount,
+      estimatedF2Moment: this.estimateSecondMoment(),
+      heavyHittersCount: this.getHeavyHitters().length
+    };
+  }
+}
+
+export class RCPOConstrainedPricing {
+  constructor(options = {}) {
+    this.stateDim = Math.max(2, Math.floor(options.stateDim || 5));
+    this.costBudget = Math.max(0.001, Number(options.costBudget || 0.06));
+    this.actorLr = Math.max(0.001, Number(options.actorLr || 0.03));
+    this.lambdaLr = Math.max(0.0001, Number(options.lambdaLr || 0.005));
+    this.lambda = Math.max(0, Number(options.initLambda || 0.1));
+
+    this.policyWeights = new Float64Array(this.stateDim);
+    this.costWeights = new Float64Array(this.stateDim);
+
+    const initPolicy = [0.04, 0.06, -0.05, 0.03, 0.02];
+    const initCost = [0.03, -0.02, 0.05, 0.01, 0.02];
+
+    for (let i = 0; i < this.stateDim; i++) {
+      this.policyWeights[i] = i < initPolicy.length ? initPolicy[i] : 0.01;
+      this.costWeights[i] = i < initCost.length ? initCost[i] : 0.02;
+    }
+
+    this.updatesCount = 0;
+    this.lastCost = 0;
+    this.lastConstraintDelta = 0;
+  }
+
+  _dot(w, x) {
+    let sum = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      sum += w[i] * x[i];
+    }
+    return sum;
+  }
+
+  predictAction(state) {
+    const rawAction = this._dot(this.policyWeights, state);
+    return Math.max(-0.15, Math.min(0.15, rawAction));
+  }
+
+  evaluateCost(state) {
+    const rawCost = this._dot(this.costWeights, state);
+    return Math.max(0.0, rawCost);
+  }
+
+  updatePolicy(batch) {
+    if (!Array.isArray(batch) || batch.length === 0) {
+      return { success: false, reason: "EMPTY_BATCH" };
+    }
+
+    const N = batch.length;
+    let avgReward = 0;
+    let avgCost = 0;
+
+    for (let i = 0; i < N; i++) {
+      const item = batch[i];
+      const s = new Float64Array(this.stateDim);
+      for (let j = 0; j < this.stateDim; j++) {
+        s[j] = Number(item.state ? item.state[j] : 0) || 0;
+      }
+
+      const predictedCost = this.evaluateCost(s);
+      const actualCost = Math.max(0, Number(item.cost || 0));
+      avgCost += actualCost / N;
+      avgReward += Number(item.reward || 0) / N;
+
+      const costError = actualCost - predictedCost;
+      const criticLr = 0.05;
+      for (let j = 0; j < this.stateDim; j++) {
+        this.costWeights[j] += (criticLr * costError * s[j]) / N;
+      }
+
+      const act = Number(item.action || 0);
+      const augmentedReward = Number(item.reward || 0) - this.lambda * actualCost;
+      const policyGrad = augmentedReward * act;
+
+      for (let j = 0; j < this.stateDim; j++) {
+        this.policyWeights[j] += (this.actorLr * policyGrad * s[j]) / N;
+      }
+    }
+
+    const constraintDelta = avgCost - this.costBudget;
+    this.lambda = Math.max(0, this.lambda + this.lambdaLr * constraintDelta);
+
+    this.updatesCount++;
+    this.lastCost = avgCost;
+    this.lastConstraintDelta = constraintDelta;
+
+    return {
+      success: true,
+      updatesCount: this.updatesCount,
+      lambda: Number(this.lambda.toFixed(5)),
+      avgCost: Number(avgCost.toFixed(5)),
+      avgReward: Number(avgReward.toFixed(5)),
+      constraintDelta: Number(constraintDelta.toFixed(5)),
+      isBudgetExceeded: constraintDelta > 0
+    };
+  }
+
+  recommendPrice(product = {}, marketContext = {}) {
+    const currentPrice = Math.max(1000, Number(product.price || 100000));
+    const cogs = Math.max(500, Number(product.cogs || currentPrice * 0.7));
+    const msrp = Math.max(currentPrice, Number(product.msrp || currentPrice * 1.3));
+
+    const competitorPrice = Number(marketContext.competitorPrice || currentPrice);
+    const stock = Number(marketContext.inventoryLevel || 50);
+    const capacity = Math.max(1, Number(marketContext.inventoryCapacity || 100));
+    const salesVelocity = Number(marketContext.salesVelocity || 1.0);
+    const demandIndex = Number(marketContext.demandIndex || 1.0);
+
+    const state = new Float64Array([
+      Number((currentPrice / msrp).toFixed(4)),
+      Number((competitorPrice / currentPrice).toFixed(4)),
+      Number((stock / capacity).toFixed(4)),
+      Number(Math.min(3.0, salesVelocity / 10.0).toFixed(4)),
+      Number(Math.min(3.0, demandIndex).toFixed(4))
+    ]);
+
+    const rawAction = this.predictAction(state);
+    const predictedCost = this.evaluateCost(state);
+
+    const rcpoDamping = Math.max(0.4, 1.0 - this.lambda * predictedCost);
+    const safeAdjustment = rawAction * rcpoDamping;
+
+    const rawPrice = currentPrice * (1.0 + safeAdjustment);
+    const safetyFloor = Math.round(cogs * 1.05);
+    const safetyCeiling = Math.round(msrp * 1.25);
+
+    const safePrice = Math.round(Math.max(safetyFloor, Math.min(safetyCeiling, rawPrice)));
+    const priceAdjustmentPct = Number((((safePrice - currentPrice) / currentPrice) * 100).toFixed(2));
+    const grossMarginVnd = safePrice - cogs;
+    const grossMarginPct = Number(((grossMarginVnd / safePrice) * 100).toFixed(2));
+
+    return {
+      currentPrice,
+      recommendedPrice: safePrice,
+      safetyFloor,
+      safetyCeiling,
+      isFloorBounded: safePrice === safetyFloor,
+      isCeilingBounded: safePrice === safetyCeiling,
+      cogs,
+      priceAdjustmentPct,
+      grossMarginVnd,
+      grossMarginPct,
+      predictedCost: Number(predictedCost.toFixed(4)),
+      rcpoDamping: Number(rcpoDamping.toFixed(3)),
+      lambda: Number(this.lambda.toFixed(4)),
+      isBudgetExceeded: predictedCost > this.costBudget
+    };
+  }
+}
+
+export class VRPTWTimeDependentGreenRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || { id: "DEPOT_CENTRAL", name: "SPX Central Hub", x: 10.7769, y: 106.7009 };
+    this.vehicleCapacityKg = Math.max(10, Number(options.vehicleCapacityKg || 750));
+    this.batteryCapacityKwh = Math.max(5.0, Number(options.batteryCapacityKwh || 45.0));
+    this.baseConsumptionPerKm = Math.max(0.05, Number(options.baseConsumptionPerKm || 0.32));
+    this.auxiliaryDrawKwhPerMin = Math.max(0.001, Number(options.auxiliaryDrawKwhPerMin || 0.015));
+    this.freeSpeedKmMin = Math.max(0.1, Number(options.freeSpeedKmMin || 0.6));
+    this.minBatteryBufferPct = Math.max(0.05, Math.min(0.3, Number(options.minBatteryBufferPct || 0.15)));
+  }
+
+  getTrafficProfile(timeMin) {
+    const t = ((Number(timeMin) || 0) % 1440 + 1440) % 1440;
+
+    if (t >= 420 && t < 540) {
+      return { speedFactor: 0.50, trafficState: "MORNING_RUSH" };
+    }
+    if (t >= 540 && t < 990) {
+      return { speedFactor: 1.00, trafficState: "DAY_FLOW" };
+    }
+    if (t >= 990 && t < 1170) {
+      return { speedFactor: 0.45, trafficState: "EVENING_RUSH" };
+    }
+    if (t >= 1170 && t < 1320) {
+      return { speedFactor: 0.90, trafficState: "LATE_EVENING" };
+    }
+    return { speedFactor: 1.25, trafficState: "NIGHT_OFF_PEAK" };
+  }
+
+  calculateDistanceKm(p1, p2) {
+    if (!p1 || !p2) return 0;
+    const dx = (Number(p1.x) || 0) - (Number(p2.x) || 0);
+    const dy = (Number(p1.y) || 0) - (Number(p2.y) || 0);
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  computeEdgeMetrics(distanceKm, departureTimeMin) {
+    const dist = Math.max(0, Number(distanceKm) || 0);
+    if (dist === 0) {
+      return { travelTimeMin: 0, energyKwh: 0, speedFactor: 1.0, trafficState: "STATIONARY" };
+    }
+
+    const { speedFactor, trafficState } = this.getTrafficProfile(departureTimeMin);
+    const currentSpeed = this.freeSpeedKmMin * speedFactor;
+    const travelTimeMin = dist / currentSpeed;
+
+    const congestionFactor = Math.max(0, 1.0 - speedFactor);
+    const tractionEnergy = dist * (this.baseConsumptionPerKm + 0.15 * congestionFactor);
+    const auxEnergy = travelTimeMin * this.auxiliaryDrawKwhPerMin;
+    const energyKwh = tractionEnergy + auxEnergy;
+
+    return {
+      travelTimeMin: Number(travelTimeMin.toFixed(2)),
+      energyKwh: Number(energyKwh.toFixed(3)),
+      speedFactor,
+      trafficState
+    };
+  }
+
+  optimizeTimeDependentRoutes(rawCustomers = [], startTimeMin = 480) {
+    if (!Array.isArray(rawCustomers) || rawCustomers.length === 0) {
+      return {
+        routes: [],
+        summary: {
+          totalCustomers: 0,
+          totalDistanceKm: 0,
+          totalDurationMin: 0,
+          totalEnergyKwh: 0,
+          totalLatenessMin: 0,
+          vehiclesUsed: 0
+        }
+      };
+    }
+
+    const customers = rawCustomers.map((c, idx) => ({
+      id: c.id || `CUST_${idx + 1}`,
+      name: c.name || `Customer ${idx + 1}`,
+      x: Number(c.x || 0),
+      y: Number(c.y || 0),
+      demandKg: Number(c.demandKg || c.demand || 12.0),
+      timeWindow: Array.isArray(c.timeWindow) ? c.timeWindow : [startTimeMin, startTimeMin + 240],
+      serviceTimeMin: Number(c.serviceTimeMin || 5.0)
+    })).sort((a, b) => a.timeWindow[0] - b.timeWindow[0]);
+
+    const depotNode = { ...this.depot, demandKg: 0, timeWindow: [0, 9999], isDepot: true };
+    const unvisited = [...customers];
+    const routes = [];
+    let vehicleId = 1;
+    const minSafeKwh = this.batteryCapacityKwh * this.minBatteryBufferPct;
+
+    while (unvisited.length > 0) {
+      const currentRoute = [];
+      let currentPayload = 0;
+      let currentLoc = depotNode;
+      let currentTime = Number(startTimeMin) || 480;
+      let currentBatteryKwh = this.batteryCapacityKwh;
+      let routeDistance = 0;
+      let routeEnergy = 0;
+      let routeLateness = 0;
+
+      currentRoute.push({
+        nodeId: depotNode.id,
+        nodeName: depotNode.name,
+        type: "DEPOT_START",
+        arrivalTime: Number(currentTime.toFixed(1)),
+        departureTime: Number(currentTime.toFixed(1)),
+        batteryKwh: Number(currentBatteryKwh.toFixed(2)),
+        trafficState: this.getTrafficProfile(currentTime).trafficState
+      });
+
+      while (unvisited.length > 0) {
+        let bestIdx = -1;
+        let bestScore = Infinity;
+        let bestMetrics = null;
+
+        for (let i = 0; i < unvisited.length; i++) {
+          const cand = unvisited[i];
+          if (currentPayload + cand.demandKg > this.vehicleCapacityKg) continue;
+
+          const dist = this.calculateDistanceKm(currentLoc, cand);
+          const metrics = this.computeEdgeMetrics(dist, currentTime);
+          const arrival = currentTime + metrics.travelTimeMin;
+          const distReturn = this.calculateDistanceKm(cand, depotNode);
+          const returnMetrics = this.computeEdgeMetrics(distReturn, arrival + cand.serviceTimeMin);
+
+          if (currentBatteryKwh - metrics.energyKwh - returnMetrics.energyKwh < minSafeKwh) {
+            continue;
+          }
+
+          const waitTime = Math.max(0, cand.timeWindow[0] - arrival);
+          const lateness = Math.max(0, arrival - cand.timeWindow[1]);
+
+          const score = dist * 1.5 + metrics.travelTimeMin + lateness * 10 + waitTime * 0.5;
+
+          if (score < bestScore) {
+            bestScore = score;
+            bestIdx = i;
+            bestMetrics = metrics;
+          }
+        }
+
+        if (bestIdx === -1) {
+          break;
+        }
+
+        const chosen = unvisited.splice(bestIdx, 1)[0];
+        const distToChosen = this.calculateDistanceKm(currentLoc, chosen);
+        routeDistance += distToChosen;
+        routeEnergy += bestMetrics.energyKwh;
+        currentBatteryKwh -= bestMetrics.energyKwh;
+
+        const arrivalTime = currentTime + bestMetrics.travelTimeMin;
+        const waitTime = Math.max(0, chosen.timeWindow[0] - arrivalTime);
+        const serviceStart = arrivalTime + waitTime;
+        const lateness = Math.max(0, arrivalTime - chosen.timeWindow[1]);
+        routeLateness += lateness;
+
+        const departureTime = serviceStart + chosen.serviceTimeMin;
+
+        currentRoute.push({
+          nodeId: chosen.id,
+          nodeName: chosen.name,
+          type: "CUSTOMER",
+          distanceFromPrevKm: Number(distToChosen.toFixed(2)),
+          arrivalTime: Number(arrivalTime.toFixed(1)),
+          departureTime: Number(departureTime.toFixed(1)),
+          waitTimeMin: Number(waitTime.toFixed(1)),
+          latenessMin: Number(lateness.toFixed(1)),
+          batteryKwh: Number(currentBatteryKwh.toFixed(2)),
+          trafficState: bestMetrics.trafficState,
+          speedFactor: bestMetrics.speedFactor
+        });
+
+        currentPayload += chosen.demandKg;
+        currentLoc = chosen;
+        currentTime = departureTime;
+      }
+
+      const distToDepot = this.calculateDistanceKm(currentLoc, depotNode);
+      const returnMetrics = this.computeEdgeMetrics(distToDepot, currentTime);
+      routeDistance += distToDepot;
+      routeEnergy += returnMetrics.energyKwh;
+      currentBatteryKwh -= returnMetrics.energyKwh;
+      currentTime += returnMetrics.travelTimeMin;
+
+      currentRoute.push({
+        nodeId: depotNode.id,
+        nodeName: depotNode.name,
+        type: "DEPOT_END",
+        distanceFromPrevKm: Number(distToDepot.toFixed(2)),
+        arrivalTime: Number(currentTime.toFixed(1)),
+        departureTime: Number(currentTime.toFixed(1)),
+        batteryKwh: Number(Math.max(0, currentBatteryKwh).toFixed(2)),
+        trafficState: returnMetrics.trafficState
+      });
+
+      routes.push({
+        vehicleId: `EV_GREEN_${vehicleId++}`,
+        stopsCount: currentRoute.length,
+        payloadKg: currentPayload,
+        distanceKm: Number(routeDistance.toFixed(2)),
+        durationMin: Number((currentTime - startTimeMin).toFixed(1)),
+        energyKwh: Number(routeEnergy.toFixed(2)),
+        latenessMin: Number(routeLateness.toFixed(1)),
+        batteryRemainingKwh: Number(Math.max(0, currentBatteryKwh).toFixed(2)),
+        stops: currentRoute
+      });
+    }
+
+    const totalDistance = routes.reduce((sum, r) => sum + r.distanceKm, 0);
+    const totalDuration = Math.max(...routes.map(r => r.durationMin), 0);
+    const totalEnergy = routes.reduce((sum, r) => sum + r.energyKwh, 0);
+    const totalLateness = routes.reduce((sum, r) => sum + r.latenessMin, 0);
+
+    return {
+      vehiclesUsed: routes.length,
+      routes,
+      summary: {
+        totalCustomers: customers.length,
+        totalDistanceKm: Number(totalDistance.toFixed(2)),
+        totalDurationMin: Number(totalDuration.toFixed(1)),
+        totalEnergyKwh: Number(totalEnergy.toFixed(2)),
+        totalLatenessMin: Number(totalLateness.toFixed(1)),
+        vehiclesUsed: routes.length
+      }
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -36335,6 +36829,10 @@ export default {
   DGIMSlidingWindow,
   WCSACRiskPricing,
   EVRPTWNonlinearChargingRouter,
+  // Phase 69 Enterprise Algorithms
+  LossyCountingFrequencyMoments,
+  RCPOConstrainedPricing,
+  VRPTWTimeDependentGreenRouter,
 };
 
 

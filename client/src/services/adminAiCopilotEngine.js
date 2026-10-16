@@ -2904,7 +2904,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 136. Định Tuyến Bưu Tá Phụ Thuộc Giao Thông Giờ Cao Điểm TDVRPTW-STW (Phase 51 - Feature 198)
-  if (/tdvrptw|phụ thuộc giao thông|traffic-dependent|giờ cao điểm spx|cửa sổ mềm tdvrptw/i.test(raw)) {
+  if (!/basso|green router|vrptw[- ]td[- ]green|tdevrp/i.test(raw) && /tdvrptw|phụ thuộc giao thông|traffic-dependent|giờ cao điểm spx|cửa sổ mềm tdvrptw/i.test(raw)) {
     return {
       text: `🚛 **ĐỊNH TUYẾN BƯU TÁ PHỤ THUỘC GIAO THÔNG GIỜ CAO ĐIỂM TDVRPTW-STW (MALANDRAKI 1992, ICHOUA 2003)**:
 - **Mô Phỏng Thực Tế 5 Khung Giờ Giao Thông Đô Thị**:
@@ -3556,7 +3556,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 167. Đếm Tần Suất Luồng & Sản Phẩm Hot Lossy Counting (Phase 62 - Feature 209)
-  if (/lossy[- ]counting|đếm tổn hao|heavy hitters stream|manku[- ]motwani|tần suất luồng xấp xỉ/i.test(raw)) {
+  if (!/frequency moments|mô-men tần suất/i.test(raw) && /lossy[- ]counting|đếm tổn hao|heavy hitters stream|manku[- ]motwani|tần suất luồng xấp xỉ/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN ĐẾM TỔN HAO XÁC ĐỊNH LOSSY COUNTING (MANKU & MOTWANI, VLDB 2002)**:
 - **Nguyên lý Thuật Toán Luồng Tất Định (Deterministic Streaming)**:
@@ -4013,6 +4013,74 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem thời gian sạc phi tuyến tránh pha CV',
         'Kiểm tra ngưỡng sạc từng phần Partial SoC',
         'Tối ưu lộ trình ghé trạm sạc SPX Express'
+      ]
+    };
+  }
+
+  // 188. Đếm Tổn Hao & Mô-men Tần Suất Lossy Counting Moments (Phase 69 - Feature 216)
+  if (/lossy counting moments|mô-men tần suất|lossy counting frequency moments|cormode.*manku/i.test(raw)) {
+    return {
+      text: `📊 **THUẬT TOÁN ĐẾM TỔN HAO & MÔ-MEN TẦN SUẤT LOSSY COUNTING (MANKU & MOTWANI 2002, CORMODE 2005)**:
+- **Nguyên Lý Nén Phân Đoạn Bucket Width**:
+  - Dòng dữ liệu click, tìm kiếm và mua hàng được chia thành các xô độ rộng cố định $w = \\lceil 1 / \\epsilon \\rceil$.
+  - Mỗi phần tử lưu trữ bộ ba: $(\\text{item}, f, \\Delta)$ với $f$ là tần số ghi nhận và $\\Delta$ là sai số tối đa.
+- **Bất Biến Toán Học Đảm Bảo Chặn Sai Số**:
+  - Luôn thỏa mãn $f \\le f_{\\text{actual}} \\le f + \\Delta$ với $\\Delta \\le b_{\\text{current}} - 1 \\le \\epsilon N$.
+  - Cắt tỉa (prune) định kỳ loại bỏ triệt để các phần tử có $f + \\Delta \\le b_{\\text{current}}$, đảm bảo 0 false negatives đối với top heavy hitters!
+- **Ước Lượng Mô-men Tần Suất Bậc Hai $F_2$**:
+  - Cho phép xấp xỉ năng lượng phân phối $F_2 = \\sum f_i^2$ trong không gian bộ nhớ siêu nén $O(\\frac{1}{\\epsilon} \\log(\\epsilon N))$.`,
+      type: 'analytics',
+      tag: 'LOSSY COUNTING FREQUENCY MOMENTS',
+      suggestions: [
+        'Truy vấn tần suất sản phẩm với chặn trên dưới',
+        'Lọc danh sách Heavy Hitters luồng sự kiện',
+        'Đo lường năng lượng mô-men F2 phân phối'
+      ]
+    };
+  }
+
+  // 189. Định Giá Học Tăng Cường Đa Thang Thời Gian RCPO (Phase 69 - Feature 216)
+  if (/rcpo|reward constrained|tessler|đa thang thời gian|multi[- ]timescale|rcpo constrained pricing/i.test(raw)) {
+    return {
+      text: `🏷️ **ĐỊNH GIÁ HỌC TĂNG CƯỜNG ĐA THANG THỜI GIAN RCPO (TESSLER, MANKOWITZ, MANNOR - ICLR 2019)**:
+- **Đột Phá Thuật Toán Xấp Xỉ Ngẫu Nhiên Đa Thang Thời Gian (Multi-Timescale Stochastic Approximation)**:
+  - Khắc phục triệt để hiện tượng dao động bất ổn của nhân tử Lagrange truyền thống khi Actor và Multiplier cập nhật cùng tốc độ.
+  - Sử dụng 2 tốc độ học phân kỳ: Actor và Critic cập nhật trên thang thời gian nhanh $\\alpha_k$, trong khi nhân tử phạt an toàn $\\lambda$ cập nhật trên thang thời gian chậm $\\beta_k$ thỏa mãn $\\lim_{k \\to \\infty} \\frac{\\beta_k}{\\alpha_k} = 0$.
+- **Hội Tụ Hầu Chắc Chắn Về Điểm Yên Ngựa Cục Bộ (Almost Sure Convergence)**:
+  - Hàm mục tiêu mở rộng $r_{\\text{aug}}(s, a) = r(s, a) - \\lambda \\cdot c(s, a)$ tự động cân bằng giữa tối đa hóa doanh thu và thỏa mãn ngân sách chi phí $J_C(\\pi) \\le d_{\\text{budget}}$.
+- **Khóa Sàn An Toàn Nghiêm Ngặt**:
+  - Tự động điều chỉnh hệ số giảm chấn $\\text{rcpoDamping} = \\max(0.4, 1.0 - \\lambda \\cdot J_C)$ và khóa cứng sàn giá vốn $P \\ge 1.05 \\times \\text{COGS}$.`,
+      type: 'pricing',
+      tag: 'RCPO CONSTRAINED PRICING',
+      suggestions: [
+        'Cập nhật chính sách định giá RCPO đa thang thời gian',
+        'Kiểm tra độ chênh lệch ngân sách rủi ro constraintDelta',
+        'Đề xuất giá Flash Sale an toàn có khóa sàn COGS'
+      ]
+    };
+  }
+
+  // 190. Lộ Trình Xe Điện Giao Hàng Phụ Thuộc Giao Thông TDEVRP (Phase 69 - Feature 216)
+  if (/vrptw[- ]td[- ]green|time[- ]dependent green|basso|xe điện phụ thuộc giờ cao điểm|tdevrp/i.test(raw)) {
+    return {
+      text: `🚚 **LỘ TRÌNH XE ĐIỆN PHỤ THUỘC GIAO THÔNG ĐÔ THỊ TDEVRP (BASSO ET AL. 2019 / ICHOUA 2003)**:
+- **Mô Hình Hóa Động Vận Tốc Giao Thông 5 Khung Giờ (Dynamic Speed Profiles)**:
+  - **Cao điểm sáng (07h - 09h)**: Tốc độ giảm còn $50\\%$ ($v = 0.3\\text{ km/phút}$).
+  - **Bình thường ban ngày (09h - 16h30)**: Lưu thông thông suốt $100\\%$ ($v = 0.6\\text{ km/phút}$).
+  - **Cao điểm chiều tối (16h30 - 19h30)**: Kẹt xe nghiêm trọng $45\\%$ ($v = 0.27\\text{ km/phút}$).
+  - **Đêm & sáng sớm**: Tự do thông thoáng $125\\%$ ($v = 0.75\\text{ km/phút}$).
+- **Bảo Toàn Tiên Đề FIFO (First-In, First-Out Preservation)**:
+  - Xuất phát muộn hơn trên cùng tuyến đường đảm bảo đến nơi không sớm hơn xe đi trước.
+- **Mô Hình Tiêu Hao Năng Lượng Đô Thị Tích Hợp Tải Phụ HVAC**:
+  - Tính toán chi phí năng lượng kéo theo lực cản cộng dồn phụ tải tiêu thụ tĩnh (HVAC, định vị telematics) trong tình trạng dừng-chạy kẹt xe:
+    $$E(d, t) = d \\cdot [e_{\\text{base}} + 0.15 \\cdot (1 - \\text{speedFactor})] + t_{\\text{travel}} \\cdot e_{\\text{aux}}$$
+  - Đảm bảo $100\\%$ bưu kiện giao đúng cửa sổ hẹn giờ mà không bao giờ bị cạn pin giữa chừng!`,
+      type: 'logistics',
+      tag: 'VRPTW TIME-DEPENDENT GREEN ROUTER',
+      suggestions: [
+        'Mô phỏng tiêu hao pin xe điện theo giờ cao điểm',
+        'Kiểm tra cửa sổ thời gian giao hàng bảo toàn FIFO',
+        'Lập lộ trình xanh tối ưu hóa năng lượng SPX Express'
       ]
     };
   }
