@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/count[- ]mean[- ]min|cmm|mean[- ]noise|turnstile|conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp|frequent[- ]directions|matrix sketch|dyadic[- ]range|dyadic/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/time[- ]decayed|decayed count[- ]min|suy giảm thời gian|count[- ]mean[- ]min|cmm|mean[- ]noise|turnstile|conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp|frequent[- ]directions|matrix sketch|dyadic[- ]range|dyadic/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -2237,7 +2237,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 102. Tối Ưu Hóa Combo Mua Kèm Cross-Selling Bằng PPO & GAE (Phase 40 - Feature 187)
-  if (/ppo bundle|proximal policy optimization|combo mua kèm ppo|gae advantage|clipped surrogate|tối ưu bundle/i.test(raw)) {
+  if (!/mappo|multi[- ]agent/i.test(raw) && /ppo bundle|proximal policy optimization|combo mua kèm ppo|gae advantage|clipped surrogate|tối ưu bundle/i.test(raw)) {
     return {
       text: `🎯 **TỐI ƯU HÓA COMBO MUA KÈM CROSS-SELLING BẰNG PPO & GENERALIZED ADVANTAGE ESTIMATION (GAE)**:
 - **Nguyên lý Clipped Surrogate Objective (Schulman et al., 2017)**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3836,7 +3836,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 180. Định Giá Ràng Buộc An Toàn PPO-Lagrangian Safe Pricing (Phase 66 - Feature 213)
-  if (!/ppo[- ]clip|ppo[- ]entropy|ddpg[- ]lagrangian/i.test(raw) && /ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
+  if (!/mappo|multi[- ]agent.*ppo|ppo[- ]clip|ppo[- ]entropy|ddpg[- ]lagrangian/i.test(raw) && /ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
     return {
       text: `🛡️ **ĐỊNH GIÁ RÀNG BUỘC AN TOÀN PPO-LAGRANGIAN SAFE PRICING (ACHIAM ET AL. ICML 2017 / RAY ET AL. 2019)**:
 - **Tối Đa Doanh Thu Dưới Đa Ràng Buộc Kinh Doanh Nghiêm Ngặt**:
@@ -3994,7 +3994,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 187. Điều Phối Xe Điện & Sạc Phi Tuyến Từng Phần EVRPTW-NL (Phase 68 - Feature 215)
-  if (/evrptw[- ]nl|sạc phi tuyến|sạc từng phần|cc[- ]cv|constant current|constant voltage|montoya|nonlinear charging/i.test(raw)) {
+  if (!/tou|biểu giá điện/i.test(raw) && /evrptw[- ]nl|sạc phi tuyến|sạc từng phần|cc[- ]cv|constant current|constant voltage|montoya|nonlinear charging/i.test(raw)) {
     return {
       text: `⚡ **ĐIỀU PHỐI ĐỘI XE ĐIỆN VỚI HÀM SẠC PHI TUYẾN EVRPTW-NL (MONTOYA ET AL. 2017 / FROGER 2019)**:
 - **Đặc Tính Sạc Phi Tuyến Thực Tế Của Pin Lithium-Ion**:
@@ -4196,7 +4196,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 196. Định Tuyến Xe Điện Đổi Pin và Suy Giảm Dung Lượng EVRPTW-BSD (Phase 71 - Feature 218)
-  if (!/active cooling|btms|làm mát chủ động|park.*jung|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw[- ]bsd|battery swapping decay|đổi pin suy giảm|suy giảm dung lượng pin|battery capacity fading|pelletier|hof/i.test(raw)) {
+  if (!/tou|partial charging|biểu giá điện|active cooling|btms|làm mát chủ động|park.*jung|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw[- ]bsd|battery swapping decay|đổi pin suy giảm|suy giảm dung lượng pin|battery capacity fading|pelletier|hof/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN XE ĐIỆN ĐỔI PIN & MÔ HÌNH SUY GIẢM DUNG LƯỢNG EVRPTW-BSD (HOF 2017, PELLETIER 2018)**:
 - **Mô Hình Lão Hóa & Suy Giảm Dung Lượng Khả Dụng (Battery Capacity Fading)**:
@@ -4490,7 +4490,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 210. Định Giá Hành Động Liên Tục PPO-Clip Lagrangian (Phase 76 - Feature 223)
-  if (/ppo[- ]clip[- ]lagrangian|ppo[- ]clip continuous|ppo clip continuous|clipped surrogate lagrangian|ppo continuous safe pricing/i.test(raw)) {
+  if (!/mappo|multi[- ]agent/i.test(raw) && /ppo[- ]clip[- ]lagrangian|ppo[- ]clip continuous|ppo clip continuous|clipped surrogate lagrangian|ppo continuous safe pricing/i.test(raw)) {
     return {
       text: `🎯 **ĐỊNH GIÁ HÀNH ĐỘNG LIÊN TỤC AN TOÀN PPO-CLIP LAGRANGIAN (SCHULMAN 2017, ACHIAM 2017)**:
 - **Chính Sách Gaussian Hành Động Liên Tục**:
@@ -4512,7 +4512,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 211. Định Tuyến Xe Điện Mô Hình Nhiệt & Suy Giảm Pin Arrhenius EVRPTW-Thermal (Phase 76 - Feature 223)
-  if (!/active cooling|btms|làm mát chủ động|park.*jung/i.test(raw) && /thermal (?:battery|degradation)|arrhenius|suy giảm pin nhiệt|nhiệt độ cell pin|evrptw[- ]thermal|pelletier.*jabali|pelletier|suri onori/i.test(raw)) {
+  if (!/tou|partial charging|biểu giá điện|active cooling|btms|làm mát chủ động|park.*jung/i.test(raw) && /thermal (?:battery|degradation)|arrhenius|suy giảm pin nhiệt|nhiệt độ cell pin|evrptw[- ]thermal|pelletier.*jabali|pelletier|suri onori/i.test(raw)) {
     return {
       text: `🌡️ **ĐỊNH TUYẾN XE ĐIỆN NHIỆT & SUY GIẢM PIN ARRHENIUS EVRPTW-THERMAL (PELLETIER 2017, SURI & ONORI 2016)**:
 - **Mô Hình Động Học Điện - Nhiệt Ghép Cặp (Electro-Thermal Dynamics)**:
@@ -4730,6 +4730,79 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem kế hoạch giảm tải trọng từng chặng',
         'Kiểm tra năng lượng tái sinh đổ dốc',
         'Đo lường chi phí điện năng tiết kiệm'
+      ]
+    };
+  }
+
+  // 221. Ước Lượng Tần Suất Dòng Thời Gian Suy Giảm Time-Decayed Count-Min Sketch (Phase 80 - Feature 227)
+  if (/time[- ]decayed|decayed count[- ]min|suy giảm thời gian.*count[- ]min|chu kỳ bán rã.*count[- ]min|forward decay/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG TẦN SUẤT THỜI GIAN SUY GIẢM TIME-DECAYED COUNT-MIN SKETCH (CORMODE ET AL. VLDB 2008, CHEN & ZHANG IEEE TKDE 2006)**:
+- **Mô Hình Suy Giảm Hàm Mũ Tiến (Forward Exponential Decay Model)**:
+  - Khi luồng sự kiện bão đơn và clickstream kéo dài vô hạn, tần suất lịch sử của các sự kiện cũ mất dần giá trị. Trọng lượng hiệu dụng tại thời điểm truy vấn $t$ suy giảm theo chu kỳ bán rã $T_{1/2}$:
+    $$w(e_i, t) = v_i \\cdot e^{-\\lambda (t - t_i)}, \\quad \\lambda = \\frac{\\ln 2}{T_{1/2}}$$
+- **Cơ Chế Lan Truyền Trễ Lười Biếng (Lazy Forward Decay Propagation)**:
+  - Không cần quét cập nhật toàn bộ $w \\times d$ ô mỗi giây (tiêu tốn $O(w \\cdot d)$), mỗi ô $C[j, k]$ chỉ lưu nhãn thời gian cập nhật gần nhất $\\tau[j, k]$.
+  - Khi có sự kiện mới tại thời điểm $t$, ô băm cập nhật lười:
+    $$C[j, k] \\leftarrow C[j, k] \\cdot e^{-\\lambda (t - \\tau[j, k])} + v, \\quad \\tau[j, k] \\leftarrow t$$
+  - Đảm bảo độ phức tạp cập nhật và truy vấn chuẩn xác tuyệt đối chỉ $O(d) = O(1)$!
+- **Theo Dõi Heavy Hitters Động & Khả Hợp Phân Tán (Mergeable Trend Radar)**:
+  - Tự động duy trì danh sách Top trending Heavy Hitters thỏa mãn $\\hat{f}(x, t) \\ge \\phi \\cdot W(t)$, lọc bỏ các hot deal đã nguội và hỗ trợ gộp chính xác giữa các cụm Server!`,
+      type: 'analytics',
+      tag: 'TIME-DECAYED COUNT-MIN SKETCH',
+      suggestions: [
+        'Xem ma trận bộ đếm Time-Decayed CMS',
+        'Kiểm tra chu kỳ bán rã Half-Life T1/2',
+        'Lọc danh sách Heavy Hitters luồng tức thời'
+      ]
+    };
+  }
+
+  // 222. Định Giá Đa Đại Diện Học Tăng Cường MAPPO Continuous (Phase 80 - Feature 227)
+  if (/mappo|multi[- ]agent.*ppo|mappo continuous|multi[- ]agent proximal policy/i.test(raw)) {
+    return {
+      text: `💹 **ĐỊNH GIÁ ĐA ĐẠI DIỆN HỌC TĂNG CƯỜNG PROXIMAL POLICY OPTIMIZATION LIÊN TỤC MAPPO-CONTINUOUS (CHAO YU ET AL. NEURIPS 2022, SCHULMAN 2017)**:
+- **Kiến Trúc Huấn Luyện Tập Trung - Thực Thi Phân Tán (CTDE) Với PPO**:
+  - Mỗi người bán là một Actor Gauss phân tán $\\pi_{\\theta_i}(a_i \\mid s_i)$ lấy mẫu hành động liên tục $a_i = \\tanh(u_i) \\in (-1, 1)$, mở rộng thành dải giá $[P_{\\min}, P_{\\max}]$.
+  - Mạng Centralized Value Critic $V_\\phi(s_{\\text{joint}})$ quan sát toàn cảnh thị trường chung để ước tính chính xác hàm lợi thế $\\hat{A}_i = Q - V$.
+- **Cơ Chế Cắt Ngọn Surrogate Clipped PPO Objective**:
+  - Triệt tiêu hoàn toàn hiện tượng sốc giá hoặc bất ổn chính sách giữa các shop đối thủ thông qua tỷ lệ xác suất $r_i(\\theta) = \\frac{\\pi_{\\theta_i}(a_i|s_i)}{\\pi_{\\theta_i}^{\\text{old}}(a_i|s_i)}$:
+    $$L_i^{\\text{CLIP}}(\\theta) = \\mathbb{E}\\left[ \\min(r_i(\\theta) \\hat{A}_i, \\text{clip}(r_i(\\theta), 1 - \\epsilon, 1 + \\epsilon) \\hat{A}_i) \\right]$$
+- **Cost Critic Centralized & Đối Ngẫu Lagrange Khóa Sàn 1.05 COGS**:
+  - Mạng Cost Critic $V^C_\\psi(s_{\\text{joint}})$ đánh giá nguy cơ bán dưới giá vốn, kết hợp bước nhảy đối ngẫu $\\lambda_i \\leftarrow \\max(0, \\lambda_i + \\eta_\\lambda (c_i - d_{\\text{budget}}))$.
+  - Đảm bảo rào chắn an toàn tuyệt đối $p_i \\ge 1.05 \\times \\text{COGS}$ ngăn ngừa hoàn toàn các cuộc chiến tranh giá hủy diệt!`,
+      type: 'pricing',
+      tag: 'MAPPO MULTI-AGENT CONTINUOUS PRICING',
+      suggestions: [
+        'Xem chính sách giá liên tục MAPPO từng gian hàng',
+        'Kiểm tra tỷ lệ cắt ngọn Clipped Ratio Epsilon',
+        'Đo lường rào chắn an toàn 1.05 COGS Floor'
+      ]
+    };
+  }
+
+  // 223. Định Tuyến Xe Điện Biểu Giá Theo Giờ & Sạc Từng Phần EVRPTW-TOU-Partial (Phase 80 - Feature 227)
+  if (/evrptw[- ]tou|tou tariff|partial charging|biểu giá điện theo giờ|sạc từng phần tou|tou.*evrptw|pelletier.*tou/i.test(raw)) {
+    return {
+      text: `⚡ **ĐỊNH TUYẾN XE ĐIỆN BIỂU GIÁ THEO GIỜ & SẠC TỪNG PHẦN EVRPTW TOU TARIFF PARTIAL CHARGING ROUTER (EVRPTW-TOU-PARTIAL - PELLETIER ET AL. TR PART B 2018, KESKIN & ÇATAY EJOR 2018)**:
+- **Tối Ưu Hóa Chi Phí Điện Năng Theo Biểu Giá TOU (Time-of-Use Electricity Tariff)**:
+  - Giá điện sạc xe biến thiên theo khung giờ thực tế:
+    • **Off-Peak (Đêm 22h - 06h)**: $1.600\\text{ VND/kWh}$ (tiết kiệm tối đa).
+    • **Standard (Bình thường)**: $2.800\\text{ VND/kWh}$.
+    • **Peak (Cao điểm 09h30 - 11h30, 17h - 20h)**: $4.900\\text{ VND/kWh}$ (chi phí cao gấp 3 lần).
+- **Chiến Lược Sạc Từng Phần Thông Minh (Partial Charging Optimization)**:
+  - Thay vì cố sạc đầy 100% gây tốn thời gian và phải chịu giá điện cao điểm đắt đỏ, xe điện chỉ sạc vừa đủ dung lượng $\\Delta E_i$ để tới điểm đến tiếp theo với biên an toàn SoC $15\\%$:
+    $$\\Delta E_i = \\min(B_{\\text{cap}} - B_{\\text{arrival}}, \\max(0, E_{\\text{required}} - B_{\\text{arrival}} + B_{\\text{buffer}}))$$
+- **Mô Hình Sạc Phi Tuyến Hai Giai Đoạn (CC/CV)**:
+  - Ưu tiên sạc ở pha CC (Dòng không đổi) công suất cực đại khi SoC $\\le 80\\%$, né tránh triệt để pha CV (Áp không đổi) công suất suy giảm khi SoC $> 80\\%$.
+- **Tiết Kiệm Chi Phí Vận Hành Toàn Mạng Lưới SPX Express**:
+  - Tiết kiệm **30% - 52%** chi phí tiền điện sạc so với sạc giờ cao điểm, cam kết 100% bưu kiện giao đúng cửa sổ thời gian (Time Windows)!`,
+      type: 'logistics',
+      tag: 'EVRPTW TOU TARIFF PARTIAL CHARGING ROUTER',
+      suggestions: [
+        'Xem biểu giá điện TOU theo từng khung giờ',
+        'Kiểm tra lượng sạc từng phần Partial kWh',
+        'Thống kê số tiền điện tiết kiệm so với giờ cao điểm'
       ]
     };
   }

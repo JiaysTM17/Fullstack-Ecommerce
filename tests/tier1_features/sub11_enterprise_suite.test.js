@@ -407,6 +407,11 @@ import {
   CountMeanMinSketch,
   MASACContinuousPricing,
   EVRPTWPayloadTerrainRouter,
+  // Phase 80 Enterprise Algorithms
+  TimeDecayedCountMinSketch,
+  MAPPOContinuousPricing,
+  TOU_TARIFF_TIERS,
+  EVRPTWPartialChargingTOURouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -612,6 +617,9 @@ import { EVRPTWAutonomousDroneRechargeRouter as ServerEVRPTWAutonomousDroneRecha
 import { CountMeanMinSketch as ServerCountMeanMinSketch } from "../../server/src/utils/countMeanMinSketch.js";
 import { MASACContinuousPricing as ServerMASACContinuousPricing } from "../../server/src/utils/masacContinuousPricing.js";
 import { EVRPTWPayloadTerrainRouter as ServerEVRPTWPayloadTerrainRouter } from "../../server/src/utils/evrptwPayloadTerrainRouter.js";
+import { TimeDecayedCountMinSketch as ServerTimeDecayedCountMinSketch } from "../../server/src/utils/timeDecayedCountMinSketch.js";
+import { MAPPOContinuousPricing as ServerMAPPOContinuousPricing } from "../../server/src/utils/mappoContinuousPricing.js";
+import { EVRPTWPartialChargingTOURouter as ServerEVRPTWPartialChargingTOURouter, TOU_TARIFF_TIERS as ServerTOUTariffTiers } from "../../server/src/utils/evrptwPartialChargingTOURouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -33603,6 +33611,438 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích bằng CMM hoặc giao bằng xe điện giảm tải địa hình không?");
         expect.equal(buyerRes.intent, "CMM_MASAC_PAYLOAD_TERRAIN_ASSIST");
         expect.ok(buyerRes.replyText.includes("Count-Mean-Min"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 227: Phase 80 Enterprise Algorithms Suite (24 Tests)
+    //   - Time-Decayed Count-Min Sketch (F227-T01 - F227-T08)
+    //   - MAPPO Continuous Pricing (F227-T09 - F227-T14)
+    //   - EVRPTW Partial Charging TOU Tariff Router (F227-T15 - F227-T22)
+    //   - Tri-Role AI Copilots Deep Integration (F227-T23 - F227-T24)
+    // =========================================================================
+    describe("Feature 227: Phase 80 Enterprise Algorithms Suite", () => {
+      // -----------------------------------------------------------------------
+      // Time-Decayed Count-Min Sketch Tests (F227-T01 - F227-T08)
+      // -----------------------------------------------------------------------
+      test("F227-T01: TimeDecayedCountMinSketch initializes depth, width, decay rate, and hash parameters", () => {
+        const sketch = new TimeDecayedCountMinSketch({ depth: 4, width: 128, decayLambda: 0.002, phi: 0.05, seed: 12345 });
+        expect.equal(sketch.depth, 4);
+        expect.equal(sketch.width, 128);
+        expect.equal(sketch.decayLambda, 0.002);
+        expect.equal(sketch.phi, 0.05);
+        expect.equal(sketch.table.length, 4);
+        expect.equal(sketch.table[0].length, 128);
+        expect.equal(sketch.timestamps.length, 4);
+        expect.equal(sketch.timestamps[0].length, 128);
+        expect.equal(sketch.hashParams.length, 4);
+      });
+
+      test("F227-T02: TimeDecayedCountMinSketch accurately derives decay lambda from half-life seconds", () => {
+        const halfLife = 600; // 10 minutes
+        const sketch = new TimeDecayedCountMinSketch({ halfLifeSec: halfLife });
+        const expectedLambda = Math.LN2 / halfLife;
+        expect.equal(Number(sketch.decayLambda.toFixed(6)), Number(expectedLambda.toFixed(6)));
+        const stats = sketch.getStats();
+        expect.equal(stats.halfLifeSec, halfLife);
+      });
+
+      test("F227-T03: TimeDecayedCountMinSketch applies lazy forward decay propagation during single-item updates", () => {
+        const sketch = new TimeDecayedCountMinSketch({ halfLifeSec: 100 });
+        const t0 = 1000;
+        sketch.update("SKU_PROMO_01", 10, t0);
+
+        expect.equal(sketch.itemsInserted, 1);
+        expect.equal(sketch.totalWeight, 10);
+        expect.equal(sketch.lastStreamTimestamp, t0);
+
+        const est0 = sketch.estimate("SKU_PROMO_01", t0);
+        expect.equal(est0, 10);
+
+        // Advance by 1 half-life (100 seconds)
+        const t1 = t0 + 100;
+        const est1 = sketch.estimate("SKU_PROMO_01", t1);
+        expect.ok(Math.abs(est1 - 5.0) <= 0.05);
+      });
+
+      test("F227-T04: TimeDecayedCountMinSketch point query decays properly as query reference timestamp advances", () => {
+        const sketch = new TimeDecayedCountMinSketch({ halfLifeSec: 200 });
+        const t0 = 5000;
+        sketch.update("FLASH_DEAL_A", 100, t0);
+
+        // Query at t0 + 200 (1 half-life): ~50
+        const est1 = sketch.estimate("FLASH_DEAL_A", t0 + 200);
+        expect.ok(Math.abs(est1 - 50.0) <= 0.5);
+
+        // Query at t0 + 400 (2 half-lives): ~25
+        const est2 = sketch.estimate("FLASH_DEAL_A", t0 + 400);
+        expect.ok(Math.abs(est2 - 25.0) <= 0.5);
+
+        // Query at t0 + 600 (3 half-lives): ~12.5
+        const est3 = sketch.estimate("FLASH_DEAL_A", t0 + 600);
+        expect.ok(Math.abs(est3 - 12.5) <= 0.5);
+      });
+
+      test("F227-T05: TimeDecayedCountMinSketch total decayed stream weight tracks global decay accurately over time", () => {
+        const sketch = new TimeDecayedCountMinSketch({ halfLifeSec: 300 });
+        sketch.update("ITEM_1", 40, 1000);
+        sketch.update("ITEM_2", 60, 1000);
+
+        expect.equal(sketch.getTotalDecayedWeight(1000), 100);
+
+        // After 300 seconds, total decayed weight should be 50
+        const wAfter = sketch.getTotalDecayedWeight(1300);
+        expect.ok(Math.abs(wAfter - 50.0) <= 0.5);
+
+        // Insert new item at 1300
+        sketch.update("ITEM_3", 50, 1300);
+        expect.ok(Math.abs(sketch.getTotalDecayedWeight(1300) - 100.0) <= 0.5);
+      });
+
+      test("F227-T06: TimeDecayedCountMinSketch dynamically tracks active heavy hitters exceeding phi fraction", () => {
+        const sketch = new TimeDecayedCountMinSketch({ halfLifeSec: 100, phi: 0.15 });
+        const t0 = 2000;
+
+        for (let i = 0; i < 50; i++) sketch.update("HOT_ITEM", 2, t0); // weight 100
+        for (let i = 0; i < 20; i++) sketch.update(`NORMAL_${i}`, 1, t0); // weight 20
+
+        const heavy = sketch.getHeavyHitters(t0);
+        expect.ok(heavy.length >= 1);
+        expect.equal(heavy[0].key, "HOT_ITEM");
+        expect.ok(heavy[0].fractionOfStream >= 0.7);
+
+        // Fast forward 1000 seconds (10 half-lives) and add a new hot item
+        const t1 = t0 + 1000;
+        sketch.update("NEW_VIRAL_ITEM", 50, t1);
+
+        const newHeavy = sketch.getHeavyHitters(t1);
+        expect.ok(newHeavy.length >= 1);
+        expect.equal(newHeavy[0].key, "NEW_VIRAL_ITEM");
+      });
+
+      test("F227-T07: TimeDecayedCountMinSketch merges two sketches with identical dimensions and preserves decayed frequency", () => {
+        const s1 = new TimeDecayedCountMinSketch({ depth: 4, width: 64, halfLifeSec: 200, seed: 999 });
+        const s2 = new TimeDecayedCountMinSketch({ depth: 4, width: 64, halfLifeSec: 200, seed: 999 });
+
+        s1.update("SKU_SHARED", 20, 1000);
+        s2.update("SKU_SHARED", 30, 1000);
+
+        s1.merge(s2, 1000);
+        const estMerged = s1.estimate("SKU_SHARED", 1000);
+        expect.ok(Math.abs(estMerged - 50) <= 1.0);
+        expect.equal(s1.itemsInserted, 2);
+      });
+
+      test("F227-T08: Client and Server TimeDecayedCountMinSketch demonstrate 100% bidirectional parity", () => {
+        const clientSketch = new TimeDecayedCountMinSketch({ depth: 4, width: 64, halfLifeSec: 150, seed: 777 });
+        const serverSketch = new ServerTimeDecayedCountMinSketch({ depth: 4, width: 64, halfLifeSec: 150, seed: 777 });
+
+        const items = ["LAPTOP_ASUS", "MOUSE_LOGI", "KEYBOARD_KEYCHRON", "LAPTOP_ASUS", "LAPTOP_ASUS"];
+        let t = 1000;
+        for (const item of items) {
+          clientSketch.update(item, 5, t);
+          serverSketch.update(item, 5, t);
+          t += 20;
+        }
+
+        expect.equal(clientSketch.itemsInserted, serverSketch.itemsInserted);
+        expect.equal(clientSketch.getTotalDecayedWeight(t), serverSketch.getTotalDecayedWeight(t));
+
+        for (const item of ["LAPTOP_ASUS", "MOUSE_LOGI", "KEYBOARD_KEYCHRON"]) {
+          expect.equal(clientSketch.estimate(item, t + 100), serverSketch.estimate(item, t + 100));
+        }
+
+        const clientHH = clientSketch.getHeavyHitters(t + 50);
+        const serverHH = serverSketch.getHeavyHitters(t + 50);
+        expect.equal(clientHH.length, serverHH.length);
+        expect.equal(clientHH[0].key, serverHH[0].key);
+      });
+
+      // -----------------------------------------------------------------------
+      // MAPPO Continuous Pricing Tests (F227-T09 - F227-T14)
+      // -----------------------------------------------------------------------
+      test("F227-T09: MAPPOContinuousPricing initializes multi-agent continuous Gaussian actors, value and cost critics", () => {
+        const mappo = new MAPPOContinuousPricing({ numAgents: 3, stateDim: 4, clipEps: 0.15 });
+        expect.equal(mappo.numAgents, 3);
+        expect.equal(mappo.stateDim, 4);
+        expect.equal(mappo.clipEps, 0.15);
+        expect.equal(mappo.agents.length, 3);
+        expect.equal(mappo.wCritic.length, 12);
+        expect.equal(mappo.wCostCritic.length, 12);
+      });
+
+      test("F227-T10: MAPPOContinuousPricing sampleAction bounds continuous action in (-1, 1) and computes log-probability", () => {
+        const mappo = new MAPPOContinuousPricing({ numAgents: 2, stateDim: 4 });
+        const localState = [0.8, 1.1, 0.5, 0.7];
+
+        const sampleDet = mappo.sampleAction(0, localState, true);
+        expect.ok(sampleDet.action >= -1.0 && sampleDet.action <= 1.0);
+        expect.ok(Number.isFinite(sampleDet.logProb));
+
+        const sampleStoch = mappo.sampleAction(0, localState, false);
+        expect.ok(sampleStoch.action >= -1.0 && sampleStoch.action <= 1.0);
+        expect.ok(Number.isFinite(sampleStoch.logProb));
+      });
+
+      test("F227-T11: MAPPOContinuousPricing evaluateCentralizedValue evaluates joint reward and cost values", () => {
+        const mappo = new MAPPOContinuousPricing({ numAgents: 2, stateDim: 3 });
+        const jointState = [0.5, 0.6, 0.7, 0.8, 0.9, 0.4];
+
+        const values = mappo.evaluateCentralizedValue(jointState);
+        expect.ok(Number.isFinite(values.vReward));
+        expect.ok(Number.isFinite(values.vCost));
+      });
+
+      test("F227-T12: MAPPOContinuousPricing update performs PPO clipped surrogate optimization and critic gradient steps", () => {
+        const mappo = new MAPPOContinuousPricing({ numAgents: 2, stateDim: 3, clipEps: 0.2 });
+
+        const batch = {
+          states: [[0.5, 0.6, 0.7], [0.8, 0.9, 0.4]],
+          actions: [0.1, -0.2],
+          oldLogProbs: [-0.5, -0.6],
+          rewards: [10.0, 8.5],
+          costs: [0.01, 0.04],
+          nextStates: [[0.6, 0.7, 0.8], [0.7, 0.8, 0.5]],
+          done: false
+        };
+
+        const res = mappo.update(batch);
+        expect.equal(res.step, 1);
+        expect.ok(res.criticLoss >= 0);
+        expect.ok(res.costCriticLoss >= 0);
+        expect.equal(res.agentLosses.length, 2);
+        expect.ok(Number.isFinite(res.agentLosses[0].ratio));
+        expect.ok(Number.isFinite(res.agentLosses[0].ppoLoss));
+      });
+
+      test("F227-T13: MAPPOContinuousPricing dual Lagrangian multiplier Lambda ascends upon safety violations and enforces 1.05 COGS floor", () => {
+        const mappo = new MAPPOContinuousPricing({ numAgents: 2, stateDim: 3, costBudget: 0.02, lrDual: 0.05 });
+        expect.equal(mappo.agents[0].lambda, 0);
+
+        const batchViolating = {
+          states: [[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]],
+          actions: [-0.8, -0.8],
+          oldLogProbs: [-0.5, -0.5],
+          rewards: [2.0, 2.0],
+          costs: [0.12, 0.15],
+          nextStates: [[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]],
+          done: false
+        };
+
+        mappo.update(batchViolating);
+        expect.ok(mappo.agents[0].lambda > 0);
+        expect.ok(mappo.agents[1].lambda > 0);
+
+        const contexts = [
+          { cogs: 100000, basePrice: 130000, competitorPrice: 105000, inventory: 60, priceElasticity: 2.0 },
+          { cogs: 300000, basePrice: 400000, competitorPrice: 310000, inventory: 90, priceElasticity: 1.8 }
+        ];
+
+        const recs = mappo.recommendPrices(contexts);
+        expect.equal(recs.length, 2);
+        for (const r of recs) {
+          expect.ok(r.recommendedPrice >= r.safeFloorPrice);
+          expect.ok(r.grossMarginRate >= 0.045);
+          expect.equal(r.isSafe, r.rawPrice >= r.safeFloorPrice);
+        }
+      });
+
+      test("F227-T14: Client and Server MAPPOContinuousPricing demonstrate 100% bidirectional parity", () => {
+        const clientMAPPO = new MAPPOContinuousPricing({ numAgents: 2, stateDim: 4 });
+        const serverMAPPO = new ServerMAPPOContinuousPricing({ numAgents: 2, stateDim: 4 });
+
+        for (let i = 0; i < 2; i++) {
+          serverMAPPO.agents[i].wMean = [...clientMAPPO.agents[i].wMean];
+          serverMAPPO.agents[i].bMean = clientMAPPO.agents[i].bMean;
+          serverMAPPO.agents[i].wLogStd = [...clientMAPPO.agents[i].wLogStd];
+          serverMAPPO.agents[i].bLogStd = clientMAPPO.agents[i].bLogStd;
+        }
+        serverMAPPO.wCritic = [...clientMAPPO.wCritic];
+        serverMAPPO.bCritic = clientMAPPO.bCritic;
+        serverMAPPO.wCostCritic = [...clientMAPPO.wCostCritic];
+        serverMAPPO.bCostCritic = clientMAPPO.bCostCritic;
+
+        const state = [0.8, 1.2, 0.5, 0.7];
+        const clientSample = clientMAPPO.sampleAction(0, state, true);
+        const serverSample = serverMAPPO.sampleAction(0, state, true);
+
+        expect.equal(clientSample.action, serverSample.action);
+        expect.equal(clientSample.logProb, serverSample.logProb);
+
+        const contexts = [
+          { cogs: 150000, basePrice: 200000, competitorPrice: 180000, inventory: 50, priceElasticity: 1.7 },
+          { cogs: 400000, basePrice: 550000, competitorPrice: 490000, inventory: 80, priceElasticity: 2.2 }
+        ];
+
+        const clientRecs = clientMAPPO.recommendPrices(contexts);
+        const serverRecs = serverMAPPO.recommendPrices(contexts);
+
+        expect.equal(clientRecs.length, serverRecs.length);
+        expect.equal(clientRecs[0].recommendedPrice, serverRecs[0].recommendedPrice);
+        expect.equal(clientRecs[0].safeFloorPrice, serverRecs[0].safeFloorPrice);
+        expect.equal(clientRecs[1].recommendedPrice, serverRecs[1].recommendedPrice);
+        expect.equal(clientRecs[1].safeFloorPrice, serverRecs[1].safeFloorPrice);
+      });
+
+      // -----------------------------------------------------------------------
+      // EVRPTW Partial Charging TOU Tariff Router Tests (F227-T15 - F227-T22)
+      // -----------------------------------------------------------------------
+      test("F227-T15: EVRPTWPartialChargingTOURouter initializes depot, charging stations, and battery parameters", () => {
+        const router = new EVRPTWPartialChargingTOURouter({
+          batteryCapacityKwh: 75,
+          minSocBufferPct: 20,
+          consumptionKwhPerKm: 0.25,
+          speedKmh: 45
+        });
+
+        expect.equal(router.batteryCapacityKwh, 75);
+        expect.equal(router.minSocBufferPct, 20);
+        expect.equal(router.consumptionKwhPerKm, 0.25);
+        expect.equal(router.speedKmh, 45);
+        expect.ok(router.chargingStations.length >= 3);
+      });
+
+      test("F227-T16: EVRPTWPartialChargingTOURouter accurately resolves 3-tier Time-of-Use (TOU) electricity tariffs", () => {
+        const router = new EVRPTWPartialChargingTOURouter();
+
+        // 02:00 AM -> Off-Peak
+        const tNight = router.getTOUTariff(2.0);
+        expect.equal(tNight.tier, "OFF_PEAK");
+        expect.equal(tNight.rateVnd, 1600);
+
+        // 10:30 AM -> Peak
+        const tMorningPeak = router.getTOUTariff(10.5);
+        expect.equal(tMorningPeak.tier, "PEAK");
+        expect.equal(tMorningPeak.rateVnd, 4900);
+
+        // 14:00 PM -> Standard
+        const tAfternoon = router.getTOUTariff(14.0);
+        expect.equal(tAfternoon.tier, "STANDARD");
+        expect.equal(tAfternoon.rateVnd, 2800);
+
+        // 18:30 PM -> Peak
+        const tEveningPeak = router.getTOUTariff(18.5);
+        expect.equal(tEveningPeak.tier, "PEAK");
+        expect.equal(tEveningPeak.rateVnd, 4900);
+      });
+
+      test("F227-T17: EVRPTWPartialChargingTOURouter simulates non-linear CC and CV charging sessions", () => {
+        const router = new EVRPTWPartialChargingTOURouter({ batteryCapacityKwh: 60 });
+
+        // CC phase: 20% to 70% (12 kWh to 42 kWh, needed 30 kWh)
+        const sessionCC = router._simulateChargingSession(12, 42, 60);
+        expect.equal(sessionCC.chargedKwh, 30);
+        expect.equal(sessionCC.durationHours, 0.5); // 30 kWh / 60 kW = 0.5 hours
+        expect.equal(sessionCC.endSocPct, 70);
+
+        // CV phase: 80% to 90% (48 kWh to 54 kWh, needed 6 kWh)
+        const sessionCV = router._simulateChargingSession(48, 54, 60);
+        expect.equal(sessionCV.chargedKwh, 6);
+        expect.ok(sessionCV.durationHours > 6 / 60); // CV power is ~65% of 60 kW
+        expect.equal(sessionCV.endSocPct, 90);
+      });
+
+      test("F227-T18: EVRPTWPartialChargingTOURouter partial charging handles zero-demand charging when target <= current", () => {
+        const router = new EVRPTWPartialChargingTOURouter({ batteryCapacityKwh: 60 });
+        const session = router._simulateChargingSession(40, 30, 60);
+        expect.equal(session.chargedKwh, 0);
+        expect.equal(session.durationHours, 0);
+      });
+
+      test("F227-T19: EVRPTWPartialChargingTOURouter returns empty result safely when no customers provided", () => {
+        const router = new EVRPTWPartialChargingTOURouter();
+        const res = router.planRoute([]);
+        expect.equal(res.success, true);
+        expect.equal(res.routes.length, 0);
+        expect.equal(res.totalDistanceKm, 0);
+        expect.equal(res.totalChargingKwh, 0);
+      });
+
+      test("F227-T20: EVRPTWPartialChargingTOURouter triggers partial recharging when battery drops below safety buffer", () => {
+        const router = new EVRPTWPartialChargingTOURouter({
+          batteryCapacityKwh: 40,
+          minSocBufferPct: 20,
+          consumptionKwhPerKm: 0.35,
+          speedKmh: 40
+        });
+
+        const farCustomers = [
+          { id: "C1", x: 40, y: 30, readyTime: 8.5 },
+          { id: "C2", x: 80, y: 60, readyTime: 10.0 }
+        ];
+
+        const plan = router.planRoute(farCustomers, 8.0);
+        expect.equal(plan.success, true);
+        const route = plan.routes[0];
+        expect.ok(route.chargingEvents.length >= 1);
+        expect.ok(plan.totalChargingKwh > 0);
+        expect.ok(plan.totalElectricityCostVnd > 0);
+      });
+
+      test("F227-T21: EVRPTWPartialChargingTOURouter calculates TOU charging savings compared to all-peak charging", () => {
+        const router = new EVRPTWPartialChargingTOURouter({
+          batteryCapacityKwh: 30,
+          consumptionKwhPerKm: 0.3
+        });
+
+        const customers = [
+          { id: "STOP_X", x: 30, y: 20 },
+          { id: "STOP_Y", x: 60, y: 40 }
+        ];
+
+        const plan = router.planRoute(customers, 23.0); // Depart during Off-Peak (23:00)
+        expect.equal(plan.success, true);
+        expect.ok(plan.totalChargingSavingsVnd >= 0);
+        expect.ok(plan.summary.includes("partial TOU recharges"));
+      });
+
+      test("F227-T22: Client and Server EVRPTWPartialChargingTOURouter demonstrate 100% bidirectional parity", () => {
+        const clientRouter = new EVRPTWPartialChargingTOURouter();
+        const serverRouter = new ServerEVRPTWPartialChargingTOURouter();
+
+        const customers = [
+          { id: "DROP_1", x: 10, y: 15, readyTime: 8.5 },
+          { id: "DROP_2", x: 25, y: 30, readyTime: 9.5 },
+          { id: "DROP_3", x: 5, y: 20, readyTime: 10.5 }
+        ];
+
+        const clientPlan = clientRouter.planRoute(customers, 8.0);
+        const serverPlan = serverRouter.planRoute(customers, 8.0);
+
+        expect.equal(clientPlan.success, serverPlan.success);
+        expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+        expect.equal(clientPlan.totalChargingKwh, serverPlan.totalChargingKwh);
+        expect.equal(clientPlan.totalElectricityCostVnd, serverPlan.totalElectricityCostVnd);
+        expect.equal(clientPlan.totalChargingSavingsVnd, serverPlan.totalChargingSavingsVnd);
+        expect.equal(clientPlan.routes[0].stops.length, serverPlan.routes[0].stops.length);
+        expect.equal(clientPlan.routes[0].finalSocPct, serverPlan.routes[0].finalSocPct);
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F227-T23 - F227-T24)
+      // -----------------------------------------------------------------------
+      test("F227-T23: Admin Sentinel Copilot correctly routes Section 221 (Time-Decayed CMS), Section 222 (MAPPO), and Section 223 (EVRPTW TOU Partial)", () => {
+        const resDecay = generateAdminCopilotResponse("Ước lượng tần suất luồng suy giảm thời gian Time-Decayed Count-Min Sketch Cormode Chen");
+        expect.equal(resDecay.tag, "TIME-DECAYED COUNT-MIN SKETCH");
+        expect.ok(resDecay.text.includes("TIME-DECAYED COUNT-MIN SKETCH"));
+
+        const resMAPPO = generateAdminCopilotResponse("Định giá đa đại diện học tăng cường MAPPO Proximal Policy Optimization Chao Yu liên tục");
+        expect.equal(resMAPPO.tag, "MAPPO MULTI-AGENT CONTINUOUS PRICING");
+        expect.ok(resMAPPO.text.includes("MAPPO"));
+
+        const resTOU = generateAdminCopilotResponse("Định tuyến xe điện biểu giá điện theo giờ và sạc từng phần EVRPTW TOU Partial Pelletier");
+        expect.equal(resTOU.tag, "EVRPTW TOU TARIFF PARTIAL CHARGING ROUTER");
+        expect.ok(resTOU.text.includes("EVRPTW TOU TARIFF PARTIAL CHARGING ROUTER"));
+      });
+
+      test("F227-T24: Seller ShopSmart Copilot Section 89 and Buyer Assistant Intent 82 handle Phase 80 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn tần suất suy giảm Time-Decayed CMS và định giá đa đại diện MAPPO liên tục");
+        expect.equal(sellerRes.tag, "TIME-DECAYED CMS, MAPPO CONTINUOUS & TOU PARTIAL CHARGING EVRPTW");
+        expect.ok(sellerRes.text.includes("Time-Decayed Count-Min Sketch"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích bằng Time-Decayed CMS hoặc giao bằng xe điện sạc từng phần TOU không?");
+        expect.equal(buyerRes.intent, "TIME_DECAYED_MAPPO_TOU_PARTIAL_CHARGING_ASSIST");
+        expect.ok(buyerRes.replyText.includes("Time-Decayed Count-Min Sketch"));
       });
     });
   });

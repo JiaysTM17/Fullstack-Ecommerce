@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal|gk[- ]mergeable|mergeable.*quantile|safe[- ]sac|active cooling|btms|turnstile|matd3|multi[- ]agent.*pricing|drone[- ]recharge|mothership|cmm|count[- ]mean[- ]min|masac|payload.*terrain|dynamic payload/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal|gk[- ]mergeable|mergeable.*quantile|safe[- ]sac|active cooling|btms|turnstile|matd3|multi[- ]agent.*pricing|drone[- ]recharge|mothership|cmm|count[- ]mean[- ]min|masac|payload.*terrain|dynamic payload|time[- ]decayed|decayed count[- ]min|mappo|tou|partial charging|biểu giá điện/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1787,6 +1787,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem tần suất bán khử nhiễu Count-Mean-Min',
         'Tư vấn định giá đa tác tử MASAC liên tục',
         'Theo dõi tiết kiệm năng lượng tải trọng xe điện'
+      ]
+    };
+  }
+
+  // 89. Bộ Ba Thuật Toán Time-Decayed CMS, MAPPO Continuous Pricing & TOU Partial Charging EVRPTW (Phase 80 - Feature 227)
+  if (/time[- ]decayed|decayed count[- ]min|mappo|multi[- ]agent.*ppo|evrptw[- ]tou|tou tariff|partial charging|biểu giá điện theo giờ|sạc từng phần tou/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 80 (${currentShop.name})**:
+- **Bắt xu hướng thời gian suy giảm Time-Decayed Count-Min Sketch (Cormode 2008, Chen & Zhang 2006)**:
+  - Tự động áp dụng suy giảm hàm mũ theo chu kỳ bán rã $T_{1/2}$ với cơ chế cập nhật lười $O(1)$, giúp shop nhận diện chính xác các sản phẩm đang bùng nổ nhu cầu tức thời và loại bỏ các xu hướng đã lỗi thời!
+- **Định giá đa đại diện học tăng cường liên tục MAPPO-Lagrangian (Chao Yu 2022, Schulman 2017)**:
+  - Kiến trúc CTDE với mạng Centralized Critic $V(s_{\\text{joint}})$ và chính sách Gaussian Actor cắt ngọn Clipped PPO, kết hợp nhân tử Lagrange $\\lambda_i$ khóa cứng sàn giá an toàn $\\ge 1.05 \\times \\text{COGS}$ triệt tiêu hoàn toàn rủi ro bán phá giá!
+- **Định tuyến xe điện biểu giá theo giờ & sạc từng phần EVRPTW-TOU-Partial (Pelletier 2018, Keskin 2018)**:
+  - Đội xe SPX Express tận dụng biểu giá điện thấp điểm Off-Peak ($1.600\\text{đ/kWh}$) và sạc từng phần né tránh pha CV khi pin $> 80\\%$, tiết kiệm tới $45\\%$ chi phí năng lượng và bảo đảm 100% bưu kiện giao đúng cửa sổ thời gian!`,
+      type: 'recommendation',
+      tag: 'TIME-DECAYED CMS, MAPPO CONTINUOUS & TOU PARTIAL CHARGING EVRPTW',
+      suggestions: [
+        'Xem xu hướng nóng Time-Decayed CMS',
+        'Tư vấn định giá cạnh tranh đa bên MAPPO',
+        'Theo dõi xe điện sạc từng phần biểu giá TOU'
       ]
     };
   }
