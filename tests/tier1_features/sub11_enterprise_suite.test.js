@@ -420,6 +420,10 @@ import {
   DDSketchLogQuantile,
   TarMACMultiAgentCooperativePricing,
   EVRPTWVehicleToGridPeakShavingRouter,
+  // Phase 83 Enterprise Algorithms
+  ConservativeUpdateCountMinSketch,
+  BiCNetMultiVendorPricing,
+  EVRPTWMultiDepotMicrogridRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -634,6 +638,9 @@ import ServerEVRPTWDynamicWirelessInductiveRouter from "../../server/src/utils/e
 import ServerDDSketchLogQuantile from "../../server/src/utils/ddsketchLogQuantile.js";
 import ServerTarMACMultiAgentCooperativePricing from "../../server/src/utils/tarmacMultiVendorPricing.js";
 import ServerEVRPTWVehicleToGridPeakShavingRouter from "../../server/src/utils/evrptwVehicleToGridRouter.js";
+import ServerConservativeUpdateCountMinSketch from "../../server/src/utils/conservativeUpdateCountMinSketch.js";
+import ServerBiCNetMultiVendorPricing from "../../server/src/utils/bicnetMultiVendorPricing.js";
+import ServerEVRPTWMultiDepotMicrogridRouter from "../../server/src/utils/evrptwMultiDepotMicrogridRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -34793,6 +34800,344 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sàn có sử dụng phân vị DDSketch Log hoặc xe điện phát điện ngược lưới EVRPTW-V2G không?");
         expect.equal(buyerRes.intent, "DDSKETCH_TARMAC_V2G_ASSIST");
         expect.ok(buyerRes.replyText.includes("DDSketch Log Quantile"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 230: Conservative Update CMS, BiCNet Multi-Vendor Pricing, & EVRPTW Multi-Depot Microgrid (Phase 83) (24 Tests)
+    // =========================================================================
+    describe("Feature 230: Conservative Update CMS, BiCNet Multi-Vendor Pricing, & EVRPTW Multi-Depot Microgrid (Phase 83)", () => {
+      // -----------------------------------------------------------------------
+      // ConservativeUpdateCountMinSketch Tests (F230-T01 - F230-T07)
+      // -----------------------------------------------------------------------
+      test("F230-T01: ConservativeUpdateCountMinSketch initializes correctly with parameters", () => {
+        const sketch = new ConservativeUpdateCountMinSketch({
+          epsilon: 0.005,
+          delta: 0.01,
+          heavyHitterThreshold: 0.02
+        });
+        expect.ok(sketch.width >= 543);
+        expect.ok(sketch.depth >= 4);
+        expect.equal(sketch.totalWeight, 0);
+        expect.equal(sketch.phi, 0.02);
+      });
+
+      test("F230-T02: Conservative update rule prevents unnecessary counter increments compared to basic CMS", () => {
+        const sketch = new ConservativeUpdateCountMinSketch({ epsilon: 0.01, delta: 0.05 });
+        sketch.update("item_flash_sale_1", 5);
+        sketch.update("item_flash_sale_1", 3);
+
+        const est = sketch.estimate("item_flash_sale_1");
+        expect.equal(est, 8);
+      });
+
+      test("F230-T03: Accurate point query frequency estimation with conservative heuristic", () => {
+        const sketch = new ConservativeUpdateCountMinSketch({ epsilon: 0.005, delta: 0.01 });
+        const items = ["iphone_15", "macbook_pro", "airpods_pro", "ipad_air"];
+        const counts = [150, 45, 90, 30];
+
+        items.forEach((item, idx) => {
+          sketch.update(item, counts[idx]);
+        });
+
+        expect.equal(sketch.estimate("iphone_15"), 150);
+        expect.equal(sketch.estimate("macbook_pro"), 45);
+        expect.equal(sketch.estimate("airpods_pro"), 90);
+        expect.equal(sketch.estimate("ipad_air"), 30);
+        expect.equal(sketch.estimate("non_existent_item"), 0);
+      });
+
+      test("F230-T04: Batch update processing correctly tracks item weights and occurrences", () => {
+        const sketch = new ConservativeUpdateCountMinSketch();
+        sketch.updateBatch([
+          { item: "keyboard_rgb", weight: 20 },
+          { item: "mouse_wireless", weight: 35 },
+          "mousepad_xl",
+          "mousepad_xl"
+        ]);
+
+        expect.equal(sketch.estimate("keyboard_rgb"), 20);
+        expect.equal(sketch.estimate("mouse_wireless"), 35);
+        expect.equal(sketch.estimate("mousepad_xl"), 2);
+      });
+
+      test("F230-T05: Heavy hitters candidate min-heap / tracking correctly filters items exceeding threshold phi * N", () => {
+        const sketch = new ConservativeUpdateCountMinSketch({ heavyHitterThreshold: 0.10 });
+        sketch.update("super_deal_item", 500);
+        sketch.update("medium_deal_item", 150);
+        sketch.update("small_item_1", 10);
+        sketch.update("small_item_2", 10);
+
+        const hh = sketch.getHeavyHitters();
+        expect.ok(hh.length >= 2);
+        expect.equal(hh[0].item, "super_deal_item");
+        expect.ok(hh[0].percentage > 50);
+      });
+
+      test("F230-T06: Logarithmic bucket quantile estimation (p50, p90, p99) on transaction price streams", () => {
+        const sketch = new ConservativeUpdateCountMinSketch();
+        for (let i = 1; i <= 100; i++) {
+          sketch.update(i * 10000, 1);
+        }
+
+        const metrics = sketch.getMetrics();
+        expect.ok(metrics.p50 >= 450000 && metrics.p50 <= 550000);
+        expect.ok(metrics.p90 >= 850000 && metrics.p90 <= 950000);
+      });
+
+      test("F230-T07: Client and Server ConservativeUpdateCountMinSketch demonstrate strict parity", () => {
+        const clientSketch = new ConservativeUpdateCountMinSketch({ epsilon: 0.01, delta: 0.01 });
+        const serverSketch = new ServerConservativeUpdateCountMinSketch({ epsilon: 0.01, delta: 0.01 });
+
+        const stream = [
+          { item: "sku_101", weight: 40 },
+          { item: "sku_102", weight: 80 },
+          { item: "sku_103", weight: 15 }
+        ];
+
+        clientSketch.updateBatch(stream);
+        serverSketch.updateBatch(stream);
+
+        expect.equal(clientSketch.estimate("sku_102"), serverSketch.estimate("sku_102"));
+        expect.equal(clientSketch.totalWeight, serverSketch.totalWeight);
+      });
+
+      // -----------------------------------------------------------------------
+      // BiCNetMultiVendorPricing Tests (F230-T08 - F230-T15)
+      // -----------------------------------------------------------------------
+      test("F230-T08: BiCNetMultiVendorPricing initializes correctly with hyper-parameters", () => {
+        const engine = new BiCNetMultiVendorPricing({
+          hiddenDim: 12,
+          maxMarkup: 0.15,
+          learningRate: 0.02
+        });
+        expect.equal(engine.hiddenDim, 12);
+        expect.equal(engine.maxMarkup, 0.15);
+      });
+
+      test("F230-T09: Forward-backward recurrent pass creates valid joint communication embeddings", () => {
+        const engine = new BiCNetMultiVendorPricing({ hiddenDim: 8 });
+        const vendors = [
+          { id: 'v_anchor', price: 1500000, stock: 50, cogs: 1000000, marketDemand: 80, category: 'Electronics' },
+          { id: 'v_accessory', price: 200000, stock: 200, cogs: 120000, marketDemand: 150, category: 'Accessories' },
+          { id: 'v_delivery', price: 50000, stock: 500, cogs: 30000, marketDemand: 200, category: 'Services' }
+        ];
+
+        const result = engine.coordinatePricing(vendors);
+        expect.equal(result.numVendors, 3);
+        expect.equal(result.decisions.length, 3);
+        expect.ok(Array.isArray(result.decisions[0].communicationEmbedding));
+        expect.equal(result.decisions[0].communicationEmbedding.length, 4);
+      });
+
+      test("F230-T10: Multi-vendor coordinated pricing ensures strict safe floor P_i >= 1.05 * COGS_i", () => {
+        const engine = new BiCNetMultiVendorPricing({ maxMarkup: 0.30 });
+        const vendors = [
+          { id: 'v_loss_leader', price: 90000, stock: 10, cogs: 100000, marketDemand: 20 },
+          { id: 'v_normal', price: 250000, stock: 50, cogs: 180000, marketDemand: 40 }
+        ];
+
+        const result = engine.coordinatePricing(vendors);
+        const lossLeader = result.decisions.find(d => d.vendorId === 'v_loss_leader');
+        expect.ok(lossLeader.recommendedPrice >= Math.round(100000 * 1.05));
+        expect.equal(lossLeader.isFloorEnforced, true);
+      });
+
+      test("F230-T11: Decentralized execution respects max markup constraint", () => {
+        const engine = new BiCNetMultiVendorPricing({ maxMarkup: 0.10 });
+        const vendors = [
+          { id: 'v1', price: 100000, stock: 80, cogs: 60000, marketDemand: 50 },
+          { id: 'v2', price: 200000, stock: 90, cogs: 120000, marketDemand: 60 }
+        ];
+
+        const result = engine.coordinatePricing(vendors);
+        result.decisions.forEach(d => {
+          if (!d.isFloorEnforced) {
+            expect.ok(Math.abs(d.priceAdjustmentPct) <= 10.5);
+          }
+        });
+      });
+
+      test("F230-T12: Cross-vendor synergy bonus when complementary products discount cooperatively", () => {
+        const engine = new BiCNetMultiVendorPricing();
+        const vendors = [
+          { id: 'v_phone', price: 10000000, stock: 30, cogs: 7500000, marketDemand: 60 },
+          { id: 'v_case', price: 150000, stock: 300, cogs: 80000, marketDemand: 120 }
+        ];
+
+        const result = engine.coordinatePricing(vendors);
+        expect.ok(result.synergyIndex >= 0.8 && result.synergyIndex <= 1.05);
+      });
+
+      test("F230-T13: Marketplace step evaluation calculates GMV, gross profit, and average margin", () => {
+        const engine = new BiCNetMultiVendorPricing();
+        const decisions = [
+          { vendorId: 'v1', recommendedPrice: 100000, cogs: 70000 },
+          { vendorId: 'v2', recommendedPrice: 200000, cogs: 140000 }
+        ];
+        const sales = [
+          { vendorId: 'v1', unitsSold: 10 },
+          { vendorId: 'v2', unitsSold: 5 }
+        ];
+
+        const outcome = engine.evaluateMarketplaceStep(decisions, sales);
+        expect.equal(outcome.totalGmv, 2000000);
+        expect.equal(outcome.totalGrossProfit, 600000);
+        expect.equal(outcome.averageGrossMarginPct, 30.0);
+      });
+
+      test("F230-T14: Multi-step pricing simulation converges and preserves positive gross margins", () => {
+        const engine = new BiCNetMultiVendorPricing();
+        const vendors = [
+          { id: 'vA', price: 500000, stock: 100, cogs: 400000, marketDemand: 80 },
+          { id: 'vB', price: 300000, stock: 120, cogs: 220000, marketDemand: 100 }
+        ];
+
+        for (let step = 0; step < 5; step++) {
+          const res = engine.coordinatePricing(vendors);
+          res.decisions.forEach(d => {
+            expect.ok(d.recommendedPrice >= d.safeFloor);
+          });
+        }
+      });
+
+      test("F230-T15: Client and Server BiCNetMultiVendorPricing demonstrate architectural parity", () => {
+        const clientEngine = new BiCNetMultiVendorPricing();
+        const serverEngine = new ServerBiCNetMultiVendorPricing();
+
+        const decisions = [
+          { vendorId: 'v1', recommendedPrice: 150000, cogs: 100000 },
+          { vendorId: 'v2', recommendedPrice: 300000, cogs: 220000 }
+        ];
+        const sales = [
+          { vendorId: 'v1', unitsSold: 20 },
+          { vendorId: 'v2', unitsSold: 10 }
+        ];
+
+        const clientRes = clientEngine.evaluateMarketplaceStep(decisions, sales);
+        const serverRes = serverEngine.evaluateMarketplaceStep(decisions, sales);
+
+        expect.equal(clientRes.totalGmv, serverRes.totalGmv);
+        expect.equal(clientRes.totalGrossProfit, serverRes.totalGrossProfit);
+        expect.equal(clientRes.averageGrossMarginPct, serverRes.averageGrossMarginPct);
+      });
+
+      // -----------------------------------------------------------------------
+      // EVRPTWMultiDepotMicrogridRouter Tests (F230-T16 - F230-T22)
+      // -----------------------------------------------------------------------
+      test("F230-T16: EVRPTWMultiDepotMicrogridRouter initializes correctly with vehicle and grid configs", () => {
+        const router = new EVRPTWMultiDepotMicrogridRouter({
+          batteryCapacityKWh: 80,
+          baseConsumptionPerKm: 0.22,
+          payloadConsumptionFactor: 0.09
+        });
+        expect.equal(router.batteryCapacityKWh, 80);
+        expect.equal(router.baseConsumptionPerKm, 0.22);
+        expect.equal(router.solarLevelizedCostVND, 400);
+      });
+
+      test("F230-T17: Diurnal solar generation curve P_solar(t) accurately reflects solar peak at noon and 0 at night", () => {
+        const router = new EVRPTWMultiDepotMicrogridRouter();
+        const depot = { id: 'd1', solarPeakKW: 100 };
+
+        expect.equal(router.getSolarPowerKW(depot, 0), 0);
+        expect.equal(router.getSolarPowerKW(depot, 5.5), 0);
+        expect.ok(Math.abs(router.getSolarPowerKW(depot, 12) - 100) < 0.1);
+        expect.ok(router.getSolarPowerKW(depot, 9) > 0);
+        expect.equal(router.getSolarPowerKW(depot, 20), 0);
+      });
+
+      test("F230-T18: Grid TOU tariff returns correct rates for off-peak, standard, and high-peak hours", () => {
+        const router = new EVRPTWMultiDepotMicrogridRouter();
+        expect.equal(router.getGridTariff(2), 1600); // Off-peak (22h - 4h)
+        expect.equal(router.getGridTariff(10), 5500); // High-peak (9h30 - 11h30)
+        expect.equal(router.getGridTariff(14), 2800); // Standard
+      });
+
+      test("F230-T19: Multi-depot routing dispatches vehicles considering payload-dependent consumption and time windows", () => {
+        const router = new EVRPTWMultiDepotMicrogridRouter();
+        const customers = [
+          { id: 'c1', x: 5, y: 5, demand: 30, readyHour: 8, dueHour: 12, serviceMinutes: 10 },
+          { id: 'c2', x: 8, y: 12, demand: 40, readyHour: 9, dueHour: 15, serviceMinutes: 15 }
+        ];
+
+        const plan = router.planMultiDepotRoutes({ customers });
+        expect.ok(plan.routes.length > 0);
+        expect.ok(plan.totalTravelDistanceKm > 0);
+        expect.ok(plan.totalEnergyConsumedKWh > 0);
+      });
+
+      test("F230-T20: Vehicles return to closest / most cost-effective microgrid depot and prioritize rooftop solar charging", () => {
+        const router = new EVRPTWMultiDepotMicrogridRouter();
+        const depots = [
+          { id: 'DEPOT_NORTH', x: 0, y: 0, solarPeakKW: 50, bessCapacityKWh: 80, openHour: 7 },
+          { id: 'DEPOT_SOUTH', x: 100, y: 100, solarPeakKW: 80, bessCapacityKWh: 120, openHour: 7 }
+        ];
+        const customers = [
+          { id: 'c_near_north', x: 2, y: 2, demand: 20, readyHour: 8, dueHour: 11, serviceMinutes: 10 }
+        ];
+
+        const plan = router.planMultiDepotRoutes({ depots, customers });
+        const r = plan.routes[0];
+        expect.equal(r.endDepotId, 'DEPOT_NORTH');
+        const returnStop = r.stops[r.stops.length - 1];
+        expect.equal(returnStop.action, 'DEPOT_RETURN_SOLAR_RECHARGE');
+        expect.ok(returnStop.rechargeDispatch.solarChargedKWh >= 0);
+      });
+
+      test("F230-T21: Economic cost savings from levelized solar energy (400 VND/kWh) vs Grid TOU (1,600 - 5,500 VND/kWh)", () => {
+        const router = new EVRPTWMultiDepotMicrogridRouter();
+        const customers = [
+          { id: 'c_midday', x: 10, y: 10, demand: 50, readyHour: 10, dueHour: 12, serviceMinutes: 10 }
+        ];
+
+        const plan = router.planMultiDepotRoutes({ customers });
+        expect.ok(plan.solarCostSavingsVND >= 0);
+      });
+
+      test("F230-T22: Client and Server EVRPTWMultiDepotMicrogridRouter demonstrate routing parity", () => {
+        const clientRouter = new EVRPTWMultiDepotMicrogridRouter();
+        const serverRouter = new ServerEVRPTWMultiDepotMicrogridRouter();
+
+        const input = {
+          customers: [
+            { id: 'c1', x: 4, y: 4, demand: 15, readyHour: 8, dueHour: 12, serviceMinutes: 10 }
+          ]
+        };
+
+        const clientPlan = clientRouter.planMultiDepotRoutes(input);
+        const serverPlan = serverRouter.planMultiDepotRoutes(input);
+
+        expect.equal(clientPlan.totalTravelDistanceKm, serverPlan.totalTravelDistanceKm);
+        expect.equal(clientPlan.totalEnergyConsumedKWh, serverPlan.totalEnergyConsumedKWh);
+        expect.equal(clientPlan.totalChargingCostVND, serverPlan.totalChargingCostVND);
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F230-T23 - F230-T24)
+      // -----------------------------------------------------------------------
+      test("F230-T23: Admin Sentinel Copilot correctly routes Section 230 (Conservative CMS Log), Section 231 (BiCNet), and Section 232 (EVRPTW Multi-Depot Microgrid)", () => {
+        const resCU = generateAdminCopilotResponse("Phác họa phân vị cập nhật thận trọng logarit Conservative-Update-Count-Min Estan Varghese 2003");
+        expect.equal(resCU.tag, "CONSERVATIVE UPDATE CMS");
+        expect.ok(resCU.text.includes("CONSERVATIVE UPDATE COUNT-MIN SKETCH"));
+
+        const resBiCNet = generateAdminCopilotResponse("Định giá hai chiều BiCNet bi-directional recurrent communication network Peng AAAI 2017");
+        expect.equal(resBiCNet.tag, "BICNET COOPERATIVE PRICING");
+        expect.ok(resBiCNet.text.includes("BICNET MULTI-VENDOR PRICING"));
+
+        const resMicrogrid = generateAdminCopilotResponse("Định tuyến quản lý đa kho microgrid EVRPTW-Multi-Depot Keskin TR Part C 2019");
+        expect.equal(resMicrogrid.tag, "EVRPTW MULTI-DEPOT MICROGRID ROUTER");
+        expect.ok(resMicrogrid.text.includes("EVRPTW MULTI-DEPOT MICROGRID"));
+      });
+
+      test("F230-T24: Seller ShopSmart Copilot Section 92 and Buyer Assistant Intent 85 handle Phase 83 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn định giá hai chiều BiCNet và quản lý đa kho microgrid cho gian hàng");
+        expect.equal(sellerRes.tag, "CU-CMS LOG, BICNET PRICING & MULTI-DEPOT MICROGRID EVRPTW");
+        expect.ok(sellerRes.text.includes("BiCNet Pricing"));
+
+        const buyerRes = generateAiChatResponse("Sàn có sử dụng xe điện sạc từ đa kho microgrid mặt trời hoặc định giá hai chiều BiCNet không?");
+        expect.equal(buyerRes.intent, "CU_CMS_BICNET_MICROGRID_ASSIST");
+        expect.ok(buyerRes.replyText.includes("EVRPTW-MD-Microgrid"));
       });
     });
   });

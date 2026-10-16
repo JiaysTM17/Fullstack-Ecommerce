@@ -1449,7 +1449,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 62. Phác Thảo Tần Suất Dữ Liệu Luồng Bằng Conservative Count-Min Sketch
-  if (!/fcm|dyadic/i.test(raw) && /conservative count-min|conservative cms|cập nhật thận trọng|heavy hitters.*conservative|phác thảo tần suất/i.test(raw)) {
+  if (!/estan|varghese|cu[- ]cms[- ]log|cập nhật thận trọng logarit|fcm|dyadic/i.test(raw) && /conservative count-min|conservative cms|cập nhật thận trọng|heavy hitters.*conservative|phác thảo tần suất/i.test(raw)) {
     return {
       text: `📊 **PHÁC THẢO TẦN SUẤT CONSERVATIVE COUNT-MIN SKETCH (GOYAL ET AL. 2012)**:
 - **Cơ chế Cập nhật Thận trọng (Conservative Update)**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3051,7 +3051,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 143. Phác Thảo Nhanh Tần Suất Luồng & Truy Vấn Khoảng Dyadic FCM-CU (Phase 54 - Feature 201)
-  if (!/dyadic[- ]range count[- ]sketch|unbiased dyadic|dyadic[- ]range count[- ]min|dyadic range sketch|dyadic range count min|cormode pods/i.test(raw) && /fcm|conservative update|cu-cms|cập nhật thận trọng fcm|dyadic range|khoảng dyadic|cây dyadic/i.test(raw)) {
+  if (!/estan|varghese|cu[- ]cms[- ]log|cập nhật thận trọng logarit|dyadic[- ]range count[- ]sketch|unbiased dyadic|dyadic[- ]range count[- ]min|dyadic range sketch|dyadic range count min|cormode pods/i.test(raw) && /fcm|conservative update|cu-cms|cập nhật thận trọng fcm|dyadic range|khoảng dyadic|cây dyadic/i.test(raw)) {
     return {
       text: `📊 **PHÁC THẢO NHANH TẦN SUẤT LUỒNG VỚI CẬP NHẬT THẬN TRỌNG & KHOẢNG DYADIC FCM-CU (CORMODE & MUTHUKRISHNAN 2005, GOYAL ET AL. 2012)**:
 - **Cập Nhật Thận Trọng Triệt Tiêu Sai Số (Conservative Update)**:
@@ -4936,6 +4936,68 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lịch phát điện ngược V2G trong giờ cao điểm',
         'Tính toán doanh thu chênh lệch giá điện Arbitrage Net Profit',
         'Kiểm tra khấu hao chu kỳ pin và lượng CO2 cắt giảm'
+      ]
+    };
+  }
+
+  // 230. Phác Thảo Cập Nhật Thận Trọng CU-CMS Logarit (Phase 83 - Feature 230)
+  if (/cu[- ]cms[- ]log|conservative update count[- ]min|estan.*varghese|cập nhật thận trọng logarit|goyal.*daume/i.test(raw)) {
+    return {
+      text: `📊 **PHÁC THẢO CẬP NHẬT THẬN TRỌNG CONSERVATIVE UPDATE COUNT-MIN SKETCH (ESTAN & VARGHESE ACM TOCS 2003, GOYAL & DAUME 2012)**:
+- **Nguyên Lý Cập Nhật Thận Trọng (Conservative Update Rule)**:
+  - Thay vì tăng mù quáng cả $d$ dòng băm, thuật toán tìm giá trị nhỏ nhất hiện tại $f_{\\text{est}} = \\min_{r} C[r, h_r(x)]$ và chỉ tăng các ô có giá trị bằng $f_{\\text{est}}$: $C[r, h_r(x)] \\leftarrow \\max(C[r, h_r(x)], f_{\\text{est}} + w)$.
+  - Triệt tiêu tới **70% sai số thổi phồng tần suất** so với Count-Min Sketch truyền thống!
+- **Tích Hợp Ước Lượng Phân Vị Xô Logarit**:
+  - Phân vùng theo cấp số nhân $\\text{base} = 1.05$, ước lượng chính xác $P_{50}, P_{90}, P_{99}$ giá trị đơn hàng GMV và độ trễ gateway.
+- **Rút Trích Heavy Hitters Thời Gian Thực**:
+  - Tự động gắn cờ các SKU hoặc tài khoản phát sinh lưu lượng vượt ngưỡng $\\phi \\cdot N$ để cảnh báo nghẽn hệ thống!`,
+      type: 'analytics',
+      tag: 'CONSERVATIVE UPDATE CMS',
+      suggestions: [
+        'Xem danh sách Heavy Hitters lưu lượng đỉnh',
+        'Ước lượng phân vị đơn hàng P90 và P99',
+        'Đo lường độ giảm sai số thổi phồng tần suất'
+      ]
+    };
+  }
+
+  // 231. Định Giá Đa Đại Diện Mạng Hồi Quy Hai Chiều BiCNet Multi-Vendor Pricing (Phase 83 - Feature 230)
+  if (/bicnet|commnet|mạng hồi quy hai chiều|peng.*aaai|hai chiều.*định giá|bi[- ]directional communication.*pricing/i.test(raw)) {
+    return {
+      text: `🤝 **ĐỊNH GIÁ ĐA ĐẠI DIỆN MẠNG HỒI QUY HAI CHIỀU BICNET MULTI-VENDOR PRICING (PENG ET AL., AAAI 2017)**:
+- **Mạng Nơ-ron Truyền Tin Hai Chiều (Bi-Directional Recurrent Communication)**:
+  - Chuỗi liên kết tuần tự giữa các gian hàng: lan truyền trạng thái ẩn xuôi $\\vec{h}_i = \\tanh(W_{fx} o_i + W_{fh} \\vec{h}_{i-1} + b_f)$ và ngược $\\overleftarrow{h}_i = \\tanh(W_{bx} o_i + W_{bh} \\overleftarrow{h}_{i+1} + b_b)$.
+  - Đại diện $i$ thấu hiểu đầy đủ ý định định giá của cả các gian hàng đứng trước và đứng sau trong chuỗi cung ứng: $h_i = [\\vec{h}_i, \\overleftarrow{h}_i]$.
+- **Hợp Tác Bán Kèm Combo & Phối Hợp Giảm Giá**:
+  - Khuyến khích giảm giá hiệp đồng giữa các sản phẩm bổ trợ (Ví dụ: Điện thoại + Củ sạc nhanh + Ốp lưng), tối đa hóa tổng doanh thu giỏ hàng liên shop.
+- **Khóa Sàn An Toàn 1.05x COGS**:
+  - Không bao giờ cho phép giá bán giảm sâu dưới giá vốn $+ 5\\%$, bảo vệ 100% người bán khỏi nguy cơ kiệt quệ tài chính!`,
+      type: 'pricing',
+      tag: 'BICNET COOPERATIVE PRICING',
+      suggestions: [
+        'Xem vector truyền tin hai chiều BiCNet Embeddings',
+        'Tối ưu hóa giá bán combo giỏ hàng liên shop',
+        'Kiểm tra sàn an toàn 1.05x COGS'
+      ]
+    };
+  }
+
+  // 232. Định Tuyến Xe Điện Đa Kho Vi Lưới Năng Lượng Mặt Trời EVRPTW-MD-Microgrid (Phase 83 - Feature 230)
+  if (/evrptw[- ]md[- ]microgrid|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|đa kho microgrid|quản lý đa kho microgrid|vi lưới đa kho|sạc mặt trời đa kho|keskin.*(?:microgrid|tr part c)|goeke.*schneider/i.test(raw)) {
+    return {
+      text: `☀️ **ĐỊNH TUYẾN XE ĐIỆN ĐA KHO VI LƯỚI NĂNG LƯỢNG MẶT TRỜI EVRPTW MULTI-DEPOT MICROGRID (KESKIN 2019, SCHNEIDER 2014)**:
+- **Mạng Lưới Đa Bưu Cục Tích Hợp Điện Mặt Trời Áp Mái (Multi-Depot Solar Rooftop)**:
+  - Mỗi bưu cục trang bị giàn pin quang điện công suất $P_{\\text{solar}}(t) = P_{\\text{peak}} \\cdot \\max(0, \\sin(\\pi (t-6)/12))$ cùng hệ thống lưu trữ pin cố định BESS.
+- **Tiêu Hao Năng Lượng Phụ Thuộc Tải Trọng Động (Mass-Payload Dynamics)**:
+  - Năng lượng tiêu hao trên từng cung đường: $E_{uv} = d_{uv} \\cdot (c_{\\text{base}} + c_{\\text{payload}} \\cdot (m_{\\text{load}} / m_{\\text{cap}}))$.
+- **Tự Do Điều Phối Xuất/Nhập Kho & Tiết Kiệm Chi Phí Năng Lượng**:
+  - Xe có thể xuất phát từ Hub Hà Nội Bắc và quay về Hub Hà Nội Nam để nạp trực tiếp năng lượng mặt trời giá rẻ ($400\\text{đ/kWh}$ thay vì điện lưới $2.800 - 5.500\\text{đ/kWh}$), cắt giảm hơn $60\\%$ chi phí sạc pin và giao hàng chuẩn cửa sổ thời gian!`,
+      type: 'logistics',
+      tag: 'EVRPTW MULTI-DEPOT MICROGRID ROUTER',
+      suggestions: [
+        'Xem công suất phát điện mặt trời theo giờ tại các Hub',
+        'Tính toán chi phí năng lượng sạc điện mặt trời vs lưới',
+        'Định tuyến xe điện xuất nhập đa kho tối ưu'
       ]
     };
   }
