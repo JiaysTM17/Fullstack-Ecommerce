@@ -355,6 +355,10 @@ import {
   FrequentDirectionsSketch,
   PPOLagrangianSafePricing,
   EVRPTWQueueRouter,
+  // Phase 67 Enterprise Algorithms
+  QDigestQuantiles,
+  TRPOSafeDynamicPricing,
+  VRPTWTandemDroneRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -521,6 +525,9 @@ import { VRPTWCrossDockBilateralRouter as ServerVRPTWCrossDockBilateralRouter } 
 import { FrequentDirectionsSketch as ServerFrequentDirectionsSketch } from "../../server/src/utils/frequentDirectionsSketch.js";
 import { PPOLagrangianSafePricing as ServerPPOLagrangianSafePricing } from "../../server/src/utils/ppoLagrangianSafePricing.js";
 import { EVRPTWQueueRouter as ServerEVRPTWQueueRouter } from "../../server/src/utils/evrptwQueueRouter.js";
+import { QDigestQuantiles as ServerQDigestQuantiles } from "../../server/src/utils/qDigestQuantiles.js";
+import { TRPOSafeDynamicPricing as ServerTRPOSafeDynamicPricing } from "../../server/src/utils/trpoSafePricing.js";
+import { VRPTWTandemDroneRouter as ServerVRPTWTandemDroneRouter } from "../../server/src/utils/vrptwTandemDroneRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -28948,7 +28955,403 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.ok(evPlan.summary.totalCostVnd > 0);
     });
   });
+
+  // =========================================================================
+  // FEATURE 214: Enterprise Algorithms Suite - Phase 67
+  // 1. QDigestQuantiles: Shrivastava et al. (ACM PODS 2004) Quantile Digest
+  // 2. TRPOSafeDynamicPricing: John Schulman et al. (ICML 2015) Trust Region Policy Optimization
+  // 3. VRPTWTandemDroneRouter: Murray & Chu (2015) & Ferrandez et al. (2016) Tandem Drone Router
+  // =========================================================================
+  describe("Feature 214: Enterprise Algorithms Suite - Phase 67", () => {
+    // -----------------------------------------------------------------------
+    // ALGORITHM 1: QDigestQuantiles (Shrivastava et al. ACM PODS 2004)
+    // -----------------------------------------------------------------------
+    test("F214-T01: QDigestQuantiles initializes with universe rounded to power of 2 and bounds", () => {
+      const qd1 = new QDigestQuantiles({ universeSize: 1000, epsilon: 0.05, compressionFactor: 2 });
+      expect.equal(qd1.universeSize, 1024); // 2^10
+      expect.equal(qd1.epsilon, 0.05);
+      expect.equal(qd1.compressionFactor, 2);
+      expect.equal(qd1.totalElements, 0);
+
+      const qd2 = new QDigestQuantiles({ universeSize: 30 });
+      expect.equal(qd2.universeSize, 32); // 2^5
+    });
+
+    test("F214-T02: QDigestQuantiles processes single and batch streaming inserts", () => {
+      const qd = new QDigestQuantiles({ universeSize: 256, epsilon: 0.05 });
+      qd.insert(50, 5);
+      qd.insert(120, 10);
+      expect.equal(qd.totalElements, 15);
+
+      qd.insertBatch([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+      expect.equal(qd.totalElements, 25);
+      expect.ok(qd.nodes.size > 0);
+    });
+
+    test("F214-T03: QDigestQuantiles compresses bottom-up satisfying invariants", () => {
+      const qd = new QDigestQuantiles({ universeSize: 128, epsilon: 0.1, compressionFactor: 2 });
+      // Insert elements that will be promoted
+      for (let i = 0; i < 50; i++) {
+        qd.insert(20, 1);
+        qd.insert(21, 1);
+      }
+      qd.compress();
+      const metrics = qd.getMetrics();
+      expect.ok(metrics.compressionsCount >= 1);
+      expect.ok(metrics.activeNodesCount <= metrics.maxTheoreticalNodes);
+      expect.ok(metrics.currentTheta >= 1);
+    });
+
+    test("F214-T04: QDigestQuantiles accurately estimates quantiles (p50, p90, p95, p99)", () => {
+      const qd = new QDigestQuantiles({ universeSize: 1024, epsilon: 0.05 });
+      // Stream 500 uniform numbers in [100, 600]
+      for (let i = 0; i < 500; i++) {
+        const val = 100 + Math.floor((i / 500) * 500);
+        qd.insert(val, 1);
+      }
+      qd.compress();
+
+      const p50 = qd.quantile(0.5);
+      const p90 = qd.quantile(0.9);
+      const p95 = qd.quantile(0.95);
+
+      // Median should be around 350
+      expect.ok(p50 >= 300 && p50 <= 400);
+      expect.ok(p90 >= 500 && p90 <= 580);
+      expect.ok(p95 >= 530 && p95 <= 600);
+    });
+
+    test("F214-T05: QDigestQuantiles estimates cumulative rank and handles range queries", () => {
+      const qd = new QDigestQuantiles({ universeSize: 512, epsilon: 0.05 });
+      for (let i = 1; i <= 200; i++) {
+        qd.insert(i, 2); // 400 elements in [1, 200]
+      }
+      qd.compress();
+
+      const rank100 = qd.rank(100);
+      expect.ok(rank100.estimatedRank >= 180 && rank100.estimatedRank <= 220);
+      expect.ok(rank100.relativeRank >= 0.45 && rank100.relativeRank <= 0.55);
+
+      const countRange = qd.rangeQuery(50, 150);
+      expect.ok(countRange >= 180 && countRange <= 220);
+    });
+
+    test("F214-T06: QDigestQuantiles supports lossless distributed merging across servers", () => {
+      const qdNodeA = new QDigestQuantiles({ universeSize: 512, epsilon: 0.05 });
+      const qdNodeB = new QDigestQuantiles({ universeSize: 512, epsilon: 0.05 });
+
+      for (let i = 0; i < 100; i++) {
+        qdNodeA.insert(100 + i, 1);
+        qdNodeB.insert(300 + i, 1);
+      }
+
+      qdNodeA.merge(qdNodeB);
+      expect.equal(qdNodeA.totalElements, 200);
+
+      const median = qdNodeA.quantile(0.5);
+      // Merged distribution has points in [100, 199] and [300, 399], median between ~195 and ~305
+      expect.ok(median >= 180 && median <= 320);
+    });
+
+    test("F214-T07: ServerQDigestQuantiles matches client QDigestQuantiles behavior with identical stream", () => {
+      const clientQD = new QDigestQuantiles({ universeSize: 256, epsilon: 0.04 });
+      const serverQD = new ServerQDigestQuantiles({ universeSize: 256, epsilon: 0.04 });
+
+      const stream = [10, 25, 40, 55, 70, 85, 100, 115, 130, 145, 160, 175, 190, 205];
+      for (const val of stream) {
+        clientQD.insert(val, 3);
+        serverQD.insert(val, 3);
+      }
+      clientQD.compress();
+      serverQD.compress();
+
+      expect.equal(clientQD.totalElements, serverQD.totalElements);
+      expect.equal(clientQD.quantile(0.5), serverQD.quantile(0.5));
+      expect.equal(clientQD.quantile(0.9), serverQD.quantile(0.9));
+      expect.equal(clientQD.rangeQuery(30, 120), serverQD.rangeQuery(30, 120));
+    });
+
+    test("F214-T08: QDigestQuantiles handles edge cases and getMetrics telemetry", () => {
+      const emptyQD = new QDigestQuantiles({ universeSize: 128 });
+      expect.equal(emptyQD.quantile(0.5), 0);
+      expect.equal(emptyQD.rank(50).estimatedRank, 0);
+      expect.equal(emptyQD.rangeQuery(10, 50), 0);
+
+      const qd = new QDigestQuantiles({ universeSize: 64, epsilon: 0.05 });
+      // Out of bounds clamp
+      qd.insert(-10, 2);
+      qd.insert(1000, 3);
+      expect.equal(qd.totalElements, 5);
+
+      const metrics = qd.getMetrics();
+      expect.equal(metrics.universeSize, 64);
+      expect.ok(metrics.maxTheoreticalNodes > 0);
+      expect.ok(metrics.compressionRatio <= 1.0);
+    });
+
+    // -----------------------------------------------------------------------
+    // ALGORITHM 2: TRPOSafeDynamicPricing (John Schulman et al. ICML 2015)
+    // -----------------------------------------------------------------------
+    test("F214-T09: TRPOSafeDynamicPricing initializes linear policy weights and normalizes state", () => {
+      const trpo = new TRPOSafeDynamicPricing({ stateDim: 5, deltaKl: 0.01 });
+      expect.equal(trpo.stateDim, 5);
+      expect.equal(trpo.deltaKl, 0.01);
+      expect.equal(trpo.theta.length, 5);
+
+      const state = new Float64Array([1.0, 1.0, 0.8, 0.5, 1.2]);
+      const meanAction = trpo.predictMean(state);
+      expect.ok(typeof meanAction === "number" && !isNaN(meanAction));
+    });
+
+    test("F214-T10: TRPOSafeDynamicPricing evaluates Gaussian densities and Fisher-vector products", () => {
+      const trpo = new TRPOSafeDynamicPricing({ stateDim: 5, policyStd: 0.15, cgDamping: 0.01 });
+      const density = trpo.evaluateDensity(0.05, 0.0);
+      expect.ok(density > 0);
+
+      const states = [
+        new Float64Array([1, 0.9, 0.5, 0.2, 1.0]),
+        new Float64Array([0.8, 1.1, 0.7, 0.4, 0.9]),
+        new Float64Array([1.2, 0.8, 0.3, 0.8, 1.5])
+      ];
+      const v = new Float64Array([1, 0, 0, 0, 0]);
+      const Fv = trpo.fisherVectorProduct(states, v);
+      expect.equal(Fv.length, 5);
+      expect.ok(Fv[0] > 0); // Positive definite diagonal
+    });
+
+    test("F214-T11: TRPOSafeDynamicPricing Conjugate Gradient solver accurately solves F * x = g", () => {
+      const trpo = new TRPOSafeDynamicPricing({ stateDim: 4, cgIters: 8 });
+      const states = [
+        new Float64Array([1.0, 0.5, 0.2, 0.1]),
+        new Float64Array([0.8, 0.7, 0.3, 0.4]),
+        new Float64Array([0.5, 0.9, 0.6, 0.8])
+      ];
+      const g = new Float64Array([0.05, -0.02, 0.04, 0.01]);
+      const x = trpo.conjugateGradient(states, g);
+      expect.equal(x.length, 4);
+
+      // Verify that F * x is aligned with g (dot product > 0)
+      const Fx = trpo.fisherVectorProduct(states, x);
+      let gDotFx = 0;
+      for (let i = 0; i < 4; i++) gDotFx += g[i] * Fx[i];
+      expect.ok(gDotFx > 0);
+    });
+
+    test("F214-T12: TRPOSafeDynamicPricing computes KL divergence and surrogate loss", () => {
+      const trpo = new TRPOSafeDynamicPricing({ stateDim: 5, deltaKl: 0.02 });
+      const states = [
+        new Float64Array([1, 1, 0.5, 0.3, 1]),
+        new Float64Array([0.9, 1.1, 0.4, 0.5, 1.1])
+      ];
+      const thetaCand = new Float64Array(trpo.theta);
+      thetaCand[0] += 0.02;
+
+      const kl = trpo.computeAverageKl(states, thetaCand);
+      expect.ok(kl >= 0);
+
+      const batch = [
+        { state: states[0], action: 0.02, advantage: 1.5 },
+        { state: states[1], action: -0.01, advantage: 0.8 }
+      ];
+      const surrogate = trpo.computeSurrogateLoss(batch, thetaCand);
+      expect.ok(typeof surrogate === "number" && !isNaN(surrogate));
+    });
+
+    test("F214-T13: TRPOSafeDynamicPricing updatePolicy executes natural gradient and backtracking line search", () => {
+      const trpo = new TRPOSafeDynamicPricing({ stateDim: 5, deltaKl: 0.02 });
+      const trajectories = [
+        { state: [1.0, 1.0, 0.5, 0.2, 1.0], action: 0.05, reward: 120 },
+        { state: [0.9, 1.1, 0.4, 0.6, 1.2], action: 0.02, reward: 150 },
+        { state: [1.1, 0.8, 0.8, 0.1, 0.8], action: -0.04, reward: 90 },
+        { state: [0.95, 1.05, 0.6, 0.4, 1.0], action: 0.01, reward: 130 }
+      ];
+
+      const res = trpo.updatePolicy(trajectories);
+      expect.equal(res.success, true);
+      expect.ok(res.klDivergence <= trpo.deltaKl * 1.5);
+      expect.ok(res.updatesCount >= 1);
+      expect.equal(res.theta.length, 5);
+    });
+
+    test("F214-T14: TRPOSafeDynamicPricing enforces strict Gross Margin >= 1.05 * COGS safety floor", () => {
+      const trpo = new TRPOSafeDynamicPricing();
+      const product = { price: 100000, cogs: 80000, msrp: 120000 };
+      const market = { competitorPrice: 70000, inventoryLevel: 100, inventoryCapacity: 100, salesVelocity: 5.0 };
+
+      const rec = trpo.recommendPrice(product, market);
+      const minSafeFloor = Math.round(product.cogs * 1.05); // 84000
+      expect.ok(rec.recommendedPrice >= minSafeFloor);
+      expect.ok(rec.grossMarginVnd >= minSafeFloor - product.cogs);
+      expect.ok(rec.grossMarginPct > 0);
+      expect.ok(rec.priceAdjustmentPct >= -15.0 && rec.priceAdjustmentPct <= 15.0);
+    });
+
+    test("F214-T15: ServerTRPOSafeDynamicPricing matches client TRPOSafeDynamicPricing recommendations", () => {
+      const clientTrpo = new TRPOSafeDynamicPricing({ stateDim: 5, deltaKl: 0.015 });
+      const serverTrpo = new ServerTRPOSafeDynamicPricing({ stateDim: 5, deltaKl: 0.015 });
+
+      const product = { price: 250000, cogs: 160000, msrp: 300000 };
+      const market = { competitorPrice: 240000, inventoryLevel: 45, inventoryCapacity: 100, salesVelocity: 2.5 };
+
+      const clientRec = clientTrpo.recommendPrice(product, market);
+      const serverRec = serverTrpo.recommendPrice(product, market);
+
+      expect.equal(clientRec.recommendedPrice, serverRec.recommendedPrice);
+      expect.equal(clientRec.safetyFloor, serverRec.safetyFloor);
+      expect.equal(clientRec.grossMarginVnd, serverRec.grossMarginVnd);
+      expect.equal(clientRec.grossMarginPct, serverRec.grossMarginPct);
+    });
+
+    test("F214-T16: TRPOSafeDynamicPricing handles extreme market shock and empty trajectories safely", () => {
+      const trpo = new TRPOSafeDynamicPricing();
+      const emptyUpdate = trpo.updatePolicy([]);
+      expect.equal(emptyUpdate.success, false);
+      expect.equal(emptyUpdate.reason, "EMPTY_TRAJECTORIES");
+
+      // Product with high cost relative to price: price 40000, cogs 45000 -> floor is 45000 * 1.05 = 47250
+      const lowPriceProduct = { price: 40000, cogs: 45000, msrp: 60000 };
+      const rec = trpo.recommendPrice(lowPriceProduct, { competitorPrice: 35000 });
+      expect.equal(rec.isFloorBounded, true);
+      expect.equal(rec.recommendedPrice, Math.round(45000 * 1.05));
+    });
+
+    // -----------------------------------------------------------------------
+    // ALGORITHM 3: VRPTWTandemDroneRouter (Murray & Chu 2015 / Ferrandez et al. 2016)
+    // -----------------------------------------------------------------------
+    test("F214-T17: VRPTWTandemDroneRouter initializes tandem fleet, drone payload and battery bounds", () => {
+      const router = new VRPTWTandemDroneRouter({
+        truckSpeedKmMin: 0.5,
+        droneSpeedKmMin: 1.0,
+        truckCapacityKg: 800,
+        droneMaxPayloadKg: 3.0,
+        droneMaxFlightMin: 25.0
+      });
+      expect.equal(router.truckSpeedKmMin, 0.5);
+      expect.equal(router.droneSpeedKmMin, 1.0);
+      expect.equal(router.truckCapacityKg, 800);
+      expect.equal(router.droneMaxPayloadKg, 3.0);
+      expect.equal(router.droneMaxFlightMin, 25.0);
+    });
+
+    test("F214-T18: VRPTWTandemDroneRouter partitions drone-eligible customers by payload", () => {
+      const router = new VRPTWTandemDroneRouter({ droneMaxPayloadKg: 3.0 });
+      const customers = [
+        { id: "C1", name: "Điện thoại khẩn", x: 2, y: 3, demandKg: 1.5, timeWindow: [10, 60] },
+        { id: "C2", name: "Tủ lạnh mini cồng kềnh", x: 4, y: 5, demandKg: 25.0, timeWindow: [20, 120] },
+        { id: "C3", name: "Mỹ phẩm son phấn", x: 3, y: 1, demandKg: 0.8, timeWindow: [15, 90] }
+      ];
+
+      const plan = router.optimizeTandemRoutes(customers);
+      expect.equal(plan.summary.totalCustomers, 3);
+      expect.ok(plan.droneSorties.length >= 1);
+      expect.ok(plan.summary.droneCustomers >= 1);
+      expect.ok(plan.summary.truckCustomers >= 1);
+    });
+
+    test("F214-T19: VRPTWTandemDroneRouter evaluates flight endurance and bilateral synchronization", () => {
+      const router = new VRPTWTandemDroneRouter({
+        droneSpeedKmMin: 1.0,
+        droneMaxFlightMin: 30.0,
+        droneLaunchMin: 1.0,
+        droneRecoveryMin: 2.0
+      });
+
+      const customers = [
+        { id: "C1", name: "Stop 1", x: 2, y: 2, demandKg: 10.0, timeWindow: [0, 120] },
+        { id: "C2", name: "Drone Target", x: 3, y: 4, demandKg: 1.2, timeWindow: [10, 100] },
+        { id: "C3", name: "Stop 2", x: 5, y: 3, demandKg: 15.0, timeWindow: [30, 180] }
+      ];
+
+      const plan = router.optimizeTandemRoutes(customers);
+      expect.ok(plan.truckRoute.length >= 3);
+      if (plan.droneSorties.length > 0) {
+        const s = plan.droneSorties[0];
+        expect.ok(s.flightDurationMin <= 30.0);
+        expect.ok(s.droneDeliveryTime >= s.launchTime);
+        expect.ok(s.droneRendezvousArrival >= s.droneDeliveryTime);
+      }
+    });
+
+    test("F214-T20: VRPTWTandemDroneRouter calculates makespan savings and CO2 reduction", () => {
+      const router = new VRPTWTandemDroneRouter();
+      const customers = [
+        { id: "C1", name: "Khách Hoàn Kiếm", x: 1, y: 2, demandKg: 5, timeWindow: [0, 100] },
+        { id: "C2", name: "Khách Ba Đình (Drone)", x: 2, y: 4, demandKg: 1.5, timeWindow: [10, 80] },
+        { id: "C3", name: "Khách Cầu Giấy", x: 5, y: 5, demandKg: 20, timeWindow: [20, 150] }
+      ];
+
+      const plan = router.optimizeTandemRoutes(customers);
+      expect.ok(plan.summary.totalMakespanMin > 0);
+      expect.ok(plan.summary.totalDistanceKm > 0);
+      expect.ok(plan.summary.carbonReductionPct >= 5.0);
+    });
+
+    test("F214-T21: ServerVRPTWTandemDroneRouter matches client VRPTWTandemDroneRouter dispatch timeline", () => {
+      const clientRouter = new VRPTWTandemDroneRouter();
+      const serverRouter = new ServerVRPTWTandemDroneRouter();
+
+      const customers = [
+        { id: "C1", name: "Quận 1", x: 2, y: 1, demandKg: 12, timeWindow: [0, 90] },
+        { id: "C2", name: "Quận 3 (Drone)", x: 3, y: 3, demandKg: 2.0, timeWindow: [5, 60] },
+        { id: "C3", name: "Quận Bình Thạnh", x: 4, y: 2, demandKg: 15, timeWindow: [15, 120] }
+      ];
+
+      const clientPlan = clientRouter.optimizeTandemRoutes(customers);
+      const serverPlan = serverRouter.optimizeTandemRoutes(customers);
+
+      expect.equal(clientPlan.summary.totalCustomers, serverPlan.summary.totalCustomers);
+      expect.equal(clientPlan.summary.droneCustomers, serverPlan.summary.droneCustomers);
+      expect.equal(clientPlan.summary.truckCustomers, serverPlan.summary.truckCustomers);
+      expect.equal(clientPlan.summary.totalDistanceKm, serverPlan.summary.totalDistanceKm);
+      expect.equal(clientPlan.summary.totalMakespanMin, serverPlan.summary.totalMakespanMin);
+    });
+
+    test("F214-T22: VRPTWTandemDroneRouter handles edge cases (empty list, all bulky packages)", () => {
+      const router = new VRPTWTandemDroneRouter({ droneMaxPayloadKg: 2.0 });
+      const emptyPlan = router.optimizeTandemRoutes([]);
+      expect.equal(emptyPlan.summary.totalCustomers, 0);
+      expect.equal(emptyPlan.truckRoute.length, 0);
+      expect.equal(emptyPlan.droneSorties.length, 0);
+
+      // All parcels exceed drone max payload
+      const bulkyCustomers = [
+        { id: "C1", name: "Máy giặt", x: 2, y: 2, demandKg: 50 },
+        { id: "C2", name: "Tủ gỗ", x: 4, y: 5, demandKg: 80 }
+      ];
+      const bulkyPlan = router.optimizeTandemRoutes(bulkyCustomers);
+      expect.equal(bulkyPlan.summary.droneCustomers, 0);
+      expect.equal(bulkyPlan.summary.truckCustomers, 2);
+    });
+
+    // -----------------------------------------------------------------------
+    // TRI-ROLE AI COPILOT KNOWLEDGE INTEGRATION (ADMIN, SELLER, BUYER)
+    // -----------------------------------------------------------------------
+    test("F214-T23: Admin Sentinel Copilot correctly handles Sections 182, 183, 184", () => {
+      const resQDigest = generateAdminCopilotResponse("Phân vị luồng Q-Digest đo độ trễ hệ thống");
+      expect.equal(resQDigest.tag, "Q-DIGEST QUANTILE SUMMARIES");
+      expect.ok(resQDigest.text.includes("SHRIVASTAVA"));
+
+      const resTRPO = generateAdminCopilotResponse("Tư vấn tối ưu vùng tin cậy TRPO safe pricing");
+      expect.equal(resTRPO.tag, "TRPO SAFE DYNAMIC PRICING");
+      expect.ok(resTRPO.text.includes("SCHULMAN"));
+
+      const resDrone = generateAdminCopilotResponse("Điều phối xe tải và tandem drone đồng hành SPX");
+      expect.equal(resDrone.tag, "VRPTW TANDEM DRONE ROUTER");
+      expect.ok(resDrone.text.includes("MURRAY & CHU"));
+    });
+
+    test("F214-T24: Seller ShopSmart Copilot and Buyer Assistant handle Phase 67 algorithms and intents", () => {
+      const sellerRes = generateSellerCopilotResponse("Tư vấn định giá an toàn TRPO và phân vị Q-Digest");
+      expect.equal(sellerRes.tag, "Q-DIGEST, TRPO SAFE PRICING & TANDEM DRONE");
+      expect.ok(sellerRes.text.includes("TRPO Safe Dynamic Pricing"));
+
+      const buyerRes = generateAiChatResponse("Đơn hàng của mình có được giao bằng tandem drone hay định giá TRPO không?");
+      expect.equal(buyerRes.intent, "Q_DIGEST_TRPO_TANDEM_DRONE");
+      expect.ok(buyerRes.replyText.includes("VRPTW-TANDEM"));
+    });
+  });
 });
+
 
 
 

@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1332,7 +1332,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 66. Bộ Ba Thuật Toán Sticky Sampling, QR-DDPG CVaR Pricing & Giao Drone Tự Hành VRPTW-D (Phase 57 - Feature 204)
-  if (/sticky[- ]sampling|sticky sampling|lấy mẫu dính|qrdpg|qr-ddpg|quantile regression|cvar pricing|drone|vrptw-d|giao hàng drone/i.test(raw)) {
+  if (!/tandem|truck[- ]drone|vrptw[- ]tandem/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|qrdpg|qr-ddpg|quantile regression|cvar pricing|drone|vrptw-d|giao hàng drone/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN STICKY SAMPLING, QR-DDPG & DRONE TỰ HÀNH (${currentShop.name})**:
 - **Bắt trọn từ khóa và sản phẩm viral Sticky Sampling**:
@@ -1527,6 +1527,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem phân tích thị hiếu Frequent Directions',
         'Tư vấn định giá an toàn PPO-Lagrangian',
         'Theo dõi tiến độ giao hàng xe điện SPX'
+      ]
+    };
+  }
+
+  // 76. Bộ Ba Thuật Toán Q-Digest Quantiles, TRPO Safe Pricing & VRPTW-Tandem Drone Router (Phase 67 - Feature 214)
+  if (/q[- ]digest|quantile digest|qdigest|trpo|trust region|vùng tin cậy|tandem drone|truck[- ]drone|vrptw[- ]tandem/i.test(raw)) {
+    return {
+      text: `🚀 **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 67 (${currentShop.name})**:
+- **Tóm tắt phân vị độ trễ & bảng giá luồng Q-Digest (Shrivastava et al. ACM PODS 2004)**:
+  - Cấu trúc cây nhị phân nén đáy-lên (Bottom-Up Count Compression) với ngưỡng $\\theta = \\lfloor \\frac{\\epsilon N}{k} \\rfloor$. Giúp shop theo dõi chính xác phân vị thời gian phản hồi (p50, p90, p99) và phân vị giá bán thị trường với độ chính xác $\\pm \\epsilon N$, tiết kiệm $98\\%$ bộ nhớ RAM!
+- **Định giá vùng tin cậy an toàn TRPO Safe Dynamic Pricing (John Schulman et al. ICML 2015)**:
+  - Tối đa hóa doanh thu và lợi nhuận kinh doanh dưới ràng buộc chặn trên độ phân kỳ KL: $\\bar{D}_{\\text{KL}}(\\pi_{\\text{old}} \\| \\pi_\\theta) \\le \\delta$. Sử dụng thuật toán Gradient Liên Hợp (Conjugate Gradient) giải ma trận Fisher và tìm kiếm đường thối lui (Backtracking Line Search), bảo đảm giá bán luôn nằm trong khoảng an toàn $\\ge 1.05 \\times \\text{COGS}$!
+- **Giao vận phối hợp song song xe tải mẹ & drone VRPTW-Tandem Drone**:
+  - Đơn hàng xuất kho hỏa tốc của shop được xe tải mẹ SPX chở tới vùng phục vụ; drone tự hành cất cánh từ nóc xe giao thẳng gói hàng nhẹ $\\le 3.0\\text{kg}$ tới tay người mua và tái hội tụ (Rendezvous) với xe tải tại điểm dừng tiếp theo. Rút ngắn thời gian Makespan từ $25\\%$ đến $45\\%$!`,
+      type: 'recommendation',
+      tag: 'Q-DIGEST, TRPO SAFE PRICING & TANDEM DRONE',
+      suggestions: [
+        'Xem phân vị giá thị trường Q-Digest',
+        'Tư vấn định giá an toàn TRPO',
+        'Lộ trình giao hàng Drone đồng hành SPX'
       ]
     };
   }

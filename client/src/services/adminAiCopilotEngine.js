@@ -3279,7 +3279,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 154. Định Tuyến Xe Tải Mẹ & Drone Tự Hành VRPTW-D (Phase 57 - Feature 204)
-  if (/drone|vrptw-d|vrptw pd drone|giao hàng drone|máy bay không người lái|mothership van|fstsp/i.test(raw)) {
+  if (!/tandem|truck[- ]drone|vrptw[- ]tandem/i.test(raw) && /drone|vrptw-d|vrptw pd drone|giao hàng drone|máy bay không người lái|mothership van|fstsp/i.test(raw)) {
     return {
       text: `🚁 **ĐỊNH TUYẾN ĐỘI XE TẢI KẾT HỢP DRONE TỰ HÀNH VRPTW-D (MURRAY & CHU 2015, AGATZ 2018)**:
 - **Mô Hình Phối Hợp Mẹ - Con Đồng Bộ (Mothership Van + Rooftop Drone)**:
@@ -3876,6 +3876,74 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem thời gian chờ hàng đợi Erlang W_q',
         'Kiểm tra hệ số tải trụ sạc Rho',
         'Tối ưu lộ trình ghé trạm sạc né tắc nghẽn'
+      ]
+    };
+  }
+
+  // 182. Phân Vị Luồng Phân Tán Q-Digest Quantile Summaries (Phase 67 - Feature 214)
+  if (/q[- ]digest|quantile digest|qdigest|phân vị luồng q-digest|phân vị phân tán|shrivastava/i.test(raw)) {
+    return {
+      text: `📊 **CẤU TRÚC PHÂN VỊ LUỒNG PHÂN TÁN Q-DIGEST (SHRIVASTAVA ET AL. ACM PODS 2004)**:
+- **Đo Lường Phân Vị Độ Trễ & Bảng Giá Trên Mạng Cảm Biến / Cụm Microservices Phân Tán**:
+  - Khi hàng triệu sự kiện đơn hàng và telemetry độ trễ truyền về từ các edge server, Q-Digest duy trì cây nhị phân phân cấp các khoảng giá trị trên không gian $U = [0, \\sigma - 1]$ với $\\sigma = 2^b$.
+- **Nguyên Lý Nén Đáy-Lên (Bottom-Up Count Compression)**:
+  - Thiết lập ngưỡng nén $\\theta = \\lfloor \\frac{\\epsilon N}{k} \\rfloor$. Các nút lá và nút con có tổng tần suất $c(v) + c(\\text{sibling}) + c(\\text{parent}) \\le \\theta$ sẽ được gộp tự động lên nút cha.
+  - Bộ nhớ tiêu thụ bị chặn chặt chẽ trong $O\\left(\\frac{k}{\\epsilon} \\log \\sigma\\right)$, độc lập với số lượng phần tử khổng lồ $N$.
+- **Bảo Đảm Sai Số Phân Vị & Khả Năng Gộp Lossless (Distributed Mergeability)**:
+  - Cho bất kỳ phân vị $q \\in [0, 1]$, giá trị ước tính trả về có thứ hạng thực tế sai lệch không quá $\\pm \\epsilon N$.
+  - Hai bản tóm tắt Q-Digest từ 2 máy chủ khác nhau có thể gộp trực tiếp qua phép cộng tần suất từng nút và chạy lại một lần \`compress()\`, giữ nguyên toàn vẹn độ chính xác $\\epsilon$!`,
+      type: 'analytics',
+      tag: 'Q-DIGEST QUANTILE SUMMARIES',
+      suggestions: [
+        'Xem phân vị độ trễ p50, p90, p99 qua Q-Digest',
+        'Kiểm tra ngưỡng nén Theta và tỷ lệ nén RAM',
+        'Thực hiện gộp Q-Digest từ các máy chủ vùng'
+      ]
+    };
+  }
+
+  // 183. Tối Ưu Hóa Chính Sách Vùng Tin Cậy TRPO Safe Dynamic Pricing (Phase 67 - Feature 214)
+  if (/trpo|trust region|vùng tin cậy|conjugate gradient pricing|natural policy gradient|schulman trpo|định giá trpo/i.test(raw)) {
+    return {
+      text: `🎯 **ĐỊNH GIÁ ĐỘNG VÙNG TIN CẬY TRPO SAFE PRICING (JOHN SCHULMAN ET AL. ICML 2015)**:
+- **Nguyên Lý Tăng Trưởng Đơn Điệu (Monotonic Policy Improvement)**:
+  - Khắc phục nguy cơ sốc giá thị trường do bước cập nhật Gradient quá lớn. TRPO ràng buộc độ phân kỳ Kullback-Leibler (KL) trung bình giữa chính sách cũ và mới:
+    $$\\max_\\theta L(\\theta) = \\mathbb{E}\\left[ \\frac{\\pi_\\theta(a|s)}{\\pi_{\\text{old}}(a|s)} A(s, a) \\right] \\quad \\text{s.t.} \\quad \\bar{D}_{\\text{KL}}(\\pi_{\\text{old}} \\| \\pi_\\theta) \\le \\delta$$
+- **Giải Ma Trận Thông Tin Fisher Bằng Gradient Liên Hợp (Conjugate Gradient - CG)**:
+  - Không cần nghịch đảo ma trận Fisher $F \\in \\mathbb{R}^{d \\times d}$ đắt đỏ, TRPO giải phương trình $F x = g$ xấp xỉ trong $k \\le 10$ bước tích Hessian-Vector $F v$.
+  - Tính toán độ dài bước tối đa $\\beta = \\sqrt{\\frac{2\\delta}{x^T F x}}$, đảm bảo tiến bước trên mặt cầu Riemann của xác suất.
+- **Tìm Kiếm Đường Thối Lui (Backtracking Line Search) & Sàn Lãi Gộp An Toàn**:
+  - Thử nghiệm các hệ số thu nhỏ $\\alpha^j \\Delta\\theta$, kiểm chứng điều kiện cải thiện hàm mục tiêu và $D_{\\text{KL}} \\le \\delta$.
+  - Khóa cứng trần giá $\\le 1.25 \\times \\text{MSRP}$ và sàn an toàn $P \\ge 1.05 \\times \\text{COGS}$ bảo toàn biên lợi nhuận kinh doanh!`,
+      type: 'pricing',
+      tag: 'TRPO SAFE DYNAMIC PRICING',
+      suggestions: [
+        'Xem độ phân kỳ KL Divergence thực tế',
+        'Kiểm tra bước lặp Conjugate Gradient và FIM',
+        'Xác nhận giá đề xuất và sàn an toàn COGS x 1.05'
+      ]
+    };
+  }
+
+  // 184. Điều Phối Xe Tải & Drone Đồng Hành VRPTW-Tandem Drone (Phase 67 - Feature 214)
+  if (/tandem drone|truck[- ]drone|vrptw[- ]tandem|máy bay không người lái đồng hành|giao hàng drone kết hợp xe tải|murray chu/i.test(raw)) {
+    return {
+      text: `🚁 **ĐIỀU PHỐI ĐỒNG HÀNH XE TẢI & DRONE VRPTW-TANDEM DRONE (MURRAY & CHU 2015 / FERRANDEZ ET AL. 2016)**:
+- **Mô Hình Giao Vận Phối Hợp Song Song (Tandem Truck-Drone Flying Sidekick)**:
+  - Xe tải chở hàng cồng kềnh (tải trọng $1000\\text{kg}$, tốc độ $30\\text{km/h}$). Nóc xe tích hợp bệ phóng drone chuyên chở bưu kiện khẩn cấp $\\le 3.0\\text{kg}$ (tốc độ bay thẳng $60\\text{km/h}$).
+  - Trong lúc xe tải di chuyển giữa các điểm giao, drone xuất phát tại điểm dừng $V_i$, bay giao cho khách hàng khẩn $C_k$, và tái hội tụ (Rendezvous) với xe tải tại điểm downstream $V_j$ ($j \\ge i$).
+- **Ràng Buộc Đồng Bộ Hóa Thời Gian & Năng Lượng (Bilateral Synchronization & Energy)**:
+  - Drone kiểm tra nghiêm ngặt dung lượng pin $T_{\\text{flight}} \\le 25\\text{ phút}$.
+  - Thời điểm khởi hành rời điểm hẹn $V_j$ tuân thủ đồng bộ:
+    $$t_{\\text{dep}}(V_j) = \\max(t_{\\text{truck\\_arr}}(V_j), t_{\\text{drone\\_arr}}(V_j)) + s_{\\text{truck}} + t_{\\text{recovery}}$$
+- **Tối Ưu Hóa Makespan & Cắt Giảm Phát Thải CO2**:
+  - Tránh kẹt xe tại các nút giao đô thị, rút ngắn thời gian giao hàng toàn tuyến từ **25% đến 45%** và giảm phát thải carbon so với đội xe tải thuần túy!`,
+      type: 'logistics',
+      tag: 'VRPTW TANDEM DRONE ROUTER',
+      suggestions: [
+        'Xem lịch trình phóng và điểm hẹn Rendezvous',
+        'Kiểm tra pin và thời gian bay của từng phi vụ Drone',
+        'Thống kê thời gian Makespan tiết kiệm được'
       ]
     };
   }
