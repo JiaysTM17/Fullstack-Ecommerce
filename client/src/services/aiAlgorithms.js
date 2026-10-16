@@ -43496,6 +43496,648 @@ export class EVRPTWAutonomousDroneRechargeRouter {
   }
 }
 
+// ==========================================
+// Phase 79: Count-Mean-Min Noise Subtracted Sketch, MASAC Multi-Agent Continuous Pricing & EVRPTW Dynamic Payload Terrain Suite
+// ==========================================
+
+export class CountMeanMinSketch {
+  constructor(options = {}) {
+    this.depth = Math.max(3, Math.floor(Number(options.depth || options.d || 5)));
+    this.width = Math.max(16, Math.floor(Number(options.width || options.w || 256)));
+    this.epsilon = Number(options.epsilon || (Math.E / this.width).toFixed(4));
+    this.phi = Math.max(0.001, Math.min(0.5, Number(options.phi || 0.01)));
+
+    this.table = Array.from({ length: this.depth }, () => new Float64Array(this.width));
+    this.rowTotals = new Float64Array(this.depth);
+
+    this.prime = 2147483647;
+    const baseSeed = options.seed !== undefined ? Number(options.seed) : 10007;
+    this.hashParams = [];
+    for (let j = 0; j < this.depth; j++) {
+      const a = 1 + (((baseSeed * (j + 1) * 31) ^ (j * 16777619)) >>> 1);
+      const b = ((baseSeed + 997) * (j + 1) * 17) >>> 1;
+      this.hashParams.push({
+        a: (a % (this.prime - 2)) + 1,
+        b: b % this.prime
+      });
+    }
+
+    this.totalWeight = 0;
+    this.itemsInserted = 0;
+    this.candidates = new Map();
+  }
+
+  get n() {
+    return this.totalWeight;
+  }
+
+  _hashKey(key) {
+    const str = String(key);
+    let hash = 2166136261;
+    for (let i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  _getRowBucket(row, rawHash) {
+    const { a, b } = this.hashParams[row];
+    const val = (Number(BigInt(a) * BigInt(rawHash) + BigInt(b)) % this.prime + this.prime) % this.prime;
+    return val % this.width;
+  }
+
+  update(key, weight = 1) {
+    const wVal = Number(weight);
+    if (!Number.isFinite(wVal) || wVal <= 0) return;
+
+    const rawHash = this._hashKey(key);
+    const keyStr = String(key);
+
+    for (let j = 0; j < this.depth; j++) {
+      const bucket = this._getRowBucket(j, rawHash);
+      this.table[j][bucket] += wVal;
+      this.rowTotals[j] += wVal;
+    }
+
+    this.totalWeight += wVal;
+    this.itemsInserted += 1;
+
+    const est = this.estimate(keyStr);
+    if (est >= this.phi * this.totalWeight) {
+      this.candidates.set(keyStr, est);
+    }
+  }
+
+  insert(key, weight = 1) {
+    this.update(key, weight);
+  }
+
+  estimate(key) {
+    const rawHash = this._hashKey(key);
+    const estimates = new Float64Array(this.depth);
+
+    for (let j = 0; j < this.depth; j++) {
+      const bucket = this._getRowBucket(j, rawHash);
+      const count = this.table[j][bucket];
+      const otherSum = Math.max(0, this.rowTotals[j] - count);
+      const avgNoise = otherSum / (this.width - 1);
+      const debiased = Math.max(0, count - avgNoise);
+      estimates[j] = debiased;
+    }
+
+    estimates.sort();
+    const mid = Math.floor(this.depth / 2);
+    const medianEst = (this.depth % 2 === 1)
+      ? estimates[mid]
+      : (estimates[mid - 1] + estimates[mid]) / 2;
+
+    return Number(medianEst.toFixed(4));
+  }
+
+  estimateVanillaCountMin(key) {
+    const rawHash = this._hashKey(key);
+    let minCount = Infinity;
+
+    for (let j = 0; j < this.depth; j++) {
+      const bucket = this._getRowBucket(j, rawHash);
+      if (this.table[j][bucket] < minCount) {
+        minCount = this.table[j][bucket];
+      }
+    }
+
+    return minCount === Infinity ? 0 : minCount;
+  }
+
+  getHeavyHitters(customPhi) {
+    const thresholdFraction = customPhi !== undefined ? customPhi : this.phi;
+    const threshold = thresholdFraction * this.totalWeight;
+
+    const result = [];
+    for (const [key] of this.candidates) {
+      const est = this.estimate(key);
+      if (est >= threshold) {
+        result.push({
+          key,
+          estimatedFrequency: Math.round(est),
+          rawCountMin: Math.round(this.estimateVanillaCountMin(key)),
+          noiseReductionPct: Number((((this.estimateVanillaCountMin(key) - est) / Math.max(1, this.estimateVanillaCountMin(key))) * 100).toFixed(2)),
+          fractionOfStream: Number((est / Math.max(1, this.totalWeight)).toFixed(4))
+        });
+      }
+    }
+
+    result.sort((a, b) => b.estimatedFrequency - a.estimatedFrequency);
+    return result;
+  }
+
+  merge(other) {
+    if (!other || other.depth !== this.depth || other.width !== this.width) {
+      throw new Error("Cannot merge CountMeanMinSketches with mismatched dimensions");
+    }
+
+    for (let j = 0; j < this.depth; j++) {
+      for (let k = 0; k < this.width; k++) {
+        this.table[j][k] += other.table[j][k];
+      }
+      this.rowTotals[j] += other.rowTotals[j];
+    }
+
+    this.totalWeight += other.totalWeight;
+    this.itemsInserted += other.itemsInserted;
+
+    for (const [key] of other.candidates) {
+      const est = this.estimate(key);
+      if (est >= this.phi * this.totalWeight) {
+        this.candidates.set(key, est);
+      }
+    }
+
+    return this;
+  }
+
+  getSummary() {
+    return {
+      depth: this.depth,
+      width: this.width,
+      epsilon: this.epsilon,
+      phi: this.phi,
+      totalWeight: this.totalWeight,
+      itemsInserted: this.itemsInserted,
+      trackedCandidatesCount: this.candidates.size,
+      heavyHittersCount: this.getHeavyHitters().length
+    };
+  }
+
+  getStats() {
+    return {
+      depth: this.depth,
+      width: this.width,
+      totalWeight: this.totalWeight,
+      itemsInserted: this.itemsInserted,
+      candidateCount: this.candidates.size,
+      epsilon: this.epsilon,
+      phi: this.phi
+    };
+  }
+}
+
+export class MASACContinuousPricing {
+  constructor(options = {}) {
+    this.numAgents = Math.max(2, Math.floor(Number(options.numAgents || 2)));
+    this.stateDim = Math.max(2, Math.floor(Number(options.stateDim || 5)));
+    this.gamma = options.gamma !== undefined ? options.gamma : 0.98;
+    this.tau = options.tau !== undefined ? options.tau : 0.01;
+    this.targetEntropy = options.targetEntropy !== undefined ? options.targetEntropy : -1.0;
+    this.costBudget = options.costBudget !== undefined ? options.costBudget : 0.02;
+
+    this.lrActor = options.lrActor || 0.005;
+    this.lrCritic = options.lrCritic || 0.01;
+    this.lrAlpha = options.lrAlpha || 0.01;
+    this.lrDual = options.lrDual || 0.02;
+
+    this.jointStateDim = this.numAgents * this.stateDim;
+    this.jointDim = this.jointStateDim + this.numAgents;
+
+    this.agents = [];
+    for (let i = 0; i < this.numAgents; i++) {
+      const wMean = new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+      const bMean = 0.0;
+      const wLogStd = new Array(this.stateDim).fill(0).map(() => (Math.random() - 0.5) * 0.05);
+      const bLogStd = -0.5;
+
+      const wQ1 = new Array(this.jointDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+      const bQ1 = 0.0;
+      const wQ2 = new Array(this.jointDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+      const bQ2 = 0.0;
+
+      const wQ1Target = [...wQ1];
+      let bQ1Target = bQ1;
+      const wQ2Target = [...wQ2];
+      let bQ2Target = bQ2;
+
+      const wC = new Array(this.jointDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+      const bC = 0.0;
+      const wCTarget = [...wC];
+      let bCTarget = bC;
+
+      this.agents.push({
+        id: `MASAC_AGENT_${i + 1}`,
+        wMean,
+        bMean,
+        wLogStd,
+        bLogStd,
+        wQ1,
+        bQ1,
+        wQ2,
+        bQ2,
+        wQ1Target,
+        bQ1Target,
+        wQ2Target,
+        bQ2Target,
+        wC,
+        bC,
+        wCTarget,
+        bCTarget,
+        alpha: 0.2,
+        lambda: 0.0
+      });
+    }
+
+    this.trainStepCount = 0;
+  }
+
+  _evalLinear(weights, bias, input) {
+    let sum = bias;
+    for (let i = 0; i < weights.length; i++) {
+      sum += weights[i] * input[i];
+    }
+    return sum;
+  }
+
+  sampleAction(agentIdx, localState, deterministic = false) {
+    const ag = this.agents[agentIdx];
+    let mean = ag.bMean;
+    let logStd = ag.bLogStd;
+
+    for (let j = 0; j < this.stateDim; j++) {
+      mean += ag.wMean[j] * localState[j];
+      logStd += ag.wLogStd[j] * localState[j];
+    }
+
+    logStd = Math.max(-20, Math.min(2, logStd));
+    const std = Math.exp(logStd);
+
+    let u;
+    if (deterministic) {
+      u = mean;
+    } else {
+      const u1 = Math.max(1e-7, Math.random());
+      const u2 = Math.random();
+      const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      u = mean + std * z;
+    }
+
+    const action = Math.tanh(u);
+    const normalLogProb = -0.5 * (Math.pow((u - mean) / std, 2) + 2 * logStd + Math.log(2 * Math.PI));
+    const jacobianCorr = Math.log(Math.max(1e-6, 1.0 - action * action));
+    const logProb = normalLogProb - jacobianCorr;
+
+    const result = {
+      agentId: ag.id,
+      action: Number(action.toFixed(5)),
+      rawU: u,
+      logProb: Number(logProb.toFixed(5)),
+      alpha: Number(ag.alpha.toFixed(4)),
+      lambda: Number(ag.lambda.toFixed(4)),
+      valueOf() {
+        return this.action;
+      },
+      [Symbol.toPrimitive](hint) {
+        if (hint === "number") return this.action;
+        return `[MASAC a=${this.action.toFixed(4)}]`;
+      }
+    };
+
+    return result;
+  }
+
+  update(batch) {
+    this.trainStepCount += 1;
+    const { states, actions, rewards, costs, nextStates, done = false } = batch;
+
+    const jointState = [];
+    const jointNextState = [];
+    for (let i = 0; i < this.numAgents; i++) {
+      for (let j = 0; j < this.stateDim; j++) {
+        jointState.push(states[i][j]);
+        jointNextState.push(nextStates[i][j]);
+      }
+    }
+
+    const jointInput = [...jointState, ...actions];
+
+    const nextActions = [];
+    const nextLogProbs = [];
+    for (let i = 0; i < this.numAgents; i++) {
+      const sample = this.sampleAction(i, nextStates[i], false);
+      nextActions.push(sample.action);
+      nextLogProbs.push(sample.logProb);
+    }
+
+    const jointNextInput = [...jointNextState, ...nextActions];
+    const discount = done ? 0 : this.gamma;
+    const agentSummaries = [];
+
+    for (let i = 0; i < this.numAgents; i++) {
+      const ag = this.agents[i];
+
+      const q1Targ = this._evalLinear(ag.wQ1Target, ag.bQ1Target, jointNextInput);
+      const q2Targ = this._evalLinear(ag.wQ2Target, ag.bQ2Target, jointNextInput);
+      const targetQ = rewards[i] + discount * (Math.min(q1Targ, q2Targ) - ag.alpha * nextLogProbs[i]);
+
+      const q1Curr = this._evalLinear(ag.wQ1, ag.bQ1, jointInput);
+      const q2Curr = this._evalLinear(ag.wQ2, ag.bQ2, jointInput);
+      const errQ1 = q1Curr - targetQ;
+      const errQ2 = q2Curr - targetQ;
+
+      for (let k = 0; k < this.jointDim; k++) {
+        ag.wQ1[k] -= this.lrCritic * errQ1 * jointInput[k];
+        ag.wQ2[k] -= this.lrCritic * errQ2 * jointInput[k];
+      }
+      ag.bQ1 -= this.lrCritic * errQ1;
+      ag.bQ2 -= this.lrCritic * errQ2;
+
+      const cTarg = this._evalLinear(ag.wCTarget, ag.bCTarget, jointNextInput);
+      const targetC = costs[i] + discount * cTarg;
+      const cCurr = this._evalLinear(ag.wC, ag.bC, jointInput);
+      const errC = cCurr - targetC;
+
+      for (let k = 0; k < this.jointDim; k++) {
+        ag.wC[k] -= this.lrCritic * errC * jointInput[k];
+      }
+      ag.bC -= this.lrCritic * errC;
+
+      const curSample = this.sampleAction(i, states[i], false);
+      const actionIdxInJoint = this.jointStateDim + i;
+      const dQda = ag.wQ1[actionIdxInJoint];
+      const dCda = ag.wC[actionIdxInJoint];
+
+      const da_du = Math.max(0.01, 1 - curSample.action * curSample.action);
+      const policyGrad = (dQda - ag.lambda * dCda - ag.alpha * curSample.logProb) * da_du;
+
+      for (let j = 0; j < this.stateDim; j++) {
+        ag.wMean[j] += this.lrActor * policyGrad * states[i][j];
+      }
+      ag.bMean += this.lrActor * policyGrad;
+
+      const entropyDiff = curSample.logProb + this.targetEntropy;
+      ag.alpha = Math.max(0.01, ag.alpha - this.lrAlpha * entropyDiff);
+
+      const costViolation = costs[i] - this.costBudget;
+      ag.lambda = Math.max(0, ag.lambda + this.lrDual * costViolation);
+
+      for (let k = 0; k < this.jointDim; k++) {
+        ag.wQ1Target[k] = this.tau * ag.wQ1[k] + (1 - this.tau) * ag.wQ1Target[k];
+        ag.wQ2Target[k] = this.tau * ag.wQ2[k] + (1 - this.tau) * ag.wQ2Target[k];
+        ag.wCTarget[k] = this.tau * ag.wC[k] + (1 - this.tau) * ag.wCTarget[k];
+      }
+      ag.bQ1Target = this.tau * ag.bQ1 + (1 - this.tau) * ag.bQ1Target;
+      ag.bQ2Target = this.tau * ag.bQ2 + (1 - this.tau) * ag.bQ2Target;
+      ag.bCTarget = this.tau * ag.bC + (1 - this.tau) * ag.bCTarget;
+
+      agentSummaries.push({
+        agentId: ag.id,
+        lossQ1: Number((errQ1 * errQ1).toFixed(5)),
+        lossQ2: Number((errQ2 * errQ2).toFixed(5)),
+        lossCost: Number((errC * errC).toFixed(5)),
+        alpha: Number(ag.alpha.toFixed(4)),
+        lambda: Number(ag.lambda.toFixed(4))
+      });
+    }
+
+    return {
+      step: this.trainStepCount,
+      agentSummaries
+    };
+  }
+
+  recommendPrices(sellerContexts = []) {
+    const recommendations = [];
+
+    for (let i = 0; i < Math.min(this.numAgents, sellerContexts.length); i++) {
+      const ctx = sellerContexts[i];
+      const ag = this.agents[i];
+
+      const cogs = Math.max(1000, Number(ctx.cogs || 100000));
+      const basePrice = Math.max(cogs, Number(ctx.basePrice || cogs * 1.35));
+      const competitorPrice = Number(ctx.competitorPrice || basePrice);
+      const inventory = Math.max(0, Number(ctx.inventory || 100));
+      const elasticity = Math.max(0.1, Number(ctx.priceElasticity || 1.6));
+
+      const localState = [
+        Math.min(2.0, cogs / basePrice),
+        Math.min(2.0, competitorPrice / basePrice),
+        Math.min(2.0, inventory / 100),
+        Math.min(2.0, elasticity / 3.0),
+        0.5
+      ];
+
+      const sample = this.sampleAction(i, localState, true);
+      const a = sample.action;
+
+      const pMin = cogs * 0.95;
+      const pMax = basePrice * 1.5;
+      const rawPrice = pMin + ((1 + a) / 2) * (pMax - pMin);
+
+      const safeFloorPrice = Math.round(cogs * 1.05);
+      const recommendedPrice = Math.max(safeFloorPrice, Math.round(rawPrice));
+      const grossMarginRate = Number(((recommendedPrice - cogs) / recommendedPrice).toFixed(4));
+
+      recommendations.push({
+        agentId: ag.id,
+        recommendedPrice,
+        rawPrice: Math.round(rawPrice),
+        safeFloorPrice,
+        grossMarginRate,
+        isSafe: rawPrice >= safeFloorPrice,
+        alpha: Number(ag.alpha.toFixed(4)),
+        lambda: Number(ag.lambda.toFixed(4)),
+        action: a
+      });
+    }
+
+    return recommendations;
+  }
+}
+
+export class EVRPTWPayloadTerrainRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || { x: 0, y: 0, elevationM: 10, lat: 10.7769, lng: 106.7009 };
+    this.batteryCapacityKwh = options.batteryCapacityKwh || 70;
+    this.curbWeightKg = options.curbWeightKg || 1800;
+    this.maxPayloadKg = options.maxPayloadKg || 1200;
+    this.rollingResistCoeff = options.rollingResistCoeff || 0.012;
+    this.dragCoeff = options.dragCoeff || 0.35;
+    this.frontalAreaM2 = options.frontalAreaM2 || 3.2;
+    this.drivetrainEfficiency = options.drivetrainEfficiency || 0.88;
+    this.regenEfficiency = options.regenEfficiency || 0.72;
+    this.auxiliaryPowerKw = options.auxiliaryPowerKw || 1.2;
+    this.speedKmh = options.speedKmh || 45;
+    this.electricityRateVnd = options.electricityRateVnd || 3200;
+
+    this.g = 9.81;
+    this.airDensity = 1.204;
+  }
+
+  _computeDistanceKm(p1, p2) {
+    if (p1.lat !== undefined && p1.lng !== undefined && p2.lat !== undefined && p2.lng !== undefined) {
+      const R = 6371;
+      const dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
+      const dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((p1.lat * Math.PI) / 180) * Math.cos((p2.lat * Math.PI) / 180) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Number((R * c).toFixed(2));
+    }
+
+    const dx = (p2.x !== undefined ? p2.x : 0) - (p1.x !== undefined ? p1.x : 0);
+    const dy = (p2.y !== undefined ? p2.y : 0) - (p1.y !== undefined ? p1.y : 0);
+    return Number(Math.sqrt(dx * dx + dy * dy).toFixed(2));
+  }
+
+  _simulateLegEnergyKwh(from, to, currentPayloadKg) {
+    const distKm = this._computeDistanceKm(from, to);
+    if (distKm <= 0.01) {
+      return { distKm: 0, deltaElevM: 0, energyKwh: 0, regenKwh: 0, isRegenerating: false };
+    }
+
+    const elevFrom = from.elevationM !== undefined ? from.elevationM : 10;
+    const elevTo = to.elevationM !== undefined ? to.elevationM : 10;
+    const deltaElevM = elevTo - elevFrom;
+
+    const distM = distKm * 1000;
+    const thetaRad = Math.atan2(deltaElevM, distM);
+    const speedMs = (this.speedKmh * 1000) / 3600;
+    const travelHours = distKm / this.speedKmh;
+    const totalMassKg = this.curbWeightKg + Math.max(0, currentPayloadKg);
+
+    const fRoll = totalMassKg * this.g * this.rollingResistCoeff * Math.cos(thetaRad);
+    const fGrade = totalMassKg * this.g * Math.sin(thetaRad);
+    const fAero = 0.5 * this.airDensity * this.dragCoeff * this.frontalAreaM2 * Math.pow(speedMs, 2);
+    const fTraction = fRoll + fGrade + fAero;
+
+    let netEnergyKwh = 0;
+    let regenKwh = 0;
+    let isRegenerating = false;
+
+    if (fTraction > 0) {
+      const mechPowerKw = (fTraction * speedMs) / 1000;
+      const elecPowerKw = (mechPowerKw / this.drivetrainEfficiency) + this.auxiliaryPowerKw;
+      netEnergyKwh = elecPowerKw * travelHours;
+    } else {
+      isRegenerating = true;
+      const brakingPowerKw = (-fTraction * speedMs) / 1000;
+      const recoveredPowerKw = brakingPowerKw * this.regenEfficiency;
+      regenKwh = recoveredPowerKw * travelHours;
+      const auxEnergyKwh = this.auxiliaryPowerKw * travelHours;
+      netEnergyKwh = Math.max(-regenKwh, auxEnergyKwh - regenKwh);
+    }
+
+    return {
+      distKm,
+      deltaElevM,
+      totalMassKg,
+      netEnergyKwh: Number(netEnergyKwh.toFixed(4)),
+      regenKwh: Number(regenKwh.toFixed(4)),
+      isRegenerating,
+      travelHours: Number(travelHours.toFixed(4))
+    };
+  }
+
+  planRoute(customers = []) {
+    if (!customers || customers.length === 0) {
+      return {
+        success: true,
+        routes: [],
+        totalDistanceKm: 0,
+        totalNetEnergyKwh: 0,
+        totalRegenKwh: 0,
+        totalElectricityCostVnd: 0,
+        summary: "No customers to route"
+      };
+    }
+
+    const sorted = [...customers].sort((a, b) => {
+      const eA = a.readyTime !== undefined ? a.readyTime : 0;
+      const eB = b.readyTime !== undefined ? b.readyTime : 0;
+      return eA - eB;
+    });
+
+    let initialPayloadKg = sorted.reduce((sum, c) => sum + (c.demandKg || 10), 0);
+    initialPayloadKg = Math.min(this.maxPayloadKg, initialPayloadKg);
+
+    const stops = [];
+    let currentPayload = initialPayloadKg;
+    let currentLoc = this.depot;
+    let currentTime = 8.0;
+    let currentBatteryKwh = this.batteryCapacityKwh;
+
+    let totalDistKm = 0;
+    let totalNetEnergyKwh = 0;
+    let totalRegenKwh = 0;
+
+    for (let i = 0; i < sorted.length; i++) {
+      const cust = sorted[i];
+      const leg = this._simulateLegEnergyKwh(currentLoc, cust, currentPayload);
+
+      const arrTime = currentTime + leg.travelHours;
+      const twStart = cust.readyTime !== undefined ? cust.readyTime : 0;
+      const serviceHours = (cust.serviceTimeMin || 10) / 60;
+      const depTime = Math.max(arrTime, twStart) + serviceHours;
+
+      currentBatteryKwh = Math.min(this.batteryCapacityKwh, currentBatteryKwh - leg.netEnergyKwh);
+      const deliveredDemand = cust.demandKg || 10;
+      currentPayload = Math.max(0, currentPayload - deliveredDemand);
+
+      stops.push({
+        stopId: cust.id || `STOP_${i + 1}`,
+        distanceKm: leg.distKm,
+        deltaElevM: leg.deltaElevM,
+        payloadBeforeShedKg: Math.round(currentPayload + deliveredDemand),
+        payloadAfterShedKg: Math.round(currentPayload),
+        legEnergyKwh: leg.netEnergyKwh,
+        regenKwh: leg.regenKwh,
+        batterySocPct: Number(((currentBatteryKwh / this.batteryCapacityKwh) * 100).toFixed(1)),
+        arrivedAt: Number(arrTime.toFixed(2)),
+        departedAt: Number(depTime.toFixed(2))
+      });
+
+      totalDistKm += leg.distKm;
+      totalNetEnergyKwh += leg.netEnergyKwh;
+      totalRegenKwh += leg.regenKwh;
+
+      currentLoc = cust;
+      currentTime = depTime;
+    }
+
+    const returnLeg = this._simulateLegEnergyKwh(currentLoc, this.depot, 0);
+    currentBatteryKwh = Math.min(this.batteryCapacityKwh, currentBatteryKwh - returnLeg.netEnergyKwh);
+    totalDistKm += returnLeg.distKm;
+    totalNetEnergyKwh += returnLeg.netEnergyKwh;
+    totalRegenKwh += returnLeg.regenKwh;
+
+    totalDistKm = Number(totalDistKm.toFixed(2));
+    totalNetEnergyKwh = Number(totalNetEnergyKwh.toFixed(4));
+    totalRegenKwh = Number(totalRegenKwh.toFixed(4));
+    const totalElectricityCostVnd = Math.round(Math.max(0, totalNetEnergyKwh) * this.electricityRateVnd);
+
+    const route = {
+      vehicleId: "SPX_PAYLOAD_TERRAIN_EV_01",
+      initialPayloadKg,
+      finalPayloadKg: 0,
+      stops,
+      totalDistanceKm: totalDistKm,
+      totalNetEnergyKwh,
+      totalRegenKwh,
+      remainingBatteryKwh: Number(currentBatteryKwh.toFixed(2)),
+      finalSocPct: Number(((currentBatteryKwh / this.batteryCapacityKwh) * 100).toFixed(1))
+    };
+
+    return {
+      success: true,
+      routes: [route],
+      totalDistanceKm: totalDistKm,
+      totalNetEnergyKwh,
+      totalRegenKwh,
+      totalElectricityCostVnd,
+      summary: `Planned ${stops.length} stops over ${totalDistKm} km with dynamic payload shedding (${initialPayloadKg} kg -> 0 kg) recovering ${totalRegenKwh} kWh via terrain regen`
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -43885,7 +44527,12 @@ export default {
   TurnstileCountSketchHeavyHitters,
   MATD3ContinuousPricing,
   EVRPTWAutonomousDroneRechargeRouter,
+  // Phase 79 Enterprise Algorithms
+  CountMeanMinSketch,
+  MASACContinuousPricing,
+  EVRPTWPayloadTerrainRouter,
 };
+
 
 
 

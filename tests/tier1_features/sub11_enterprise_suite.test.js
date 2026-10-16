@@ -403,6 +403,10 @@ import {
   TurnstileCountSketchHeavyHitters,
   MATD3ContinuousPricing,
   EVRPTWAutonomousDroneRechargeRouter,
+  // Phase 79 Enterprise Algorithms
+  CountMeanMinSketch,
+  MASACContinuousPricing,
+  EVRPTWPayloadTerrainRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -605,6 +609,9 @@ import { EVRPTWActiveCoolingRouter as ServerEVRPTWActiveCoolingRouter } from "..
 import { TurnstileCountSketchHeavyHitters as ServerTurnstileCountSketchHeavyHitters } from "../../server/src/utils/turnstileCountSketchHeavyHitters.js";
 import { MATD3ContinuousPricing as ServerMATD3ContinuousPricing } from "../../server/src/utils/matd3ContinuousPricing.js";
 import { EVRPTWAutonomousDroneRechargeRouter as ServerEVRPTWAutonomousDroneRechargeRouter } from "../../server/src/utils/evrptwAutonomousDroneRechargeRouter.js";
+import { CountMeanMinSketch as ServerCountMeanMinSketch } from "../../server/src/utils/countMeanMinSketch.js";
+import { MASACContinuousPricing as ServerMASACContinuousPricing } from "../../server/src/utils/masacContinuousPricing.js";
+import { EVRPTWPayloadTerrainRouter as ServerEVRPTWPayloadTerrainRouter } from "../../server/src/utils/evrptwPayloadTerrainRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -33175,6 +33182,427 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có theo dõi biến động Turnstile hoặc giao bằng drone sạc nóc xe không?");
         expect.equal(buyerRes.intent, "TURNSTILE_MATD3_DRONE_ROOFTOP_RECHARGE");
         expect.ok(buyerRes.replyText.includes("Turnstile Count-Sketch"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 226: Count-Mean-Min Sketch, MASAC Multi-Agent Continuous Pricing,
+    // and Dynamic Payload Terrain EVRPTW (Phase 79 - 24 Tests: F226-T01 - F226-T24)
+    // =========================================================================
+    describe("Feature 226: Count-Mean-Min Sketch, MASAC Multi-Agent Continuous Pricing & Dynamic Payload Terrain EVRPTW", () => {
+      // -----------------------------------------------------------------------
+      // Count-Mean-Min Sketch Tests (F226-T01 - F226-T07)
+      // -----------------------------------------------------------------------
+      test("F226-T01: CountMeanMinSketch initializes with custom/default dimensions and candidate tracking", () => {
+        const sketch = new CountMeanMinSketch({ depth: 5, width: 128, phi: 0.02 });
+        expect.equal(sketch.depth, 5);
+        expect.equal(sketch.width, 128);
+        expect.equal(sketch.phi, 0.02);
+        expect.equal(sketch.totalWeight, 0);
+        expect.equal(sketch.itemsInserted, 0);
+        const stats = sketch.getStats();
+        expect.equal(stats.depth, 5);
+        expect.equal(stats.width, 128);
+        expect.equal(stats.candidateCount, 0);
+      });
+
+      test("F226-T02: CountMeanMinSketch correctly records single and multiple weighted element insertions", () => {
+        const sketch = new CountMeanMinSketch({ depth: 4, width: 64 });
+        sketch.update("SKU_IPHONE_16", 15);
+        sketch.update("SKU_AIRPODS_PRO", 8);
+        sketch.update("SKU_IPHONE_16", 5);
+
+        expect.equal(sketch.totalWeight, 28);
+        expect.equal(sketch.itemsInserted, 3);
+        for (let j = 0; j < sketch.depth; j++) {
+          expect.equal(sketch.rowTotals[j], 28);
+        }
+      });
+
+      test("F226-T03: CountMeanMinSketch computes row-wise mean noise and debiased frequency estimate", () => {
+        const sketch = new CountMeanMinSketch({ depth: 5, width: 64 });
+        sketch.update("SKU_TOP_DEAL", 100);
+        for (let i = 0; i < 50; i++) {
+          sketch.update(`NOISE_SKU_${i}`, 2);
+        }
+
+        const debiasedEst = sketch.estimate("SKU_TOP_DEAL");
+        const vanillaEst = sketch.estimateVanillaCountMin("SKU_TOP_DEAL");
+
+        expect.ok(debiasedEst >= 90 && debiasedEst <= 110);
+        expect.ok(vanillaEst >= 100);
+      });
+
+      test("F226-T04: CountMeanMinSketch estimate is strictly non-negative and bounded by total stream weight", () => {
+        const sketch = new CountMeanMinSketch({ depth: 4, width: 32 });
+        sketch.update("TARGET_ITEM", 25);
+        for (let i = 0; i < 150; i++) {
+          sketch.update(`BG_STREAM_${i % 15}`, 3);
+        }
+
+        const debiased = sketch.estimate("TARGET_ITEM");
+        const absentEst = sketch.estimate("NON_EXISTENT_SKU");
+
+        expect.ok(debiased >= 0);
+        expect.ok(debiased <= sketch.totalWeight);
+        expect.ok(absentEst >= 0);
+      });
+
+      test("F226-T05: CountMeanMinSketch supports exact element-wise matrix mergeability across edge nodes", () => {
+        const sketchA = new CountMeanMinSketch({ depth: 4, width: 64, phi: 0.01 });
+        const sketchB = new CountMeanMinSketch({ depth: 4, width: 64, phi: 0.01 });
+
+        sketchA.update("SKU_HOT_1", 50);
+        sketchA.update("SKU_SHARED", 30);
+
+        sketchB.update("SKU_HOT_2", 40);
+        sketchB.update("SKU_SHARED", 20);
+
+        sketchA.merge(sketchB);
+
+        expect.equal(sketchA.totalWeight, 140);
+        expect.equal(sketchA.itemsInserted, 4);
+        const estShared = sketchA.estimate("SKU_SHARED");
+        expect.ok(estShared >= 45 && estShared <= 55);
+      });
+
+      test("F226-T06: CountMeanMinSketch extracts Top-K Heavy Hitters with noise reduction percentage", () => {
+        const sketch = new CountMeanMinSketch({ depth: 5, width: 128, phi: 0.05 });
+        sketch.update("SKU_MEGA_SALE", 200);
+        sketch.update("SKU_RUNNER_UP", 80);
+        for (let i = 0; i < 100; i++) {
+          sketch.update(`LOW_FREQ_${i}`, 1);
+        }
+
+        const heavyHitters = sketch.getHeavyHitters();
+        expect.ok(heavyHitters.length >= 2);
+        expect.equal(heavyHitters[0].key, "SKU_MEGA_SALE");
+        expect.ok(heavyHitters[0].estimatedFrequency >= 190);
+        expect.ok(heavyHitters[0].fractionOfStream > 0.4);
+      });
+
+      test("F226-T07: Client and Server CountMeanMinSketch exhibit 100% bidirectional parity", () => {
+        const clientSketch = new CountMeanMinSketch({ depth: 4, width: 64, phi: 0.02 });
+        const serverSketch = new ServerCountMeanMinSketch({ depth: 4, width: 64, phi: 0.02 });
+
+        const stream = [
+          { key: "ITEM_ALPHA", weight: 35 },
+          { key: "ITEM_BETA", weight: 22 },
+          { key: "ITEM_GAMMA", weight: 60 },
+          { key: "ITEM_ALPHA", weight: 15 },
+          { key: "ITEM_DELTA", weight: 8 }
+        ];
+
+        for (const item of stream) {
+          clientSketch.update(item.key, item.weight);
+          serverSketch.update(item.key, item.weight);
+        }
+
+        expect.equal(clientSketch.totalWeight, serverSketch.totalWeight);
+        expect.equal(clientSketch.itemsInserted, serverSketch.itemsInserted);
+
+        for (const item of stream) {
+          const clientEst = clientSketch.estimate(item.key);
+          const serverEst = serverSketch.estimate(item.key);
+          expect.equal(clientEst, serverEst);
+          expect.equal(clientSketch.estimateVanillaCountMin(item.key), serverSketch.estimateVanillaCountMin(item.key));
+        }
+
+        const clientHH = clientSketch.getHeavyHitters();
+        const serverHH = serverSketch.getHeavyHitters();
+        expect.equal(clientHH.length, serverHH.length);
+        expect.equal(clientHH[0].key, serverHH[0].key);
+        expect.equal(clientHH[0].estimatedFrequency, serverHH[0].estimatedFrequency);
+      });
+
+      // -----------------------------------------------------------------------
+      // MASAC Multi-Agent Continuous Pricing Tests (F226-T08 - F226-T14)
+      // -----------------------------------------------------------------------
+      test("F226-T08: MASACContinuousPricing initializes CTDE multi-agent parameters with adaptive temperatures", () => {
+        const masac = new MASACContinuousPricing({ numAgents: 3, stateDim: 5, targetEntropy: -1.0 });
+        expect.equal(masac.numAgents, 3);
+        expect.equal(masac.stateDim, 5);
+        expect.equal(masac.agents.length, 3);
+        for (const ag of masac.agents) {
+          expect.equal(ag.alpha, 0.2);
+          expect.equal(ag.lambda, 0.0);
+          expect.equal(ag.wMean.length, 5);
+          expect.equal(ag.wQ1.length, 3 * 5 + 3);
+        }
+      });
+
+      test("F226-T09: MASACContinuousPricing samples bounded continuous actions via squashed Gaussian with Jacobian correction", () => {
+        const masac = new MASACContinuousPricing({ numAgents: 2, stateDim: 4 });
+        const localState = [0.8, 1.1, 0.5, 0.3];
+        const resSample = masac.sampleAction(0, localState, false);
+
+        expect.ok(resSample.action >= -1.0 && resSample.action <= 1.0);
+        expect.ok(typeof resSample.logProb === "number");
+        expect.ok(Number.isFinite(resSample.logProb));
+
+        const resDet = masac.sampleAction(0, localState, true);
+        expect.ok(resDet.action >= -1.0 && resDet.action <= 1.0);
+      });
+
+      test("F226-T10: MASACContinuousPricing updates twin centralized Q-critics and maintains soft target polyak averaging", () => {
+        const masac = new MASACContinuousPricing({ numAgents: 2, stateDim: 3, tau: 0.05 });
+        const batch = {
+          states: [[0.5, 0.6, 0.7], [0.8, 0.9, 0.4]],
+          actions: [0.1, -0.2],
+          rewards: [10.0, 8.5],
+          costs: [0.01, 0.04],
+          nextStates: [[0.6, 0.7, 0.8], [0.7, 0.8, 0.5]],
+          done: false
+        };
+
+        const updateRes = masac.update(batch);
+        expect.equal(updateRes.step, 1);
+        expect.equal(updateRes.agentSummaries.length, 2);
+        expect.ok(updateRes.agentSummaries[0].lossQ1 >= 0);
+        expect.ok(updateRes.agentSummaries[0].lossQ2 >= 0);
+        expect.ok(updateRes.agentSummaries[0].lossCost >= 0);
+      });
+
+      test("F226-T11: MASACContinuousPricing automatically adjusts individual entropy temperatures Alpha towards target entropy", () => {
+        const masac = new MASACContinuousPricing({ numAgents: 2, stateDim: 3, lrAlpha: 0.05, targetEntropy: -1.0 });
+
+        const batch = {
+          states: [[0.2, 0.3, 0.4], [0.5, 0.6, 0.7]],
+          actions: [0.0, 0.0],
+          rewards: [5.0, 6.0],
+          costs: [0.01, 0.01],
+          nextStates: [[0.2, 0.3, 0.4], [0.5, 0.6, 0.7]],
+          done: false
+        };
+
+        masac.update(batch);
+        expect.ok(masac.agents[0].alpha >= 0.01);
+      });
+
+      test("F226-T12: MASACContinuousPricing Cost Critic dual Lagrangian multiplier Lambda penalizes safety budget violations", () => {
+        const masac = new MASACContinuousPricing({ numAgents: 2, stateDim: 3, costBudget: 0.02, lrDual: 0.1 });
+        expect.equal(masac.agents[0].lambda, 0.0);
+
+        const batchViolating = {
+          states: [[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]],
+          actions: [-0.9, -0.9],
+          rewards: [1.0, 1.0],
+          costs: [0.15, 0.20],
+          nextStates: [[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]],
+          done: false
+        };
+
+        masac.update(batchViolating);
+        expect.ok(masac.agents[0].lambda > 0.0);
+        expect.ok(masac.agents[1].lambda > 0.0);
+      });
+
+      test("F226-T13: MASACContinuousPricing enforces 1.05 COGS hard price floor across competitive seller contexts", () => {
+        const masac = new MASACContinuousPricing({ numAgents: 2, stateDim: 5 });
+        const sellerContexts = [
+          { cogs: 200000, basePrice: 260000, competitorPrice: 210000, inventory: 50, priceElasticity: 2.1 },
+          { cogs: 500000, basePrice: 650000, competitorPrice: 520000, inventory: 80, priceElasticity: 1.8 }
+        ];
+
+        const recs = masac.recommendPrices(sellerContexts);
+        expect.equal(recs.length, 2);
+        for (const r of recs) {
+          expect.ok(r.recommendedPrice >= r.safeFloorPrice);
+          expect.ok(r.grossMarginRate >= 0.045);
+          expect.equal(r.isSafe, r.rawPrice >= r.safeFloorPrice);
+        }
+      });
+
+      test("F226-T14: Client and Server MASACContinuousPricing demonstrate 100% bidirectional parity", () => {
+        const clientMASAC = new MASACContinuousPricing({ numAgents: 2, stateDim: 4 });
+        const serverMASAC = new ServerMASACContinuousPricing({ numAgents: 2, stateDim: 4 });
+
+        for (let i = 0; i < 2; i++) {
+          serverMASAC.agents[i].wMean = [...clientMASAC.agents[i].wMean];
+          serverMASAC.agents[i].bMean = clientMASAC.agents[i].bMean;
+          serverMASAC.agents[i].wLogStd = [...clientMASAC.agents[i].wLogStd];
+          serverMASAC.agents[i].bLogStd = clientMASAC.agents[i].bLogStd;
+          serverMASAC.agents[i].wQ1 = [...clientMASAC.agents[i].wQ1];
+          serverMASAC.agents[i].bQ1 = clientMASAC.agents[i].bQ1;
+          serverMASAC.agents[i].wQ2 = [...clientMASAC.agents[i].wQ2];
+          serverMASAC.agents[i].bQ2 = clientMASAC.agents[i].bQ2;
+          serverMASAC.agents[i].wC = [...clientMASAC.agents[i].wC];
+          serverMASAC.agents[i].bC = clientMASAC.agents[i].bC;
+        }
+
+        const state = [0.9, 1.2, 0.4, 0.6];
+        const clientSample = clientMASAC.sampleAction(0, state, true);
+        const serverSample = serverMASAC.sampleAction(0, state, true);
+
+        expect.equal(clientSample.action, serverSample.action);
+        expect.equal(clientSample.logProb, serverSample.logProb);
+
+        const sellerContexts = [
+          { cogs: 100000, basePrice: 140000, competitorPrice: 125000, inventory: 40, priceElasticity: 1.5 },
+          { cogs: 300000, basePrice: 420000, competitorPrice: 380000, inventory: 90, priceElasticity: 2.0 }
+        ];
+
+        const clientRecs = clientMASAC.recommendPrices(sellerContexts);
+        const serverRecs = serverMASAC.recommendPrices(sellerContexts);
+
+        expect.equal(clientRecs.length, serverRecs.length);
+        expect.equal(clientRecs[0].recommendedPrice, serverRecs[0].recommendedPrice);
+        expect.equal(clientRecs[0].safeFloorPrice, serverRecs[0].safeFloorPrice);
+        expect.equal(clientRecs[1].recommendedPrice, serverRecs[1].recommendedPrice);
+        expect.equal(clientRecs[1].safeFloorPrice, serverRecs[1].safeFloorPrice);
+      });
+
+      // -----------------------------------------------------------------------
+      // EVRPTW Dynamic Payload & Terrain Router Tests (F226-T15 - F226-T22)
+      // -----------------------------------------------------------------------
+      test("F226-T15: EVRPTWPayloadTerrainRouter initializes physical vehicle parameters and topography constants", () => {
+        const router = new EVRPTWPayloadTerrainRouter({
+          batteryCapacityKwh: 80,
+          curbWeightKg: 2000,
+          maxPayloadKg: 1500,
+          rollingResistCoeff: 0.015,
+          dragCoeff: 0.38,
+          speedKmh: 50
+        });
+
+        expect.equal(router.batteryCapacityKwh, 80);
+        expect.equal(router.curbWeightKg, 2000);
+        expect.equal(router.maxPayloadKg, 1500);
+        expect.equal(router.rollingResistCoeff, 0.015);
+        expect.equal(router.speedKmh, 50);
+        expect.equal(router.g, 9.81);
+      });
+
+      test("F226-T16: EVRPTWPayloadTerrainRouter computes physics-based traction force considering payload mass and elevation change", () => {
+        const router = new EVRPTWPayloadTerrainRouter();
+        const depot = { x: 0, y: 0, elevationM: 10 };
+        const uphillNode = { x: 10, y: 0, elevationM: 110 };
+
+        const legEmpty = router._simulateLegEnergyKwh(depot, uphillNode, 0);
+        const legLoaded = router._simulateLegEnergyKwh(depot, uphillNode, 1000);
+
+        expect.equal(legEmpty.distKm, 10);
+        expect.equal(legLoaded.distKm, 10);
+        expect.equal(legLoaded.deltaElevM, 100);
+        expect.ok(legLoaded.netEnergyKwh > legEmpty.netEnergyKwh);
+        expect.equal(legLoaded.isRegenerating, false);
+      });
+
+      test("F226-T17: EVRPTWPayloadTerrainRouter calculates downhill regenerative braking energy recovery on steep declines", () => {
+        const router = new EVRPTWPayloadTerrainRouter({ regenEfficiency: 0.72 });
+        const highDepot = { x: 0, y: 0, elevationM: 500 };
+        const valleyNode = { x: 5, y: 0, elevationM: 50 };
+
+        const downhillLeg = router._simulateLegEnergyKwh(highDepot, valleyNode, 500);
+        expect.equal(downhillLeg.isRegenerating, true);
+        expect.ok(downhillLeg.regenKwh > 0);
+        expect.ok(downhillLeg.netEnergyKwh < 0);
+      });
+
+      test("F226-T18: EVRPTWPayloadTerrainRouter dynamic payload shedding reduces total mass at each delivery stop", () => {
+        const router = new EVRPTWPayloadTerrainRouter({ curbWeightKg: 1800 });
+        const customers = [
+          { id: "CUST_1", x: 5, y: 0, elevationM: 10, demandKg: 200 },
+          { id: "CUST_2", x: 10, y: 0, elevationM: 10, demandKg: 300 }
+        ];
+
+        const plan = router.planRoute(customers);
+        expect.equal(plan.success, true);
+        const route = plan.routes[0];
+        expect.equal(route.initialPayloadKg, 500);
+        expect.equal(route.stops[0].payloadBeforeShedKg, 500);
+        expect.equal(route.stops[0].payloadAfterShedKg, 300);
+        expect.equal(route.stops[1].payloadBeforeShedKg, 300);
+        expect.equal(route.stops[1].payloadAfterShedKg, 0);
+      });
+
+      test("F226-T19: EVRPTWPayloadTerrainRouter enforces battery SoC feasibility and returns empty array on empty input", () => {
+        const router = new EVRPTWPayloadTerrainRouter();
+        const emptyPlan = router.planRoute([]);
+        expect.equal(emptyPlan.success, true);
+        expect.equal(emptyPlan.routes.length, 0);
+        expect.equal(emptyPlan.totalDistanceKm, 0);
+      });
+
+      test("F226-T20: EVRPTWPayloadTerrainRouter tracks customer time windows and service departure hours", () => {
+        const router = new EVRPTWPayloadTerrainRouter({ speedKmh: 50 });
+        const customers = [
+          { id: "N1", x: 25, y: 0, elevationM: 15, demandKg: 50, readyTime: 8.8, serviceTimeMin: 15 },
+          { id: "N2", x: 50, y: 0, elevationM: 20, demandKg: 50, readyTime: 9.5, serviceTimeMin: 20 }
+        ];
+
+        const plan = router.planRoute(customers);
+        expect.equal(plan.success, true);
+        const stops = plan.routes[0].stops;
+        expect.equal(stops.length, 2);
+        expect.ok(stops[0].departedAt > stops[0].arrivedAt);
+        expect.ok(stops[1].departedAt > stops[1].arrivedAt);
+      });
+
+      test("F226-T21: EVRPTWPayloadTerrainRouter full route plan outputs comprehensive energy savings and VND cost", () => {
+        const router = new EVRPTWPayloadTerrainRouter({ electricityRateVnd: 3500 });
+        const customers = [
+          { id: "STOP_A", x: 5, y: 0, elevationM: 400, demandKg: 100 },
+          { id: "STOP_B", x: 8, y: 0, elevationM: 20, demandKg: 150 },
+          { id: "STOP_C", x: 12, y: 0, elevationM: 15, demandKg: 80 }
+        ];
+
+        const plan = router.planRoute(customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.totalDistanceKm > 0);
+        expect.ok(plan.totalNetEnergyKwh > 0);
+        expect.ok(plan.totalRegenKwh > 0);
+        expect.ok(plan.totalElectricityCostVnd > 0);
+        expect.ok(plan.summary.includes("dynamic payload shedding"));
+      });
+
+      test("F226-T22: Client and Server EVRPTWPayloadTerrainRouter exhibit 100% bidirectional parity", () => {
+        const clientRouter = new EVRPTWPayloadTerrainRouter();
+        const serverRouter = new ServerEVRPTWPayloadTerrainRouter();
+
+        const customers = [
+          { id: "H1", x: 8, y: 6, elevationM: 50, demandKg: 120, readyTime: 8.5 },
+          { id: "H2", x: 15, y: 12, elevationM: 10, demandKg: 180, readyTime: 9.0 },
+          { id: "H3", x: 22, y: 5, elevationM: 30, demandKg: 100, readyTime: 9.5 }
+        ];
+
+        const clientPlan = clientRouter.planRoute(customers);
+        const serverPlan = serverRouter.planRoute(customers);
+
+        expect.equal(clientPlan.success, serverPlan.success);
+        expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+        expect.equal(clientPlan.totalNetEnergyKwh, serverPlan.totalNetEnergyKwh);
+        expect.equal(clientPlan.totalRegenKwh, serverPlan.totalRegenKwh);
+        expect.equal(clientPlan.totalElectricityCostVnd, serverPlan.totalElectricityCostVnd);
+        expect.equal(clientPlan.routes[0].initialPayloadKg, serverPlan.routes[0].initialPayloadKg);
+        expect.equal(clientPlan.routes[0].remainingBatteryKwh, serverPlan.routes[0].remainingBatteryKwh);
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F226-T23 - F226-T24)
+      // -----------------------------------------------------------------------
+      test("F226-T23: Admin Sentinel Copilot correctly routes Section 218 (Count-Mean-Min), Section 219 (MASAC), and Section 220 (EVRPTW Payload Terrain)", () => {
+        const resCMM = generateAdminCopilotResponse("Thống kê tần suất khử nhiễu trung bình Count-Mean-Min Sketch Bingsheng He");
+        expect.equal(resCMM.tag, "COUNT-MEAN-MIN NOISE-SUBTRACTED SKETCH");
+        expect.ok(resCMM.text.includes("COUNT-MEAN-MIN"));
+
+        const resMASAC = generateAdminCopilotResponse("Định giá đa đại diện liên tục MASAC Multi-Agent Soft Actor-Critic Wei tự điều chỉnh nhiệt độ");
+        expect.equal(resMASAC.tag, "MASAC MULTI-AGENT CONTINUOUS PRICING");
+        expect.ok(resMASAC.text.includes("MASAC"));
+
+        const resPayload = generateAdminCopilotResponse("Định tuyến xe điện giảm tải trọng động và độ dốc địa hình EVRPTW Payload Terrain Basso");
+        expect.equal(resPayload.tag, "EVRPTW DYNAMIC PAYLOAD & TERRAIN ROUTER");
+        expect.ok(/dynamic payload/i.test(resPayload.text));
+      });
+
+      test("F226-T24: Seller ShopSmart Copilot Section 88 and Buyer Assistant Intent 81 handle Phase 79 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn tần suất bán Count-Mean-Min và định giá MASAC liên tục");
+        expect.equal(sellerRes.tag, "CMM SKETCH, MASAC CONTINUOUS & PAYLOAD-TERRAIN EVRPTW");
+        expect.ok(sellerRes.text.includes("Count-Mean-Min"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích bằng CMM hoặc giao bằng xe điện giảm tải địa hình không?");
+        expect.equal(buyerRes.intent, "CMM_MASAC_PAYLOAD_TERRAIN_ASSIST");
+        expect.ok(buyerRes.replyText.includes("Count-Mean-Min"));
       });
     });
   });

@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/turnstile|conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp|frequent[- ]directions|matrix sketch|dyadic[- ]range|dyadic/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/count[- ]mean[- ]min|cmm|mean[- ]noise|turnstile|conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp|frequent[- ]directions|matrix sketch|dyadic[- ]range|dyadic/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -2298,7 +2298,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 105. Tối Ưu Hóa Xả Hàng Tồn Kho Cận Hạn Bằng Soft Actor-Critic (SAC) (Phase 41 - Feature 188)
-  if (!/safe[- ]sac|sac[- ]lagrangian|lagrangian|sac[- ]auto|bidding|đấu thầu|sac-per|sac per/i.test(raw) && /sac markdown|soft actor[- ]critic|xả hàng cận hạn sac|maximum entropy rl|polyak markdown|hạ giá thanh lý/i.test(raw)) {
+  if (!/masac|multi[- ]agent.*sac|safe[- ]sac|sac[- ]lagrangian|lagrangian|sac[- ]auto|bidding|đấu thầu|sac-per|sac per/i.test(raw) && /sac markdown|soft actor[- ]critic|xả hàng cận hạn sac|maximum entropy rl|polyak markdown|hạ giá thanh lý/i.test(raw)) {
     return {
       text: `📉 **TỐI ƯU HÓA XẢ HÀNG TỒN KHO CẬN HẠN BẰNG SOFT ACTOR-CRITIC (SAC - HAARNOJA 2018)**:
 - **Nguyên lý Tối Đa Hóa Entropy Tự Do (Maximum Entropy Reinforcement Learning)**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -2821,7 +2821,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 132. Định Giá Đa Mục Tiêu Bằng SAC-PER (Phase 50 - Feature 197)
-  if (!/sac[- ]lagrangian|lagrangian safe pricing/i.test(raw) && /sac-per|sac per|soft actor-critic|prioritized experience replay pricing|định giá sac-per|maximum entropy pricing/i.test(raw)) {
+  if (!/masac|multi[- ]agent|safe[- ]sac|sac[- ]lagrangian|lagrangian safe pricing/i.test(raw) && /sac-per|sac per|soft actor-critic|prioritized experience replay pricing|định giá sac-per|maximum entropy pricing/i.test(raw)) {
     return {
       text: `🎯 **ĐỊNH GIÁ ĐA MỤC TIÊU BẰNG SOFT ACTOR-CRITIC & PER (SAC-PER - HAARNOJA ET AL., ICML 2018)**:
 - **Tối Đa Hóa Entropy Cực Đại $J(\\pi) = \\mathbb{E}[r + \\alpha \\mathcal{H}(\\pi)]$**:
@@ -4061,7 +4061,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 190. Lộ Trình Xe Điện Giao Hàng Phụ Thuộc Giao Thông TDEVRP (Phase 69 - Feature 216)
-  if (/vrptw[- ]td[- ]green|time[- ]dependent green|basso|xe điện phụ thuộc giờ cao điểm|tdevrp/i.test(raw)) {
+  if (!/payload|terrain/i.test(raw) && /vrptw[- ]td[- ]green|time[- ]dependent green|basso|xe điện phụ thuộc giờ cao điểm|tdevrp/i.test(raw)) {
     return {
       text: `🚚 **LỘ TRÌNH XE ĐIỆN PHỤ THUỘC GIAO THÔNG ĐÔ THỊ TDEVRP (BASSO ET AL. 2019 / ICHOUA 2003)**:
 - **Mô Hình Hóa Động Vận Tốc Giao Thông 5 Khung Giờ (Dynamic Speed Profiles)**:
@@ -4109,7 +4109,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 192. Định Giá An Toàn Tự Điều Chỉnh Entropy SAC-Lagrangian (Phase 70 - Feature 217)
-  if (!/safe[- ]sac|sac.*(continuous|liên tục)|(continuous|liên tục).*sac|achiam|sac[- ]lagrangian continuous|sac continuous safe pricing/i.test(raw) && /sac[- ]lagrangian|adaptive entropy|sac lagrangian safe pricing|haarnoja.*ray/i.test(raw)) {
+  if (!/masac|multi[- ]agent.*sac|safe[- ]sac|sac.*(continuous|liên tục)|(continuous|liên tục).*sac|achiam|sac[- ]lagrangian continuous|sac continuous safe pricing/i.test(raw) && /sac[- ]lagrangian|adaptive entropy|sac lagrangian safe pricing|haarnoja.*ray/i.test(raw)) {
     return {
       text: `🏷️ **ĐỊNH GIÁ AN TOÀN SOFT ACTOR-CRITIC TỰ ĐIỀU CHỈNH ENTROPY SAC-LAGRANGIAN (HAARNOJA 2018, RAY 2019)**:
 - **Hàm Mục Tiêu Tối Ưu Kép Maximum Entropy & Ràng Buộc Kép Lagrangian**:
@@ -4364,7 +4364,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 204. Định Giá Soft Actor-Critic Liên Tục Với Ràng Buộc Lagrange SAC-Lagrangian Continuous (Phase 74 - Feature 221)
-  if (!/safe[- ]sac|safe sac lagrangian/i.test(raw) && (/sac[- ]lagrangian[ -](continuous|liên tục)|(continuous|liên tục)[ -].*sac[- ]lagrangian|sac continuous safe pricing|soft actor[- ]critic continuous lagrangian|haarnoja.*achiam/i.test(raw))) {
+  if (!/masac|multi[- ]agent.*sac|safe[- ]sac|safe sac lagrangian/i.test(raw) && (/sac[- ]lagrangian[ -](continuous|liên tục)|(continuous|liên tục)[ -].*sac[- ]lagrangian|sac continuous safe pricing|soft actor[- ]critic continuous lagrangian|haarnoja.*achiam/i.test(raw))) {
     return {
       text: `💰 **ĐỊNH GIÁ SOFT ACTOR-CRITIC LIÊN TỤC RÀNG BUỘC LAGRANGE (HAARNOJA ICML 2018, ACHIAM 2017)**:
 - **Mạng Actor Gaussian Tái Tham Số Hóa (Reparameterized Gaussian Actor)**:
@@ -4447,7 +4447,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 208. Định Tuyến Xe Điện Phanh Tái Sinh KERS & Địa Hình 3D EVRPTW-Regen (Phase 75 - Feature 222)
-  if (/regenerative braking|phanh tái sinh|3d terrain|kers|địa hình 3d|bektas laporte|độ dốc địa hình|evrptw[- ]regen/i.test(raw)) {
+  if (!/payload.*terrain|dynamic payload/i.test(raw) && /regenerative braking|phanh tái sinh|3d terrain|kers|địa hình 3d|bektas laporte|độ dốc địa hình|evrptw[- ]regen/i.test(raw)) {
     return {
       text: `⚡ **ĐỊNH TUYẾN XE ĐIỆN PHANH TÁI SINH KERS & ĐỊA HÌNH 3D EVRPTW-REGEN (BEKTAS & LAPORTE 2011/2012, SCHIFFER 2017)**:
 - **Mô Hình Động Lực Học Xe & Trọng Trường Địa Hình 3D (Topographic Profiles)**:
@@ -4555,7 +4555,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 213. Định Giá Soft Actor-Critic Tự Động Điều Chỉnh Nhiệt Độ & Lagrange Safe SAC (Phase 77 - Feature 224)
-  if (/safe[- ]sac|safe sac lagrangian|sac lagrangian safe|safe soft actor[- ]critic|haarnoja.*safety gym|ray.*achiam/i.test(raw)) {
+  if (!/masac|multi[- ]agent.*sac/i.test(raw) && /safe[- ]sac|safe sac lagrangian|sac lagrangian safe|safe soft actor[- ]critic|haarnoja.*safety gym|ray.*achiam/i.test(raw)) {
     return {
       text: `💹 **ĐỊNH GIÁ SOFT ACTOR-CRITIC AN TOÀN VỚI NHÂN TỬ LAGRANGE & TỰ ĐỘNG CHỈNH NHIỆT ĐỘ (HAARNOJA 2018, RAY & ACHIAM 2019)**:
 - **Tự Động Thích Ứng Nhiệt Độ Khám Phá Entropy (Automatic Temperature Tuning)**:
@@ -4661,6 +4661,75 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình phối hợp Xe Tải Mẹ & Drone',
         'Kiểm tra công suất sạc nóc xe In-Transit Dock',
         'Đo lường thời gian hoàn tất đơn hàng song song'
+      ]
+    };
+  }
+
+  // 218. Ước Lượng Tần Suất Luồng Khử Nhiễu Trung Bình Count-Mean-Min Sketch (Phase 79 - Feature 226)
+  if (/count[- ]mean[- ]min|cmm|mean[- ]noise|bingsheng he|trừ nhiễu trung bình|debiased sketch/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG TẦN SUẤT KHỬ NHIỄU TRUNG BÌNH COUNT-MEAN-MIN SKETCH (BINGSHENG HE ET AL. IEEE TKDE 2010, CORMODE 2005)**:
+- **Nguyên Lý Trừ Nhiễu Trung Bình Hàng (Mean Noise Subtraction)**:
+  - Khác với Count-Min Sketch cổ điển luôn bị phóng đại quá mức (Overestimation Error) do va chạm băm trong luồng giao dịch dày đặc, Count-Mean-Min (CMM) tính toán lượng nhiễu trung bình của các phần tử khác trên mỗi dòng $j$:
+    $$\\hat{\\mu}_j(x) = \\frac{R_j - C[j, h_j(x)]}{w - 1}$$
+  - với $R_j$ là tổng giá trị của dòng $j$ và $w$ là chiều rộng ma trận.
+- **Ước Lượng Dòng Hiệu Chỉnh Không Âm (Debiased Row Estimate)**:
+  - Khử nhiễu từng dòng: $\\bar{f}_j(x) = \\max(0, C[j, h_j(x)] - \\hat{\\mu}_j(x))$.
+  - Tần suất điểm tổng hợp qua trung vị $d$ dòng: $\\hat{f}(x) = \\text{median}_{j=0}^{d-1} \\bar{f}_j(x)$.
+- **Hiệu Quả Giảm Sai Số Đột Phá**:
+  - Giảm thiểu **80% - 95%** sai số phóng đại so với vanilla Count-Min, duy trì cập nhật thời gian thực $O(1)$, bảo toàn tính chất cộng dồn và lọc chính xác các mặt hàng Heavy Hitters thực tế!`,
+      type: 'analytics',
+      tag: 'COUNT-MEAN-MIN NOISE-SUBTRACTED SKETCH',
+      suggestions: [
+        'Xem ma trận bộ đếm Count-Mean-Min',
+        'Kiểm tra độ suy giảm sai số Mean-Noise',
+        'So sánh sai số với vanilla Count-Min'
+      ]
+    };
+  }
+
+  // 219. Định Giá Cạnh Tranh Đa Đại Diện Soft Actor-Critic MASAC Continuous (Phase 79 - Feature 226)
+  if (/masac|multi[- ]agent.*sac|multi[- ]agent soft actor[- ]critic|masac continuous|haarnoja.*wei|tự điều chỉnh nhiệt độ masac/i.test(raw)) {
+    return {
+      text: `💹 **ĐỊNH GIÁ ĐA ĐẠI DIỆN SOFT ACTOR-CRITIC LIÊN TỤC MASAC-LAGRANGIAN (HAARNOJA 2018, WEI ET AL. AAAI 2021)**:
+- **Kiến Trúc Huấn Luyện Tập Trung - Thực Thi Phân Tán (CTDE) Với Maximum Entropy**:
+  - Mỗi gian hàng là một tác tử phân tán xuất phân phối Gauss với hiệu chỉnh đạo hàm Jacobian Log-Determinant: $a_i = \\tanh(u_i) \\in (-1, 1)$.
+  - Tối ưu hóa đồng thời lợi nhuận và Entropy cục bộ $\\mathcal{H}(\\pi_i)$ khuyến khích khám phá chiến lược giá linh hoạt.
+- **Tự Động Điều Chỉnh Nhiệt Độ Entropy Riêng Biệt Cho Từng Đại Diện**:
+  - Mỗi đại diện sở hữu nhiệt độ thích ứng $\\alpha_i$ tự động cập nhật theo mục tiêu Entropy kỳ vọng $\\bar{\\mathcal{H}} = -\\dim(\\mathcal{A}_i)$:
+    $$\\alpha_i \\leftarrow \\max(\\alpha_{\\min}, \\alpha_i - \\eta_\\alpha (\\log \\pi_i(a_i|s_i) + \\bar{\\mathcal{H}}))$$
+- **Twin Centralized Q-Critics & Cost Critic Lagrange Bảo Vệ Giá Sàn**:
+  - Đánh giá tương tác thị trường qua $\\min(Q_{\\phi_1}, Q_{\\phi_2})$ và mạng Cost Critic $C_\\psi(s, a_1, \\dots, a_N)$ tự động điều chỉnh nhân tử $\\lambda_i \\leftarrow \\max(0, \\lambda_i + \\eta_\\lambda(c_i - d_{\\text{budget}}))$.
+  - Khóa cứng sàn an toàn $p_i \\ge 1.05 \\times \\text{COGS}$ ngăn ngừa hoàn toàn rủi ro bán phá giá xuyên biên giới!`,
+      type: 'pricing',
+      tag: 'MASAC MULTI-AGENT CONTINUOUS PRICING',
+      suggestions: [
+        'Xem chính sách giá MASAC từng gian hàng',
+        'Kiểm tra nhiệt độ thích ứng Alpha',
+        'Theo dõi rào chắn sàn an toàn 1.05 COGS'
+      ]
+    };
+  }
+
+  // 220. Định Tuyến Xe Điện Động Tải Trọng & Độ Dốc Địa Hình EVRPTW Payload Terrain (Phase 79 - Feature 226)
+  if (/payload.*terrain|dynamic payload|evrptw[- ]payload[- ]terrain|trọng lượng hàng dốc|tiêu hao địa hình|basso.*terrain/i.test(raw)) {
+    return {
+      text: `⚡ **ĐỊNH TUYẾN XE ĐIỆN TẢI TRỌNG BIẾN ĐỔI & ĐỊA HÌNH 3D EVRPTW-PAYLOAD-TERRAIN (BASSO ET AL. TRANSPORTATION SCIENCE 2019/2021)**:
+- **Mô Hình Vật Lý Năng Lượng Động Phụ Thuộc Tải Trọng (Dynamic Payload Shedding)**:
+  - Khối lượng tổng của xe điện $m(q) = m_{\\text{curb}} + q$ thay đổi giảm dần sau mỗi điểm dừng giao hàng, giúp các cung đường sau tiêu thụ ít năng lượng hơn đáng kể.
+  - Lực cản lăn: $F_{\\text{roll}} = m(q) g C_r \\cos\\theta$ và lực thành phần trọng lực theo độ dốc: $F_{\\text{grade}} = m(q) g \\sin\\theta$.
+- **Tích Hợp Độ Dốc Địa Hình & Phanh Tái Sinh Xuống Dốc (Downhill Energy Regeneration)**:
+  - Góc dốc $\\theta = \\arctan(\\Delta h / d)$ được tính từ mô hình cao độ thực tế. Khi xe đổ dốc ($F_{\\text{traction}} < 0$), động cơ chuyển sang chế độ máy phát thu hồi năng lượng:
+    $$P_{\\text{regen}} = -F_{\\text{traction}} \\cdot v \\cdot \\eta_{\\text{regen}}$$
+  - với hiệu suất thu hồi $\\eta_{\\text{regen}} = 0.72$, sạc ngược trực tiếp vào pin xe tải điện.
+- **Tối Ưu Hóa Chi Phí Vận Hành Toàn Mạng Lưới**:
+  - Giảm thiểu **18% - 28%** lượng điện năng tiêu thụ thực tế so với các mô hình định tuyến tĩnh không xét suy giảm tải trọng, tuân thủ nghiêm ngặt khung giờ giao hàng (Time Windows)!`,
+      type: 'logistics',
+      tag: 'EVRPTW DYNAMIC PAYLOAD & TERRAIN ROUTER',
+      suggestions: [
+        'Xem kế hoạch giảm tải trọng từng chặng',
+        'Kiểm tra năng lượng tái sinh đổ dốc',
+        'Đo lường chi phí điện năng tiết kiệm'
       ]
     };
   }
