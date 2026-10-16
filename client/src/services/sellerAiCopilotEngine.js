@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal|gk[- ]mergeable|mergeable.*quantile|safe[- ]sac|active cooling|btms|turnstile|matd3|multi[- ]agent.*pricing|drone[- ]recharge|mothership|cmm|count[- ]mean[- ]min|masac|payload.*terrain|dynamic payload|time[- ]decayed|decayed count[- ]min|mappo|tou|partial charging|biểu giá điện|sliding[- ]window|qmix|monotonic value|cooperative pricing|evrptw[- ]inductive|dynamic wireless inductive|làn sạc cảm ứng/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal|gk[- ]mergeable|mergeable.*quantile|safe[- ]sac|active cooling|btms|turnstile|matd3|multi[- ]agent.*pricing|drone[- ]recharge|mothership|cmm|count[- ]mean[- ]min|masac|payload.*terrain|dynamic payload|time[- ]decayed|decayed count[- ]min|mappo|tou|partial charging|biểu giá điện|sliding[- ]window|qmix|monotonic value|cooperative pricing|evrptw[- ]inductive|dynamic wireless inductive|làn sạc cảm ứng|ddsketch[- ]log|masson.*tods|tarmac|targeted multi[- ]agent|targeted communication|das.*icml|evrptw[- ]v2g|vehicle[- ]to[- ]grid|v2g peak shaving/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1192,7 +1192,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 59. Phân Vị Độ Trễ DDSketch, Định Giá SAC-PER & Xe Điện Đa Kho MDEVRP-NL (Phase 50 - Feature 197)
-  if (/ddsketch|sac-per|sac per|mdevrp|sạc phi tuyến|phân vị sla gian hàng|định giá entropy|xe điện đa kho/i.test(raw)) {
+  if (!/ddsketch[- ]log|masson.*tods|log[- ]bucket|acm tods|tarmac|targeted multi[- ]agent|targeted communication|das.*icml|giao tiếp mục tiêu|evrptw[- ]v2g|vehicle[- ]to[- ]grid|v2g peak shaving/i.test(raw) && /ddsketch|sac-per|sac per|mdevrp|sạc phi tuyến|phân vị sla gian hàng|định giá entropy|xe điện đa kho/i.test(raw)) {
     return {
       text: `🚀 **BỘ BA THUẬT TOÁN DOANH NGHIỆP: PHÂN VỊ DDSKETCH, ĐỊNH GIÁ SAC-PER & GIAO VẬN MDEVRP-NL**:
 - **Giám sát độ trễ và SLA đơn hàng với DDSketch**:
@@ -1827,6 +1827,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem gia tốc xu hướng Trending Velocity',
         'Tư vấn định giá combo liên shop QMIX',
         'Theo dõi hành trình xe điện sạc cảm ứng không dây'
+      ]
+    };
+  }
+
+  // 91. Bộ Ba Thuật Toán DDSketch Log Quantile, TarMAC Cooperative Pricing & EVRPTW-V2G Peak Shaving (Phase 82 - Feature 229)
+  if (/ddsketch[- ]log|masson.*tods|log[- ]bucket|acm tods|tarmac|targeted multi[- ]agent|targeted communication|das.*icml|giao tiếp mục tiêu|evrptw[- ]v2g|vehicle[- ]to[- ]grid|v2g peak shaving|phát điện ngược lưới|keskin.*catay.*v2g/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 82 (${currentShop.name})**:
+- **Phác Họa Phân Vị Logarit DDSketch Log Quantile (Masson, Rim, Lee - VLDB 2019 / ACM TODS 2020)**:
+  - Phân tích phổ giá trị đơn hàng và doanh số giỏ hàng theo cơ số logarit $\\gamma = (1+\\alpha)/(1-\\alpha)$, bảo đảm sai số tương đối tuyệt đối $\\alpha \\le 1\\%$ trên mọi phân vị $P_{50}, P_{90}, P_{99}$ mà không lo tràn bộ nhớ!
+- **Định Giá Hợp Tác Mục Tiêu TarMAC Cooperative Pricing (Abhishek Das et al., ICML 2019)**:
+  - Mạng cơ chế chú ý có định hướng Soft Attention Keys & Queries $c_j = \\sum_{i \\ne j} \\alpha_{i \\to j} m_i$ giúp gian hàng của bạn bắt tay thông minh với các shop đối tác, đồng bộ giá thầu và cân đối tồn kho mà vẫn khóa chặt sàn an toàn $1.05 \\times \\text{COGS}$!
+- **Định Tuyến Xe Điện Phát Điện Ngược Lưới EVRPTW-V2G Peak Shaving (Wang 2020, Keskin & Catay 2021)**:
+  - Tối ưu hóa chu trình sạc giờ rẻ ($1.600\\text{đ/kWh}$) và phát điện ngược V2G trong giờ cao điểm ($5.500\\text{đ/kWh}$), vừa cắt giảm chi phí logistics cho shop vừa đảm bảo xe giao hàng đúng cửa sổ thời gian!`,
+      type: 'recommendation',
+      tag: 'DDSKETCH LOG, TARMAC COOPERATIVE PRICING & EVRPTW-V2G ROUTER',
+      suggestions: [
+        'Phân tích phân vị giá trị đơn hàng DDSketch Log',
+        'Chiến lược định giá hợp tác mục tiêu TarMAC',
+        'Tối ưu hóa logistics xe điện phát điện ngược V2G'
       ]
     };
   }

@@ -45440,6 +45440,612 @@ export class EVRPTWDynamicWirelessInductiveRouter {
   }
 }
 
+// ------------------------------------------------------------------------------
+// ALGORITHM 244: DDSketch Log Quantile (Phase 82)
+// (Charles Masson, Jee E. Rim, Homin K. Lee - VLDB 2019 / ACM TODS 2020)
+// ------------------------------------------------------------------------------
+export class DDSketchLogQuantile {
+  constructor(options = {}) {
+    this.alpha = Math.max(0.0001, Math.min(0.25, Number(options.alpha) || 0.01));
+    this.maxBins = Math.max(64, Math.min(65536, Number(options.maxBins) || 1024));
+
+    this.gamma = (1 + this.alpha) / (1 - this.alpha);
+    this.multiplier = 1.0 / Math.log(this.gamma);
+
+    this.minPositiveValue = 1e-9;
+    this.minIndex = Math.ceil(Math.log(this.minPositiveValue) * this.multiplier);
+
+    this.positiveBins = new Map();
+    this.negativeBins = new Map();
+    this.zeroCount = 0;
+    this.count = 0;
+    this.sum = 0;
+    this.min = Infinity;
+    this.max = -Infinity;
+  }
+
+  _valToIndex(val) {
+    if (val < this.minPositiveValue) {
+      return this.minIndex;
+    }
+    return Math.ceil(Math.log(val) * this.multiplier);
+  }
+
+  _indexToVal(index) {
+    return Math.pow(this.gamma, index - 0.5);
+  }
+
+  add(val, weight = 1) {
+    const num = Number(val);
+    if (Number.isNaN(num) || !Number.isFinite(num)) return;
+    const w = Math.max(0.00001, Number(weight) || 1);
+
+    this.count += w;
+    this.sum += num * w;
+    if (num < this.min) this.min = num;
+    if (num > this.max) this.max = num;
+
+    if (num === 0) {
+      this.zeroCount += w;
+      return;
+    }
+
+    if (num > 0) {
+      const idx = this._valToIndex(num);
+      const cur = this.positiveBins.get(idx) || 0;
+      this.positiveBins.set(idx, cur + w);
+    } else {
+      const idx = this._valToIndex(Math.abs(num));
+      const cur = this.negativeBins.get(idx) || 0;
+      this.negativeBins.set(idx, cur + w);
+    }
+
+    this._collapseIfNeeded();
+  }
+
+  addBatch(values = []) {
+    if (!Array.isArray(values)) return;
+    for (const v of values) {
+      this.add(v);
+    }
+  }
+
+  _collapseIfNeeded() {
+    if (this.positiveBins.size > this.maxBins) {
+      const keys = Array.from(this.positiveBins.keys()).sort((a, b) => a - b);
+      const overflowCount = this.positiveBins.size - this.maxBins;
+      let mergedWeight = 0;
+      for (let i = 0; i < overflowCount; i++) {
+        mergedWeight += this.positiveBins.get(keys[i]) || 0;
+        this.positiveBins.delete(keys[i]);
+      }
+      const targetKey = keys[overflowCount];
+      this.positiveBins.set(targetKey, (this.positiveBins.get(targetKey) || 0) + mergedWeight);
+    }
+  }
+
+  getQuantile(q) {
+    if (this.count === 0) return 0;
+    const clampedQ = Math.max(0, Math.min(1.0, Number(q)));
+
+    if (clampedQ === 0) return this.min;
+    if (clampedQ === 1.0) return this.max;
+
+    const targetRank = clampedQ * this.count;
+    let accumulated = 0;
+
+    if (this.negativeBins.size > 0) {
+      const negKeys = Array.from(this.negativeBins.keys()).sort((a, b) => b - a);
+      for (const k of negKeys) {
+        accumulated += this.negativeBins.get(k);
+        if (accumulated >= targetRank) {
+          return -this._indexToVal(k);
+        }
+      }
+    }
+
+    accumulated += this.zeroCount;
+    if (accumulated >= targetRank) {
+      return 0;
+    }
+
+    if (this.positiveBins.size > 0) {
+      const posKeys = Array.from(this.positiveBins.keys()).sort((a, b) => a - b);
+      for (const k of posKeys) {
+        accumulated += this.positiveBins.get(k);
+        if (accumulated >= targetRank) {
+          return this._indexToVal(k);
+        }
+      }
+    }
+
+    return this.max;
+  }
+
+  getPercentiles() {
+    return {
+      p50: Number(this.getQuantile(0.50).toFixed(3)),
+      p75: Number(this.getQuantile(0.75).toFixed(3)),
+      p90: Number(this.getQuantile(0.90).toFixed(3)),
+      p95: Number(this.getQuantile(0.95).toFixed(3)),
+      p99: Number(this.getQuantile(0.99).toFixed(3)),
+      p999: Number(this.getQuantile(0.999).toFixed(3)),
+      count: this.count,
+      mean: this.count > 0 ? Number((this.sum / this.count).toFixed(3)) : 0,
+      min: this.min === Infinity ? 0 : Number(this.min.toFixed(3)),
+      max: this.max === -Infinity ? 0 : Number(this.max.toFixed(3))
+    };
+  }
+
+  merge(other) {
+    if (!other || !(other instanceof DDSketchLogQuantile)) return;
+
+    this.count += other.count;
+    this.sum += other.sum;
+    this.zeroCount += other.zeroCount;
+    if (other.min < this.min) this.min = other.min;
+    if (other.max > this.max) this.max = other.max;
+
+    for (const [k, count] of other.positiveBins.entries()) {
+      this.positiveBins.set(k, (this.positiveBins.get(k) || 0) + count);
+    }
+    for (const [k, count] of other.negativeBins.entries()) {
+      this.negativeBins.set(k, (this.negativeBins.get(k) || 0) + count);
+    }
+
+    this._collapseIfNeeded();
+  }
+
+  reset() {
+    this.positiveBins.clear();
+    this.negativeBins.clear();
+    this.zeroCount = 0;
+    this.count = 0;
+    this.sum = 0;
+    this.min = Infinity;
+    this.max = -Infinity;
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 245: TarMAC Multi-Agent Cooperative Pricing (Phase 82)
+// (Abhishek Das et al., ICML 2019 / Sukhbaatar et al., NeurIPS 2016)
+// ------------------------------------------------------------------------------
+export class TarMACMultiAgentCooperativePricing {
+  constructor(options = {}) {
+    this.numVendors = Math.max(2, Math.min(32, Number(options.numVendors) || 4));
+    this.dKey = Math.max(4, Math.min(32, Number(options.dKey) || 8));
+    this.dMsg = Math.max(4, Math.min(32, Number(options.dMsg) || 8));
+    this.numHeads = Math.max(1, Math.min(8, Number(options.numHeads) || 2));
+    this.learningRate = Number(options.learningRate) || 0.01;
+    this.gamma = Number(options.gamma) || 0.95;
+
+    this.heads = [];
+    for (let h = 0; h < this.numHeads; h++) {
+      this.heads.push({
+        wKey: this._initMatrix(4, this.dKey),
+        wQuery: this._initMatrix(4, this.dKey),
+        wMsg: this._initMatrix(4, this.dMsg)
+      });
+    }
+
+    const policyInputDim = 4 + this.numHeads * this.dMsg;
+    this.wPolicy = new Array(policyInputDim).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+    this.bPolicy = 0.0;
+    this.episodeHistory = [];
+  }
+
+  _initMatrix(rows, cols) {
+    const mat = [];
+    for (let r = 0; r < rows; r++) {
+      const row = [];
+      for (let c = 0; c < cols; c++) {
+        row.push((Math.random() - 0.5) * 0.2);
+      }
+      mat.push(row);
+    }
+    return mat;
+  }
+
+  _dot(vecA, vecB) {
+    let sum = 0;
+    for (let i = 0; i < vecA.length; i++) {
+      sum += vecA[i] * (vecB[i] || 0);
+    }
+    return sum;
+  }
+
+  _vecMatMul(vec, mat) {
+    const cols = mat[0].length;
+    const res = new Array(cols).fill(0);
+    for (let c = 0; c < cols; c++) {
+      let sum = 0;
+      for (let r = 0; r < vec.length; r++) {
+        sum += vec[r] * mat[r][c];
+      }
+      res[c] = sum;
+    }
+    return res;
+  }
+
+  coordinatePricing(vendors) {
+    if (!Array.isArray(vendors) || vendors.length < 2) {
+      throw new Error("TarMAC requires at least 2 vendor states to coordinate.");
+    }
+
+    const n = vendors.length;
+    const obs = vendors.map(v => {
+      const p = Math.max(1000, Number(v.price) || 100000);
+      const s = Math.max(0, Number(v.stock) || 100);
+      const c = Math.max(1000, Number(v.cogs) || 80000);
+      const d = Math.max(1, Number(v.marketDemand) || 50);
+      return [p / 100000, s / 100, c / 100000, d / 100];
+    });
+
+    const headContexts = [];
+    const headAttentions = [];
+
+    for (let h = 0; h < this.numHeads; h++) {
+      const head = this.heads[h];
+      const keys = obs.map(o => this._vecMatMul(o, head.wKey));
+      const queries = obs.map(o => this._vecMatMul(o, head.wQuery));
+      const msgs = obs.map(o => this._vecMatMul(o, head.wMsg));
+
+      const attnMatrix = [];
+      const contexts = [];
+      const scale = Math.sqrt(this.dKey);
+
+      for (let j = 0; j < n; j++) {
+        const q_j = queries[j];
+        const scores = [];
+        for (let i = 0; i < n; i++) {
+          if (i === j) {
+            scores.push(-Infinity);
+          } else {
+            scores.push(this._dot(q_j, keys[i]) / scale);
+          }
+        }
+
+        const maxScore = Math.max(...scores.filter(s => isFinite(s)));
+        const expScores = scores.map(s => isFinite(s) ? Math.exp(s - maxScore) : 0);
+        const sumExp = expScores.reduce((acc, val) => acc + val, 0) || 1e-9;
+        const alpha_j = expScores.map(v => v / sumExp);
+        attnMatrix.push(alpha_j);
+
+        const c_j = new Array(this.dMsg).fill(0);
+        for (let i = 0; i < n; i++) {
+          if (i !== j && alpha_j[i] > 0) {
+            for (let d = 0; d < this.dMsg; d++) {
+              c_j[d] += alpha_j[i] * msgs[i][d];
+            }
+          }
+        }
+        contexts.push(c_j);
+      }
+
+      headContexts.push(contexts);
+      headAttentions.push(attnMatrix);
+    }
+
+    const decisions = [];
+    for (let j = 0; j < n; j++) {
+      const v = vendors[j];
+      const o_j = obs[j];
+      let fullContext = [];
+      for (let h = 0; h < this.numHeads; h++) {
+        fullContext = fullContext.concat(headContexts[h][j]);
+      }
+      const combinedInput = o_j.concat(fullContext);
+
+      const rawLogit = this._dot(combinedInput, this.wPolicy) + this.bPolicy;
+      const priceDeltaPct = Math.tanh(rawLogit) * 0.2;
+
+      const currentPrice = Number(v.price) || 100000;
+      const cogs = Number(v.cogs) || 80000;
+      const safeFloor = Math.round(cogs * 1.05);
+
+      let proposedPrice = Math.round(currentPrice * (1 + priceDeltaPct));
+      let isFloorEnforced = false;
+      if (proposedPrice < safeFloor) {
+        proposedPrice = safeFloor;
+        isFloorEnforced = true;
+      }
+
+      decisions.push({
+        vendorId: v.id || `vendor_${j}`,
+        currentPrice,
+        cogs,
+        safeFloor,
+        recommendedPrice: proposedPrice,
+        priceAdjustmentPct: Number((((proposedPrice - currentPrice) / currentPrice) * 100).toFixed(2)),
+        isFloorEnforced,
+        targetCommunicationWeight: headAttentions[0][j],
+        rationale: isFloorEnforced
+          ? "Đã kích hoạt chốt sàn an toàn 1.05x COGS để ngăn chặn bán phá giá dưới giá vốn."
+          : `Điều chỉnh giá ${priceDeltaPct >= 0 ? '+' : ''}${(priceDeltaPct * 100).toFixed(1)}% dựa trên tín hiệu tồn kho và độ co giãn chéo từ các đối thủ.`
+      });
+    }
+
+    return {
+      numVendors: n,
+      numHeads: this.numHeads,
+      attentionMatrix: headAttentions,
+      decisions
+    };
+  }
+
+  evaluateCooperativeStep(decisions, actualSales = []) {
+    const salesMap = new Map();
+    actualSales.forEach(s => salesMap.set(s.vendorId, Number(s.unitsSold) || 0));
+
+    let totalGmv = 0;
+    let totalGrossProfit = 0;
+    const vendorMetrics = [];
+
+    decisions.forEach(d => {
+      const units = salesMap.get(d.vendorId) || Math.max(5, Math.round(50 * (100000 / (d.recommendedPrice || 100000))));
+      const revenue = units * d.recommendedPrice;
+      const cost = units * d.cogs;
+      const profit = revenue - cost;
+      const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+
+      totalGmv += revenue;
+      totalGrossProfit += profit;
+
+      vendorMetrics.push({
+        vendorId: d.vendorId,
+        unitsSold: units,
+        revenue,
+        grossProfit: profit,
+        grossMarginPct: Number(margin.toFixed(2))
+      });
+    });
+
+    const avgMargin = totalGmv > 0 ? (totalGrossProfit / totalGmv) * 100 : 0;
+    const teamReward = totalGrossProfit / 1000000;
+
+    return {
+      totalGmv,
+      totalGrossProfit,
+      averageGrossMarginPct: Number(avgMargin.toFixed(2)),
+      teamReward: Number(teamReward.toFixed(4)),
+      vendorMetrics
+    };
+  }
+}
+
+// ------------------------------------------------------------------------------
+// ALGORITHM 246: EVRPTW Vehicle-To-Grid Peak Shaving Router (Phase 82)
+// (K. Wang et al., TR Part B 2020 / M. Keskin & B. Çatay, Computers & OR 2021)
+// ------------------------------------------------------------------------------
+export class EVRPTWVehicleToGridPeakShavingRouter {
+  constructor(options = {}) {
+    this.batteryCapacityKWh = Number(options.batteryCapacityKWh) || 60;
+    this.consumptionPerKm = Number(options.consumptionPerKm) || 0.22;
+    this.maxChargeKW = Number(options.maxChargeKW) || 30;
+    this.maxDischargeKW = Number(options.maxDischargeKW) || 22;
+    this.batteryCostVND = Number(options.batteryCostVND) || 120000000;
+    this.cycleLife = Number(options.cycleLife) || 3000;
+
+    this.minSOC = 0.20;
+    this.maxSOC = 0.95;
+    this.chargeEfficiency = 0.92;
+    this.dischargeEfficiency = 0.90;
+
+    this.tariffs = {
+      OFF_PEAK: 1600,
+      STANDARD: 2800,
+      HIGH_PEAK: 5500
+    };
+
+    const dodFactor = 0.8;
+    this.degradationCostPerKWh = Math.round(
+      this.batteryCostVND / (this.cycleLife * this.batteryCapacityKWh * dodFactor)
+    );
+  }
+
+  getTariffBand(hour) {
+    const h = (hour % 24 + 24) % 24;
+    if ((h >= 9.5 && h < 11.5) || (h >= 17 && h < 20)) {
+      return 'HIGH_PEAK';
+    }
+    if (h >= 22 || h < 4) {
+      return 'OFF_PEAK';
+    }
+    return 'STANDARD';
+  }
+
+  getTariffRate(hour) {
+    const band = this.getTariffBand(hour);
+    return this.tariffs[band];
+  }
+
+  _calculateDistance(locA, locB) {
+    const dx = locA.x - locB.x;
+    const dy = locA.y - locB.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  planRoutesAndEnergyDispatch(input) {
+    const depot = input.depot || { id: 'depot_central', x: 0, y: 0, openHour: 6, closeHour: 22 };
+    const customers = Array.isArray(input.customers) ? [...input.customers] : [];
+    const fleet = Array.isArray(input.fleet) && input.fleet.length > 0
+      ? input.fleet
+      : [
+          { id: 'EV_01', currentSOC: 0.85, payloadCapacityKg: 500 },
+          { id: 'EV_02', currentSOC: 0.90, payloadCapacityKg: 500 }
+        ];
+
+    if (customers.length === 0) {
+      return {
+        routes: [],
+        totalTravelDistanceKm: 0,
+        totalEnergyConsumedKWh: 0,
+        v2gPeakShavingKWh: 0,
+        v2gRevenueVND: 0,
+        batteryDegradationCostVND: 0,
+        netArbitrageProfitVND: 0
+      };
+    }
+
+    const unserved = [...customers].sort((a, b) => (a.readyHour || 0) - (b.readyHour || 0));
+    const routes = [];
+    let totalDistAll = 0;
+    let totalEnergyConsumedAll = 0;
+    let totalDischargedKWhAll = 0;
+    let totalV2GRevenueAll = 0;
+    let totalDegradationCostAll = 0;
+
+    for (const vehicle of fleet) {
+      if (unserved.length === 0) break;
+
+      let currentLoc = depot;
+      let currentTime = depot.openHour || 7.0;
+      let currentSOC = Math.min(this.maxSOC, Math.max(this.minSOC, vehicle.currentSOC || 0.9));
+      let currentLoad = 0;
+      const vehicleRouteStops = [];
+      let vehicleDist = 0;
+      let vehicleEnergyConsumed = 0;
+      let vehicleDischargedKWh = 0;
+      let vehicleV2GRevenue = 0;
+      let vehicleDegradation = 0;
+
+      while (unserved.length > 0) {
+        let bestIdx = -1;
+        let minDetour = Infinity;
+
+        for (let i = 0; i < unserved.length; i++) {
+          const cust = unserved[i];
+          const dist = this._calculateDistance(currentLoc, cust);
+          const travelHours = dist / 30;
+          const arrivalTime = currentTime + travelHours;
+
+          if (currentLoad + (cust.demand || 10) <= vehicle.payloadCapacityKg &&
+              arrivalTime <= (cust.dueHour || 20)) {
+            if (dist < minDetour) {
+              minDetour = dist;
+              bestIdx = i;
+            }
+          }
+        }
+
+        if (bestIdx === -1) break;
+
+        const nextCust = unserved.splice(bestIdx, 1)[0];
+        const dist = this._calculateDistance(currentLoc, nextCust);
+        const travelHours = dist / 30;
+        const arrivalTime = Math.max(currentTime + travelHours, nextCust.readyHour || 0);
+        const serviceHours = (nextCust.serviceMinutes || 15) / 60;
+        const departureTime = arrivalTime + serviceHours;
+
+        const travelEnergy = dist * this.consumptionPerKm;
+        currentSOC -= travelEnergy / this.batteryCapacityKWh;
+        vehicleDist += dist;
+        vehicleEnergyConsumed += travelEnergy;
+
+        vehicleRouteStops.push({
+          stopId: nextCust.id,
+          location: { x: nextCust.x, y: nextCust.y },
+          arrivalTime: Number(arrivalTime.toFixed(2)),
+          departureTime: Number(departureTime.toFixed(2)),
+          distanceFromPrevKm: Number(dist.toFixed(2)),
+          energyConsumedKWh: Number(travelEnergy.toFixed(2)),
+          socAtDeparture: Number(currentSOC.toFixed(3)),
+          action: 'DELIVERY'
+        });
+
+        currentLoc = nextCust;
+        currentTime = departureTime;
+        currentLoad += (nextCust.demand || 10);
+      }
+
+      const returnDist = this._calculateDistance(currentLoc, depot);
+      const returnTravelHours = returnDist / 30;
+      const returnArrival = currentTime + returnTravelHours;
+      const returnEnergy = returnDist * this.consumptionPerKm;
+      currentSOC -= returnEnergy / this.batteryCapacityKWh;
+      vehicleDist += returnDist;
+      vehicleEnergyConsumed += returnEnergy;
+
+      let v2gAction = null;
+      const tariffBand = this.getTariffBand(returnArrival);
+      const targetMinReturnSOC = this.minSOC + 0.05;
+
+      if (tariffBand === 'HIGH_PEAK' && currentSOC > targetMinReturnSOC) {
+        const availableDischargeKWh = (currentSOC - targetMinReturnSOC) * this.batteryCapacityKWh;
+        const maxDischargePossibleKWh = this.maxDischargeKW * 1.5 * this.dischargeEfficiency;
+        const actualDischargeKWh = Math.min(availableDischargeKWh, maxDischargePossibleKWh);
+
+        if (actualDischargeKWh > 0) {
+          const revenue = actualDischargeKWh * this.tariffs.HIGH_PEAK;
+          const degradation = actualDischargeKWh * this.degradationCostPerKWh;
+          const netProfit = revenue - degradation - (actualDischargeKWh * this.tariffs.OFF_PEAK);
+
+          currentSOC -= actualDischargeKWh / this.batteryCapacityKWh;
+          vehicleDischargedKWh += actualDischargeKWh;
+          vehicleV2GRevenue += revenue;
+          vehicleDegradation += degradation;
+
+          v2gAction = {
+            type: 'V2G_DISCHARGE_PEAK_SHAVING',
+            tariffBand,
+            dischargedKWh: Number(actualDischargeKWh.toFixed(2)),
+            feedInTariffVND: this.tariffs.HIGH_PEAK,
+            revenueVND: Math.round(revenue),
+            degradationCostVND: Math.round(degradation),
+            netArbitrageProfitVND: Math.round(netProfit)
+          };
+        }
+      }
+
+      vehicleRouteStops.push({
+        stopId: depot.id,
+        location: { x: depot.x, y: depot.y },
+        arrivalTime: Number(returnArrival.toFixed(2)),
+        distanceFromPrevKm: Number(returnDist.toFixed(2)),
+        energyConsumedKWh: Number(returnEnergy.toFixed(2)),
+        socAtArrival: Number(currentSOC.toFixed(3)),
+        action: 'DEPOT_RETURN',
+        v2gDispatch: v2gAction
+      });
+
+      routes.push({
+        vehicleId: vehicle.id,
+        numDeliveries: vehicleRouteStops.length - 1,
+        totalDistanceKm: Number(vehicleDist.toFixed(2)),
+        totalEnergyConsumedKWh: Number(vehicleEnergyConsumed.toFixed(2)),
+        finalSOC: Number(currentSOC.toFixed(3)),
+        v2gPeakShavedKWh: Number(vehicleDischargedKWh.toFixed(2)),
+        v2gRevenueVND: Math.round(vehicleV2GRevenue),
+        stops: vehicleRouteStops
+      });
+
+      totalDistAll += vehicleDist;
+      totalEnergyConsumedAll += vehicleEnergyConsumed;
+      totalDischargedKWhAll += vehicleDischargedKWh;
+      totalV2GRevenueAll += vehicleV2GRevenue;
+      totalDegradationCostAll += vehicleDegradation;
+    }
+
+    const netArbitrageProfit = totalV2GRevenueAll - totalDegradationCostAll - (totalDischargedKWhAll * this.tariffs.OFF_PEAK);
+
+    return {
+      unservedCount: unserved.length,
+      routes,
+      totalTravelDistanceKm: Number(totalDistAll.toFixed(2)),
+      totalEnergyConsumedKWh: Number(totalEnergyConsumedAll.toFixed(2)),
+      v2gPeakShavingKWh: Number(totalDischargedKWhAll.toFixed(2)),
+      v2gRevenueVND: Math.round(totalV2GRevenueAll),
+      batteryDegradationCostVND: Math.round(totalDegradationCostAll),
+      netArbitrageProfitVND: Math.round(netArbitrageProfit),
+      sustainabilitySummary: {
+        co2AvoidedKg: Number((totalDischargedKWhAll * 0.72).toFixed(2)),
+        peakDemandReducedKW: Number((totalDischargedKWhAll > 0 ? this.maxDischargeKW : 0).toFixed(1))
+      }
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -45842,6 +46448,10 @@ export default {
   SlidingWindowFrequentItems,
   QMIXMultiVendorCooperativePricing,
   EVRPTWDynamicWirelessInductiveRouter,
+  // Phase 82 Enterprise Algorithms
+  DDSketchLogQuantile,
+  TarMACMultiAgentCooperativePricing,
+  EVRPTWVehicleToGridPeakShavingRouter,
 };
 
 

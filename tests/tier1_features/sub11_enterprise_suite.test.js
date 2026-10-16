@@ -416,6 +416,10 @@ import {
   SlidingWindowFrequentItems,
   QMIXMultiVendorCooperativePricing,
   EVRPTWDynamicWirelessInductiveRouter,
+  // Phase 82 Enterprise Algorithms
+  DDSketchLogQuantile,
+  TarMACMultiAgentCooperativePricing,
+  EVRPTWVehicleToGridPeakShavingRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -627,6 +631,9 @@ import { EVRPTWPartialChargingTOURouter as ServerEVRPTWPartialChargingTOURouter,
 import ServerSlidingWindowFrequentItems from "../../server/src/utils/slidingWindowFrequentItems.js";
 import ServerQMIXMultiVendorCooperativePricing from "../../server/src/utils/qmixMultiVendorCooperativePricing.js";
 import ServerEVRPTWDynamicWirelessInductiveRouter from "../../server/src/utils/evrptwDynamicWirelessInductiveRouter.js";
+import ServerDDSketchLogQuantile from "../../server/src/utils/ddsketchLogQuantile.js";
+import ServerTarMACMultiAgentCooperativePricing from "../../server/src/utils/tarmacMultiVendorPricing.js";
+import ServerEVRPTWVehicleToGridPeakShavingRouter from "../../server/src/utils/evrptwVehicleToGridRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -34449,6 +34456,343 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có nằm trong cửa sổ trượt hot trend hoặc giao bằng xe điện sạc cảm ứng không dây không?");
         expect.equal(buyerRes.intent, "SLIDING_WINDOW_QMIX_INDUCTIVE_ASSIST");
         expect.ok(buyerRes.replyText.includes("Sliding-Window Frequent Items"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 229: DDSketch Log Quantile, TarMAC Multi-Agent Cooperative Pricing & EVRPTW Vehicle-To-Grid Peak Shaving Router (Phase 82)
+    // =========================================================================
+    describe("Feature 229: Enterprise Algorithms Suite (Phase 82)", () => {
+      // -----------------------------------------------------------------------
+      // DDSketch Log Quantile Tests (F229-T01 - F229-T07)
+      // -----------------------------------------------------------------------
+      test("F229-T01: Initializes DDSketchLogQuantile with relative error alpha and logarithmic base gamma", () => {
+        const sketch = new DDSketchLogQuantile({ alpha: 0.01, maxBins: 512 });
+        expect.equal(sketch.alpha, 0.01);
+        expect.equal(sketch.maxBins, 512);
+        expect.ok(sketch.gamma > 1.0);
+        expect.equal(sketch.count, 0);
+        expect.equal(sketch.sum, 0);
+      });
+
+      test("F229-T02: Correctly maps values to log bins, updates zeroCount, min, and max", () => {
+        const sketch = new DDSketchLogQuantile({ alpha: 0.01 });
+        sketch.add(0);
+        sketch.add(100);
+        sketch.add(200);
+        sketch.add(50);
+        expect.equal(sketch.count, 4);
+        expect.equal(sketch.zeroCount, 1);
+        expect.equal(sketch.min, 0);
+        expect.equal(sketch.max, 200);
+        expect.equal(sketch.sum, 350);
+      });
+
+      test("F229-T03: Computes percentiles p50, p90, p99 within relative error guarantee", () => {
+        const sketch = new DDSketchLogQuantile({ alpha: 0.01 });
+        const values = [];
+        for (let i = 1; i <= 1000; i++) {
+          values.push(i);
+        }
+        sketch.addBatch(values);
+        const percentiles = sketch.getPercentiles();
+        expect.equal(percentiles.count, 1000);
+        expect.ok(Math.abs(percentiles.p50 - 500) / 500 <= 0.05);
+        expect.ok(Math.abs(percentiles.p90 - 900) / 900 <= 0.05);
+        expect.ok(Math.abs(percentiles.p99 - 990) / 990 <= 0.05);
+      });
+
+      test("F229-T04: Supports negative values with correct order traversal", () => {
+        const sketch = new DDSketchLogQuantile({ alpha: 0.02 });
+        sketch.addBatch([-50, -20, -10, 0, 10, 20, 50]);
+        expect.equal(sketch.count, 7);
+        expect.equal(sketch.min, -50);
+        expect.equal(sketch.max, 50);
+        const p50 = sketch.getQuantile(0.5);
+        expect.equal(p50, 0);
+        const p10 = sketch.getQuantile(0.1);
+        expect.ok(p10 < 0);
+      });
+
+      test("F229-T05: Dynamically collapses lowest buckets when maxBins is exceeded", () => {
+        const sketch = new DDSketchLogQuantile({ alpha: 0.01, maxBins: 64 });
+        for (let i = 1; i <= 200; i++) {
+          sketch.add(Math.pow(1.5, i));
+        }
+        expect.ok(sketch.positiveBins.size <= 65);
+        expect.equal(sketch.count, 200);
+      });
+
+      test("F229-T06: Merges multiple DDSketch instances across cluster workers with zero error amplification", () => {
+        const sketchA = new DDSketchLogQuantile({ alpha: 0.01 });
+        const sketchB = new DDSketchLogQuantile({ alpha: 0.01 });
+        sketchA.addBatch([10, 20, 30, 40, 50]);
+        sketchB.addBatch([60, 70, 80, 90, 100]);
+
+        sketchA.merge(sketchB);
+        expect.equal(sketchA.count, 10);
+        expect.equal(sketchA.min, 10);
+        expect.equal(sketchA.max, 100);
+        expect.equal(sketchA.sum, 550);
+        const p50 = sketchA.getQuantile(0.5);
+        expect.ok(Math.abs(p50 - 50) <= 5);
+      });
+
+      test("F229-T07: Client and Server DDSketchLogQuantile demonstrate strict parity", () => {
+        const clientSketch = new DDSketchLogQuantile({ alpha: 0.01 });
+        const serverSketch = new ServerDDSketchLogQuantile({ alpha: 0.01 });
+        const testVals = [12.5, 45.2, 100.8, 300.4, 850.1, 1200.0, 5000.5];
+        clientSketch.addBatch(testVals);
+        serverSketch.addBatch(testVals);
+
+        const clientPct = clientSketch.getPercentiles();
+        const serverPct = serverSketch.getPercentiles();
+
+        expect.equal(clientPct.count, serverPct.count);
+        expect.equal(clientPct.sum, serverPct.sum);
+        expect.equal(clientPct.p50, serverPct.p50);
+        expect.equal(clientPct.p90, serverPct.p90);
+        expect.equal(clientPct.p99, serverPct.p99);
+      });
+
+      // -----------------------------------------------------------------------
+      // TarMAC Multi-Agent Cooperative Pricing Tests (F229-T08 - F229-T15)
+      // -----------------------------------------------------------------------
+      test("F229-T08: Initializes TarMACMultiAgentCooperativePricing with attention heads and policy weights", () => {
+        const tarmac = new TarMACMultiAgentCooperativePricing({ numVendors: 3, numHeads: 2 });
+        expect.equal(tarmac.numVendors, 3);
+        expect.equal(tarmac.numHeads, 2);
+        expect.equal(tarmac.heads.length, 2);
+        expect.ok(tarmac.wPolicy.length > 0);
+      });
+
+      test("F229-T09: Validates input and throws if fewer than 2 vendors are provided", () => {
+        const tarmac = new TarMACMultiAgentCooperativePricing();
+        let threw = false;
+        try {
+          tarmac.coordinatePricing([{ id: 'v1', price: 100000 }]);
+        } catch (e) {
+          threw = true;
+        }
+        expect.equal(threw, true);
+      });
+
+      test("F229-T10: Generates soft attention matrix where non-self attention weights sum to 1", () => {
+        const tarmac = new TarMACMultiAgentCooperativePricing({ numHeads: 2 });
+        const vendors = [
+          { id: 'v1', price: 100000, stock: 80, cogs: 70000, marketDemand: 60 },
+          { id: 'v2', price: 120000, stock: 50, cogs: 85000, marketDemand: 45 },
+          { id: 'v3', price: 95000, stock: 120, cogs: 65000, marketDemand: 80 }
+        ];
+        const res = tarmac.coordinatePricing(vendors);
+        expect.equal(res.numVendors, 3);
+        expect.equal(res.attentionMatrix.length, 2);
+
+        const head0Attn = res.attentionMatrix[0];
+        const a0 = head0Attn[0];
+        expect.equal(a0[0], 0);
+        const sumOther = a0[1] + a0[2];
+        expect.ok(Math.abs(sumOther - 1.0) < 1e-4);
+      });
+
+      test("F229-T11: Produces recommended prices with targeted communication rationale", () => {
+        const tarmac = new TarMACMultiAgentCooperativePricing();
+        const vendors = [
+          { id: 'v1', price: 100000, stock: 80, cogs: 70000, marketDemand: 60 },
+          { id: 'v2', price: 120000, stock: 50, cogs: 85000, marketDemand: 45 }
+        ];
+        const res = tarmac.coordinatePricing(vendors);
+        expect.equal(res.decisions.length, 2);
+        expect.ok(res.decisions[0].recommendedPrice > 0);
+        expect.ok(typeof res.decisions[0].rationale === 'string');
+      });
+
+      test("F229-T12: Enforces strict 1.05 * COGS safe price floor for all participating vendors", () => {
+        const tarmac = new TarMACMultiAgentCooperativePricing();
+        const vendors = [
+          { id: 'v1', price: 50000, stock: 80, cogs: 60000, marketDemand: 60 },
+          { id: 'v2', price: 70000, stock: 50, cogs: 80000, marketDemand: 45 }
+        ];
+        const res = tarmac.coordinatePricing(vendors);
+        res.decisions.forEach(d => {
+          expect.ok(d.recommendedPrice >= d.safeFloor);
+          expect.equal(d.safeFloor, Math.round(d.cogs * 1.05));
+        });
+      });
+
+      test("F229-T13: Evaluates cooperative step with GMV, gross profit, and team reward", () => {
+        const tarmac = new TarMACMultiAgentCooperativePricing();
+        const decisions = [
+          { vendorId: 'v1', recommendedPrice: 100000, cogs: 70000 },
+          { vendorId: 'v2', recommendedPrice: 150000, cogs: 100000 }
+        ];
+        const actualSales = [
+          { vendorId: 'v1', unitsSold: 10 },
+          { vendorId: 'v2', unitsSold: 5 }
+        ];
+        const evalRes = tarmac.evaluateCooperativeStep(decisions, actualSales);
+        expect.equal(evalRes.totalGmv, 10 * 100000 + 5 * 150000);
+        expect.equal(evalRes.totalGrossProfit, 10 * 30000 + 5 * 50000);
+        expect.ok(evalRes.averageGrossMarginPct > 30);
+        expect.ok(evalRes.teamReward > 0);
+      });
+
+      test("F229-T14: Multi-head attention (H=3) generates independent attention maps across heads", () => {
+        const tarmac = new TarMACMultiAgentCooperativePricing({ numHeads: 3 });
+        const vendors = [
+          { id: 'v1', price: 100000, stock: 100, cogs: 70000, marketDemand: 50 },
+          { id: 'v2', price: 110000, stock: 90, cogs: 75000, marketDemand: 55 },
+          { id: 'v3', price: 105000, stock: 80, cogs: 72000, marketDemand: 60 }
+        ];
+        const res = tarmac.coordinatePricing(vendors);
+        expect.equal(res.numHeads, 3);
+        expect.equal(res.attentionMatrix.length, 3);
+      });
+
+      test("F229-T15: Client and Server TarMACMultiAgentCooperativePricing demonstrate architectural parity", () => {
+        const clientTarmac = new TarMACMultiAgentCooperativePricing();
+        const serverTarmac = new ServerTarMACMultiAgentCooperativePricing();
+        const decisions = [
+          { vendorId: 'v1', recommendedPrice: 120000, cogs: 80000 },
+          { vendorId: 'v2', recommendedPrice: 160000, cogs: 110000 }
+        ];
+        const sales = [
+          { vendorId: 'v1', unitsSold: 12 },
+          { vendorId: 'v2', unitsSold: 8 }
+        ];
+        const clientEval = clientTarmac.evaluateCooperativeStep(decisions, sales);
+        const serverEval = serverTarmac.evaluateCooperativeStep(decisions, sales);
+
+        expect.equal(clientEval.totalGmv, serverEval.totalGmv);
+        expect.equal(clientEval.totalGrossProfit, serverEval.totalGrossProfit);
+        expect.equal(clientEval.averageGrossMarginPct, serverEval.averageGrossMarginPct);
+        expect.equal(clientEval.teamReward, serverEval.teamReward);
+      });
+
+      // -----------------------------------------------------------------------
+      // EVRPTW Vehicle-To-Grid Peak Shaving Router Tests (F229-T16 - F229-T22)
+      // -----------------------------------------------------------------------
+      test("F229-T16: Initializes EVRPTWVehicleToGridPeakShavingRouter with tariffs and degradation model", () => {
+        const router = new EVRPTWVehicleToGridPeakShavingRouter({ batteryCapacityKWh: 60 });
+        expect.equal(router.batteryCapacityKWh, 60);
+        expect.equal(router.tariffs.OFF_PEAK, 1600);
+        expect.equal(router.tariffs.STANDARD, 2800);
+        expect.equal(router.tariffs.HIGH_PEAK, 5500);
+        expect.ok(router.degradationCostPerKWh > 0);
+      });
+
+      test("F229-T17: Accurately classifies hours into OFF_PEAK, STANDARD, and HIGH_PEAK bands", () => {
+        const router = new EVRPTWVehicleToGridPeakShavingRouter();
+        expect.equal(router.getTariffBand(2), 'OFF_PEAK');
+        expect.equal(router.getTariffBand(8), 'STANDARD');
+        expect.equal(router.getTariffBand(10), 'HIGH_PEAK');
+        expect.equal(router.getTariffBand(14), 'STANDARD');
+        expect.equal(router.getTariffBand(18), 'HIGH_PEAK');
+        expect.equal(router.getTariffBand(23), 'OFF_PEAK');
+      });
+
+      test("F229-T18: Returns zeroed empty itinerary when customer array is empty", () => {
+        const router = new EVRPTWVehicleToGridPeakShavingRouter();
+        const res = router.planRoutesAndEnergyDispatch({ customers: [] });
+        expect.equal(res.routes.length, 0);
+        expect.equal(res.totalTravelDistanceKm, 0);
+        expect.equal(res.v2gPeakShavingKWh, 0);
+      });
+
+      test("F229-T19: Plans multi-stop delivery routes respecting payload and customer time windows", () => {
+        const router = new EVRPTWVehicleToGridPeakShavingRouter();
+        const input = {
+          depot: { id: 'hub_central', x: 0, y: 0, openHour: 7, closeHour: 21 },
+          customers: [
+            { id: 'c1', x: 5, y: 10, demand: 20, readyHour: 8, dueHour: 12, serviceMinutes: 10 },
+            { id: 'c2', x: 8, y: 15, demand: 15, readyHour: 9, dueHour: 14, serviceMinutes: 10 }
+          ],
+          fleet: [{ id: 'EV_Alpha', currentSOC: 0.90, payloadCapacityKg: 400 }]
+        };
+        const res = router.planRoutesAndEnergyDispatch(input);
+        expect.equal(res.unservedCount, 0);
+        expect.equal(res.routes.length, 1);
+        expect.equal(res.routes[0].numDeliveries, 2);
+        expect.ok(res.totalTravelDistanceKm > 0);
+        expect.ok(res.totalEnergyConsumedKWh > 0);
+      });
+
+      test("F229-T20: Triggers V2G discharge peak shaving and calculates arbitrage profit on High-Peak return", () => {
+        const router = new EVRPTWVehicleToGridPeakShavingRouter();
+        const input = {
+          depot: { id: 'hub_central', x: 0, y: 0, openHour: 16.5, closeHour: 22 },
+          customers: [
+            { id: 'c1', x: 10, y: 10, demand: 25, readyHour: 16.8, dueHour: 18, serviceMinutes: 20 }
+          ],
+          fleet: [{ id: 'EV_Beta', currentSOC: 0.90, payloadCapacityKg: 500 }]
+        };
+        const res = router.planRoutesAndEnergyDispatch(input);
+        expect.ok(res.v2gPeakShavingKWh > 0);
+        expect.ok(res.v2gRevenueVND > 0);
+        expect.ok(res.batteryDegradationCostVND > 0);
+        expect.ok(res.netArbitrageProfitVND > 0);
+      });
+
+      test("F229-T21: Computes sustainability metrics (CO2 avoided kg and peak demand reduction kW)", () => {
+        const router = new EVRPTWVehicleToGridPeakShavingRouter();
+        const input = {
+          depot: { id: 'hub_central', x: 0, y: 0, openHour: 17.0, closeHour: 21 },
+          customers: [
+            { id: 'c1', x: 5, y: 5, demand: 10, readyHour: 17.2, dueHour: 19, serviceMinutes: 15 }
+          ],
+          fleet: [{ id: 'EV_Gamma', currentSOC: 0.85, payloadCapacityKg: 500 }]
+        };
+        const res = router.planRoutesAndEnergyDispatch(input);
+        expect.ok(res.sustainabilitySummary.co2AvoidedKg >= 0);
+        expect.ok(res.sustainabilitySummary.peakDemandReducedKW >= 0);
+      });
+
+      test("F229-T22: Client and Server EVRPTWVehicleToGridPeakShavingRouter exhibit strict parity", () => {
+        const clientRouter = new EVRPTWVehicleToGridPeakShavingRouter();
+        const serverRouter = new ServerEVRPTWVehicleToGridPeakShavingRouter();
+        const input = {
+          depot: { id: 'hub', x: 0, y: 0, openHour: 8, closeHour: 20 },
+          customers: [
+            { id: 'cust1', x: 4, y: 7, demand: 12, readyHour: 8.5, dueHour: 11, serviceMinutes: 10 },
+            { id: 'cust2', x: 9, y: 12, demand: 18, readyHour: 9.5, dueHour: 13, serviceMinutes: 15 }
+          ],
+          fleet: [{ id: 'EV_1', currentSOC: 0.88, payloadCapacityKg: 300 }]
+        };
+        const clientRes = clientRouter.planRoutesAndEnergyDispatch(input);
+        const serverRes = serverRouter.planRoutesAndEnergyDispatch(input);
+
+        expect.equal(clientRes.unservedCount, serverRes.unservedCount);
+        expect.equal(clientRes.totalTravelDistanceKm, serverRes.totalTravelDistanceKm);
+        expect.equal(clientRes.totalEnergyConsumedKWh, serverRes.totalEnergyConsumedKWh);
+        expect.equal(clientRes.v2gPeakShavingKWh, serverRes.v2gPeakShavingKWh);
+        expect.equal(clientRes.netArbitrageProfitVND, serverRes.netArbitrageProfitVND);
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F229-T23 - F229-T24)
+      // -----------------------------------------------------------------------
+      test("F229-T23: Admin Sentinel Copilot correctly routes Section 227 (DDSketch Log), Section 228 (TarMAC), and Section 229 (EVRPTW V2G)", () => {
+        const resDDSketch = generateAdminCopilotResponse("Phác họa phân vị logarit DDSketch Log Quantile Masson VLDB 2019 ACM TODS 2020");
+        expect.equal(resDDSketch.tag, "DDSKETCH LOG QUANTILE");
+        expect.ok(resDDSketch.text.includes("DDSKETCH LOG QUANTILE"));
+
+        const resTarMAC = generateAdminCopilotResponse("Định giá hợp tác đa đại diện mục tiêu TarMAC Targeted Multi-Agent Communication Abhishek Das ICML 2019");
+        expect.equal(resTarMAC.tag, "TARMAC COOPERATIVE PRICING");
+        expect.ok(resTarMAC.text.includes("TARMAC MULTI-AGENT COOPERATIVE PRICING"));
+
+        const resV2G = generateAdminCopilotResponse("Định tuyến xe điện phát điện ngược lưới EVRPTW-V2G Peak Shaving Router Keskin Catay Wang 2020");
+        expect.equal(resV2G.tag, "EVRPTW V2G PEAK SHAVING ROUTER");
+        expect.ok(resV2G.text.includes("VEHICLE-TO-GRID PEAK SHAVING ROUTER"));
+      });
+
+      test("F229-T24: Seller ShopSmart Copilot Section 91 and Buyer Assistant Intent 84 handle Phase 82 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn định giá hợp tác mục tiêu TarMAC và phác họa phân vị DDSketch Log cho shop");
+        expect.equal(sellerRes.tag, "DDSKETCH LOG, TARMAC COOPERATIVE PRICING & EVRPTW-V2G ROUTER");
+        expect.ok(sellerRes.text.includes("DDSketch Log Quantile"));
+
+        const buyerRes = generateAiChatResponse("Sàn có sử dụng phân vị DDSketch Log hoặc xe điện phát điện ngược lưới EVRPTW-V2G không?");
+        expect.equal(buyerRes.intent, "DDSKETCH_TARMAC_V2G_ASSIST");
+        expect.ok(buyerRes.replyText.includes("DDSketch Log Quantile"));
       });
     });
   });

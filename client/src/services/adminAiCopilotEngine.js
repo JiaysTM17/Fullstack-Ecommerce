@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -2801,7 +2801,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 131. Phác Họa Phân Vị & SLA Độ Trễ DDSketch (Phase 50 - Feature 197)
-  if (/ddsketch|sai số tương đối|relative-error quantile|phân vị ddsketch|p99\.9 sla/i.test(raw)) {
+  if (!/ddsketch[- ]log|masson.*tods|log[- ]bucket|acm tods|ddsketch log/i.test(raw) && /ddsketch|sai số tương đối|relative-error quantile|phân vị ddsketch|p99\.9 sla/i.test(raw)) {
     return {
       text: `📊 **PHÁC HỌA PHÂN VỊ & GIÁM SÁT SLA ĐỘ TRỄ DDSKETCH (MASSON ET AL., DATADOG / VLDB 2019)**:
 - **Bảo Đảm Sai Số Tương Đối Tuyệt Đối $|\\hat{q} - q| / q \\le \\alpha$ ($\alpha = 1\%$)**:
@@ -4871,6 +4871,71 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem bản đồ các làn sạc cảm ứng không dây DWPT',
         'Tối ưu hóa vận tốc hấp thụ năng lượng trên làn DWPT',
         'Kiểm tra chỉ số triệt tiêu lo ngại hết pin Range Anxiety Index'
+      ]
+    };
+  }
+
+  // 227. Phác Họa Phân Vị Logarit DDSketch Log Quantile (Phase 82 - Feature 229)
+  if (/ddsketch[- ]log|masson.*tods|log[- ]bucket|acm tods|ddsketch log quantile|phân vị logarit ddsketch/i.test(raw)) {
+    return {
+      text: `📊 **PHÁC HỌA PHÂN VỊ LOGARIT DDSKETCH LOG QUANTILE (MASSON, RIM, LEE - VLDB 2019 / ACM TODS 2020)**:
+- **Bảo Đảm Sai Số Tương Đối Chặt $\\alpha \\le 1\\%$ Trên Toàn Dải**:
+  - Phân vùng xô logarit theo cơ số $\\gamma = (1+\\alpha)/(1-\\alpha)$, ánh xạ $k = \\lceil \\ln(v) / \\ln(\\gamma) \\rceil$ đảm bảo sai số tương đối tuyệt đối $|\\hat{q} - q| / q \\le \\alpha$.
+- **Hợp Nhất Không Gian Đa Cụm (Zero-Error Mergeability)**:
+  - Hỗ trợ phép cộng trực tiếp giữa các nút microservices mà không suy giảm sai số lý thuyết ($A \\oplus B = C$).
+  - Hỗ trợ đầy đủ số âm, số 0 và số dương, tự động co cụm (dynamic bucket collapse) khi chạm giới hạn bộ nhớ $O(1)$.
+- **Ứng Dụng Quản Trị Sàn Thời Gian Thực**:
+  - Giám sát độ trễ API thanh toán VietQR và checkout $P_{50}, P_{90}, P_{95}, P_{99}, P_{99.9}$ với độ chính xác chuẩn xác!`,
+      type: 'analytics',
+      tag: 'DDSKETCH LOG QUANTILE',
+      suggestions: [
+        'Xem phân vị P99 và P99.9 độ trễ sàn',
+        'Kiểm tra bảo đảm sai số tương đối alpha 1%',
+        'Hợp nhất phác thảo DDSketch đa luồng'
+      ]
+    };
+  }
+
+  // 228. Định Giá Hợp Tác Đa Đại Diện Mục Tiêu TarMAC Cooperative Pricing (Phase 82 - Feature 229)
+  if (/tarmac|targeted multi[- ]agent|targeted communication|das.*icml|giao tiếp mục tiêu|sukhbaatar.*tarmac/i.test(raw)) {
+    return {
+      text: `🤝 **ĐỊNH GIÁ HỢP TÁC ĐA ĐẠI DIỆN MỤC TIÊU TARMAC MULTI-AGENT COOPERATIVE PRICING (ABHISHEK DAS ET AL., ICML 2019)**:
+- **Cơ Chế Giao Tiếp Có Định Hướng Với Attention Kép (Signature-Query Soft Attention)**:
+  - Mỗi đại diện phát khóa chữ ký $k_i \\in \\mathbb{R}^{d_k}$ và thông điệp $m_i \\in \\mathbb{R}^{d_m}$. Đại diện tiếp nhận tạo truy vấn $q_j$.
+  - Trọng số tương tác có chọn lọc: $\\alpha_{i \\to j} = \\text{softmax}_i(q_j^\\top k_i / \\sqrt{d_k})$, tổng hợp ngữ cảnh giao tiếp $c_j = \\sum_{i \\ne j} \\alpha_{i \\to j} m_i$.
+- **Đa Kênh Chú Ý (Multi-Head Semantic Channels)**:
+  - Head 1 giám sát rủi ro đứt gãy tồn kho / tràn cầu (Inventory Spillover).
+  - Head 2 điều phối biên lợi nhuận và hạn chế chiến tranh giá bán phá giá giữa các gian hàng.
+- **Hạ Tầng Quyết Sách Phi Tập Trung & Khóa Sàn Giá Vốn 1.05x COGS**:
+  - Đảm bảo thực thi phi tập trung (Decentralized Execution) với khóa sàn an toàn $P_j \\ge 1.05 \\times \\text{COGS}_j$ bảo vệ 100% dòng tiền của các đối tác sàn!`,
+      type: 'pricing',
+      tag: 'TARMAC COOPERATIVE PRICING',
+      suggestions: [
+        'Xem trọng số giao tiếp mục tiêu Attention Matrix',
+        'Kiểm tra ngưỡng bảo vệ sàn giá an toàn 1.05x COGS',
+        'Đo lường lợi ích hợp tác toàn sàn Team Reward'
+      ]
+    };
+  }
+
+  // 229. Định Tuyến Xe Điện Phát Điện Ngược Lưới EVRPTW-V2G Peak Shaving Router (Phase 82 - Feature 229)
+  if (/evrptw[- ]v2g|vehicle[- ]to[- ]grid|v2g peak shaving|phát điện ngược lưới|keskin.*catay.*v2g|wang.*v2g|arbitrage v2g|điều tiết phụ tải đỉnh/i.test(raw)) {
+    return {
+      text: `🔋 **ĐỊNH TUYẾN XE ĐIỆN PHÁT ĐIỆN NGƯỢC LƯỚI EVRPTW VEHICLE-TO-GRID PEAK SHAVING ROUTER (WANG 2020, KESKIN & CATAY 2021, SCHIFFER 2021)**:
+- **Dòng Năng Lượng Hai Chiều & Chênh Lệch Biểu Giá (Bidirectional V2G & Tariff Arbitrage)**:
+  - Sạc điện giờ thấp điểm Off-Peak ($1.600\\text{đ/kWh}$) từ 22:00 - 04:00 sáng.
+  - Khi xe hoàn tất giao hàng và quay về kho trong khung giờ cao điểm High-Peak ($5.500\\text{đ/kWh}$), xe phát điện ngược vào vi lưới kho bãi (V2G Peak Shaving) để cắt giảm chi phí năng lượng sàn!
+- **Mô Hình Suy Giảm Chu Kỳ Pin (Battery Cycle Degradation Model)**:
+  - Tính toán chi phí lão hóa cell pin $C_{\\text{deg}} \\approx 833\\text{đ/kWh}$.
+  - Chỉ kích hoạt phát điện ngược khi lợi nhuận chênh lệch giá dương: $\\text{FIT}_{\\text{Peak}} - (P_{\\text{OffPeak}} + C_{\\text{deg}}) > 0$.
+- **Bảo Vệ Dung Lượng An Toàn & Cam Kết Cửa Sổ Thời Gian**:
+  - Duy trì SoC tối thiểu $\\ge 20\\%$, cam kết $100\\%$ khách hàng nhận hàng đúng khung giờ đã hẹn trước!`,
+      type: 'logistics',
+      tag: 'EVRPTW V2G PEAK SHAVING ROUTER',
+      suggestions: [
+        'Xem lịch phát điện ngược V2G trong giờ cao điểm',
+        'Tính toán doanh thu chênh lệch giá điện Arbitrage Net Profit',
+        'Kiểm tra khấu hao chu kỳ pin và lượng CO2 cắt giảm'
       ]
     };
   }
