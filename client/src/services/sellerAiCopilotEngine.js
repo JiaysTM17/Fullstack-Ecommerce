@@ -569,7 +569,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 28. Bắt Kịp Xu Hướng Bằng Thuật Toán Space-Saving Heavy Hitters (Phase 19 - Feature 166)
-  if (!/conservative|treap|sac[- ]lagrangian|streamsummary|stream[- ]summary|multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd/i.test(raw) && /space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
+  if (!/conservative|treap|sac[- ]lagrangian|streamsummary|stream[- ]summary|multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|dynamic wireless/i.test(raw) && /space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
     return {
       text: `🔥 **BẮT KỊP XU HƯỚNG BÁN CHẠY BẰNG SPACE-SAVING HEAVY HITTERS (TOP-K STREAMING)**:
 - **Cơ chế bắt sóng Real-Time với bộ nhớ cố định $O(K)$**:
@@ -1627,6 +1627,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem nhánh hàng hot Count-Min HHH',
         'Tư vấn định giá an toàn PPO-Entropy',
         'Lộ trình giao xe điện đổi pin siêu tốc SPX'
+      ]
+    };
+  }
+
+  // 81. Bộ Ba Thuật Toán Dyadic Range Sketch, DDPG-Lagrangian Safe Pricing & Sạc Không Dây Động DWPT (Phase 72 - Feature 219)
+  if (/dyadic[- ]range|phác thảo khoảng nhị phân|ddpg[- ]lagrangian|ddpg safe pricing|evrptw[- ]dwpt|sạc không dây động|dynamic wireless/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 72 (${currentShop.name})**:
+- **Truy vấn khoảng giá siêu tốc Dyadic Range Count-Min Sketch (Cormode & Korn PODS 2005)**:
+  - Phân rã nhị phân chính tắc giúp shop truy vấn tức thì tổng doanh thu và lượng khách trong bất kỳ khoảng giá nào $[l, r]$ chỉ trong $O(\\log U)$, tối ưu hóa phân khúc sản phẩm Flash Sale!
+- **Định giá học tăng cường liên tục tất định DDPG-Lagrangian (Lillicrap 2016, Achiam 2017)**:
+  - Mạng Actor liên tục xuất biên độ giá tối ưu kết hợp cập nhật mềm Polyak Target Networks và nhân tử đối ngẫu Lagrange, khóa cứng sàn an toàn $\\ge 1.05 \\times \\text{COGS}$ bảo vệ 100% biên lãi ròng của shop!
+- **Giao hàng không dừng với làn đường sạc không dây động EVRPTW-DWPT (Deflorio 2015, Hwang 2020)**:
+  - Đội xe máy điện SPX Express nạp năng lượng trực tiếp khi đang chạy trên các hành lang xanh điện hóa với công suất $20\\text{ kW}$, không cần dừng trạm sạc tĩnh, bảo đảm giao hàng hỏa tốc đúng hẹn!`,
+      type: 'recommendation',
+      tag: 'DYADIC RANGE SKETCH, DDPG-LAGRANGIAN & DWPT CHARGING',
+      suggestions: [
+        'Phân tích khoảng giá bán Dyadic',
+        'Tư vấn định giá an toàn DDPG-Lagrangian',
+        'Theo dõi xe điện sạc động DWPT SPX'
       ]
     };
   }

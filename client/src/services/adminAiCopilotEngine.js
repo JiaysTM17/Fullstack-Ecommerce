@@ -90,7 +90,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   const raw = query.toLowerCase().trim();
 
   // 2. Tra cứu Tài chính & Hoa hồng sàn (GMV, Commission, Doanh thu)
-  if (!/fenwick|cây fenwick/i.test(raw) && /doanh số|gmv|doanh thu|hoa hồng|tiền sàn|phí sàn|lợi nhuận sàn/i.test(raw)) {
+  if (!/fenwick|cây fenwick|dyadic[- ]range|dyadic/i.test(raw) && /doanh số|gmv|doanh thu|hoa hồng|tiền sàn|phí sàn|lợi nhuận sàn/i.test(raw)) {
     const commVnd = commission || Math.round(totalRevenue * 0.05);
     return {
       text: `📊 **BÁO CÁO TÀI CHÍNH & HOA HỒNG TOÀN SÀN**:
@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp|frequent[- ]directions|matrix sketch/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp|frequent[- ]directions|matrix sketch|dyadic[- ]range|dyadic/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -2948,7 +2948,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 138. Định Giá Bán Tối Ưu Hành Động Liên Tục Bằng CQL Continuous (Phase 52 - Feature 199)
-  if (/cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
+  if (!/ddpg[- ]lagrangian|ddpg/i.test(raw) && /cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
     return {
       text: `💰 **ĐỊNH GIÁ BÁN TỐI ƯU HÀNH ĐỘNG LIÊN TỤC CONSERVATIVE Q-LEARNING (CQL) (KUMAR ET AL., NEURIPS 2020)**:
 - **Kiến Trúc Actor-Critic Liên Tục**:
@@ -3051,7 +3051,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 143. Phác Thảo Nhanh Tần Suất Luồng & Truy Vấn Khoảng Dyadic FCM-CU (Phase 54 - Feature 201)
-  if (/fcm|conservative update|cu-cms|cập nhật thận trọng fcm|dyadic range|khoảng dyadic|cây dyadic/i.test(raw)) {
+  if (!/dyadic[- ]range count[- ]min|dyadic range sketch|dyadic range count min|cormode pods/i.test(raw) && /fcm|conservative update|cu-cms|cập nhật thận trọng fcm|dyadic range|khoảng dyadic|cây dyadic/i.test(raw)) {
     return {
       text: `📊 **PHÁC THẢO NHANH TẦN SUẤT LUỒNG VỚI CẬP NHẬT THẬN TRỌNG & KHOẢNG DYADIC FCM-CU (CORMODE & MUTHUKRISHNAN 2005, GOYAL ET AL. 2012)**:
 - **Cập Nhật Thận Trọng Triệt Tiêu Sai Số (Conservative Update)**:
@@ -3279,7 +3279,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 154. Định Tuyến Xe Tải Mẹ & Drone Tự Hành VRPTW-D (Phase 57 - Feature 204)
-  if (!/tandem|truck[- ]drone|vrptw[- ]tandem/i.test(raw) && /drone|vrptw-d|vrptw pd drone|giao hàng drone|máy bay không người lái|mothership van|fstsp/i.test(raw)) {
+  if (!/tandem|truck[- ]drone|vrptw[- ]tandem|dwpt|sạc không dây|dynamic wireless/i.test(raw) && /drone|\bvrptw-d\b|vrptw pd drone|giao hàng drone|máy bay không người lái|mothership van|fstsp/i.test(raw)) {
     return {
       text: `🚁 **ĐỊNH TUYẾN ĐỘI XE TẢI KẾT HỢP DRONE TỰ HÀNH VRPTW-D (MURRAY & CHU 2015, AGATZ 2018)**:
 - **Mô Hình Phối Hợp Mẹ - Con Đồng Bộ (Mothership Van + Rooftop Drone)**:
@@ -3836,7 +3836,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 180. Định Giá Ràng Buộc An Toàn PPO-Lagrangian Safe Pricing (Phase 66 - Feature 213)
-  if (!/ppo[- ]entropy/i.test(raw) && /ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
+  if (!/ppo[- ]entropy|ddpg[- ]lagrangian/i.test(raw) && /ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
     return {
       text: `🛡️ **ĐỊNH GIÁ RÀNG BUỘC AN TOÀN PPO-LAGRANGIAN SAFE PRICING (ACHIAM ET AL. ICML 2017 / RAY ET AL. 2019)**:
 - **Tối Đa Doanh Thu Dưới Đa Ràng Buộc Kinh Doanh Nghiêm Ngặt**:
@@ -4214,6 +4214,69 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Phân tích chi phí đánh đổi BSS vs CS',
         'Kiểm tra dung lượng suy giảm C_eff(n)',
         'Lập lịch định tuyến xe điện EVRPTW-BSD'
+      ]
+    };
+  }
+
+  // 197. Phác Thảo Khoảng Nhị Phân Dyadic Range Count-Min Sketch (Phase 72 - Feature 219)
+  if (/dyadic[- ]range|phác thảo khoảng nhị phân|dyadic count[- ]min|dyadic sketch|truy vấn khoảng streaming|cormode.*korn/i.test(raw)) {
+    return {
+      text: `📊 **PHÁC THẢO KHOẢNG NHỊ PHÂN DYADIC RANGE COUNT-MIN SKETCH (CORMODE, KORN, MUTHUKRISHNAN PODS 2005 / VLDB 2006)**:
+- **Đột Phá Truy Vấn Khoảng Tức Thì Trong $O(\\log U)$ Thay Vì $O(U)$**:
+  - Đối với các thuộc tính số liên tục trong TMĐT (khoảng giá, giá trị giỏ hàng, phần trăm chiết khấu), truy vấn khoảng $[l, r]$ bằng duyệt tuần tự sẽ gây nghẽn nghiêm trọng khi miền giá trị $U = 2^B$ lớn.
+- **Phân Rã Nhị Phân Chính Tắc (Canonical Dyadic Intervals)**:
+  - Mọi đoạn $[l, r] \\subseteq [0, U-1]$ được phân rã thành tối đa $2 \\log_2 U$ khoảng nhị phân rời rạc $I_{j, k} = [j \\cdot 2^k, (j+1) \\cdot 2^k - 1]$.
+  - Hệ thống duy trì $B+1$ bộ phác thảo Count-Min độc lập tương ứng với các cấp độ $k \\in [0, B]$.
+- **Ước Lượng Phân Vị & Truy Vấn Range Sum Chuẩn Xác**:
+  - Ước lượng tổng tần suất $\\sum_{x=l}^r f(x)$ và tìm kiếm phân vị nhị phân cực nhanh với sai số chặn trên $O(\\epsilon N \\log U)$ và độ tin cậy $1 - \\delta$!`,
+      type: 'analytics',
+      tag: 'DYADIC RANGE COUNT-MIN SKETCH',
+      suggestions: [
+        'Truy vấn tổng tần suất khoảng giá Dyadic',
+        'Ước lượng phân vị giá trị đơn hàng Quantile',
+        'Xem cấu trúc mảng phác thảo nhị phân'
+      ]
+    };
+  }
+
+  // 198. Định Giá Học Tăng Cường Xác Định DDPG-Lagrangian Safe Dynamic Pricing (Phase 72 - Feature 219)
+  if (/ddpg[- ]lagrangian|ddpg safe pricing|định giá ddpg|deterministic policy gradient lagrangian|lillicrap.*achiam/i.test(raw)) {
+    return {
+      text: `🛡️ **ĐỊNH GIÁ HỌC TĂNG CƯỜNG XÁC ĐỊNH DDPG-LAGRANGIAN SAFE PRICING (LILLICRAP 2016 / ACHIAM 2017)**:
+- **Kiểm Soát Hành Động Liên Tục Tất Định (Deterministic Continuous Action)**:
+  - Mạng Actor $\\mu(s|\\theta^\\mu)$ trực tiếp xuất ra biên độ điều chỉnh giá liên tục $a \\in [-0.20, +0.20]$, triệt tiêu hiện tượng bùng nổ tổ hợp của không gian rời rạc.
+- **Mạng Kép Reward Critic & Cost Critic Với Cập Nhật Mềm Polyak**:
+  - $Q(s, a | \\theta^Q)$ ước lượng doanh thu kỳ vọng, còn $Q_C(s, a | \\theta^{Q_C})$ giám sát rủi ro vi phạm an toàn tài chính.
+  - Mạng mục tiêu cập nhật mềm theo hệ số $\\tau$: $\\theta' \\leftarrow \\tau \\theta + (1-\\tau) \\theta'$, triệt tiêu biến động Q-value bất thường.
+- **Cập Nhật Nhân Tử Đối Ngẫu Kép Lagrange & Khóa Sàn Giá Vốn**:
+  - Nhân tử đối ngẫu $\\lambda \\leftarrow \\max(0, \\lambda + \\alpha_\\lambda (\\bar{C} - d_{\\text{budget}}))$ tự động siết chặt khi chạm ngưỡng rủi ro.
+  - Khóa sàn giá bán bất biến $P_{\\text{safe}} \\ge 1.05 \\times \\text{COGS}$ bảo vệ an toàn 100% biên lãi gộp!`,
+      type: 'pricing',
+      tag: 'DDPG-LAGRANGIAN SAFE PRICING',
+      suggestions: [
+        'Xem hành động tất định Actor Continuous Action',
+        'Đo lường nhân tử Lagrange Lambda',
+        'Kiểm tra cập nhật mềm Polyak Target Networks'
+      ]
+    };
+  }
+
+  // 199. Lộ Trình Xe Điện Sạc Không Dây Động EVRPTW-DWPT In-Motion Charging (Phase 72 - Feature 219)
+  if (/evrptw[- ]dwpt|dynamic wireless|sạc không dây động|sạc khi đang chạy|electrified road|hành lang xanh điện hóa|in[- ]motion charging|deflorio|hwang/i.test(raw)) {
+    return {
+      text: `⚡ **LỘ TRÌNH XE ĐIỆN VỚI SẠC KHÔNG DÂY ĐỘNG EVRPTW-DWPT (DEFLORIO 2015, HWANG IEEE T-ITS 2020)**:
+- **Công Nghệ Truyền Năng Lượng Không Dây Động (Dynamic Wireless Power Transfer - DWPT)**:
+  - Cuộn cảm ứng từ trường được đặt chìm dưới lòng đường các đại lộ huyết mạch SPX Express, cho phép xe máy điện nạp năng lượng **ngay khi đang di chuyển** với công suất $P_{\\text{dwpt}} = 20\\text{ kW}$.
+- **Cơ Chế Tích Lũy Năng Lượng Thực (Net Energy In-Motion Dynamics)**:
+  - Trên hành lang điện hóa: $\\Delta E_{\\text{net}} = (d/v) \\cdot P_{\\text{dwpt}} - d \\cdot c_{\\text{rate}} > 0$. Xe điện vừa giao hàng vừa sạc đầy pin mà **không cần dừng lại một giây nào**!
+- **Đánh Đổi Lộ Trình Tối Ưu Triệt Tiêu Trễ Hẹn**:
+  - Lựa chọn đi vòng qua hành lang DWPT để sạc động không tốn thời gian dừng vs trạm sạc cắm dây tĩnh CS tốn thời gian chờ; đảm bảo 100% bưu kiện giao đúng cửa sổ thời gian hẹn trước của khách hàng!`,
+      type: 'logistics',
+      tag: 'EVRPTW DYNAMIC WIRELESS CHARGING',
+      suggestions: [
+        'Xem danh sách hành lang xanh sạc động DWPT',
+        'Tính toán độ lợi năng lượng Net Energy Benefit',
+        'Lập lịch định tuyến xe điện EVRPTW-DWPT'
       ]
     };
   }

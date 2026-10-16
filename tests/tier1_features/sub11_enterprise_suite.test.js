@@ -375,6 +375,10 @@ import {
   CountMinHierarchicalHH,
   PPOEntropySafePricing,
   EVRPTWBatterySwappingDecayRouter,
+  // Phase 72 Enterprise Algorithms
+  DyadicRangeCountMinSketch,
+  DDPGLagrangianSafePricing,
+  EVRPTWDynamicWirelessChargingRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -556,6 +560,9 @@ import { EVRPTWMultiTierChargingRouter as ServerEVRPTWMultiTierChargingRouter } 
 import { CountMinHierarchicalHH as ServerCountMinHierarchicalHH } from "../../server/src/utils/countMinHierarchicalHH.js";
 import { PPOEntropySafePricing as ServerPPOEntropySafePricing } from "../../server/src/utils/ppoEntropySafePricing.js";
 import { EVRPTWBatterySwappingDecayRouter as ServerEVRPTWBatterySwappingDecayRouter } from "../../server/src/utils/evrptwBatterySwappingDecayRouter.js";
+import { DyadicRangeCountMinSketch as ServerDyadicRangeCountMinSketch } from "../../server/src/utils/dyadicRangeCountMinSketch.js";
+import { DDPGLagrangianSafePricing as ServerDDPGLagrangianSafePricing } from "../../server/src/utils/ddpgLagrangianSafePricing.js";
+import { EVRPTWDynamicWirelessChargingRouter as ServerEVRPTWDynamicWirelessChargingRouter } from "../../server/src/utils/evrptwDynamicWirelessChargingRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -30688,6 +30695,345 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích nhánh hot Count-Min HHH hay giao bằng xe điện đổi pin suy giảm không?");
         expect.equal(buyerRes.intent, "COUNTMIN_HHH_PPO_ENTROPY_SWAP_DECAY");
         expect.ok(buyerRes.replyText.includes("Count-Min"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 219: Dyadic Range Count-Min Sketch, DDPG-Lagrangian Safe Pricing & DWPT Dynamic Wireless Charging EVRPTW (Phase 72 - 24 Tests)
+    // =========================================================================
+    describe("Feature 219: Dyadic Range Sketch, DDPG-Lagrangian Safe Pricing & DWPT Wireless Charging EVRPTW", () => {
+
+      // --- DyadicRangeCountMinSketch Tests (F219-T01 to F219-T08) ---
+      test("F219-T01: DyadicRangeCountMinSketch initializes with correct domain size and multi-level sketches", () => {
+        const sketch = new DyadicRangeCountMinSketch({ domainBits: 8, epsilon: 0.05, delta: 0.01 });
+        const telemetry = sketch.getTelemetry();
+        expect.equal(telemetry.domainBits, 8);
+        expect.equal(telemetry.domainSize, 256);
+        expect.equal(telemetry.numLevels, 9); // Levels 0 through 8
+        expect.equal(sketch.sketches.length, 9);
+        expect.ok(sketch.width > 0);
+        expect.ok(sketch.depth > 0);
+        expect.equal(sketch.totalCount, 0);
+      });
+
+      test("F219-T02: DyadicRangeCountMinSketch point updates increment all dyadic scale levels", () => {
+        const sketch = new DyadicRangeCountMinSketch({ domainBits: 6, epsilon: 0.05, delta: 0.01 });
+        sketch.add(10, 5);
+        expect.equal(sketch.totalCount, 5);
+
+        for (let k = 0; k < sketch.numLevels; k++) {
+          const intervalIdx = 10 >>> k;
+          for (let d = 0; d < sketch.depth; d++) {
+            const h = sketch._hash(intervalIdx, d * 37 + 19);
+            expect.ok(sketch.sketches[k][d][h] >= 5);
+          }
+        }
+      });
+
+      test("F219-T03: DyadicRangeCountMinSketch canonical decomposition covers arbitrary range [l, r] with O(log U) intervals", () => {
+        const sketch = new DyadicRangeCountMinSketch({ domainBits: 8 });
+        const intervals = sketch.getCanonicalDyadicIntervals(3, 14);
+        expect.ok(intervals.length > 0);
+        expect.ok(intervals.length <= 2 * 8);
+
+        // Verify that union of intervals exactly equals [3, 14]
+        expect.equal(intervals[0].left, 3);
+        expect.equal(intervals[intervals.length - 1].right, 14);
+        for (let i = 0; i < intervals.length - 1; i++) {
+          expect.equal(intervals[i].right + 1, intervals[i + 1].left);
+        }
+      });
+
+      test("F219-T04: DyadicRangeCountMinSketch point estimation returns accurate upper-bound frequency", () => {
+        const sketch = new DyadicRangeCountMinSketch({ domainBits: 8, epsilon: 0.02, delta: 0.01 });
+        sketch.add(25, 42);
+        sketch.add(25, 18);
+        sketch.add(50, 10);
+
+        const est25 = sketch.estimatePoint(25);
+        const est50 = sketch.estimatePoint(50);
+        const est100 = sketch.estimatePoint(100);
+
+        expect.ok(est25 >= 60);
+        expect.ok(est50 >= 10);
+        expect.equal(est100, 0);
+      });
+
+      test("F219-T05: DyadicRangeCountMinSketch range query sums canonical intervals and respects total count", () => {
+        const sketch = new DyadicRangeCountMinSketch({ domainBits: 7, epsilon: 0.02, delta: 0.01 });
+        sketch.add(10, 20);
+        sketch.add(15, 30);
+        sketch.add(25, 50);
+        sketch.add(80, 100);
+
+        const rangeSum = sketch.estimateRange(10, 30);
+        expect.ok(rangeSum >= 100); // 20 + 30 + 50 = 100
+        expect.ok(rangeSum <= sketch.totalCount);
+
+        const outOfRange = sketch.estimateRange(40, 70);
+        expect.equal(outOfRange, 0);
+      });
+
+      test("F219-T06: DyadicRangeCountMinSketch quantile estimation finds monotonic value for target quantiles", () => {
+        const sketch = new DyadicRangeCountMinSketch({ domainBits: 8, epsilon: 0.01, delta: 0.01 });
+        for (let i = 0; i < 100; i++) {
+          sketch.add(i, 2);
+        }
+
+        const q25 = sketch.estimateQuantile(0.25);
+        const q50 = sketch.estimateQuantile(0.50);
+        const q75 = sketch.estimateQuantile(0.75);
+
+        expect.ok(q25 <= q50);
+        expect.ok(q50 <= q75);
+        expect.ok(q50 >= 40 && q50 <= 60);
+      });
+
+      test("F219-T07: DyadicRangeCountMinSketch merge correctly aggregates counts across all levels", () => {
+        const s1 = new DyadicRangeCountMinSketch({ domainBits: 6, epsilon: 0.05, delta: 0.01 });
+        const s2 = new DyadicRangeCountMinSketch({ domainBits: 6, epsilon: 0.05, delta: 0.01 });
+
+        s1.add(5, 10);
+        s2.add(5, 15);
+        s2.add(20, 25);
+
+        s1.merge(s2);
+        expect.equal(s1.totalCount, 50);
+        expect.ok(s1.estimatePoint(5) >= 25);
+        expect.ok(s1.estimatePoint(20) >= 25);
+      });
+
+      test("F219-T08: Client and Server DyadicRangeCountMinSketch demonstrate exact functional parity", () => {
+        const clientSketch = new DyadicRangeCountMinSketch({ domainBits: 7, epsilon: 0.03, delta: 0.01 });
+        const serverSketch = new ServerDyadicRangeCountMinSketch({ domainBits: 7, epsilon: 0.03, delta: 0.01 });
+
+        const values = [12, 12, 45, 60, 60, 60, 90];
+        for (const v of values) {
+          clientSketch.add(v, 5);
+          serverSketch.add(v, 5);
+        }
+
+        expect.equal(clientSketch.totalCount, serverSketch.totalCount);
+        expect.equal(clientSketch.estimatePoint(12), serverSketch.estimatePoint(12));
+        expect.equal(clientSketch.estimatePoint(60), serverSketch.estimatePoint(60));
+        expect.equal(clientSketch.estimateRange(10, 50), serverSketch.estimateRange(10, 50));
+        expect.equal(clientSketch.estimateQuantile(0.5), serverSketch.estimateQuantile(0.5));
+      });
+
+      // --- DDPGLagrangianSafePricing Tests (F219-T09 to F219-T16) ---
+      test("F219-T09: DDPGLagrangianSafePricing initializes actor, critics, and Polyak target networks", () => {
+        const agent = new DDPGLagrangianSafePricing({ stateDim: 5, tau: 0.005, costBudget: 0.08 });
+        const telemetry = agent.getTelemetry();
+        expect.equal(telemetry.stateDim, 5);
+        expect.equal(telemetry.costBudget, 0.08);
+        expect.equal(telemetry.tau, 0.005);
+        expect.equal(agent.actorWeights.length, 5);
+        expect.equal(agent.targetActorWeights.length, 5);
+        expect.equal(agent.criticWeights.length, 6);
+        expect.equal(agent.costCriticWeights.length, 6);
+      });
+
+      test("F219-T10: DDPGLagrangianSafePricing predicts deterministic continuous actions bounded in [-0.2, +0.2]", () => {
+        const agent = new DDPGLagrangianSafePricing({ stateDim: 5 });
+        const state = new Float64Array([0.8, 1.1, 0.5, 0.4, 1.2]);
+        const cleanAction = agent.predictAction(state, false);
+        const noisyAction = agent.predictAction(state, true);
+
+        expect.ok(cleanAction >= -0.2 && cleanAction <= 0.2);
+        expect.ok(noisyAction >= -0.2 && noisyAction <= 0.2);
+      });
+
+      test("F219-T11: DDPGLagrangianSafePricing evaluates reward Q and safety cost Q_C", () => {
+        const agent = new DDPGLagrangianSafePricing({ stateDim: 5 });
+        const state = new Float64Array([0.9, 1.0, 0.6, 0.5, 1.0]);
+        const qVal = agent.evaluateQ(state, 0.05);
+        const costVal = agent.evaluateCost(state, 0.05);
+
+        expect.ok(Number.isFinite(qVal));
+        expect.ok(Number.isFinite(costVal));
+        expect.ok(costVal >= 0);
+      });
+
+      test("F219-T12: DDPGLagrangianSafePricing executes Polyak target network soft update", () => {
+        const agent = new DDPGLagrangianSafePricing({ stateDim: 5, tau: 0.1 });
+        agent.actorWeights[0] = 1.0;
+        const oldTarget = agent.targetActorWeights[0];
+        agent._polyakUpdate();
+        const newTarget = agent.targetActorWeights[0];
+
+        expect.ok(newTarget !== oldTarget);
+        expect.ok(Math.abs(newTarget - (0.1 * 1.0 + 0.9 * oldTarget)) < 1e-6);
+      });
+
+      test("F219-T13: DDPGLagrangianSafePricing updates Lagrangian multiplier on budget violations", () => {
+        const agent = new DDPGLagrangianSafePricing({ costBudget: 0.05, lambdaLr: 0.1 });
+        expect.equal(agent.lambda, 0.0);
+
+        // Batch with high cost violating budget 0.05
+        const highCostBatch = [
+          { state: [1, 1, 1, 1, 1], action: 0.1, reward: 10, cost: 0.2, nextState: [1, 1, 1, 1, 1], done: false },
+          { state: [1, 1, 1, 1, 1], action: 0.1, reward: 10, cost: 0.3, nextState: [1, 1, 1, 1, 1], done: false }
+        ];
+
+        const res = agent.trainStep(highCostBatch);
+        expect.ok(res.isBudgetExceeded);
+        expect.ok(agent.lambda > 0);
+      });
+
+      test("F219-T14: DDPGLagrangianSafePricing recommends safe price strictly respecting 1.05 * COGS floor", () => {
+        const agent = new DDPGLagrangianSafePricing();
+        const product = { price: 100000, cogs: 90000, msrp: 130000 };
+        const rec = agent.recommendPrice(product, { inventoryLevel: 90, inventoryCapacity: 100 });
+
+        expect.ok(rec.recommendedPrice >= Math.round(90000 * 1.05));
+        expect.ok(rec.recommendedPrice <= Math.round(130000 * 1.25));
+        expect.ok(rec.grossMarginVnd > 0);
+        expect.ok(rec.grossMarginPct > 0);
+      });
+
+      test("F219-T15: DDPGLagrangianSafePricing executes training steps and produces telemetry", () => {
+        const agent = new DDPGLagrangianSafePricing({ stateDim: 5 });
+        const batch = [
+          { state: [0.8, 1.0, 0.4, 0.2, 0.9], action: 0.05, reward: 15.0, cost: 0.02, nextState: [0.82, 0.98, 0.38, 0.22, 0.9], done: false },
+          { state: [0.75, 1.05, 0.6, 0.3, 1.1], action: -0.02, reward: 12.0, cost: 0.01, nextState: [0.76, 1.04, 0.58, 0.31, 1.1], done: true }
+        ];
+
+        const stepResult = agent.trainStep(batch);
+        expect.ok(stepResult.success);
+        expect.equal(stepResult.updatesCount, 1);
+        expect.ok(Number.isFinite(stepResult.criticLoss));
+        expect.ok(Number.isFinite(stepResult.actorLoss));
+      });
+
+      test("F219-T16: Client and Server DDPGLagrangianSafePricing show exact recommendation parity", () => {
+        const clientAgent = new DDPGLagrangianSafePricing({ stateDim: 5 });
+        const serverAgent = new ServerDDPGLagrangianSafePricing({ stateDim: 5 });
+
+        const product = { price: 250000, cogs: 180000, msrp: 320000 };
+        const context = { competitorPrice: 240000, inventoryLevel: 30, inventoryCapacity: 100, salesVelocity: 4.5, demandIndex: 1.2 };
+
+        const clientRec = clientAgent.recommendPrice(product, context);
+        const serverRec = serverAgent.recommendPrice(product, context);
+
+        expect.equal(clientRec.recommendedPrice, serverRec.recommendedPrice);
+        expect.equal(clientRec.safetyFloor, serverRec.safetyFloor);
+        expect.equal(clientRec.grossMarginVnd, serverRec.grossMarginVnd);
+      });
+
+      // --- EVRPTWDynamicWirelessChargingRouter Tests (F219-T17 to F219-T22) ---
+      test("F219-T17: EVRPTWDynamicWirelessChargingRouter initializes with DWPT corridors and charging specifications", () => {
+        const router = new EVRPTWDynamicWirelessChargingRouter({
+          nominalBatteryKwh: 32.0,
+          dwptPowerKw: 22.0,
+          dwptTariffVndPerKwh: 3500
+        });
+        const telemetry = router.getTelemetry();
+        expect.equal(telemetry.nominalBatteryKwh, 32.0);
+        expect.equal(telemetry.dwptPowerKw, 22.0);
+        expect.equal(telemetry.dwptTariffVndPerKwh, 3500);
+        expect.ok(telemetry.dwptCorridorsCount >= 2);
+        expect.ok(telemetry.staticStationsCount >= 2);
+      });
+
+      test("F219-T18: EVRPTWDynamicWirelessChargingRouter calculates segment energy with net gain on DWPT corridors", () => {
+        const router = new EVRPTWDynamicWirelessChargingRouter({
+          consumptionPerKm: 0.25,
+          travelSpeedKmMin: 0.5, // 30 km/h -> 10 km takes 20 min = 1/3 h
+          dwptPowerKw: 30.0      // 30 kW * (1/3 h) = 10 kWh harvested vs 10 * 0.25 = 2.5 kWh consumed
+        });
+
+        const normalSegment = router.calculateSegmentEnergy(10, false);
+        expect.equal(normalSegment.energyHarvestedKwh, 0);
+        expect.equal(normalSegment.netEnergyDeltaKwh, -2.5);
+
+        const dwptSegment = router.calculateSegmentEnergy(10, true);
+        expect.ok(dwptSegment.energyHarvestedKwh > 0);
+        expect.ok(dwptSegment.netEnergyDeltaKwh > 0); // Net positive charging in motion!
+        expect.ok(dwptSegment.tariffVnd > 0);
+      });
+
+      test("F219-T19: EVRPTWDynamicWirelessChargingRouter evaluates DWPT corridor detour trade-offs", () => {
+        const router = new EVRPTWDynamicWirelessChargingRouter();
+        const from = { x: 10.7800, y: 106.6900 };
+        const to = { x: 10.8100, y: 106.7200 };
+        const corridor = router.dwptCorridors[0];
+
+        const detourEval = router.evaluateDwptDetour(from, to, corridor);
+        expect.ok(detourEval.directDistanceKm > 0);
+        expect.ok(detourEval.detourDistanceKm > 0);
+        expect.ok(Number.isFinite(detourEval.extraDistanceKm));
+        expect.ok(detourEval.energyHarvestedKwh > 0);
+        expect.ok(typeof detourEval.isBeneficial === "boolean");
+      });
+
+      test("F219-T20: EVRPTWDynamicWirelessChargingRouter enforces time windows and calculates lateness", () => {
+        const router = new EVRPTWDynamicWirelessChargingRouter();
+        const customers = [
+          { id: "CUST_1", name: "Khách 1", x: 10.7800, y: 106.7050, demandKwh: 0, timeWindowStart: 10, timeWindowEnd: 20, serviceDurationMin: 5 }
+        ];
+
+        const plan = router.planRoute(customers, { initialBatteryKwh: 30.0 });
+        expect.ok(plan.success);
+        expect.ok(plan.totalDurationMin > 0);
+        expect.equal(plan.routeLegs.length, 3); // Depot departure -> CUST_1 -> Depot arrival
+      });
+
+      test("F219-T21: EVRPTWDynamicWirelessChargingRouter plans multi-stop routes with battery safety buffer", () => {
+        const router = new EVRPTWDynamicWirelessChargingRouter({ nominalBatteryKwh: 35.0, minSocSafetyBuffer: 0.15 });
+        const customers = [
+          { id: "CUST_A", name: "Khách Quận 1", x: 10.7780, y: 106.6980, timeWindowStart: 10, timeWindowEnd: 40, serviceDurationMin: 5 },
+          { id: "CUST_B", name: "Khách Bình Thạnh", x: 10.7950, y: 106.7120, timeWindowStart: 25, timeWindowEnd: 60, serviceDurationMin: 5 },
+          { id: "CUST_C", name: "Khách Thủ Thiêm", x: 10.7850, y: 106.7350, timeWindowStart: 45, timeWindowEnd: 90, serviceDurationMin: 5 }
+        ];
+
+        const plan = router.planRoute(customers, { initialBatteryKwh: 30.0 });
+        expect.ok(plan.success);
+        expect.equal(plan.legsCount, 5); // Depot departure -> A -> B -> C -> Depot arrival
+        expect.ok(plan.batteryStatus.finalRemainingKwh >= 35.0 * 0.15); // Stays above 15% buffer
+        expect.ok(plan.costsVnd.totalOperatingCost > 0);
+      });
+
+      test("F219-T22: Client and Server EVRPTWDynamicWirelessChargingRouter demonstrate exact plan parity", () => {
+        const clientRouter = new EVRPTWDynamicWirelessChargingRouter({ nominalBatteryKwh: 30.0 });
+        const serverRouter = new ServerEVRPTWDynamicWirelessChargingRouter({ nominalBatteryKwh: 30.0 });
+
+        const customers = [
+          { id: "CUST_P1", name: "Khách Parity 1", x: 10.7820, y: 106.7020, timeWindowStart: 10, timeWindowEnd: 30, serviceDurationMin: 4 },
+          { id: "CUST_P2", name: "Khách Parity 2", x: 10.7910, y: 106.7180, timeWindowStart: 20, timeWindowEnd: 50, serviceDurationMin: 4 }
+        ];
+
+        const clientPlan = clientRouter.planRoute(customers, { initialBatteryKwh: 25.0 });
+        const serverPlan = serverRouter.planRoute(customers, { initialBatteryKwh: 25.0 });
+
+        expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+        expect.equal(clientPlan.totalDurationMin, serverPlan.totalDurationMin);
+        expect.equal(clientPlan.costsVnd.totalOperatingCost, serverPlan.costsVnd.totalOperatingCost);
+        expect.equal(clientPlan.batteryStatus.finalRemainingKwh, serverPlan.batteryStatus.finalRemainingKwh);
+      });
+
+      // --- Tri-Role AI Copilot Integration Tests (F219-T23 & F219-T24) ---
+      test("F219-T23: Admin Sentinel Copilot correctly handles Phase 72 algorithms (Sections 197, 198, 199)", () => {
+        const resDyadic = generateAdminCopilotResponse("Truy vấn khoảng doanh thu bằng Dyadic Range Count-Min Sketch Cormode PODS");
+        expect.equal(resDyadic.tag, "DYADIC RANGE COUNT-MIN SKETCH");
+        expect.ok(resDyadic.text.includes("CORMODE"));
+
+        const resDdpg = generateAdminCopilotResponse("Định giá học tăng cường liên tục tất định DDPG-Lagrangian an toàn Lillicrap");
+        expect.equal(resDdpg.tag, "DDPG-LAGRANGIAN SAFE PRICING");
+        expect.ok(resDdpg.text.includes("LILLICRAP"));
+
+        const resDwpt = generateAdminCopilotResponse("Định tuyến đội xe sạc không dây động EVRPTW-DWPT Deflorio Hwang");
+        expect.equal(resDwpt.tag, "EVRPTW DYNAMIC WIRELESS CHARGING");
+        expect.ok(resDwpt.text.includes("DEFLORIO"));
+      });
+
+      test("F219-T24: Seller ShopSmart Copilot and Buyer Shopping Assistant handle Phase 72 algorithms and Intent 74", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn định giá an toàn DDPG-Lagrangian và phân tích khoảng giá bán Dyadic");
+        expect.equal(sellerRes.tag, "DYADIC RANGE SKETCH, DDPG-LAGRANGIAN & DWPT CHARGING");
+        expect.ok(sellerRes.text.includes("DDPG-Lagrangian"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích khoảng giá Dyadic hay giao bằng xe điện sạc không dây động không?");
+        expect.equal(buyerRes.intent, "DYADIC_RANGE_DDPG_LAGRANGIAN_DWPT_CHARGING");
+        expect.ok(buyerRes.replyText.includes("Dyadic"));
       });
     });
   });
