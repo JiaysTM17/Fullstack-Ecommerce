@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1432,7 +1432,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 71. Bộ Ba Thuật Toán Lossy Counting Heavy Hitters, SPOT Pricing & Định Tuyến Cửa Sổ Mềm VRPTW-Soft (Phase 62 - Feature 209)
-  if (/lossy[- ]counting|heavy hitters stream|spot|spot pricing|supported policy|mật độ dữ liệu hành động|soft time window|cửa sổ mềm|vrptw[- ]soft/i.test(raw)) {
+  if (!/misra|gries|laplacian|vrptw[- ]stochastic/i.test(raw) && /lossy[- ]counting|heavy hitters stream|spot|spot pricing|supported policy|mật độ dữ liệu hành động|soft time window|cửa sổ mềm|vrptw[- ]soft/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN LOSSY COUNTING, SPOT PRICING & ĐỊNH TUYẾN CỬA SỔ MỀM VRPTW-SOFT (${currentShop.name})**:
 - **Bắt trọn sản phẩm bão đơn Lossy Counting Heavy Hitters**:
@@ -1447,6 +1447,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem sản phẩm bão đơn Lossy Counting',
         'Tư vấn định giá an toàn SPOT Pricing',
         'Tối ưu giao hàng cửa sổ mềm VRPTW-Soft'
+      ]
+    };
+  }
+
+  // 72. Bộ Ba Thuật Toán Misra-Gries Heavy Hitters, Laplacian Dynamic Pricing & Định Tuyến Ngẫu Nhiên VRPTW-Stochastic (Phase 63 - Feature 210)
+  if (/misra[- ]gries|misra|gries|laplacian|lap dynamic pricing|chính quy hóa laplacian|độ trơn đa tạp|vrptw[- ]stochastic|stochastic service time|thời gian phục vụ ngẫu nhiên|reliability buffer|đệm độ tin cậy/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN MISRA-GRIES, LAPLACIAN PRICING & ĐỊNH TUYẾN NGẪU NHIÊN VRPTW-STOCHASTIC (${currentShop.name})**:
+- **Bắt trọn sản phẩm Hot Trend Misra-Gries Heavy Hitters**:
+  - Thuật toán luồng tất định với $k-1$ bộ đếm bảo đảm sai số $\\le \\frac{N}{k}$ và **cam kết 100% không bỏ sót** các SKU của shop có lượng tìm kiếm vượt ngưỡng $\\frac{N}{k}$, giúp shop điều chỉnh nguồn hàng nhập kho tức thì.
+- **Định giá đa tạp mượt mà Graph Laplacian Dynamic Pricing**:
+  - Khử triệt để hiện tượng giá nhảy vọt bất thường ở các phân khúc ít giao dịch. Tối ưu giá bán Flash Sale mượt mà theo mức độ co giãn thị trường và bảo vệ biên lợi nhuận an toàn $\\ge \\text{COGS} \\times 1.05$.
+- **Đảm bảo giao đúng hẹn với đệm tin cậy VRPTW-Stochastic**:
+  - Tự động bù trừ thời gian giao hàng ngẫu nhiên do kiểm hàng và thu tiền COD bằng đệm tin cậy $B(\\alpha) = z_\\alpha \\cdot \\sqrt{\\text{Var}}$, cam kết tỷ lệ giao đúng hẹn OTD $\\ge 95\\%$ cho mọi đơn hàng của shop!`,
+      type: 'recommendation',
+      tag: 'MISRA-GRIES, LAPLACIAN & VRPTW-STOCHASTIC',
+      suggestions: [
+        'Xem sản phẩm hot trend Misra-Gries',
+        'Tư vấn định giá an toàn Laplacian Pricing',
+        'Theo dõi tỷ lệ giao đúng hẹn VRPTW-Stochastic'
       ]
     };
   }

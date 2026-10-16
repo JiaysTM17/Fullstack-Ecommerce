@@ -32166,6 +32166,602 @@ export class VRPTWSoftTimeWindowsRouter {
   }
 }
 
+export class MisraGriesHeavyHitters {
+  constructor(options = {}) {
+    const k = Math.max(2, Math.floor(options.k || 10));
+    this.k = k;
+    this.maxCounters = k - 1;
+    this.counters = new Map();
+    this.totalItems = 0;
+  }
+
+  update(item, weight = 1) {
+    if (item === undefined || item === null) return;
+    const key = String(item);
+    const w = Math.max(1, Math.floor(weight || 1));
+    this.totalItems += w;
+
+    if (this.counters.has(key)) {
+      this.counters.set(key, this.counters.get(key) + w);
+      return;
+    }
+
+    if (this.counters.size < this.maxCounters) {
+      this.counters.set(key, w);
+      return;
+    }
+
+    for (let step = 0; step < w; step++) {
+      if (this.counters.has(key)) {
+        this.counters.set(key, this.counters.get(key) + 1);
+        continue;
+      }
+      if (this.counters.size < this.maxCounters) {
+        this.counters.set(key, 1);
+        continue;
+      }
+      for (const [existingKey, count] of Array.from(this.counters.entries())) {
+        if (count <= 1) {
+          this.counters.delete(existingKey);
+        } else {
+          this.counters.set(existingKey, count - 1);
+        }
+      }
+    }
+  }
+
+  updateBatch(items = []) {
+    if (!Array.isArray(items)) return;
+    for (const item of items) {
+      this.update(item);
+    }
+  }
+
+  estimate(item) {
+    if (item === undefined || item === null) return 0;
+    const key = String(item);
+    return this.counters.get(key) || 0;
+  }
+
+  getErrorBound() {
+    return this.totalItems / this.k;
+  }
+
+  getHeavyHitters(thresholdRatio) {
+    const ratio = typeof thresholdRatio === 'number' && thresholdRatio > 0 ? thresholdRatio : 1 / this.k;
+    const thresholdCount = ratio * this.totalItems;
+    const errBound = this.getErrorBound();
+    const results = [];
+
+    for (const [item, count] of this.counters.entries()) {
+      const maxPossible = count + errBound;
+      if (maxPossible >= thresholdCount || count >= thresholdCount) {
+        results.push({
+          item,
+          estimatedCount: count,
+          lowerBound: count,
+          maxPossibleCount: Math.min(this.totalItems, Math.floor(maxPossible)),
+          frequencyRatio: this.totalItems > 0 ? Number((count / this.totalItems).toFixed(4)) : 0
+        });
+      }
+    }
+
+    results.sort((a, b) => b.estimatedCount - a.estimatedCount);
+    return results;
+  }
+
+  merge(other) {
+    if (!other || !(other instanceof MisraGriesHeavyHitters)) return;
+    if (other.k !== this.k) {
+      throw new Error(`Cannot merge MisraGries summaries with different k: ${this.k} vs ${other.k}`);
+    }
+
+    for (const [item, count] of other.counters.entries()) {
+      const current = this.counters.get(item) || 0;
+      this.counters.set(item, current + count);
+    }
+    this.totalItems += other.totalItems;
+
+    while (this.counters.size > this.maxCounters) {
+      let minVal = Infinity;
+      for (const count of this.counters.values()) {
+        if (count < minVal) minVal = count;
+      }
+      for (const [item, count] of Array.from(this.counters.entries())) {
+        if (count <= minVal) {
+          this.counters.delete(item);
+        } else {
+          this.counters.set(item, count - minVal);
+        }
+      }
+    }
+  }
+
+  reset() {
+    this.counters.clear();
+    this.totalItems = 0;
+  }
+
+  getMetrics() {
+    return {
+      k: this.k,
+      maxCounters: this.maxCounters,
+      activeCounters: this.counters.size,
+      totalItems: this.totalItems,
+      errorBound: this.getErrorBound(),
+      counterOccupancy: Number((this.counters.size / this.maxCounters).toFixed(3))
+    };
+  }
+}
+
+export class LapDynamicPricing {
+  constructor(options = {}) {
+    this.basePrice = options.basePrice || 250000;
+    this.minPriceRatio = options.minPriceRatio || 0.65;
+    this.maxPriceRatio = options.maxPriceRatio || 1.45;
+    this.gammaLap = options.gammaLap !== undefined ? options.gammaLap : 0.25;
+    this.rbfSigma = options.rbfSigma || 0.35;
+    this.learningRate = options.learningRate || 0.08;
+    this.maxIter = options.maxIter || 60;
+    this.actionCandidates = [0.70, 0.80, 0.90, 0.95, 1.00, 1.05, 1.10, 1.20, 1.30];
+    this.dataset = [];
+    this.trainedQ = null;
+  }
+
+  normalizeState(rawState = {}) {
+    const maxInv = rawState.maxInventory || 500;
+    const inv = Math.max(0, Math.min(maxInv, rawState.inventory !== undefined ? rawState.inventory : 100));
+    const comp = rawState.competitorPrice || this.basePrice;
+    const demand = rawState.demandIndex !== undefined ? rawState.demandIndex : 1.0;
+
+    const normInv = inv / maxInv;
+    const normComp = Math.max(0.5, Math.min(2.0, comp / this.basePrice));
+    const normDemand = Math.max(0.2, Math.min(3.0, demand)) / 3.0;
+
+    return [normInv, normComp, normDemand];
+  }
+
+  makeFeaturePoint(stateVec, action) {
+    return [...stateVec, action];
+  }
+
+  squaredDistance(x1, x2) {
+    let sum = 0;
+    for (let k = 0; k < x1.length; k++) {
+      const diff = x1[k] - (x2[k] || 0);
+      sum += diff * diff;
+    }
+    return sum;
+  }
+
+  fit(transitions = []) {
+    if (!Array.isArray(transitions) || transitions.length === 0) return;
+
+    this.dataset = transitions.map(t => {
+      const sVec = this.normalizeState(t.state);
+      const act = Math.max(this.minPriceRatio, Math.min(this.maxPriceRatio, t.action || 1.0));
+      const pt = this.makeFeaturePoint(sVec, act);
+      return {
+        point: pt,
+        stateVec: sVec,
+        action: act,
+        reward: t.reward || 0
+      };
+    });
+
+    const N = this.dataset.length;
+    if (N === 0) return;
+
+    const W = Array.from({ length: N }, () => new Float64Array(N));
+    const D = new Float64Array(N);
+    const twoSigmaSq = 2 * this.rbfSigma * this.rbfSigma;
+
+    for (let i = 0; i < N; i++) {
+      for (let j = i; j < N; j++) {
+        if (i === j) {
+          W[i][j] = 0;
+        } else {
+          const dSq = this.squaredDistance(this.dataset[i].point, this.dataset[j].point);
+          const w = Math.exp(-dSq / twoSigmaSq);
+          W[i][j] = w;
+          W[j][i] = w;
+          D[i] += w;
+          D[j] += w;
+        }
+      }
+    }
+
+    const q = new Float64Array(N);
+    const targetQ = new Float64Array(N);
+    for (let i = 0; i < N; i++) {
+      targetQ[i] = this.dataset[i].reward;
+      q[i] = this.dataset[i].reward;
+    }
+
+    for (let iter = 0; iter < this.maxIter; iter++) {
+      const grad = new Float64Array(N);
+      for (let i = 0; i < N; i++) {
+        const tdGrad = 2 * (q[i] - targetQ[i]);
+        let lapTerm = D[i] * q[i];
+        for (let j = 0; j < N; j++) {
+          if (W[i][j] > 0) {
+            lapTerm -= W[i][j] * q[j];
+          }
+        }
+        const lapGrad = 2 * this.gammaLap * lapTerm;
+        grad[i] = tdGrad + lapGrad;
+      }
+
+      for (let i = 0; i < N; i++) {
+        q[i] -= this.learningRate * grad[i];
+      }
+    }
+
+    this.trainedQ = Array.from(q);
+  }
+
+  predictQ(stateVec, action) {
+    if (!this.dataset || this.dataset.length === 0 || !this.trainedQ) {
+      const invRatio = stateVec[0] || 0.5;
+      const compRatio = stateVec[1] || 1.0;
+      const demRatio = stateVec[2] || 0.5;
+      const price = this.basePrice * action;
+      const estConversion = Math.max(0.05, Math.min(0.95, 1.0 - (action - 0.7) * 0.8 + demRatio * 0.4 - invRatio * 0.2));
+      return price * estConversion;
+    }
+
+    const targetPoint = this.makeFeaturePoint(stateVec, action);
+    const twoSigmaSq = 2 * this.rbfSigma * this.rbfSigma;
+
+    let numerator = 0;
+    let denominator = 0;
+
+    for (let i = 0; i < this.dataset.length; i++) {
+      const dSq = this.squaredDistance(targetPoint, this.dataset[i].point);
+      const kernelWeight = Math.exp(-dSq / twoSigmaSq);
+      numerator += kernelWeight * this.trainedQ[i];
+      denominator += kernelWeight;
+    }
+
+    if (denominator < 1e-6) {
+      let bestDist = Infinity;
+      let nearestQ = 0;
+      for (let i = 0; i < this.dataset.length; i++) {
+        const dSq = this.squaredDistance(targetPoint, this.dataset[i].point);
+        if (dSq < bestDist) {
+          bestDist = dSq;
+          nearestQ = this.trainedQ[i];
+        }
+      }
+      return nearestQ;
+    }
+
+    return numerator / denominator;
+  }
+
+  computeLaplacianEnergy() {
+    if (!this.dataset || this.dataset.length === 0 || !this.trainedQ) return 0;
+    const N = this.dataset.length;
+    const twoSigmaSq = 2 * this.rbfSigma * this.rbfSigma;
+    let energy = 0;
+
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        const dSq = this.squaredDistance(this.dataset[i].point, this.dataset[j].point);
+        const w = Math.exp(-dSq / twoSigmaSq);
+        const diff = this.trainedQ[i] - this.trainedQ[j];
+        energy += w * diff * diff;
+      }
+    }
+
+    return Number(energy.toFixed(4));
+  }
+
+  recommendPrice(rawState = {}) {
+    const stateVec = this.normalizeState(rawState);
+    let bestAction = 1.0;
+    let maxQ = -Infinity;
+    const evaluatedActions = [];
+
+    for (const act of this.actionCandidates) {
+      const qVal = this.predictQ(stateVec, act);
+      evaluatedActions.push({
+        priceRatio: act,
+        offeredPrice: Math.round(this.basePrice * act),
+        predictedQ: Math.round(qVal)
+      });
+
+      if (qVal > maxQ) {
+        maxQ = qVal;
+        bestAction = act;
+      }
+    }
+
+    const recommendedPrice = Math.round(this.basePrice * bestAction);
+    const lapEnergy = this.computeLaplacianEnergy();
+
+    return {
+      basePrice: this.basePrice,
+      recommendedPrice,
+      priceRatio: bestAction,
+      expectedObjective: Math.round(maxQ),
+      laplacianEnergy: lapEnergy,
+      evaluatedActions,
+      manifoldSmoothness: lapEnergy < 1000 ? 'EXCELLENT_LIPSCHITZ_SMOOTH' : 'MODERATE_MANIFOLD_VARIANCE'
+    };
+  }
+}
+
+export class VRPTWStochasticServiceTimeRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || { id: 'DEPOT', name: 'Hub Trung Tâm SPX', x: 0, y: 0 };
+    this.vehicleCapacity = options.vehicleCapacity || 100;
+    this.averageSpeedKmH = options.averageSpeedKmH || 30;
+    this.speedKmPerMin = this.averageSpeedKmH / 60;
+    this.confidenceAlpha = options.confidenceAlpha || 0.95;
+    this.maxRouteDuration = options.maxRouteDuration || 480;
+    this.zAlpha = this.computeNormalQuantile(this.confidenceAlpha);
+  }
+
+  computeNormalQuantile(p) {
+    if (p <= 0 || p >= 1) return 1.645;
+    if (Math.abs(p - 0.95) < 0.005) return 1.6449;
+    if (Math.abs(p - 0.90) < 0.005) return 1.2816;
+    if (Math.abs(p - 0.99) < 0.005) return 2.3263;
+
+    const t = Math.sqrt(-2 * Math.log(1 - p));
+    const c0 = 2.515517;
+    const c1 = 0.802853;
+    const c2 = 0.010328;
+    const d1 = 1.432788;
+    const d2 = 0.189269;
+    const d3 = 0.001308;
+    return t - (c0 + c1 * t + c2 * t * t) / (1 + d1 * t + d2 * t * t + d3 * t * t * t);
+  }
+
+  normalCDF(z) {
+    if (z < -6) return 0;
+    if (z > 6) return 1;
+    const b1 = 0.319381530;
+    const b2 = -0.356563782;
+    const b3 = 1.781477937;
+    const b4 = -1.821255978;
+    const b5 = 1.330274429;
+    const p = 0.2316419;
+    const c = 0.39894228;
+
+    if (z >= 0) {
+      const t = 1.0 / (1.0 + p * z);
+      return 1.0 - c * Math.exp(-z * z / 2.0) * t * (t * (t * (t * (t * b5 + b4) + b3) + b2) + b1);
+    } else {
+      const t = 1.0 / (1.0 - p * z);
+      return c * Math.exp(-z * z / 2.0) * t * (t * (t * (t * (t * b5 + b4) + b3) + b2) + b1);
+    }
+  }
+
+  distance(p1, p2) {
+    const dx = p1.x - p2.x;
+    const dy = p1.y - p2.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  travelTime(p1, p2) {
+    const dist = this.distance(p1, p2);
+    return dist / this.speedKmPerMin;
+  }
+
+  evaluateRoute(customerSequence = []) {
+    let currentExpTime = 0;
+    let currentVariance = 0;
+    let prevNode = this.depot;
+    let totalDemand = 0;
+    let totalDistance = 0;
+    const stops = [];
+    let isFeasible = true;
+
+    for (let idx = 0; idx < customerSequence.length; idx++) {
+      const customer = customerSequence[idx];
+      totalDemand += customer.demand || 1;
+
+      const dist = this.distance(prevNode, customer);
+      totalDistance += dist;
+      const tTravel = dist / this.speedKmPerMin;
+
+      const expArrival = currentExpTime + tTravel;
+      const travelVariance = Math.pow(0.05 * tTravel, 2);
+      const arrVariance = currentVariance + travelVariance;
+      const arrStd = Math.sqrt(arrVariance);
+
+      const reliabilityBuffer = this.zAlpha * arrStd;
+      const quantileArrival = expArrival + reliabilityBuffer;
+
+      const earlyWindow = customer.timeWindow ? customer.timeWindow[0] : 0;
+      const lateWindow = customer.timeWindow ? customer.timeWindow[1] : 480;
+
+      let otdProb = 1.0;
+      if (arrStd > 1e-4) {
+        const z = (lateWindow - expArrival) / arrStd;
+        otdProb = this.normalCDF(z);
+      } else {
+        otdProb = expArrival <= lateWindow ? 1.0 : 0.0;
+      }
+
+      if (quantileArrival > lateWindow) {
+        isFeasible = false;
+      }
+
+      const muService = customer.meanServiceTime !== undefined ? customer.meanServiceTime : 10;
+      const sigmaService = customer.stdServiceTime !== undefined ? customer.stdServiceTime : 3;
+
+      const effectiveStart = Math.max(earlyWindow, expArrival);
+      currentExpTime = effectiveStart + muService;
+      currentVariance = arrVariance + (sigmaService * sigmaService);
+
+      stops.push({
+        id: customer.id,
+        name: customer.name || `Khách ${customer.id}`,
+        demand: customer.demand || 1,
+        expectedArrival: Number(expArrival.toFixed(2)),
+        reliabilityBuffer: Number(reliabilityBuffer.toFixed(2)),
+        quantileArrival: Number(quantileArrival.toFixed(2)),
+        timeWindow: [earlyWindow, lateWindow],
+        otdProbability: Number(otdProb.toFixed(4)),
+        meanServiceTime: muService,
+        stdServiceTime: sigmaService,
+        departureTime: Number(currentExpTime.toFixed(2)),
+        withinSLA: quantileArrival <= lateWindow
+      });
+
+      prevNode = customer;
+    }
+
+    const returnDist = this.distance(prevNode, this.depot);
+    totalDistance += returnDist;
+    const returnTime = returnDist / this.speedKmPerMin;
+    currentExpTime += returnTime;
+
+    if (totalDemand > this.vehicleCapacity || currentExpTime > this.maxRouteDuration) {
+      isFeasible = false;
+    }
+
+    return {
+      stops,
+      totalDemand,
+      totalDistance: Number(totalDistance.toFixed(2)),
+      totalDuration: Number(currentExpTime.toFixed(2)),
+      isFeasible,
+      capacityUtilization: Number((totalDemand / this.vehicleCapacity).toFixed(3))
+    };
+  }
+
+  planRoutes(customers = []) {
+    if (!Array.isArray(customers) || customers.length === 0) {
+      return {
+        routes: [],
+        totalVehicles: 0,
+        totalDistance: 0,
+        averageOTDProbability: 1.0,
+        allFeasible: true
+      };
+    }
+
+    const unassigned = [...customers];
+    const routes = [];
+
+    unassigned.sort((a, b) => {
+      const eA = a.timeWindow ? a.timeWindow[0] : 0;
+      const eB = b.timeWindow ? b.timeWindow[0] : 0;
+      return eA - eB;
+    });
+
+    while (unassigned.length > 0) {
+      const currentRoute = [];
+      let currentCapacity = 0;
+
+      const seed = unassigned.shift();
+      currentRoute.push(seed);
+      currentCapacity += seed.demand || 1;
+
+      let added = true;
+      while (added) {
+        added = false;
+        let bestCandidateIdx = -1;
+        let minExtraCost = Infinity;
+
+        for (let i = 0; i < unassigned.length; i++) {
+          const cand = unassigned[i];
+          const candDemand = cand.demand || 1;
+          if (currentCapacity + candDemand > this.vehicleCapacity) continue;
+
+          const testSequence = [...currentRoute, cand];
+          const evalRes = this.evaluateRoute(testSequence);
+
+          if (evalRes.isFeasible) {
+            const lastStop = currentRoute[currentRoute.length - 1];
+            const dist = this.distance(lastStop, cand);
+            if (dist < minExtraCost) {
+              minExtraCost = dist;
+              bestCandidateIdx = i;
+            }
+          }
+        }
+
+        if (bestCandidateIdx >= 0) {
+          const chosen = unassigned.splice(bestCandidateIdx, 1)[0];
+          currentRoute.push(chosen);
+          currentCapacity += chosen.demand || 1;
+          added = true;
+        }
+      }
+
+      const optimizedRoute = this.twoOptRefine(currentRoute);
+      const finalEval = this.evaluateRoute(optimizedRoute);
+
+      routes.push({
+        vehicleId: `SPX-FLEET-${routes.length + 1}`,
+        ...finalEval
+      });
+    }
+
+    let totalDist = 0;
+    let totalStops = 0;
+    let sumOTD = 0;
+    let allFeasible = true;
+
+    for (const r of routes) {
+      totalDist += r.totalDistance;
+      if (!r.isFeasible) allFeasible = false;
+      for (const s of r.stops) {
+        sumOTD += s.otdProbability;
+        totalStops++;
+      }
+    }
+
+    const avgOTD = totalStops > 0 ? Number((sumOTD / totalStops).toFixed(4)) : 1.0;
+
+    return {
+      routes,
+      totalVehicles: routes.length,
+      totalDistance: Number(totalDist.toFixed(2)),
+      averageOTDProbability: avgOTD,
+      confidenceAlpha: this.confidenceAlpha,
+      zAlpha: Number(this.zAlpha.toFixed(4)),
+      allFeasible
+    };
+  }
+
+  twoOptRefine(sequence) {
+    if (sequence.length <= 3) return sequence;
+    let best = [...sequence];
+    let bestEval = this.evaluateRoute(best);
+    let improved = true;
+    let iter = 0;
+
+    while (improved && iter < 15) {
+      improved = false;
+      iter++;
+      for (let i = 0; i < best.length - 1; i++) {
+        for (let j = i + 1; j < best.length; j++) {
+          const candidate = [
+            ...best.slice(0, i),
+            ...best.slice(i, j + 1).reverse(),
+            ...best.slice(j + 1)
+          ];
+          const candEval = this.evaluateRoute(candidate);
+          if (candEval.isFeasible && candEval.totalDistance < bestEval.totalDistance - 1e-4) {
+            best = candidate;
+            bestEval = candEval;
+            improved = true;
+            break;
+          }
+        }
+        if (improved) break;
+      }
+    }
+    return best;
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -32491,6 +33087,10 @@ export default {
   LossyCountingHeavyHitters,
   SpotDynamicPricing,
   VRPTWSoftTimeWindowsRouter,
+  // Phase 63 Enterprise Algorithms
+  MisraGriesHeavyHitters,
+  LapDynamicPricing,
+  VRPTWStochasticServiceTimeRouter,
 };
 
 

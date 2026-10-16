@@ -339,6 +339,10 @@ import {
   LossyCountingHeavyHitters,
   SpotDynamicPricing,
   VRPTWSoftTimeWindowsRouter,
+  // Phase 63 Enterprise Algorithms
+  MisraGriesHeavyHitters,
+  LapDynamicPricing,
+  VRPTWStochasticServiceTimeRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -493,6 +497,9 @@ import { MTVRPTWLogisticsRouter as ServerMTVRPTWLogisticsRouter } from "../../se
 import { LossyCountingHeavyHitters as ServerLossyCountingHeavyHitters } from "../../server/src/utils/lossyCountingHeavyHitters.js";
 import { SpotDynamicPricing as ServerSpotDynamicPricing } from "../../server/src/utils/spotDynamicPricing.js";
 import { VRPTWSoftTimeWindowsRouter as ServerVRPTWSoftTimeWindowsRouter } from "../../server/src/utils/vrptwSoftTimeWindowsRouter.js";
+import { MisraGriesHeavyHitters as ServerMisraGriesHeavyHitters } from "../../server/src/utils/misraGriesHeavyHitters.js";
+import { LapDynamicPricing as ServerLapDynamicPricing } from "../../server/src/utils/lapDynamicPricing.js";
+import { VRPTWStochasticServiceTimeRouter as ServerVRPTWStochasticServiceTimeRouter } from "../../server/src/utils/vrptwStochasticServiceTimeRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -27367,6 +27374,397 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(softPlan.status, "VRPTW_SOFT_SUCCESS");
       expect.equal(softPlan.summary.totalStops, 2);
       expect.ok(softPlan.summary.totalGeneralizedCostVnd > 0);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 210: Enterprise Algorithms Suite - Phase 63
+  // 1. MisraGriesHeavyHitters (Misra & Gries 1982 / Demaine et al. 2002)
+  // 2. LapDynamicPricing (Graph Laplacian / Manifold Regularized Offline RL)
+  // 3. VRPTWStochasticServiceTimeRouter (Stochastic Service & Reliability Buffers)
+  // =========================================================================
+  describe("Feature 210: Enterprise Algorithms Suite - Phase 63", () => {
+    // -----------------------------------------------------------------------
+    // Sub-suite 1: MisraGriesHeavyHitters (T01 - T07)
+    // -----------------------------------------------------------------------
+    test("F210-T01: Initializes with parameter k, max counters k-1, and 0 total items", () => {
+      const mg = new MisraGriesHeavyHitters({ k: 5 });
+      const metrics = mg.getMetrics();
+      expect.equal(metrics.k, 5);
+      expect.equal(metrics.maxCounters, 4);
+      expect.equal(metrics.activeCounters, 0);
+      expect.equal(metrics.totalItems, 0);
+      expect.equal(metrics.errorBound, 0);
+    });
+
+    test("F210-T02: Updates counters and estimates frequency accurately when table has capacity", () => {
+      const mg = new MisraGriesHeavyHitters({ k: 10 });
+      mg.update("sku_apple", 5);
+      mg.update("sku_banana", 3);
+      mg.update("sku_orange", 2);
+
+      expect.equal(mg.estimate("sku_apple"), 5);
+      expect.equal(mg.estimate("sku_banana"), 3);
+      expect.equal(mg.estimate("sku_orange"), 2);
+      expect.equal(mg.estimate("sku_unknown"), 0);
+      expect.equal(mg.totalItems, 10);
+    });
+
+    test("F210-T03: Triggers simultaneous decrement when table is full and removes zeroes", () => {
+      // k = 3, so at most k - 1 = 2 counters
+      const mg = new MisraGriesHeavyHitters({ k: 3 });
+      mg.update("item_A"); // A: 1
+      mg.update("item_B"); // B: 1
+      expect.equal(mg.counters.size, 2);
+
+      // Now insert item_C when table is full: all decremented by 1, A and B drop to 0 and get deleted
+      mg.update("item_C");
+      expect.equal(mg.estimate("item_A"), 0);
+      expect.equal(mg.estimate("item_B"), 0);
+      expect.equal(mg.estimate("item_C"), 0);
+      expect.equal(mg.counters.size, 0);
+      expect.equal(mg.totalItems, 3);
+    });
+
+    test("F210-T04: Error bound satisfies f(x) - N/k <= f_hat(x) <= f(x) for all elements", () => {
+      const k = 5;
+      const mg = new MisraGriesHeavyHitters({ k });
+      const stream = [
+        "item_hot", "item_hot", "item_hot", "item_hot", "item_hot", "item_hot", // true count = 6
+        "noise_1", "noise_2", "noise_3", "noise_4" // each 1
+      ];
+      mg.updateBatch(stream);
+
+      const N = 10;
+      const maxErr = N / k; // 10 / 5 = 2.0
+      const estHot = mg.estimate("item_hot");
+
+      expect.ok(estHot <= 6, "Estimated count cannot exceed true count");
+      expect.ok(estHot >= 6 - maxErr, "Estimated count must be at least true count - N/k");
+      expect.equal(mg.getErrorBound(), maxErr);
+    });
+
+    test("F210-T05: Heavy Hitters with true frequency > N/k are guaranteed to be present", () => {
+      const k = 4; // threshold = N / 4 = 25%
+      const mg = new MisraGriesHeavyHitters({ k });
+
+      // Total 100 items: dominant item has 40 occurrences (> 25)
+      for (let i = 0; i < 40; i++) mg.update("viral_deal");
+      for (let i = 0; i < 60; i++) mg.update(`noise_${i % 15}`);
+
+      const heavyHitters = mg.getHeavyHitters(1 / k);
+      expect.ok(heavyHitters.length > 0);
+      expect.equal(heavyHitters[0].item, "viral_deal");
+      expect.ok(heavyHitters[0].estimatedCount > 0);
+      expect.ok(heavyHitters[0].maxPossibleCount >= 40);
+    });
+
+    test("F210-T06: Merges two Misra-Gries summaries of identical k correctly", () => {
+      const mg1 = new MisraGriesHeavyHitters({ k: 4 });
+      const mg2 = new MisraGriesHeavyHitters({ k: 4 });
+
+      mg1.update("flash_sale_1", 10);
+      mg1.update("flash_sale_2", 8);
+
+      mg2.update("flash_sale_1", 5);
+      mg2.update("flash_sale_3", 7);
+
+      mg1.merge(mg2);
+      expect.equal(mg1.totalItems, 30);
+      expect.ok(mg1.estimate("flash_sale_1") >= 10);
+      expect.ok(mg1.counters.size <= 3);
+    });
+
+    test("F210-T07: Server and Client MisraGries implementations produce identical results", () => {
+      const clientMG = new MisraGriesHeavyHitters({ k: 6 });
+      const serverMG = new ServerMisraGriesHeavyHitters({ k: 6 });
+
+      const stream = ["sku1", "sku2", "sku1", "sku3", "sku1", "sku4", "sku2", "sku1", "sku5", "sku1"];
+      clientMG.updateBatch(stream);
+      serverMG.updateBatch(stream);
+
+      expect.equal(clientMG.estimate("sku1"), serverMG.estimate("sku1"));
+      expect.equal(clientMG.estimate("sku2"), serverMG.estimate("sku2"));
+      expect.equal(clientMG.totalItems, serverMG.totalItems);
+      expect.equal(clientMG.getErrorBound(), serverMG.getErrorBound());
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 2: LapDynamicPricing (T08 - T14)
+    // -----------------------------------------------------------------------
+    test("F210-T08: Normalizes state features into bounded [0, 1] range", () => {
+      const pricing = new LapDynamicPricing({ basePrice: 200000 });
+      const norm = pricing.normalizeState({
+        inventory: 250,
+        maxInventory: 500,
+        competitorPrice: 200000,
+        demandIndex: 1.5
+      });
+
+      expect.equal(norm[0], 0.5); // 250 / 500
+      expect.equal(norm[1], 1.0); // 200k / 200k
+      expect.equal(norm[2], 0.5); // 1.5 / 3.0
+    });
+
+    test("F210-T09: Fits transitions and optimizes Laplacian regularized Q-values", () => {
+      const pricing = new LapDynamicPricing({ basePrice: 200000, maxIter: 30 });
+      const transitions = [
+        { state: { inventory: 100, competitorPrice: 200000, demandIndex: 1.0 }, action: 0.90, reward: 180000 },
+        { state: { inventory: 120, competitorPrice: 200000, demandIndex: 1.1 }, action: 0.95, reward: 190000 },
+        { state: { inventory: 80, competitorPrice: 210000, demandIndex: 1.2 }, action: 1.00, reward: 200000 },
+        { state: { inventory: 50, competitorPrice: 220000, demandIndex: 1.5 }, action: 1.10, reward: 220000 }
+      ];
+
+      pricing.fit(transitions);
+      expect.ok(pricing.dataset.length === 4);
+      expect.ok(pricing.trainedQ !== null);
+      expect.equal(pricing.trainedQ.length, 4);
+    });
+
+    test("F210-T10: Computes non-negative Graph Laplacian Energy R_Lap(Q)", () => {
+      const pricing = new LapDynamicPricing({ basePrice: 150000 });
+      const transitions = [
+        { state: { inventory: 50, competitorPrice: 150000, demandIndex: 1.0 }, action: 0.80, reward: 120000 },
+        { state: { inventory: 60, competitorPrice: 150000, demandIndex: 1.0 }, action: 0.90, reward: 135000 },
+        { state: { inventory: 70, competitorPrice: 150000, demandIndex: 1.0 }, action: 1.00, reward: 150000 }
+      ];
+      pricing.fit(transitions);
+
+      const energy = pricing.computeLaplacianEnergy();
+      expect.ok(typeof energy === 'number');
+      expect.ok(energy >= 0, "Laplacian energy must be non-negative");
+    });
+
+    test("F210-T11: Regularization ensures smooth Lipschitz pricing predictions across adjacent states", () => {
+      const pricing = new LapDynamicPricing({ basePrice: 250000, gammaLap: 0.5 });
+      const transitions = [
+        { state: { inventory: 100, competitorPrice: 250000, demandIndex: 1.0 }, action: 0.90, reward: 225000 },
+        { state: { inventory: 110, competitorPrice: 250000, demandIndex: 1.0 }, action: 0.95, reward: 237500 },
+        { state: { inventory: 120, competitorPrice: 250000, demandIndex: 1.0 }, action: 1.00, reward: 250000 }
+      ];
+      pricing.fit(transitions);
+
+      const state1 = pricing.normalizeState({ inventory: 105, competitorPrice: 250000, demandIndex: 1.0 });
+      const state2 = pricing.normalizeState({ inventory: 108, competitorPrice: 250000, demandIndex: 1.0 });
+
+      const q1 = pricing.predictQ(state1, 0.95);
+      const q2 = pricing.predictQ(state2, 0.95);
+
+      const diff = Math.abs(q1 - q2);
+      expect.ok(diff < 20000, "Adjacent manifold states must have smooth regularized Q-values");
+    });
+
+    test("F210-T12: Recommends price and evaluates actions across candidate multipliers", () => {
+      const pricing = new LapDynamicPricing({ basePrice: 300000 });
+      const rec = pricing.recommendPrice({
+        inventory: 150,
+        competitorPrice: 310000,
+        demandIndex: 1.2
+      });
+
+      expect.equal(rec.basePrice, 300000);
+      expect.ok(rec.recommendedPrice >= 300000 * 0.70);
+      expect.ok(rec.recommendedPrice <= 300000 * 1.30);
+      expect.ok(rec.evaluatedActions.length === 9);
+      expect.ok(rec.manifoldSmoothness.includes("LIPSCHITZ") || rec.manifoldSmoothness.includes("MANIFOLD"));
+    });
+
+    test("F210-T13: Predicts Q-values via Nadaraya-Watson kernel regression over manifold points", () => {
+      const pricing = new LapDynamicPricing({ basePrice: 100000, rbfSigma: 0.35 });
+      const transitions = [
+        { state: { inventory: 50, competitorPrice: 100000, demandIndex: 1.0 }, action: 1.0, reward: 100000 }
+      ];
+      pricing.fit(transitions);
+
+      const stateVec = pricing.normalizeState({ inventory: 50, competitorPrice: 100000, demandIndex: 1.0 });
+      const pred = pricing.predictQ(stateVec, 1.0);
+      expect.ok(pred > 0);
+      expect.ok(Math.abs(pred - 100000) < 50000);
+    });
+
+    test("F210-T14: Server and Client LapDynamicPricing implementations achieve consistent pricing", () => {
+      const clientPricing = new LapDynamicPricing({ basePrice: 240000 });
+      const serverPricing = new ServerLapDynamicPricing({ basePrice: 240000 });
+
+      const rawState = { inventory: 100, competitorPrice: 240000, demandIndex: 1.1 };
+      const clientRes = clientPricing.recommendPrice(rawState);
+      const serverRes = serverPricing.recommendPrice(rawState);
+
+      expect.equal(clientRes.basePrice, serverRes.basePrice);
+      expect.equal(clientRes.priceRatio, serverRes.priceRatio);
+      expect.equal(clientRes.recommendedPrice, serverRes.recommendedPrice);
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 3: VRPTWStochasticServiceTimeRouter (T15 - T20)
+    // -----------------------------------------------------------------------
+    test("F210-T15: Computes standard normal quantile z_alpha and CDF Phi(z) accurately", () => {
+      const router = new VRPTWStochasticServiceTimeRouter({ confidenceAlpha: 0.95 });
+      expect.ok(Math.abs(router.zAlpha - 1.6449) < 0.01);
+
+      // Normal CDF checks
+      expect.ok(Math.abs(router.normalCDF(0) - 0.5) < 0.001);
+      expect.ok(Math.abs(router.normalCDF(1.645) - 0.95) < 0.01);
+      expect.ok(Math.abs(router.normalCDF(-1.645) - 0.05) < 0.01);
+    });
+
+    test("F210-T16: Evaluates single route accumulating service variance and reliability buffers", () => {
+      const router = new VRPTWStochasticServiceTimeRouter({
+        averageSpeedKmH: 30, // 0.5 km/min
+        confidenceAlpha: 0.95
+      });
+
+      const sequence = [
+        { id: "C1", name: "Khách 1", x: 3, y: 4, demand: 10, meanServiceTime: 12, stdServiceTime: 4, timeWindow: [0, 60] },
+        { id: "C2", name: "Khách 2", x: 6, y: 8, demand: 15, meanServiceTime: 10, stdServiceTime: 3, timeWindow: [20, 90] }
+      ];
+
+      const evalRes = router.evaluateRoute(sequence);
+      expect.ok(evalRes.stops.length === 2);
+      expect.ok(evalRes.totalDistance > 0);
+      expect.ok(evalRes.totalDuration > 0);
+      expect.ok(evalRes.stops[0].reliabilityBuffer > 0);
+      expect.ok(evalRes.stops[1].reliabilityBuffer > evalRes.stops[0].reliabilityBuffer, "Variance must accumulate along route");
+    });
+
+    test("F210-T17: Calculates On-Time Delivery Probability (OTD) correctly per stop", () => {
+      const router = new VRPTWStochasticServiceTimeRouter();
+      const sequence = [
+        { id: "C1", x: 1, y: 1, demand: 5, meanServiceTime: 10, stdServiceTime: 2, timeWindow: [0, 120] } // very generous deadline
+      ];
+
+      const evalRes = router.evaluateRoute(sequence);
+      const stop = evalRes.stops[0];
+      expect.ok(stop.otdProbability >= 0.99, "Generous deadline should have >= 99% OTD probability");
+      expect.equal(stop.withinSLA, true);
+    });
+
+    test("F210-T18: Detects SLA infeasibility when stochastic arrival quantile exceeds latest deadline", () => {
+      const router = new VRPTWStochasticServiceTimeRouter({ confidenceAlpha: 0.95 });
+      const sequence = [
+        // Depot is at (0, 0). Customer is at (30, 40) -> distance = 50km -> travel time = 100 mins at 30km/h
+        // But deadline is 30 mins! Impossible to meet.
+        { id: "C_TIGHT", x: 30, y: 40, demand: 5, meanServiceTime: 10, stdServiceTime: 5, timeWindow: [0, 30] }
+      ];
+
+      const evalRes = router.evaluateRoute(sequence);
+      expect.equal(evalRes.isFeasible, false);
+      expect.equal(evalRes.stops[0].withinSLA, false);
+      expect.ok(evalRes.stops[0].otdProbability < 0.10);
+    });
+
+    test("F210-T19: Plans multi-vehicle routes respecting capacity and stochastic chance constraints", () => {
+      const router = new VRPTWStochasticServiceTimeRouter({
+        vehicleCapacity: 30,
+        confidenceAlpha: 0.95
+      });
+
+      const customers = [
+        { id: "C1", x: 2, y: 2, demand: 15, meanServiceTime: 8, stdServiceTime: 2, timeWindow: [0, 100] },
+        { id: "C2", x: 3, y: 3, demand: 10, meanServiceTime: 10, stdServiceTime: 3, timeWindow: [0, 120] },
+        { id: "C3", x: 4, y: 4, demand: 20, meanServiceTime: 12, stdServiceTime: 4, timeWindow: [0, 150] } // 15 + 10 + 20 = 45 > 30 -> requires 2 vehicles
+      ];
+
+      const plan = router.planRoutes(customers);
+      expect.ok(plan.totalVehicles >= 2, "Demand 45 exceeds single vehicle capacity 30");
+      expect.ok(plan.averageOTDProbability > 0.85);
+      expect.equal(plan.confidenceAlpha, 0.95);
+    });
+
+    test("F210-T20: Server and Client VRPTWStochasticServiceTimeRouter produce consistent route plans", () => {
+      const clientRouter = new VRPTWStochasticServiceTimeRouter({ vehicleCapacity: 50 });
+      const serverRouter = new ServerVRPTWStochasticServiceTimeRouter({ vehicleCapacity: 50 });
+
+      const customers = [
+        { id: "C_A", x: 5, y: 5, demand: 15, meanServiceTime: 10, stdServiceTime: 2, timeWindow: [0, 180] },
+        { id: "C_B", x: 10, y: 10, demand: 20, meanServiceTime: 15, stdServiceTime: 3, timeWindow: [0, 240] }
+      ];
+
+      const clientPlan = clientRouter.planRoutes(customers);
+      const serverPlan = serverRouter.planRoutes(customers);
+
+      expect.equal(clientPlan.totalVehicles, serverPlan.totalVehicles);
+      expect.equal(clientPlan.totalDistance, serverPlan.totalDistance);
+      expect.equal(clientPlan.averageOTDProbability, serverPlan.averageOTDProbability);
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 4: AI Copilot & End-to-End Integration (T21 - T24)
+    // -----------------------------------------------------------------------
+    test("F210-T21: Admin Sentinel Copilot recognizes Misra-Gries Heavy Hitters queries", () => {
+      const adminRes = generateAdminCopilotResponse("Giải thích thuật toán đếm tất định Misra-Gries Heavy Hitters");
+      expect.equal(adminRes.type, "analytics");
+      expect.equal(adminRes.tag, "MISRA-GRIES HEAVY HITTERS");
+      expect.ok(adminRes.text.includes("MISRA & GRIES 1982"));
+      expect.ok(adminRes.text.includes("k - 1"));
+      expect.ok(adminRes.text.includes("Zero False Negatives"));
+    });
+
+    test("F210-T22: Admin Sentinel Copilot handles Laplacian Pricing and VRPTW-Stochastic queries", () => {
+      const adminRes1 = generateAdminCopilotResponse("Tư vấn định giá chính quy hóa đa tạp Graph Laplacian");
+      expect.equal(adminRes1.type, "pricing");
+      expect.equal(adminRes1.tag, "LAPLACIAN DYNAMIC PRICING");
+      expect.ok(adminRes1.text.includes("GRAPH LAPLACIAN"));
+      expect.ok(adminRes1.text.includes("BELKIN & NIYOGI"));
+
+      const adminRes2 = generateAdminCopilotResponse("Điều phối đội xe với thời gian phục vụ ngẫu nhiên vrptw-stochastic");
+      expect.equal(adminRes2.type, "logistics");
+      expect.equal(adminRes2.tag, "VRPTW STOCHASTIC SERVICE ROUTER");
+      expect.ok(adminRes2.text.includes("VRPTW-STOCHASTIC"));
+      expect.ok(adminRes2.text.includes("Reliability Buffer"));
+    });
+
+    test("F210-T23: Seller ShopSmart Copilot & Buyer Assistant handle Phase 63 algorithms and intents", () => {
+      const sellerRes = generateSellerCopilotResponse("Tư vấn sản phẩm hot trend Misra-Gries và định giá Laplacian");
+      expect.equal(sellerRes.type, "recommendation");
+      expect.equal(sellerRes.tag, "MISRA-GRIES, LAPLACIAN & VRPTW-STOCHASTIC");
+      expect.ok(sellerRes.text.includes("MISRA-GRIES"));
+      expect.ok(sellerRes.text.includes("Graph Laplacian"));
+
+      const buyerRes = generateAiChatResponse("Hỏi về định giá mượt mà Laplacian và giao đúng hẹn với đệm độ tin cậy");
+      expect.equal(buyerRes.intent, "MISRA_LAP_VRPTW_STOCHASTIC");
+      expect.ok(buyerRes.replyText.includes("MISRA-GRIES"));
+      expect.ok(buyerRes.replyText.includes("Graph Laplacian"));
+      expect.ok(buyerRes.replyText.includes("VRPTW-Stochastic"));
+    });
+
+    test("F210-T24: Full end-to-end integration: Misra-Gries stream trends -> Laplacian pricing -> VRPTW-Stochastic dispatch", () => {
+      // Step 1: Detect viral items in live order stream with MisraGries
+      const mg = new ServerMisraGriesHeavyHitters({ k: 5 });
+      const stream = [
+        "smart_watch_ultra", "smart_watch_ultra", "smart_watch_ultra", "smart_watch_ultra",
+        "wireless_earbuds", "wireless_earbuds",
+        "usb_cable", "screen_protector", "case_silicone"
+      ];
+      mg.updateBatch(stream);
+      const topItems = mg.getHeavyHitters();
+      expect.ok(topItems.length > 0);
+      expect.equal(topItems[0].item, "smart_watch_ultra");
+
+      // Step 2: Manifold regularized pricing with LapDynamicPricing
+      const lapPricing = new ServerLapDynamicPricing({ basePrice: 450000 });
+      const priceRec = lapPricing.recommendPrice({
+        inventory: 80,
+        competitorPrice: 460000,
+        demandIndex: 1.4
+      });
+      expect.ok(priceRec.recommendedPrice >= 450000 * 0.70);
+      expect.ok(priceRec.recommendedPrice <= 450000 * 1.30);
+      expect.ok(priceRec.evaluatedActions.length === 9);
+
+      // Step 3: Chance-constrained delivery routing with VRPTWStochasticServiceTimeRouter
+      const router = new ServerVRPTWStochasticServiceTimeRouter({
+        vehicleCapacity: 50,
+        confidenceAlpha: 0.95
+      });
+      const dispatchCustomers = [
+        { id: "ORD_P63_1", x: 2, y: 3, demand: 15, meanServiceTime: 10, stdServiceTime: 2, timeWindow: [0, 90] },
+        { id: "ORD_P63_2", x: 4, y: 5, demand: 20, meanServiceTime: 12, stdServiceTime: 3, timeWindow: [0, 120] }
+      ];
+      const routePlan = router.planRoutes(dispatchCustomers);
+      expect.equal(routePlan.totalVehicles, 1);
+      expect.ok(routePlan.averageOTDProbability >= 0.95);
+      expect.equal(routePlan.allFeasible, true);
     });
   });
 });

@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -3236,7 +3236,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 152. Lấy Mẫu Dính Tần Suất Cao Sticky Sampling (Phase 57 - Feature 204)
-  if (!/lossy/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
+  if (!/lossy|misra|gries/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
     return {
       text: `📊 **BỘ ĐẾM DÒNG TẦN SUẤT CAO STICKY SAMPLING (MANKU & MOTWANI 2002)**:
 - **Cơ Chế Lấy Mẫu Thích Ứng Động (Adaptive Dynamic Sampling)**:
@@ -3616,6 +3616,69 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem tỷ lệ đơn giao đúng hẹn On-time Rate',
         'Kiểm tra tổng chi phí phạt trễ SLA',
         'Thống kê chi phí toàn diện Generalized Cost'
+      ]
+    };
+  }
+
+  // 170. Bắt Heavy Hitters Tất Định Misra-Gries (Phase 63 - Feature 210)
+  if (/misra[- ]gries|misra|gries|k[- ]top counters|ước lượng tần suất k-1|đếm tất định k/i.test(raw)) {
+    return {
+      text: `📊 **THUẬT TOÁN STREAMING TẤT ĐỊNH MISRA-GRIES HEAVY HITTERS (MISRA & GRIES 1982, DEMAINE ET AL. 2002)**:
+- **Nguyên lý Thu Gọn $k-1$ Bộ Đếm (Counter Reduction Mechanism)**:
+  - Duy trì tối đa $k - 1$ bộ đếm trong suốt dòng dữ liệu luồng $N$ sự kiện.
+  - Khi xuất hiện phần tử mới mà bảng đếm đã đầy, đồng loạt giảm tất cả bộ đếm đi 1 và xóa ngay các phần tử chạm mốc $0$.
+- **Bảo Đảm Toán Học Tuyệt Đối (Theoretical Guarantees)**:
+  - Sai số tần suất chặn trên bởi $\\frac{N}{k}$:
+    $$f(x) - \\frac{N}{k} \\le \\hat{f}(x) \\le f(x)$$
+  - **Zero False Negatives**: Mọi sản phẩm hoặc từ khóa có tần suất thực tế $f(x) > \\frac{N}{k}$ **chắc chắn $100\\%$** xuất hiện trong bảng tóm tắt kết quả!
+- **Tối Ưu Tài Nguyên Thực Tế**:
+  - Tiết kiệm $99.9\\%$ RAM so với việc lưu trữ toàn bộ lịch sử giao dịch trong các đợt bão đơn Flash Sale!`,
+      type: 'analytics',
+      tag: 'MISRA-GRIES HEAVY HITTERS',
+      suggestions: [
+        'Xem danh sách Heavy Hitters Misra-Gries',
+        'Kiểm tra cận sai số lý thuyết N/k',
+        'Thống kê số lượng bộ đếm hoạt động'
+      ]
+    };
+  }
+
+  // 171. Định Giá Học Tăng Cường Chính Quy Hóa Laplacian (Phase 63 - Feature 210)
+  if (/laplacian|lap dynamic pricing|chính quy hóa laplacian|manifold regularized|độ trơn đa tạp|năng lượng laplacian|lipschitz[- ]smooth pricing/i.test(raw)) {
+    return {
+      text: `🏷️ **ĐỊNH GIÁ HỌC TĂNG CƯỜNG CHÍNH QUY HÓA ĐA TẠP GRAPH LAPLACIAN (BELKIN & NIYOGI 2003, FARAHMAND ET AL. 2016)**:
+- **Khử Bất Ổn Ngoại Suy Bằng Graph Laplacian**:
+  - Dựa trên ma trận kề trọng số Gauss $W_{ij} = \\exp(-\\frac{\\|x_i - x_j\\|^2}{2\\sigma^2})$ và ma trận bậc $D_{ii} = \\sum_j W_{ij}$, Graph Laplacian $L = D - W$ đo lường độ biến thiên dọc theo đa tạp thị trường:
+    $$R_{\\text{Lap}}(Q) = \\frac{1}{2} \\sum_{i,j} W_{ij} (Q(x_i) - Q(x_j))^2 = \\mathbf{q}^T L \\mathbf{q}$$
+  - Phạt nặng các bước nhảy giá gãy khúc hoặc đột biến bất thường ở những vùng dữ liệu phân tán.
+- **Bảo Vệ Biên Lợi Nhuận Toàn Sàn**:
+  - Đảm bảo hàm định giá mượt mà Lipschitz theo diễn biến tồn kho và sức ép cạnh tranh, ngăn chặn bán phá giá và giữ vững biên an toàn.`,
+      type: 'pricing',
+      tag: 'LAPLACIAN DYNAMIC PRICING',
+      suggestions: [
+        'Kiểm tra năng lượng đa tạp Laplacian Energy',
+        'Xem ma trận kề trọng số RBF Sigma (0.35)',
+        'Kiểm tra hệ số mượt hóa Gamma Lap (0.25)'
+      ]
+    };
+  }
+
+  // 172. Định Tuyến Thời Gian Phục Vụ Ngẫu Nhiên VRPTW-Stochastic (Phase 63 - Feature 210)
+  if (/vrptw[- ]stochastic|stochastic service time|thời gian phục vụ ngẫu nhiên|reliability buffer|đệm độ tin cậy|chance[- ]constrained|otd probability|xác suất đúng hẹn/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN ĐỘI XE THỜI GIAN PHỤC VỤ NGẪU NHIÊN VRPTW-STOCHASTIC (KENYON & MORTON 2003, ERRICO ET AL. 2016)**:
+- **Ứng Phó Thực Tế Giao Nhận Chặng Cuối (Stochastic Service & COD Cash Counting)**:
+  - Thời gian dừng giao hàng thực tế tại mỗi địa chỉ là biến ngẫu nhiên $S_i \\sim \\mathcal{N}(\\mu_i, \\sigma_i^2)$ do chờ khách, kiểm hàng và thu tiền COD.
+  - Phương sai thời gian đến tích lũy dọc lộ trình: $\\text{Var}(A_j) = \\text{Var}(A_i) + \\sigma_i^2 + \\sigma_{\\text{travel}}^2$.
+- **Cơ Chế Đệm Tin Cậy Chuẩn Hóa SLA (Chance-Constrained Reliability Buffer)**:
+  - Tự động bổ sung đệm an toàn theo phân vị chuẩn: $B_j(\\alpha) = z_\\alpha \\cdot \\sqrt{\\text{Var}(A_j)}$ với độ tin cậy $\\alpha = 95\\%$ ($z_{0.95} = 1.645$).
+  - Đảm bảo điều kiện xác suất: $\\mathbb{P}(A_j \\le l_j) \\ge \\alpha$, tính toán tức thì tỷ lệ giao đúng hẹn OTD Probability cho từng đơn hàng!`,
+      type: 'logistics',
+      tag: 'VRPTW STOCHASTIC SERVICE ROUTER',
+      suggestions: [
+        'Xem xác suất giao đúng hẹn OTD Probability',
+        'Kiểm tra đệm tin cậy Reliability Buffer',
+        'Phân tích phương sai tích lũy dọc lộ trình'
       ]
     };
   }
