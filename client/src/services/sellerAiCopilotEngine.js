@@ -137,7 +137,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 6. Tốc Độ Tiêu Thụ Kho & Dự Báo Ngày Hết Hàng (Run Rate & Days of Inventory Remaining - DIR)
-  if (/run rate|tốc độ bán|dir|ngày còn hàng|dự báo kho|cạn kho|nhu cầu nhập/i.test(raw)) {
+  if (/run rate|tốc độ bán|\bdir\b|ngày còn hàng|dự báo kho|cạn kho|nhu cầu nhập/i.test(raw)) {
     const totalStock = shopProducts.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
     const avgDailySales = Math.max(1, Math.round(shopOrders.length / 7)) || 3;
     const daysRemaining = Math.round(totalStock / avgDailySales);
@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1507,6 +1507,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem danh mục bão đơn HHH',
         'Tư vấn định giá an toàn rủi ro DSAC',
         'Tối ưu giao hàng gom đơn Cross-Dock'
+      ]
+    };
+  }
+
+  // 75. Bộ Ba Thuật Toán Frequent Directions, PPO-Lagrangian Safe Pricing & EVRPTW Queue Router (Phase 66 - Feature 213)
+  if (/frequent[- ]directions|matrix sketch|phác thảo ma trận|ppo[- ]lagrangian|lagrangian pricing|evrptw[- ]queue|hàng đợi trạm sạc/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN FREQUENT DIRECTIONS, PPO-LAGRANGIAN & EVRPTW-QUEUE (${currentShop.name})**:
+- **Nén luồng tương tác khách hàng Frequent Directions Matrix Sketching**:
+  - Không lo tràn bộ nhớ khi hàng vạn khách xem hàng cùng lúc. Thuật toán phác thảo ma trận xác định nén các vector embedding và hành vi khách về ma trận $2k$ chiều với chặn sai số $\\frac{1}{k} \\|A\\|_F^2$, giúp shop nắm bắt không gian thị hiếu chuẩn xác!
+- **Định giá an toàn đa ràng buộc PPO-Lagrangian Safe Pricing**:
+  - Tối ưu hóa doanh thu kỳ vọng đồng thời thích ứng các nhân tử đối ngẫu $\\lambda_{\\text{margin}}$ và $\\lambda_{\\text{velocity}}$. Đảm bảo sản phẩm bán ra luôn giữ biên lãi gộp an toàn $\\ge \\text{COGS} \\times 1.05$ và tốc độ xả hàng đồng đều tránh đứt gãy tồn kho!
+- **Giao vận xanh đội xe điện né trạm sạc kẹt xe EVRPTW-Queue**:
+  - Đơn hàng xuất kho của shop được bưu tá SPX sử dụng xe điện phân phối thông minh, tự động tính toán thời gian chờ hàng đợi Erlang $W_q$ tại các trạm sạc để né trạm quá tải, cam kết bưu kiện tới tay khách hàng đúng cam kết SLA!`,
+      type: 'recommendation',
+      tag: 'FREQUENT DIRECTIONS, PPO-LAGRANGIAN & EVRPTW-QUEUE',
+      suggestions: [
+        'Xem phân tích thị hiếu Frequent Directions',
+        'Tư vấn định giá an toàn PPO-Lagrangian',
+        'Theo dõi tiến độ giao hàng xe điện SPX'
       ]
     };
   }

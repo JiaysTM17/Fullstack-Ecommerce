@@ -351,6 +351,10 @@ import {
   HierarchicalHeavyHitters,
   DSACDynamicPricing,
   VRPTWCrossDockBilateralRouter,
+  // Phase 66 Enterprise Algorithms
+  FrequentDirectionsSketch,
+  PPOLagrangianSafePricing,
+  EVRPTWQueueRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -514,6 +518,9 @@ import { EVRPTWBatteryDegradationRouter as ServerEVRPTWBatteryDegradationRouter 
 import { HierarchicalHeavyHitters as ServerHierarchicalHeavyHitters } from "../../server/src/utils/hierarchicalHeavyHitters.js";
 import { DSACDynamicPricing as ServerDSACDynamicPricing } from "../../server/src/utils/dsacDynamicPricing.js";
 import { VRPTWCrossDockBilateralRouter as ServerVRPTWCrossDockBilateralRouter } from "../../server/src/utils/vrptwCrossDockBilateralRouter.js";
+import { FrequentDirectionsSketch as ServerFrequentDirectionsSketch } from "../../server/src/utils/frequentDirectionsSketch.js";
+import { PPOLagrangianSafePricing as ServerPPOLagrangianSafePricing } from "../../server/src/utils/ppoLagrangianSafePricing.js";
+import { EVRPTWQueueRouter as ServerEVRPTWQueueRouter } from "../../server/src/utils/evrptwQueueRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -28558,6 +28565,387 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       expect.equal(crossDockPlan.inboundRoutes.length, 1);
       expect.equal(crossDockPlan.outboundRoutes.length, 1);
       expect.equal(crossDockPlan.summary.isSynchronized, true);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 213: ENTERPRISE SUITE - PHASE 66 (24 Tests)
+  // Frequent Directions Matrix Sketching, PPO-Lagrangian Safe Dynamic Pricing,
+  // and EVRPTW with Stochastic Charging Station Queuing (M/M/c Queues)
+  // =========================================================================
+  describe("Feature 213: Enterprise Algorithms Suite - Phase 66", () => {
+    // -----------------------------------------------------------------------
+    // Sub-suite 1: FrequentDirectionsSketch (T01 - T08)
+    // -----------------------------------------------------------------------
+    test("F213-T01: Initializes FrequentDirectionsSketch with dimension d, rank k, and sketchSize l = 2k", () => {
+      const sketch = new FrequentDirectionsSketch({ dimension: 6, rankK: 3, sketchSize: 6 });
+      expect.equal(sketch.dimension, 6);
+      expect.equal(sketch.rankK, 3);
+      expect.equal(sketch.sketchSize, 6);
+      expect.equal(sketch.sketchRows.length, 0);
+      expect.equal(sketch.totalRowsProcessed, 0);
+      expect.equal(sketch.frobeniusNormSq, 0);
+    });
+
+    test("F213-T02: Accumulates streaming row vectors and increments frobeniusNormSq correctly", () => {
+      const sketch = new FrequentDirectionsSketch({ dimension: 4, rankK: 2, sketchSize: 8 });
+      const row1 = [1, 2, 3, 4]; // normSq = 1 + 4 + 9 + 16 = 30
+      const row2 = [2, 0, 1, 2]; // normSq = 4 + 0 + 1 + 4 = 9
+
+      sketch.addRow(row1);
+      sketch.addRow(row2);
+
+      expect.equal(sketch.sketchRows.length, 2);
+      expect.equal(sketch.totalRowsProcessed, 2);
+      expect.equal(sketch.frobeniusNormSq, 39);
+    });
+
+    test("F213-T03: Triggers directional shrinkage when sketch buffer reaches capacity l", () => {
+      const sketch = new FrequentDirectionsSketch({ dimension: 4, rankK: 2, sketchSize: 4 });
+      for (let i = 0; i < 4; i++) {
+        sketch.addRow([i + 1, i + 2, (i + 1) * 2, 1]);
+      }
+
+      expect.ok(sketch.shrinkageOperationsCount >= 1, "Must perform directional shrinkage when full");
+      expect.ok(sketch.sketchRows.length < 4, "Shrinkage must reduce row count to allow future stream rows");
+    });
+
+    test("F213-T04: Jacobi eigendecomposition computes accurate eigenvalues and orthogonal eigenvectors", () => {
+      const sketch = new FrequentDirectionsSketch({ dimension: 3 });
+      // Symmetric positive definite matrix
+      const G = [
+        new Float64Array([4, 1, 0]),
+        new Float64Array([1, 3, 1]),
+        new Float64Array([0, 1, 2])
+      ];
+
+      const { eigenvalues, eigenvectors } = sketch._jacobiEigen(G, 3);
+      expect.equal(eigenvalues.length, 3);
+      expect.equal(eigenvectors.length, 3);
+
+      // Verify trace invariance: sum(eigenvalues) ~= trace(G) = 4 + 3 + 2 = 9
+      const sumEig = eigenvalues.reduce((a, b) => a + b, 0);
+      expect.ok(Math.abs(sumEig - 9.0) < 1e-4, "Sum of eigenvalues must equal matrix trace");
+    });
+
+    test("F213-T05: Nullifies singular vectors during shrinkage, freeing space for stream", () => {
+      const sketch = new FrequentDirectionsSketch({ dimension: 4, rankK: 2, sketchSize: 4 });
+      const batch = [
+        [5, 1, 0, 2],
+        [2, 4, 1, 0],
+        [1, 1, 6, 2],
+        [0, 2, 1, 5]
+      ];
+      sketch.addBatch(batch);
+
+      expect.ok(sketch.sketchRows.length <= 2, "Shrunk sketch should hold at most rankK principal directions");
+      const cov = sketch.getCovarianceApproximation();
+      expect.equal(cov.length, 4);
+      expect.equal(cov[0].length, 4);
+    });
+
+    test("F213-T06: Preserves deterministic error bound ||A^T A - B^T B||_2 <= (1/k) ||A||_F^2", () => {
+      const sketch = new FrequentDirectionsSketch({ dimension: 4, rankK: 2, sketchSize: 6 });
+      for (let i = 0; i < 20; i++) {
+        sketch.addRow([Math.sin(i), Math.cos(i), Math.sin(2 * i), Math.cos(2 * i)]);
+      }
+
+      const diag = sketch.getDiagnostics();
+      expect.ok(diag.theoreticalMaxError > 0);
+      expect.ok(diag.sketchFrobeniusNormSq <= diag.streamFrobeniusNormSq, "Sketch energy cannot exceed stream energy");
+      expect.ok(diag.compressionRatio < 1.0, "Sketch must compress the input stream");
+    });
+
+    test("F213-T07: Projects high-dimensional query vector onto principal subspace defined by sketch", () => {
+      const sketch = new FrequentDirectionsSketch({ dimension: 4, rankK: 2 });
+      sketch.addBatch([
+        [10, 0, 0, 0],
+        [0, 8, 0, 0],
+        [0, 0, 2, 0],
+        [0, 0, 0, 1]
+      ]);
+
+      const query = [5, 4, 0, 0];
+      const { projectionNorm, projectedVector } = sketch.project(query);
+
+      expect.ok(projectionNorm > 0);
+      expect.equal(projectedVector.length, 4);
+    });
+
+    test("F213-T08: Client and Server FrequentDirectionsSketch produce identical results and diagnostics", () => {
+      const clientSketch = new FrequentDirectionsSketch({ dimension: 5, rankK: 2, sketchSize: 6 });
+      const serverSketch = new ServerFrequentDirectionsSketch({ dimension: 5, rankK: 2, sketchSize: 6 });
+
+      const stream = [
+        [3, 1, 4, 1, 5],
+        [9, 2, 6, 5, 3],
+        [5, 8, 9, 7, 9],
+        [3, 2, 3, 8, 4],
+        [6, 2, 6, 4, 3],
+        [3, 8, 3, 2, 7]
+      ];
+
+      clientSketch.addBatch(stream);
+      serverSketch.addBatch(stream);
+
+      const clientDiag = clientSketch.getDiagnostics();
+      const serverDiag = serverSketch.getDiagnostics();
+
+      expect.equal(clientDiag.streamFrobeniusNormSq, serverDiag.streamFrobeniusNormSq);
+      expect.equal(clientDiag.currentSketchRows, serverDiag.currentSketchRows);
+      expect.equal(clientDiag.theoreticalMaxError, serverDiag.theoreticalMaxError);
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 2: PPOLagrangianSafePricing (T09 - T16)
+    // -----------------------------------------------------------------------
+    test("F213-T09: Initializes PPOLagrangianSafePricing with basePrice, cogs, and dual multipliers", () => {
+      const pricing = new PPOLagrangianSafePricing({ basePrice: 250000, cogs: 160000, targetRunRate: 15 });
+      expect.equal(pricing.basePrice, 250000);
+      expect.equal(pricing.cogs, 160000);
+      expect.equal(pricing.targetRunRate, 15);
+      expect.equal(pricing.lambdaMargin, 0.25);
+      expect.equal(pricing.lambdaVelocity, 0.15);
+      expect.equal(pricing.actionMultipliers.length, 9);
+    });
+
+    test("F213-T10: Estimates price-elastic demand with constant elasticity eta = 1.6", () => {
+      const pricing = new PPOLagrangianSafePricing({ basePrice: 200000, targetRunRate: 10 });
+      const demandBase = pricing.estimateDemand(200000);
+      const demandHighPrice = pricing.estimateDemand(240000);
+      const demandLowPrice = pricing.estimateDemand(160000);
+
+      expect.equal(demandBase, 10);
+      expect.ok(demandHighPrice < demandBase, "Higher price reduces demand");
+      expect.ok(demandLowPrice > demandBase, "Lower price increases demand");
+    });
+
+    test("F213-T11: Evaluates margin deficit and velocity deviation constraint violations", () => {
+      const cogs = 100000;
+      const pricing = new PPOLagrangianSafePricing({ basePrice: 120000, cogs, marginFloorRatio: 1.05 });
+      const safetyFloor = 105000;
+
+      // Price below safety floor -> margin deficit > 0
+      const costsBreach = pricing.evaluateConstraints(90000, 10);
+      expect.ok(costsBreach.marginCost > 0);
+
+      // Price above safety floor -> margin deficit = 0
+      const costsSafe = pricing.evaluateConstraints(110000, 10);
+      expect.equal(costsSafe.marginCost, 0);
+
+      // Velocity deviation
+      const costsVel = pricing.evaluateConstraints(110000, 18);
+      expect.equal(costsVel.velocityCost, 8); // |18 - 10| = 8
+    });
+
+    test("F213-T12: Updates policy logits and dual multipliers via subgradient ascent lambda <- max(0, lambda + lr*(C - d))", () => {
+      const pricing = new PPOLagrangianSafePricing({ basePrice: 100000, cogs: 70000, lrDual: 0.10 });
+      const initialLambdaMargin = pricing.lambdaMargin;
+
+      // Observe price breach
+      pricing.updatePolicyAndDuals(0.80, 50000, 5);
+
+      expect.equal(pricing.trainingStepsCount, 1);
+      expect.ok(pricing.lambdaMargin >= initialLambdaMargin, "Lagrange multiplier increases on safety violation");
+    });
+
+    test("F213-T13: Recommends price maximizing Lagrangian score while strictly enforcing 1.05x COGS floor", () => {
+      const cogs = 180000;
+      const pricing = new PPOLagrangianSafePricing({ basePrice: 190000, cogs, marginFloorRatio: 1.05 });
+      const decision = pricing.recommendPrice({
+        basePrice: 190000,
+        cogs,
+        competitorPrice: 185000,
+        demandIndex: 0.8
+      });
+
+      const safetyFloor = Math.round(cogs * 1.05); // 189,000
+      expect.ok(decision.recommendedPrice >= safetyFloor, "Price must respect COGS floor");
+      expect.ok(decision.marginAnalysis.isSafe, "Gross margin must be safe");
+      expect.equal(decision.evaluatedActions.length, 9);
+      expect.ok(decision.lagrangianScore > 0);
+    });
+
+    test("F213-T14: Adaptive dual multiplier lambdaMargin increases sharply when candidate price breaches margin floor", () => {
+      const pricing = new PPOLagrangianSafePricing({ basePrice: 100000, cogs: 80000, lrDual: 0.20 });
+      for (let step = 0; step < 5; step++) {
+        pricing.updatePolicyAndDuals(0.80, 40000, 4); // 80k is below 80k * 1.05 = 84k
+      }
+
+      expect.ok(pricing.lambdaMargin > 0.25, "Dual multiplier must accumulate penalty for persistent violations");
+    });
+
+    test("F213-T15: Evaluated actions array contains valid policy probabilities summing to 1.0", () => {
+      const pricing = new PPOLagrangianSafePricing({ basePrice: 300000 });
+      const rec = pricing.recommendPrice();
+      const sumProb = rec.evaluatedActions.reduce((acc, a) => acc + a.policyProbability, 0);
+
+      expect.ok(Math.abs(sumProb - 1.0) < 1e-3, "Softmax policy probabilities must sum to 1");
+    });
+
+    test("F213-T16: Client and Server PPOLagrangianSafePricing produce identical recommendations and dual metrics", () => {
+      const clientPPO = new PPOLagrangianSafePricing({ basePrice: 220000, cogs: 140000 });
+      const serverPPO = new ServerPPOLagrangianSafePricing({ basePrice: 220000, cogs: 140000 });
+
+      const clientRec = clientPPO.recommendPrice({ basePrice: 220000, demandIndex: 1.3 });
+      const serverRec = serverPPO.recommendPrice({ basePrice: 220000, demandIndex: 1.3 });
+
+      expect.equal(clientRec.recommendedPrice, serverRec.recommendedPrice);
+      expect.equal(clientRec.priceMultiplier, serverRec.priceMultiplier);
+      expect.equal(clientRec.lagrangianScore, serverRec.lagrangianScore);
+      expect.equal(clientRec.lambdaMargin, serverRec.lambdaMargin);
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 3: EVRPTWQueueRouter (T17 - T20)
+    // -----------------------------------------------------------------------
+    test("F213-T17: Computes Erlang M/M/c queuing metrics (rho, P_0, L_q, W_q wait time in minutes)", () => {
+      const router = new EVRPTWQueueRouter();
+      const station = { stalls: 3, arrivalRatePerHour: 3.0, serviceRatePerHour: 2.0 };
+      const qMetrics = router.computeQueueWaitTime(station);
+
+      expect.equal(qMetrics.rho, 0.5); // 3 / (3 * 2) = 0.5
+      expect.ok(qMetrics.p0 > 0 && qMetrics.p0 < 1);
+      expect.ok(qMetrics.expectedQueueWaitMin > 0);
+      expect.equal(qMetrics.isCongested, false);
+    });
+
+    test("F213-T18: Detects station congestion and calculates expected wait time before recharge", () => {
+      const router = new EVRPTWQueueRouter();
+      const crowdedStation = { stalls: 2, arrivalRatePerHour: 3.6, serviceRatePerHour: 2.0 };
+      const qMetrics = router.computeQueueWaitTime(crowdedStation);
+
+      expect.equal(qMetrics.rho, 0.9); // 3.6 / (2 * 2) = 0.9
+      expect.equal(qMetrics.isCongested, true);
+      expect.ok(qMetrics.expectedQueueWaitMin > 10.0, "Congested station has significant waiting time");
+    });
+
+    test("F213-T19: Automatically detours to optimal charging station minimizing total station dwell time (W_q + t_charge) when SoC < 15%", () => {
+      const router = new EVRPTWQueueRouter({
+        batteryCapacityKwh: 30, // Small battery to force charging detour
+        consumptionPerKm: 1.0,  // High consumption
+        minSocSafetyBuffer: 0.20
+      });
+
+      const chargingStations = [
+        { id: "CS_BUSY", name: "Trạm Đông Đúc", x: 5, y: 5, stalls: 2, arrivalRatePerHour: 3.8, serviceRatePerHour: 2.0 },
+        { id: "CS_FAST", name: "Trạm Thông Thoáng", x: 6, y: 4, stalls: 4, arrivalRatePerHour: 2.0, serviceRatePerHour: 2.5 }
+      ];
+
+      const customers = [
+        { id: "C1", x: 18, y: 18, demandKg: 20, timeWindow: [0, 300] }
+      ];
+
+      const plan = router.planEVRoutes({ customers, chargingStations });
+      expect.equal(plan.status, "SUCCESS");
+      expect.equal(plan.routes.length, 1);
+
+      const route = plan.routes[0];
+      expect.ok(route.chargesCount >= 1, "Vehicle must recharge when battery is insufficient");
+      const chargingStop = route.stops.find(s => s.type === "CHARGING_STATION");
+      expect.ok(chargingStop);
+      expect.ok(chargingStop.queueWaitMin > 0);
+    });
+
+    test("F213-T20: Client and Server EVRPTWQueueRouter produce identical routing plans and costs", () => {
+      const clientRouter = new EVRPTWQueueRouter();
+      const serverRouter = new ServerEVRPTWQueueRouter();
+
+      const customers = [
+        { id: "CUST_A", x: 3, y: 4, demandKg: 15, timeWindow: [0, 180] },
+        { id: "CUST_B", x: 5, y: 2, demandKg: 25, timeWindow: [0, 240] }
+      ];
+
+      const clientPlan = clientRouter.planEVRoutes({ customers });
+      const serverPlan = serverRouter.planEVRoutes({ customers });
+
+      expect.equal(clientPlan.summary.totalDistanceKm, serverPlan.summary.totalDistanceKm);
+      expect.equal(clientPlan.summary.totalEnergyKwh, serverPlan.summary.totalEnergyKwh);
+      expect.equal(clientPlan.summary.totalCostVnd, serverPlan.summary.totalCostVnd);
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 4: Tri-Role AI Copilots & End-to-End Integration (T21 - T24)
+    // -----------------------------------------------------------------------
+    test("F213-T21: Admin Sentinel Copilot handles Frequent Directions Matrix Sketching queries with mathematical details", () => {
+      const adminRes = generateAdminCopilotResponse("Phân tích nén luồng ma trận Frequent Directions Matrix Sketching Edo Liberty");
+      expect.equal(adminRes.type, "analytics");
+      expect.equal(adminRes.tag, "FREQUENT DIRECTIONS MATRIX SKETCHING");
+      expect.ok(adminRes.text.includes("FREQUENT DIRECTIONS"));
+      expect.ok(adminRes.text.includes("EDO LIBERTY 2013"));
+      expect.ok(adminRes.text.includes("Directional Shrinkage"));
+    });
+
+    test("F213-T22: Admin Sentinel Copilot handles PPO-Lagrangian Safe Pricing and EVRPTW Queue Router queries", () => {
+      const adminRes1 = generateAdminCopilotResponse("Tư vấn tối ưu định giá ràng buộc an toàn PPO-Lagrangian Safe Pricing");
+      expect.equal(adminRes1.type, "pricing");
+      expect.equal(adminRes1.tag, "PPO LAGRANGIAN SAFE PRICING");
+      expect.ok(adminRes1.text.includes("PPO-LAGRANGIAN"));
+      expect.ok(adminRes1.text.includes("ACHIAM ET AL. ICML 2017"));
+
+      const adminRes2 = generateAdminCopilotResponse("Điều phối xe điện định tuyến hàng đợi trạm sạc EVRPTW-Queue M/M/c");
+      expect.equal(adminRes2.type, "logistics");
+      expect.equal(adminRes2.tag, "EVRPTW STOCHASTIC CHARGING QUEUES");
+      expect.ok(adminRes2.text.includes("EVRPTW-QUEUE"));
+      expect.ok(adminRes2.text.includes("Erlang"));
+    });
+
+    test("F213-T23: Seller ShopSmart Copilot and Buyer Assistant handle Phase 66 algorithms and intents", () => {
+      const sellerRes = generateSellerCopilotResponse("Tư vấn phân tích ma trận Frequent Directions và định giá ràng buộc PPO-Lagrangian");
+      expect.equal(sellerRes.type, "recommendation");
+      expect.equal(sellerRes.tag, "FREQUENT DIRECTIONS, PPO-LAGRANGIAN & EVRPTW-QUEUE");
+      expect.ok(sellerRes.text.includes("Frequent Directions"));
+      expect.ok(sellerRes.text.includes("PPO-Lagrangian"));
+
+      const buyerRes = generateAiChatResponse("Hỏi về gợi ý chuẩn gu Frequent Directions và xe điện né kẹt trạm sạc EVRPTW-Queue");
+      expect.equal(buyerRes.intent, "FREQUENT_DIRECTIONS_PPO_EVRPTW_QUEUE");
+      expect.ok(buyerRes.replyText.includes("Frequent Directions"));
+      expect.ok(buyerRes.replyText.includes("PPO-Lagrangian"));
+      expect.ok(buyerRes.replyText.includes("EVRPTW"));
+    });
+
+    test("F213-T24: Full end-to-end integration: Stream dimension reduction with Frequent Directions -> Safe price optimization with PPO-Lagrangian -> Green EV logistics with stochastic queue routing", () => {
+      // Step 1: Dimensionality reduction of clickstream embedding stream
+      const fdSketch = new ServerFrequentDirectionsSketch({ dimension: 6, rankK: 3, sketchSize: 6 });
+      const streamBatch = [
+        [1, 2, 0, 4, 1, 3],
+        [2, 0, 3, 1, 5, 2],
+        [0, 1, 4, 2, 2, 4],
+        [3, 3, 1, 0, 4, 1],
+        [4, 1, 2, 3, 0, 5],
+        [2, 4, 0, 2, 3, 2]
+      ];
+      fdSketch.addBatch(streamBatch);
+      const diag = fdSketch.getDiagnostics();
+      expect.ok(diag.currentSketchRows <= 6);
+      expect.ok(diag.streamFrobeniusNormSq > 0);
+
+      // Step 2: Safe dynamic price recommendation under margin & run-rate constraints
+      const ppo = new ServerPPOLagrangianSafePricing({ basePrice: 350000, cogs: 220000, targetRunRate: 12 });
+      const pricePlan = ppo.recommendPrice({
+        basePrice: 350000,
+        cogs: 220000,
+        competitorPrice: 360000,
+        demandIndex: 1.2
+      });
+      expect.ok(pricePlan.recommendedPrice >= 220000 * 1.05);
+      expect.equal(pricePlan.evaluatedActions.length, 9);
+      expect.ok(pricePlan.marginAnalysis.isSafe);
+
+      // Step 3: Green EV dispatch with stochastic queuing awareness
+      const router = new ServerEVRPTWQueueRouter({
+        batteryCapacityKwh: 50,
+        consumptionPerKm: 0.4
+      });
+      const customers = [
+        { id: "C1", name: "Khách Đống Đa", x: 3, y: 3, demandKg: 20, timeWindow: [0, 180] },
+        { id: "C2", name: "Khách Cầu Giấy", x: 5, y: 6, demandKg: 30, timeWindow: [0, 240] }
+      ];
+      const evPlan = router.planEVRoutes({ customers });
+      expect.equal(evPlan.status, "SUCCESS");
+      expect.ok(evPlan.vehiclesUsed >= 1);
+      expect.ok(evPlan.summary.totalDistanceKm > 0);
+      expect.ok(evPlan.summary.totalCostVnd > 0);
     });
   });
 });

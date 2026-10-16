@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp|frequent[- ]directions|matrix sketch/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -454,7 +454,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 18. Tối Ưu Hóa Giá Bán Động & Flash Sale (Multi-Armed Bandit Thompson Sampling)
-  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg|opoe|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|lossy[- ]counting|spot|spot pricing|soft time window|cửa sổ mềm|dsac|bất định nhận thức/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
+  if (!/skiplist|danh sách nhảy|contextual|ngữ cảnh|lints|linear bandit|double q|q-learning|học tăng cường kép|tqpo|truncated quantile|cắt ngọn phân vị|iql|awac|cpo|calql|edac|td3\+bc|mopo|sac[- ]per|qrdpg|opoe|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|lossy[- ]counting|spot|spot pricing|soft time window|cửa sổ mềm|dsac|bất định nhận thức|ppo[- ]lagrangian|lagrangian|định giá ràng buộc/i.test(raw) && /thompson sampling|multi-armed bandit|định giá động|dynamic pricing|co giãn giá|giá flash sale/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN ĐỊNH GIÁ ĐỘNG THOMPSON SAMPLING (MULTI-ARMED BANDIT)**:
 - **Mục đích thiết kế**: Tự động dò tìm mức giá bán Flash Sale hoặc giá thầu Shopee Ads tối ưu để tối đa hóa doanh thu GMV mà không bị hớ giá (Underpricing) hay mất khách (Overpricing).
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/battery degradation|evrptw[- ]battery/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3808,6 +3808,74 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem kế hoạch đồng bộ Inbound - Outbound',
         'Kiểm tra thời gian phân loại tại Hub (25p)',
         'Phân tích chi phí vận chuyển tổng thể'
+      ]
+    };
+  }
+
+  // 179. Phác Thảo Ma Trận Xác Định Frequent Directions Matrix Sketching (Phase 66 - Feature 213)
+  if (/frequent[- ]directions|matrix sketch|phác thảo ma trận|co hướng luồng|svd luồng|thu gọn ma trận streaming|directional shrinkage/i.test(raw)) {
+    return {
+      text: `📉 **THUẬT TOÁN PHÁC THẢO MA TRẬN DÒNG FREQUENT DIRECTIONS (EDO LIBERTY 2013 / GHASHAMI ET AL. SODA 2016)**:
+- **Khắc Phục Nút Thắt Chiều Dữ Liệu Luồng Lớn**:
+  - Khi hàng triệu vector hành vi người dùng hoặc embedding sản phẩm $a_i \\in \\mathbb{R}^d$ đổ về liên tục, việc lưu trữ ma trận $A \\in \\mathbb{R}^{n \\times d}$ làm nổ tung bộ nhớ RAM.
+- **Cơ Chế Thu Co Hướng Xác Định (Directional Shrinkage)**:
+  - Duy trì ma trận phác thảo $B \\in \\mathbb{R}^{\\ell \\times d}$ với $\\ell = 2k$ dòng. Khi bộ đệm đầy, thực hiện phân rã SVD $B = U \\Sigma V^T$.
+  - Trừ trực tiếp giá trị kỳ dị thứ $k$: $\\tilde{\\Sigma} = \\sqrt{\\max(0, \\Sigma^2 - \\sigma_k^2 I)}$, triệt tiêu ít nhất $k$ dòng về 0 để đón nhận luồng dữ liệu mới.
+- **Cam Kết Chặn Sai Số Toán Học Tối Ưu**:
+  - Sai số xấp xỉ ma trận hiệp phương sai được chứng minh chặt chẽ:
+    $$0 \\le \\|A^T A - B^T B\\|_2 \\le \\frac{1}{\\ell - k} \\|A - A_k\\|_F^2 \\le \\frac{1}{k} \\|A\\|_F^2$$
+  - Hoàn toàn xác định (Deterministic), không sử dụng hàm băm ngẫu nhiên, bảo toàn tuyệt đối các thành phần chính (PCA) quan trọng nhất!`,
+      type: 'analytics',
+      tag: 'FREQUENT DIRECTIONS MATRIX SKETCHING',
+      suggestions: [
+        'Xem ma trận phác thảo B và rank k',
+        'Kiểm tra chặn sai số Frobenius ||A||_F^2 / k',
+        'Phân tích phép chiếu PCA không gian con'
+      ]
+    };
+  }
+
+  // 180. Định Giá Ràng Buộc An Toàn PPO-Lagrangian Safe Pricing (Phase 66 - Feature 213)
+  if (/ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
+    return {
+      text: `🛡️ **ĐỊNH GIÁ RÀNG BUỘC AN TOÀN PPO-LAGRANGIAN SAFE PRICING (ACHIAM ET AL. ICML 2017 / RAY ET AL. 2019)**:
+- **Tối Đa Doanh Thu Dưới Đa Ràng Buộc Kinh Doanh Nghiêm Ngặt**:
+  - Không để thuật toán tự do tăng giảm giá gây thiệt hại tài chính. PPO-Lagrangian ràng buộc chặt chẽ:
+    • **Ràng buộc biên lãi gộp**: $\\mathbb{E}[C_{\\text{margin}}(\\theta)] \\le d_{\\text{margin}}$ (khóa chặt giá bán an toàn $\\ge \\text{COGS} \\times 1.05$).
+    • **Ràng buộc tốc độ bán (Velocity Run Rate)**: $\\mathbb{E}[|\\text{Demand}(p) - \\text{RunRate}|] \\le d_{\\text{vel}}$ (tránh cạn kho quá sớm hoặc ế hàng).
+- **Cơ Chế Cập Nhật Nhân Tử Đối Ngẫu Thích Ứng (Adaptive Dual Multipliers)**:
+  - Các nhân tử $\\lambda_{\\text{margin}}, \\lambda_{\\text{vel}} \\ge 0$ tự động tăng vọt khi vi phạm an toàn qua quy tắc Subgradient Ascent:
+    $$\\lambda_k \\leftarrow \\max\\left(0, \\lambda_k + \\alpha_\\lambda (C_k(\\theta) - d_k)\\right)$$
+- **Mục Tiêu Chính Sách Cắt Ngọn Clipped Surrogate**:
+  - Tối ưu $L^{\\text{CLIP}}(\\theta) - \\sum \\lambda_k C_k(\\theta)$, duy trì độ ổn định chính sách và triệt tiêu biến động giá bất thường!`,
+      type: 'pricing',
+      tag: 'PPO LAGRANGIAN SAFE PRICING',
+      suggestions: [
+        'Kiểm tra nhân tử đối ngẫu Lambda Margin & Velocity',
+        'Đo lường sai lệch tốc độ bán Run Rate',
+        'Xem phân tích biên lợi nhuận Gross Margin'
+      ]
+    };
+  }
+
+  // 181. Điều Phối Xe Điện & Hàng Đợi Trạm Sạc M/M/c EVRPTW-Queue (Phase 66 - Feature 213)
+  if (/evrptw[- ]queue|hàng đợi trạm sạc|erlang queue|m\/m\/c|sạc xe điện ngẫu nhiên|tắc nghẽn trạm sạc|chờ sạc pin spx/i.test(raw)) {
+    return {
+      text: `⚡ **ĐIỀU PHỐI ĐỘI XE ĐIỆN VÀ HÀNG ĐỢI TRẠM SẠC M/M/c EVRPTW-QUEUE (FROGER ET AL. 2019 / MONTOYA 2017)**:
+- **Mô Hình Hóa Ùn Tắc Hàng Đợi Trạm Sạc Giờ Cao Điểm**:
+  - Tại đô thị đông đúc, các trạm sạc nhanh công cộng thường xuyên quá tải. Mỗi trạm $s$ có $c_s$ trụ sạc song song, dòng xe đến Poisson $\\lambda_s$ và thời gian sạc $\\mu_s$.
+- **Thời Gian Chờ Kỳ Vọng Theo Lý Thuyết Hàng Đợi Erlang**:
+  - Cường độ lưu lượng $\\rho = \\frac{\\lambda}{c \\mu} < 1$. Xác suất trạm rảnh $P_0$ và độ dài hàng đợi $L_q$:
+    $$L_q = \\frac{P_0 (c\\rho)^c \\rho}{c!(1-\\rho)^2}, \\quad W_q = \\frac{L_q}{\\lambda} \\times 60\\text{ (phút)}$$
+  - Tổng thời gian dừng tại trạm = $W_q + t_{\\text{charge}}$.
+- **Định Tuyến Đột Phá Thích Ứng Tránh Ùn Tắc**:
+  - Router SPX tự động điều hướng bưu tá tới trạm sạc xa hơn nhưng có thời gian chờ $W_q$ gần bằng 0, bảo đảm 100% kiện hàng tới tay người nhận đúng cửa sổ thời gian $[e_i, l_i]$!`,
+      type: 'logistics',
+      tag: 'EVRPTW STOCHASTIC CHARGING QUEUES',
+      suggestions: [
+        'Xem thời gian chờ hàng đợi Erlang W_q',
+        'Kiểm tra hệ số tải trụ sạc Rho',
+        'Tối ưu lộ trình ghé trạm sạc né tắc nghẽn'
       ]
     };
   }

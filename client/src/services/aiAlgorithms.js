@@ -33928,6 +33928,650 @@ export class VRPTWCrossDockBilateralRouter {
   }
 }
 
+// ============================================================================
+// PHASE 66 ENTERPRISE SUITE: FREQUENT DIRECTIONS, PPO-LAGRANGIAN & EVRPTW-QUEUE
+// ============================================================================
+
+export class FrequentDirectionsSketch {
+  constructor(options = {}) {
+    this.dimension = Math.max(2, Math.floor(options.dimension || 8));
+    this.rankK = Math.max(1, Math.min(this.dimension, Math.floor(options.rankK || 4)));
+    this.sketchSize = Math.max(this.rankK * 2, Math.floor(options.sketchSize || this.rankK * 2));
+
+    this.sketchRows = [];
+    this.totalRowsProcessed = 0;
+    this.frobeniusNormSq = 0;
+    this.shrinkageOperationsCount = 0;
+  }
+
+  addRow(vector) {
+    if (!Array.isArray(vector)) return;
+    const row = new Float64Array(this.dimension);
+    let rowNormSq = 0;
+    for (let j = 0; j < this.dimension; j++) {
+      const val = Number(vector[j]) || 0;
+      row[j] = val;
+      rowNormSq += val * val;
+    }
+
+    this.sketchRows.push(row);
+    this.totalRowsProcessed++;
+    this.frobeniusNormSq += rowNormSq;
+
+    if (this.sketchRows.length >= this.sketchSize) {
+      this.shrink();
+    }
+  }
+
+  addBatch(matrix) {
+    if (!Array.isArray(matrix)) return;
+    for (const row of matrix) {
+      this.addRow(row);
+    }
+  }
+
+  shrink() {
+    this.shrinkageOperationsCount++;
+    const l = this.sketchRows.length;
+    const d = this.dimension;
+
+    const G = new Array(d).fill(0).map(() => new Float64Array(d));
+    for (let r = 0; r < l; r++) {
+      const row = this.sketchRows[r];
+      for (let i = 0; i < d; i++) {
+        const ri = row[i];
+        if (ri === 0) continue;
+        for (let j = 0; j < d; j++) {
+          G[i][j] += ri * row[j];
+        }
+      }
+    }
+
+    const { eigenvalues, eigenvectors } = this._jacobiEigen(G, d);
+
+    const indices = Array.from({ length: d }, (_, i) => i);
+    indices.sort((a, b) => eigenvalues[b] - eigenvalues[a]);
+
+    const kIdx = Math.min(this.rankK, d) - 1;
+    const delta = Math.max(0, eigenvalues[indices[kIdx]] || 0);
+
+    const newRows = [];
+    for (let idx = 0; idx < d; idx++) {
+      const origEigen = eigenvalues[indices[idx]];
+      const shrunkEigen = Math.max(0, origEigen - delta);
+      if (shrunkEigen > 1e-12) {
+        const singularValue = Math.sqrt(shrunkEigen);
+        const row = new Float64Array(d);
+        for (let j = 0; j < d; j++) {
+          row[j] = singularValue * eigenvectors[j][indices[idx]];
+        }
+        newRows.push(row);
+      }
+    }
+
+    this.sketchRows = newRows;
+  }
+
+  _jacobiEigen(A, n, maxIter = 50) {
+    const V = new Array(n).fill(0).map((_, i) => {
+      const col = new Float64Array(n);
+      col[i] = 1.0;
+      return col;
+    });
+
+    const mat = A.map(row => Float64Array.from(row));
+
+    for (let iter = 0; iter < maxIter; iter++) {
+      let maxOff = 0;
+      let p = 0;
+      let q = 1;
+
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          const absVal = Math.abs(mat[i][j]);
+          if (absVal > maxOff) {
+            maxOff = absVal;
+            p = i;
+            q = j;
+          }
+        }
+      }
+
+      if (maxOff < 1e-10) break;
+
+      const app = mat[p][p];
+      const aqq = mat[q][q];
+      const apq = mat[p][q];
+
+      const theta = 0.5 * Math.atan2(2 * apq, aqq - app);
+      const c = Math.cos(theta);
+      const s = Math.sin(theta);
+
+      mat[p][p] = c * c * app - 2 * s * c * apq + s * s * aqq;
+      mat[q][q] = s * s * app + 2 * s * c * apq + c * c * aqq;
+      mat[p][q] = 0;
+      mat[q][p] = 0;
+
+      for (let k = 0; k < n; k++) {
+        if (k !== p && k !== q) {
+          const akp = mat[k][p];
+          const akq = mat[k][q];
+          mat[k][p] = c * akp - s * akq;
+          mat[p][k] = mat[k][p];
+          mat[k][q] = s * akp + c * akq;
+          mat[q][k] = mat[k][q];
+        }
+      }
+
+      for (let k = 0; k < n; k++) {
+        const vkp = V[k][p];
+        const vkq = V[k][q];
+        V[k][p] = c * vkp - s * vkq;
+        V[k][q] = s * vkp + c * vkq;
+      }
+    }
+
+    const eigenvalues = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      eigenvalues[i] = Math.max(0, mat[i][i]);
+    }
+
+    return { eigenvalues, eigenvectors: V };
+  }
+
+  getSketchMatrix() {
+    return this.sketchRows.map(row => Array.from(row).map(v => Number(v.toFixed(6))));
+  }
+
+  getCovarianceApproximation() {
+    const d = this.dimension;
+    const cov = new Array(d).fill(0).map(() => new Array(d).fill(0));
+    for (const row of this.sketchRows) {
+      for (let i = 0; i < d; i++) {
+        if (row[i] === 0) continue;
+        for (let j = 0; j < d; j++) {
+          cov[i][j] += row[i] * row[j];
+        }
+      }
+    }
+    return cov.map(row => row.map(v => Number(v.toFixed(4))));
+  }
+
+  project(query) {
+    if (!Array.isArray(query) || query.length === 0) {
+      return { projectionNorm: 0, projectedVector: [] };
+    }
+    const d = this.dimension;
+    const x = new Float64Array(d);
+    for (let j = 0; j < d; j++) x[j] = Number(query[j]) || 0;
+
+    const projected = new Float64Array(d);
+    for (const bRow of this.sketchRows) {
+      let rowNorm = 0;
+      for (let j = 0; j < d; j++) rowNorm += bRow[j] * bRow[j];
+      if (rowNorm < 1e-10) continue;
+      rowNorm = Math.sqrt(rowNorm);
+
+      let dot = 0;
+      for (let j = 0; j < d; j++) dot += x[j] * (bRow[j] / rowNorm);
+
+      for (let j = 0; j < d; j++) {
+        projected[j] += dot * (bRow[j] / rowNorm);
+      }
+    }
+
+    let projNormSq = 0;
+    for (let j = 0; j < d; j++) projNormSq += projected[j] * projected[j];
+
+    return {
+      projectionNorm: Number(Math.sqrt(projNormSq).toFixed(4)),
+      projectedVector: Array.from(projected).map(v => Number(v.toFixed(4)))
+    };
+  }
+
+  getDiagnostics() {
+    let sketchFrobeniusNormSq = 0;
+    for (const r of this.sketchRows) {
+      for (let j = 0; j < this.dimension; j++) {
+        sketchFrobeniusNormSq += r[j] * r[j];
+      }
+    }
+
+    const theoreticalMaxError = Number((this.frobeniusNormSq / this.rankK).toFixed(4));
+
+    return {
+      dimension: this.dimension,
+      rankK: this.rankK,
+      sketchSize: this.sketchSize,
+      currentSketchRows: this.sketchRows.length,
+      totalRowsProcessed: this.totalRowsProcessed,
+      streamFrobeniusNormSq: Number(this.frobeniusNormSq.toFixed(4)),
+      sketchFrobeniusNormSq: Number(sketchFrobeniusNormSq.toFixed(4)),
+      shrinkageOperationsCount: this.shrinkageOperationsCount,
+      theoreticalMaxError,
+      compressionRatio: Number((this.totalRowsProcessed > 0 ? (this.sketchRows.length / this.totalRowsProcessed) : 1.0).toFixed(4))
+    };
+  }
+}
+
+export class PPOLagrangianSafePricing {
+  constructor(options = {}) {
+    this.basePrice = Number(options.basePrice) || 200000;
+    this.cogs = Number(options.cogs) || 120000;
+    this.clipEpsilon = Number(options.clipEpsilon) || 0.20;
+    this.lrDual = Number(options.lrDual) || 0.05;
+    this.marginFloorRatio = Number(options.marginFloorRatio) || 1.05;
+    this.targetRunRate = Number(options.targetRunRate) || 10;
+
+    this.actionMultipliers = [0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.10, 1.15, 1.20];
+    this.policyLogits = new Array(this.actionMultipliers.length).fill(0.0);
+    this.oldProbabilities = new Array(this.actionMultipliers.length).fill(1 / this.actionMultipliers.length);
+
+    this.lambdaMargin = 0.25;
+    this.lambdaVelocity = 0.15;
+    this.dMargin = 0.0;
+    this.dVelocity = 3.0;
+    this.trainingStepsCount = 0;
+  }
+
+  _computeProbabilities(logits) {
+    const maxVal = Math.max(...logits);
+    const exps = logits.map(v => Math.exp(v - maxVal));
+    const sumExps = exps.reduce((acc, v) => acc + v, 0);
+    return exps.map(v => (sumExps > 0 ? v / sumExps : 1 / logits.length));
+  }
+
+  estimateDemand(price, demandIndex = 1.0) {
+    const priceRatio = Math.max(0.2, price / this.basePrice);
+    const elasticityEta = 1.6;
+    const baseDemand = this.targetRunRate * demandIndex;
+    const estimated = baseDemand * Math.pow(priceRatio, -elasticityEta);
+    return Number(Math.max(0.5, estimated).toFixed(2));
+  }
+
+  evaluateConstraints(candidatePrice, demand) {
+    const cogsFloor = this.cogs * this.marginFloorRatio;
+    const marginDeficit = Math.max(0, (cogsFloor - candidatePrice) / this.basePrice);
+    const velocityDeviation = Math.abs(demand - this.targetRunRate);
+
+    return {
+      marginCost: Number(marginDeficit.toFixed(4)),
+      velocityCost: Number(velocityDeviation.toFixed(2))
+    };
+  }
+
+  updatePolicyAndDuals(actionMultiplier, observedRevenue, observedSalesUnits) {
+    this.trainingStepsCount++;
+    const actionIdx = this.actionMultipliers.indexOf(actionMultiplier);
+    if (actionIdx === -1) return;
+
+    const currentProbs = this._computeProbabilities(this.policyLogits);
+    const oldProb = this.oldProbabilities[actionIdx] || (1 / this.actionMultipliers.length);
+    const newProb = currentProbs[actionIdx];
+
+    const ratio = newProb / Math.max(1e-4, oldProb);
+    const baselineRevenue = this.basePrice * this.targetRunRate * 0.9;
+    const advantage = (observedRevenue - baselineRevenue) / Math.max(1, baselineRevenue);
+
+    const candidatePrice = this.basePrice * actionMultiplier;
+    const costs = this.evaluateConstraints(candidatePrice, observedSalesUnits);
+
+    const unclipped = ratio * advantage;
+    const clipped = Math.max(1 - this.clipEpsilon, Math.min(1 + this.clipEpsilon, ratio)) * advantage;
+    const ppoLoss = Math.min(unclipped, clipped);
+
+    const totalPenalizedAdvantage = ppoLoss 
+      - (this.lambdaMargin * costs.marginCost * 10) 
+      - (this.lambdaVelocity * (costs.velocityCost / this.targetRunRate));
+
+    this.policyLogits[actionIdx] += 0.1 * totalPenalizedAdvantage;
+
+    const marginConstraintViolation = costs.marginCost - this.dMargin;
+    this.lambdaMargin = Number(Math.max(0, this.lambdaMargin + this.lrDual * marginConstraintViolation * 5).toFixed(4));
+
+    const velConstraintViolation = (costs.velocityCost - this.dVelocity) / this.targetRunRate;
+    this.lambdaVelocity = Number(Math.max(0, this.lambdaVelocity + this.lrDual * velConstraintViolation).toFixed(4));
+
+    this.oldProbabilities = this._computeProbabilities(this.policyLogits);
+  }
+
+  recommendPrice(item = {}) {
+    const basePrice = Number(item.basePrice) || this.basePrice;
+    const cogs = Number(item.cogs) || this.cogs;
+    const competitorPrice = Number(item.competitorPrice) || basePrice;
+    const demandIndex = item.demandIndex !== undefined ? Number(item.demandIndex) : 1.0;
+
+    const probs = this._computeProbabilities(this.policyLogits);
+    const evaluatedActions = [];
+
+    for (let i = 0; i < this.actionMultipliers.length; i++) {
+      const mult = this.actionMultipliers[i];
+      const proposedPrice = Math.round(basePrice * mult);
+      const estDemand = this.estimateDemand(proposedPrice, demandIndex);
+      const costs = this.evaluateConstraints(proposedPrice, estDemand);
+
+      const expRevenue = Math.round(proposedPrice * estDemand);
+      const marginVnd = proposedPrice - cogs;
+      const marginPercent = Number(((marginVnd / proposedPrice) * 100).toFixed(2));
+
+      const lagrangianScore = Math.round(
+        expRevenue 
+        - (this.lambdaMargin * costs.marginCost * basePrice * estDemand)
+        - (this.lambdaVelocity * costs.velocityCost * basePrice * 0.05)
+      );
+
+      evaluatedActions.push({
+        priceMultiplier: mult,
+        proposedPrice,
+        estimatedDemand: estDemand,
+        expectedRevenue: expRevenue,
+        marginPercent,
+        marginCost: costs.marginCost,
+        velocityCost: costs.velocityCost,
+        policyProbability: Number(probs[i].toFixed(4)),
+        lagrangianScore
+      });
+    }
+
+    let bestIdx = 0;
+    let maxScore = -Infinity;
+    for (let i = 0; i < evaluatedActions.length; i++) {
+      if (evaluatedActions[i].lagrangianScore > maxScore) {
+        maxScore = evaluatedActions[i].lagrangianScore;
+        bestIdx = i;
+      }
+    }
+
+    const chosenAction = evaluatedActions[bestIdx];
+    let recommendedPrice = chosenAction.proposedPrice;
+
+    const safetyFloor = Math.round(cogs * this.marginFloorRatio);
+    const safetyCeiling = Math.round(competitorPrice * 1.25);
+
+    let isFloorEnforced = false;
+    if (recommendedPrice < safetyFloor) {
+      recommendedPrice = safetyFloor;
+      isFloorEnforced = true;
+    } else if (recommendedPrice > safetyCeiling) {
+      recommendedPrice = safetyCeiling;
+    }
+
+    const marginVnd = recommendedPrice - cogs;
+    const marginPercent = Number(((marginVnd / recommendedPrice) * 100).toFixed(2));
+
+    return {
+      basePrice,
+      cogs,
+      competitorPrice,
+      recommendedPrice,
+      priceMultiplier: chosenAction.priceMultiplier,
+      estimatedDemand: chosenAction.estimatedDemand,
+      expectedRevenue: chosenAction.expectedRevenue,
+      lagrangianScore: chosenAction.lagrangianScore,
+      lambdaMargin: this.lambdaMargin,
+      lambdaVelocity: this.lambdaVelocity,
+      isFloorEnforced,
+      safetyFloorVnd: safetyFloor,
+      evaluatedActions,
+      marginAnalysis: {
+        marginVnd,
+        marginPercent,
+        isSafe: recommendedPrice >= safetyFloor
+      },
+      dualStatus: {
+        lambdaMargin: this.lambdaMargin,
+        lambdaVelocity: this.lambdaVelocity,
+        trainingStepsCount: this.trainingStepsCount
+      }
+    };
+  }
+}
+
+export class EVRPTWQueueRouter {
+  constructor(options = {}) {
+    this.batteryCapacityKwh = Number(options.batteryCapacityKwh) || 60;
+    this.consumptionPerKm = Number(options.consumptionPerKm) || 0.35;
+    this.minSocSafetyBuffer = Number(options.minSocSafetyBuffer) || 0.15;
+    this.vehicleCapacityKg = Number(options.vehicleCapacityKg) || 150;
+    this.costPerKm = Number(options.costPerKm) || 5000;
+    this.costPerKwh = Number(options.costPerKwh) || 3800;
+    this.latenessPenaltyPerMin = Number(options.latenessPenaltyPerMin) || 2000;
+
+    this.depot = { id: "DEPOT_SPX", name: "SPX Central Hub", x: 0, y: 0 };
+  }
+
+  calculateDistanceKm(a, b) {
+    const dx = (a.x || 0) - (b.x || 0);
+    const dy = (a.y || 0) - (b.y || 0);
+    return Number(Math.sqrt(dx * dx + dy * dy).toFixed(2));
+  }
+
+  _factorial(n) {
+    if (n <= 1) return 1;
+    let res = 1;
+    for (let i = 2; i <= n; i++) res *= i;
+    return res;
+  }
+
+  computeQueueWaitTime(station = {}) {
+    const c = Math.max(1, Math.floor(station.stalls || 2));
+    const lambda = Math.max(0.1, Number(station.arrivalRatePerHour) || 2.0);
+    const mu = Math.max(0.5, Number(station.serviceRatePerHour) || 2.5);
+
+    const rho = lambda / (c * mu);
+    if (rho >= 0.98) {
+      return {
+        rho: 0.99,
+        p0: 0.01,
+        expectedQueueWaitMin: 45.0,
+        isCongested: true
+      };
+    }
+
+    let sumN = 0;
+    for (let n = 0; n < c; n++) {
+      sumN += Math.pow(c * rho, n) / this._factorial(n);
+    }
+    const lastTerm = Math.pow(c * rho, c) / (this._factorial(c) * (1 - rho));
+    const p0 = 1.0 / (sumN + lastTerm);
+
+    const lq = (p0 * Math.pow(c * rho, c) * rho) / (this._factorial(c) * Math.pow(1 - rho, 2));
+    const wqMin = (lq / lambda) * 60;
+
+    return {
+      rho: Number(rho.toFixed(3)),
+      p0: Number(p0.toFixed(4)),
+      expectedQueueWaitMin: Number(Math.max(0.5, wqMin).toFixed(2)),
+      isCongested: rho >= 0.75
+    };
+  }
+
+  planEVRoutes(input = {}) {
+    const rawCustomers = Array.isArray(input.customers) ? input.customers : [];
+    const chargingStations = Array.isArray(input.chargingStations) ? input.chargingStations : [
+      { id: "CS1", name: "Trạm Sạc Mỹ Đình", x: 4, y: 3, stalls: 3, arrivalRatePerHour: 3.5, serviceRatePerHour: 2.0 },
+      { id: "CS2", name: "Trạm Sạc Long Biên", x: -3, y: 5, stalls: 2, arrivalRatePerHour: 1.2, serviceRatePerHour: 1.8 }
+    ];
+
+    if (rawCustomers.length === 0) {
+      return {
+        status: "EMPTY",
+        routes: [],
+        summary: { totalDistanceKm: 0, totalEnergyKwh: 0, totalQueueWaitMin: 0, totalCostVnd: 0 }
+      };
+    }
+
+    const unvisited = rawCustomers.map(c => ({
+      ...c,
+      demandKg: Number(c.demandKg || c.demand || 10),
+      timeWindow: Array.isArray(c.timeWindow) ? c.timeWindow : [0, 240]
+    })).sort((a, b) => a.timeWindow[0] - b.timeWindow[0]);
+
+    const routes = [];
+    let vehicleId = 1;
+
+    while (unvisited.length > 0) {
+      const currentRoute = [];
+      let currentPayload = 0;
+      let currentLoc = this.depot;
+      let currentTime = 0;
+      let currentSocKwh = this.batteryCapacityKwh;
+      let routeDistanceKm = 0;
+      let routeEnergyConsumedKwh = 0;
+      let routeTotalWaitMin = 0;
+      let routeLatenessMin = 0;
+      let chargesCount = 0;
+
+      for (let i = 0; i < unvisited.length; i++) {
+        const cust = unvisited[i];
+        if (currentPayload + cust.demandKg > this.vehicleCapacityKg) continue;
+
+        const legDist = this.calculateDistanceKm(currentLoc, cust);
+        const legEnergy = legDist * this.consumptionPerKm * (1 + 0.005 * (currentPayload / this.vehicleCapacityKg));
+
+        const minSafeKwh = this.batteryCapacityKwh * this.minSocSafetyBuffer;
+        if (currentSocKwh - legEnergy < minSafeKwh) {
+          let bestStation = null;
+          let minTotalPenalty = Infinity;
+
+          for (const cs of chargingStations) {
+            const distToCs = this.calculateDistanceKm(currentLoc, cs);
+            const energyToCs = distToCs * this.consumptionPerKm;
+            if (currentSocKwh - energyToCs < minSafeKwh * 0.5) continue;
+
+            const qMetrics = this.computeQueueWaitTime(cs);
+            const rechargeNeededKwh = this.batteryCapacityKwh * 0.85 - (currentSocKwh - energyToCs);
+            const rechargeDurationMin = Math.max(10, rechargeNeededKwh * 1.2);
+            const totalCsTime = qMetrics.expectedQueueWaitMin + rechargeDurationMin + distToCs * 2.0;
+
+            if (totalCsTime < minTotalPenalty) {
+              minTotalPenalty = totalCsTime;
+              bestStation = {
+                cs,
+                distToCs,
+                energyToCs,
+                qMetrics,
+                rechargeNeededKwh: Number(rechargeNeededKwh.toFixed(2)),
+                rechargeDurationMin: Number(rechargeDurationMin.toFixed(2)),
+                totalStationTimeMin: Number(totalCsTime.toFixed(2))
+              };
+            }
+          }
+
+          if (bestStation) {
+            routeDistanceKm += bestStation.distToCs;
+            routeEnergyConsumedKwh += bestStation.energyToCs;
+            currentTime += bestStation.distToCs * 2.0 + bestStation.totalStationTimeMin;
+            routeTotalWaitMin += bestStation.qMetrics.expectedQueueWaitMin;
+            chargesCount++;
+
+            currentRoute.push({
+              type: "CHARGING_STATION",
+              id: bestStation.cs.id,
+              name: bestStation.cs.name,
+              arrivalTime: Number(currentTime.toFixed(1)),
+              queueWaitMin: bestStation.qMetrics.expectedQueueWaitMin,
+              rechargeKwh: bestStation.rechargeNeededKwh,
+              rechargeDurationMin: bestStation.rechargeDurationMin,
+              stationRho: bestStation.qMetrics.rho,
+              departureTime: Number(currentTime.toFixed(1))
+            });
+
+            currentSocKwh = this.batteryCapacityKwh * 0.85;
+            currentLoc = bestStation.cs;
+          }
+        }
+
+        const distToCust = this.calculateDistanceKm(currentLoc, cust);
+        const energyToCust = distToCust * this.consumptionPerKm;
+        const custTravelMin = distToCust * 2.0;
+        routeDistanceKm += distToCust;
+        routeEnergyConsumedKwh += energyToCust;
+        currentSocKwh -= energyToCust;
+        currentTime += custTravelMin;
+
+        const arrivalTime = currentTime;
+        const earlyWindow = cust.timeWindow[0];
+        const lateWindow = cust.timeWindow[1];
+        if (currentTime < earlyWindow) {
+          currentTime = earlyWindow;
+        }
+        let lateness = 0;
+        if (currentTime > lateWindow) {
+          lateness = currentTime - lateWindow;
+          routeLatenessMin += lateness;
+        }
+
+        const serviceDuration = 10;
+        currentTime += serviceDuration;
+        currentPayload += cust.demandKg;
+
+        currentRoute.push({
+          type: "CUSTOMER_DELIVERY",
+          id: cust.id,
+          name: cust.name || cust.id,
+          demandKg: cust.demandKg,
+          distanceKm: distToCust,
+          arrivalTime: Number(arrivalTime.toFixed(1)),
+          departureTime: Number(currentTime.toFixed(1)),
+          timeWindow: cust.timeWindow,
+          latenessMin: Number(lateness.toFixed(1)),
+          remainingSocKwh: Number(currentSocKwh.toFixed(2))
+        });
+
+        currentLoc = cust;
+        unvisited.splice(i, 1);
+        i--;
+      }
+
+      const distToDepot = this.calculateDistanceKm(currentLoc, this.depot);
+      routeDistanceKm += distToDepot;
+      currentTime += distToDepot * 2.0;
+
+      const travelCostVnd = Math.round(routeDistanceKm * this.costPerKm);
+      const chargingCostVnd = Math.round(routeEnergyConsumedKwh * this.costPerKwh);
+      const latenessCostVnd = Math.round(routeLatenessMin * this.latenessPenaltyPerMin);
+      const totalRouteCostVnd = travelCostVnd + chargingCostVnd + latenessCostVnd;
+
+      routes.push({
+        vehicleId: `EV_VAN_${vehicleId++}`,
+        totalDistanceKm: Number(routeDistanceKm.toFixed(2)),
+        totalEnergyKwh: Number(routeEnergyConsumedKwh.toFixed(2)),
+        totalQueueWaitMin: Number(routeTotalWaitMin.toFixed(2)),
+        totalLatenessMin: Number(routeLatenessMin.toFixed(2)),
+        chargesCount,
+        finalSocPercent: Number(((currentSocKwh / this.batteryCapacityKwh) * 100).toFixed(1)),
+        costs: {
+          travelCostVnd,
+          chargingCostVnd,
+          latenessCostVnd,
+          totalRouteCostVnd
+        },
+        stops: currentRoute
+      });
+    }
+
+    const totalDist = routes.reduce((acc, r) => acc + r.totalDistanceKm, 0);
+    const totalEnergy = routes.reduce((acc, r) => acc + r.totalEnergyKwh, 0);
+    const totalQueueWait = routes.reduce((acc, r) => acc + r.totalQueueWaitMin, 0);
+    const totalLateness = routes.reduce((acc, r) => acc + r.totalLatenessMin, 0);
+    const totalCost = routes.reduce((acc, r) => acc + r.costs.totalRouteCostVnd, 0);
+
+    return {
+      status: "SUCCESS",
+      vehiclesUsed: routes.length,
+      routes,
+      summary: {
+        totalDistanceKm: Number(totalDist.toFixed(2)),
+        totalEnergyKwh: Number(totalEnergy.toFixed(2)),
+        totalQueueWaitMin: Number(totalQueueWait.toFixed(2)),
+        totalLatenessMin: Number(totalLateness.toFixed(2)),
+        totalCostVnd: totalCost
+      }
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -34265,6 +34909,10 @@ export default {
   HierarchicalHeavyHitters,
   DSACDynamicPricing,
   VRPTWCrossDockBilateralRouter,
+  // Phase 66 Enterprise Algorithms
+  FrequentDirectionsSketch,
+  PPOLagrangianSafePricing,
+  EVRPTWQueueRouter,
 };
 
 
