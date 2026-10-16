@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3747,7 +3747,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 176. Phát Hiện Phần Tử Phổ Biến Phân Cấp Hierarchical Heavy Hitters HHH (Phase 65 - Feature 212)
-  if (/hhh|hierarchical heavy hitters|heavy hitters phân cấp|heavy hitters đa tầng|tần suất có điều kiện|conditioned frequency|cây phân cấp sản phẩm/i.test(raw)) {
+  if (!/count[- ]min hierarchical|count[- ]min hhh/i.test(raw) && /hhh|hierarchical heavy hitters|heavy hitters phân cấp|heavy hitters đa tầng|tần suất có điều kiện|conditioned frequency|cây phân cấp sản phẩm/i.test(raw)) {
     return {
       text: `🌳 **THUẬT TOÁN PHẦN TỬ PHỔ BIẾN PHÂN CẤP HIERARCHICAL HEAVY HITTERS (CORMODE ET AL. VLDB 2008 / TODS 2010)**:
 - **Khắc Phục Khiếm Khuyết Của Heavy Hitters Đơn Tầng (Flat HHH)**:
@@ -3836,7 +3836,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 180. Định Giá Ràng Buộc An Toàn PPO-Lagrangian Safe Pricing (Phase 66 - Feature 213)
-  if (/ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
+  if (!/ppo[- ]entropy/i.test(raw) && /ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
     return {
       text: `🛡️ **ĐỊNH GIÁ RÀNG BUỘC AN TOÀN PPO-LAGRANGIAN SAFE PRICING (ACHIAM ET AL. ICML 2017 / RAY ET AL. 2019)**:
 - **Tối Đa Doanh Thu Dưới Đa Ràng Buộc Kinh Doanh Nghiêm Ngặt**:
@@ -4147,6 +4147,73 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Phân tích bảng đánh đổi chi phí thời gian 3 cấp sạc',
         'Tự động chọn trạm sạc đa tầng tối ưu chi phí',
         'Lập lịch trình giao hàng EVRPTW-MT toàn trình'
+      ]
+    };
+  }
+
+  // 194. Phân Tích Phần Tử Phổ Biến Phân Cấp Count-Min Hierarchical Heavy Hitters (Phase 71 - Feature 218)
+  if (/count[- ]min hierarchical|count[- ]min hhh|cây danh mục hhh|heavy hitters đa tầng count-min|tần suất có điều kiện hhh/i.test(raw)) {
+    return {
+      text: `🌳 **PHẦN TỬ PHỔ BIẾN PHÂN CẤP COUNT-MIN HIERARCHICAL HEAVY HITTERS (CORMODE & MUTHUKRISHNAN TODS 2005 / VLDB 2008)**:
+- **Kiến Trúc Mảng Phác Thảo Count-Min Đa Tầng (Multi-Level CMS Array)**:
+  - Hệ thống duy trì một mảng các bộ phác thảo Count-Min độc lập $CMS_0, CMS_1, \\dots, CMS_L$ tương ứng với độ sâu danh mục từ gốc tới lá ($L$ là độ sâu tối đa của cây danh mục TMĐT).
+  - Mỗi SKU hoặc lượt click $u$ ở tầng $l$ được cập nhật đồng thời lên toàn bộ các nút tổ tiên từ gốc tới nút hiện tại: $u_0 \\sqsubseteq u_1 \\sqsubseteq \\dots \\sqsubseteq u_l$.
+- **Nguyên Lý Tần Suất Có Điều Kiện Ngược (Bottom-Up Conditioned Frequency)**:
+  - Tần suất hiệu dụng của nút tổ tiên $u$ được tính toán nghiêm ngặt bằng cách trừ đi toàn bộ tần suất có điều kiện của các con cháu đã được công nhận là HHH:
+    $$f_{\\text{cond}}(u) = \\hat{f}(u) - \\sum_{v \\in \\text{HHH\\_Descendants}(u)} f_{\\text{cond}}(v)$$
+  - Điều kiện phong tặng: Nút $u$ là HHH khi và chỉ khi $f_{\\text{cond}}(u) \\ge \\phi \\cdot N$.
+- **Bảo Chứng Lý Thuyết 0 False Negatives**:
+  - Không bao giờ bỏ sót bất kỳ nhánh danh mục thịnh hành nào trên toàn sàn với sai số ước lượng tối đa $\\epsilon \\cdot N$ và xác suất tin cậy $1 - \\delta$!`,
+      type: 'analytics',
+      tag: 'COUNT-MIN HIERARCHICAL HEAVY HITTERS',
+      suggestions: [
+        'Xem danh sách danh mục HHH theo tầng',
+        'Kiểm tra tần suất có điều kiện Conditioned Frequency',
+        'Phân tích cây phác thảo Count-Min đa tầng'
+      ]
+    };
+  }
+
+  // 195. Định Giá Động PPO Entropy Cắt Ngọn An Toàn PPO-Entropy Safe Pricing (Phase 71 - Feature 218)
+  if (/ppo[- ]entropy|entropy safe pricing|định giá ppo entropy|adaptive entropy regularizer|clipped surrogate entropy/i.test(raw)) {
+    return {
+      text: `🛡️ **ĐỊNH GIÁ ĐỘNG PPO ENTROPY CẮT NGỌN AN TOÀN (SCHULMAN ET AL. 2017 / YU ET AL. AAAI 2021)**:
+- **Tối Ưu Hàm Mục Tiêu Cắt Ngọn Clipped Surrogate Kết Hợp Thưởng Entropy**:
+  - Tối đa hóa hàm mục tiêu chính sách với tỷ số xác suất $r_t(\\theta) = \\frac{\\pi_\\theta(a_t|s_t)}{\\pi_{\\theta_{\\text{old}}}(a_t|s_t)}$:
+    $$L^{\\text{CLIP}}(\\theta) = \\mathbb{E}\\left[\\min\\left(r_t(\\theta) A_t^{\\text{safe}}, \\text{clip}(r_t(\\theta), 1 - \\epsilon, 1 + \\epsilon) A_t^{\\text{safe}}\\right)\\right] + \\beta \\mathcal{H}(\\pi_\\theta)$$
+  - Số hạng Entropy $\\beta \\mathcal{H}(\\pi)$ thích ứng đảm bảo chính sách liên tục duy trì độ phân tán giá hợp lý, ngăn ngừa hiện tượng sớm hội tụ cục bộ (Premature Convergence).
+- **Hệ Thống Rào Chắn Kép Nhân Tử Lagrange & Sàn Giá Vốn**:
+  - Hàm lợi thế an toàn: $A_t^{\\text{safe}} = A_t^{\\text{reward}} - \\lambda A_t^{\\text{cost}}$ với nhân tử kép Lagrange $\\lambda \\ge 0$ tự động siết chặt khi chạm ngưỡng rủi ro.
+  - Khóa sàn giá bán bất khả xâm phạm: $P_{\\text{safe}} \\ge 1.05 \\times \\text{COGS}$ triệt tiêu 100% nguy cơ bán dưới giá vốn!`,
+      type: 'pricing',
+      tag: 'PPO-ENTROPY SAFE DYNAMIC PRICING',
+      suggestions: [
+        'Kiểm tra hệ số Entropy thích ứng Beta',
+        'Xem hàm lợi thế an toàn Safe Advantage',
+        'Đo lường nhân tử Lagrange vi phạm an toàn'
+      ]
+    };
+  }
+
+  // 196. Định Tuyến Xe Điện Đổi Pin và Suy Giảm Dung Lượng EVRPTW-BSD (Phase 71 - Feature 218)
+  if (/evrptw[- ]bsd|battery swapping decay|đổi pin suy giảm|suy giảm dung lượng pin|battery capacity fading|pelletier|hof/i.test(raw)) {
+    return {
+      text: `🔋 **ĐỊNH TUYẾN XE ĐIỆN ĐỔI PIN & MÔ HÌNH SUY GIẢM DUNG LƯỢNG EVRPTW-BSD (HOF 2017, PELLETIER 2018)**:
+- **Mô Hình Lão Hóa & Suy Giảm Dung Lượng Khả Dụng (Battery Capacity Fading)**:
+  - Dung lượng hữu dụng suy giảm theo số chu kỳ nạp/xả lũy kế $n$:
+    $$C_{\\text{eff}}(n) = C_0 \\left(1 - \\alpha \\sqrt{n}\\right)$$
+  - Khi pin đã qua hàng trăm chu kỳ giao hàng, phạm vi hoạt động của phương tiện co lại; thuật toán tự động hiệu chỉnh trần tích trữ năng lượng khả dụng.
+- **Đánh Đổi Trạm Đổi Pin Siêu Tốc BSS vs Trạm Sạc Cắm Dây CS**:
+  - **Trạm đổi pin BSS**: Thời gian tráo pin cơ học chỉ **3 phút**, phí cố định 25.000₫/lần — Giải cứu kịp thời các đơn hàng sắp trễ hẹn cửa sổ thời gian.
+  - **Trạm sạc cắm dây CS**: Tiết kiệm phí cố định nhưng tốn thời gian chờ và chịu thêm chi phí hao mòn pin (Degradation Wear Penalty).
+- **Tối Ưu Hóa Tổng Chi Phí Toàn Diện**:
+  - Hàm mục tiêu tối thiểu hóa tổng chi phí: $J = C_{\\text{travel}} + C_{\\text{swap}} + C_{\\text{energy}} + C_{\\text{wear}} + C_{\\text{lateness}}$, đảm bảo 100% bưu kiện giao thành công!`,
+      type: 'logistics',
+      tag: 'EVRPTW BATTERY SWAPPING & CAPACITY DECAY',
+      suggestions: [
+        'Phân tích chi phí đánh đổi BSS vs CS',
+        'Kiểm tra dung lượng suy giảm C_eff(n)',
+        'Lập lịch định tuyến xe điện EVRPTW-BSD'
       ]
     };
   }

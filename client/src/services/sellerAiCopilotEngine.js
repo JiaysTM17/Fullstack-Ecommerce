@@ -569,7 +569,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 28. Bắt Kịp Xu Hướng Bằng Thuật Toán Space-Saving Heavy Hitters (Phase 19 - Feature 166)
-  if (!/conservative|treap|sac[- ]lagrangian|streamsummary|stream[- ]summary|multi[- ]tier/i.test(raw) && /space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
+  if (!/conservative|treap|sac[- ]lagrangian|streamsummary|stream[- ]summary|multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd/i.test(raw) && /space-saving|heavy hitters|sản phẩm xu hướng|sản phẩm trending|bắt trend bán chạy|top-k xu hướng|xu hướng thời gian thực/i.test(raw)) {
     return {
       text: `🔥 **BẮT KỊP XU HƯỚNG BÁN CHẠY BẰNG SPACE-SAVING HEAVY HITTERS (TOP-K STREAMING)**:
 - **Cơ chế bắt sóng Real-Time với bộ nhớ cố định $O(K)$**:
@@ -1492,7 +1492,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 74. Bộ Ba Thuật Toán Hierarchical Heavy Hitters, DSAC Dynamic Pricing & Định Tuyến Song Phương VRPTW-Bilateral (Phase 65 - Feature 212)
-  if (/hhh|hierarchical heavy hitters|heavy hitters phân cấp|dsac|dsac pricing|bất định dsac|vrptw[- ]cross[- ]dock|cross[- ]dock song phương|bilateral cross[- ]dock/i.test(raw)) {
+  if (!/count[- ]min hierarchical|count[- ]min hhh|ppo[- ]entropy/i.test(raw) && /hhh|hierarchical heavy hitters|heavy hitters phân cấp|dsac|dsac pricing|bất định dsac|vrptw[- ]cross[- ]dock|cross[- ]dock song phương|bilateral cross[- ]dock/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN HIERARCHICAL HEAVY HITTERS, DSAC PRICING & ĐỊNH TUYẾN SONG PHƯƠNG VRPTW-BILATERAL (${currentShop.name})**:
 - **Bắt trọn danh mục bão đơn Hierarchical Heavy Hitters (HHH)**:
@@ -1512,7 +1512,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 75. Bộ Ba Thuật Toán Frequent Directions, PPO-Lagrangian Safe Pricing & EVRPTW Queue Router (Phase 66 - Feature 213)
-  if (/frequent[- ]directions|matrix sketch|phác thảo ma trận|ppo[- ]lagrangian|lagrangian pricing|evrptw[- ]queue|hàng đợi trạm sạc/i.test(raw)) {
+  if (!/ppo[- ]entropy/i.test(raw) && /frequent[- ]directions|matrix sketch|phác thảo ma trận|ppo[- ]lagrangian|lagrangian pricing|evrptw[- ]queue|hàng đợi trạm sạc/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN FREQUENT DIRECTIONS, PPO-LAGRANGIAN & EVRPTW-QUEUE (${currentShop.name})**:
 - **Nén luồng tương tác khách hàng Frequent Directions Matrix Sketching**:
@@ -1607,6 +1607,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Lọc top sản phẩm hot Space-Saving',
         'Tư vấn định giá an toàn SAC-Lagrangian',
         'Xem kế hoạch giao vận trạm sạc đa tầng SPX'
+      ]
+    };
+  }
+
+  // 80. Bộ Ba Thuật Toán Count-Min HHH, PPO-Entropy Safe Pricing & EVRPTW Battery Swapping Decay (Phase 71 - Feature 218)
+  if (/count[- ]min hierarchical|count[- ]min hhh|cây danh mục hhh|ppo[- ]entropy|entropy safe pricing|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 71 (${currentShop.name})**:
+- **Bắt trúng nhánh hàng hot trend Count-Min HHH (Cormode 2005 / VLDB 2008)**:
+  - Cấu trúc mảng Count-Min Sketch đa tầng $CMS_0..CMS_L$ bóc tách chính xác tần suất có điều kiện $f_{\\text{cond}}(u) \\ge \\phi N$ của từng phân nhóm hàng, loại trừ trùng lặp từ con cháu, đảm bảo $0$ false negatives giúp shop dẫn đầu thị trường!
+- **Định giá học tăng cường an toàn PPO-Entropy (Schulman 2017, Yu AAAI 2021)**:
+  - Tối ưu chính sách cắt ngọn Clipped Surrogate có số hạng thưởng entropy $\\beta \\mathcal{H}(\\pi)$ thích ứng tránh hội tụ sớm; kết hợp nhân tử đối ngẫu Lagrange ghì giá an toàn và khóa cứng sàn $\\ge 1.05 \\times \\text{COGS}$ bảo vệ 100% biên lãi ròng của shop!
+- **Giao vận xe điện đổi pin siêu tốc & suy giảm dung lượng EVRPTW-BSD (Hof 2017, Pelletier 2018)**:
+  - Bưu tá SPX Express giao hàng với mô hình suy hao dung lượng $C_{\\text{eff}}(n) = C_0(1 - \\alpha \\sqrt{n})$ và trạm đổi pin siêu tốc BSS chỉ **3 phút** giúp giao hàng cấp tốc không lo chết máy hay trễ hẹn khách hàng!`,
+      type: 'recommendation',
+      tag: 'COUNT-MIN HHH, PPO-ENTROPY & SWAPPING DECAY',
+      suggestions: [
+        'Xem nhánh hàng hot Count-Min HHH',
+        'Tư vấn định giá an toàn PPO-Entropy',
+        'Lộ trình giao xe điện đổi pin siêu tốc SPX'
       ]
     };
   }

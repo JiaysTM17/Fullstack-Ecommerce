@@ -371,6 +371,10 @@ import {
   SpaceSavingStreamSummary,
   SACLagrangianSafePricing,
   EVRPTWMultiTierChargingRouter,
+  // Phase 71 Enterprise Algorithms
+  CountMinHierarchicalHH,
+  PPOEntropySafePricing,
+  EVRPTWBatterySwappingDecayRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -549,6 +553,9 @@ import { VRPTWTimeDependentGreenRouter as ServerVRPTWTimeDependentGreenRouter } 
 import { SpaceSavingStreamSummary as ServerSpaceSavingStreamSummary } from "../../server/src/utils/spaceSavingStreamSummary.js";
 import { SACLagrangianSafePricing as ServerSACLagrangianSafePricing } from "../../server/src/utils/sacLagrangianSafePricing.js";
 import { EVRPTWMultiTierChargingRouter as ServerEVRPTWMultiTierChargingRouter } from "../../server/src/utils/evrptwMultiTierChargingRouter.js";
+import { CountMinHierarchicalHH as ServerCountMinHierarchicalHH } from "../../server/src/utils/countMinHierarchicalHH.js";
+import { PPOEntropySafePricing as ServerPPOEntropySafePricing } from "../../server/src/utils/ppoEntropySafePricing.js";
+import { EVRPTWBatterySwappingDecayRouter as ServerEVRPTWBatterySwappingDecayRouter } from "../../server/src/utils/evrptwBatterySwappingDecayRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -30321,6 +30328,367 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích luồng Space-Saving StreamSummary hay giao xe điện trạm sạc đa tầng không?");
       expect.equal(buyerRes.intent, "SPACESAVING_SACLAGRANGIAN_MULTITIER_CHARGING");
       expect.ok(buyerRes.replyText.includes("Space-Saving"));
+    });
+    // =========================================================================
+    // FEATURE 218: Count-Min Hierarchical Heavy Hitters, PPO-Entropy Safe Pricing,
+    // and Battery Swapping Decay EVRPTW (24 Tests: F218-T01 -> F218-T24)
+    // =========================================================================
+    describe("Feature 218: Phase 71 Enterprise Algorithms Suite", () => {
+
+      // -----------------------------------------------------------------------
+      // NHÓM 1: Count-Min Hierarchical Heavy Hitters (F218-T01 -> F218-T08)
+      // -----------------------------------------------------------------------
+      test("F218-T01: CountMinHierarchicalHH initializes multi-level sketch tables and parameters", () => {
+        const cmhhh = new CountMinHierarchicalHH({ epsilon: 0.02, delta: 0.05, maxDepth: 4, support: 0.1 });
+        expect.equal(cmhhh.epsilon, 0.02);
+        expect.equal(cmhhh.delta, 0.05);
+        expect.equal(cmhhh.maxDepth, 4);
+        expect.equal(cmhhh.support, 0.1);
+        expect.equal(cmhhh.totalProcessed, 0);
+        expect.equal(cmhhh.sketches.length, 5); // 0..maxDepth = 5 levels
+        expect.equal(cmhhh.sketches[0].length, cmhhh.depth);
+        expect.equal(cmhhh.sketches[0][0].length, cmhhh.width);
+      });
+
+      test("F218-T02: normalizePath sanitizes string paths, arrays, and limits maxDepth", () => {
+        const cmhhh = new CountMinHierarchicalHH({ maxDepth: 3 });
+        const p1 = cmhhh.normalizePath("Electronics / Phones / Smartphones / 5G / Flagship");
+        expect.equal(p1.length, 4); // 0..maxDepth = 4 elements
+        expect.equal(p1[0], "Electronics");
+        expect.equal(p1[1], "Phones");
+        expect.equal(p1[2], "Smartphones");
+
+        const p2 = cmhhh.normalizePath(["Fashion", "Men", "Shirts"]);
+        expect.deepEqual(p2, ["Fashion", "Men", "Shirts"]);
+
+        const p3 = cmhhh.normalizePath("");
+        expect.deepEqual(p3, []);
+      });
+
+      test("F218-T03: add increments counters across all prefix levels and updates totalProcessed", () => {
+        const cmhhh = new CountMinHierarchicalHH({ epsilon: 0.05, delta: 0.1, maxDepth: 3 });
+        cmhhh.add("Tech / Audio / Headphones", 5);
+        expect.equal(cmhhh.totalProcessed, 5);
+
+        // Check estimates along prefix path
+        expect.ok(cmhhh.estimateFrequency("Tech") >= 5);
+        expect.ok(cmhhh.estimateFrequency("Tech / Audio") >= 5);
+        expect.ok(cmhhh.estimateFrequency("Tech / Audio / Headphones") >= 5);
+      });
+
+      test("F218-T04: estimateFrequency enforces point query min across hash rows", () => {
+        const cmhhh = new CountMinHierarchicalHH({ epsilon: 0.02, delta: 0.05, maxDepth: 3 });
+        cmhhh.add("Home / Kitchen / Blender", 10);
+        cmhhh.add("Home / Kitchen / Toaster", 4);
+        cmhhh.add("Home / Decor / Lamp", 8);
+
+        const estBlender = cmhhh.estimateFrequency("Home / Kitchen / Blender");
+        const estKitchen = cmhhh.estimateFrequency("Home / Kitchen");
+        const estHome = cmhhh.estimateFrequency("Home");
+
+        expect.ok(estBlender >= 10);
+        expect.ok(estKitchen >= 14);
+        expect.ok(estHome >= 22);
+      });
+
+      test("F218-T05: Conditioned frequency correctly subtracts conditioned frequencies of descendant HHH nodes", () => {
+        const cmhhh = new CountMinHierarchicalHH({ epsilon: 0.02, delta: 0.05, maxDepth: 3, support: 0.1 });
+        // Add 50 items to Shoes / Sneakers and 10 to Shoes / Sandals
+        for (let i = 0; i < 50; i++) cmhhh.add("Shoes / Sneakers");
+        for (let i = 0; i < 10; i++) cmhhh.add("Shoes / Sandals");
+
+        const hhhList = cmhhh.getHierarchicalHeavyHitters(0.15); // threshold: 0.15 * 60 = 9
+        expect.ok(hhhList.length > 0);
+
+        const sneakerHHH = hhhList.find(h => h.path === "Shoes/Sneakers");
+        expect.ok(sneakerHHH);
+        expect.ok(sneakerHHH.conditionedFreq >= 50);
+
+        // Shoes parent should not double-count sneaker HHH contribution
+        const shoesHHH = hhhList.find(h => h.path === "Shoes");
+        if (shoesHHH) {
+          expect.ok(shoesHHH.conditionedFreq <= 15);
+        }
+      });
+
+      test("F218-T06: Bottom-up getHierarchicalHeavyHitters guarantees 0 false negatives for heavy prefix clusters", () => {
+        const cmhhh = new CountMinHierarchicalHH({ epsilon: 0.02, delta: 0.05, maxDepth: 3, support: 0.2 });
+        // Total 100 items
+        for (let i = 0; i < 40; i++) cmhhh.add("A / B / C");
+        for (let i = 0; i < 30; i++) cmhhh.add("A / B / D");
+        for (let i = 0; i < 30; i++) cmhhh.add("X / Y / Z");
+
+        const results = cmhhh.getHierarchicalHeavyHitters(0.2); // threshold = 20
+        const paths = results.map(r => r.path);
+        // A/B/C has 40 >= 20 -> HHH
+        expect.ok(paths.includes("A/B/C"));
+        // A/B/D has 30 >= 20 -> HHH
+        expect.ok(paths.includes("A/B/D"));
+        // X/Y/Z has 30 >= 20 -> HHH
+        expect.ok(paths.includes("X/Y/Z"));
+      });
+
+      test("F218-T07: merge combines multi-level sketch tables, totalProcessed, and observed paths", () => {
+        const cm1 = new CountMinHierarchicalHH({ epsilon: 0.02, delta: 0.05, maxDepth: 3 });
+        const cm2 = new CountMinHierarchicalHH({ epsilon: 0.02, delta: 0.05, maxDepth: 3 });
+
+        cm1.add("Books / Fiction", 12);
+        cm2.add("Books / NonFiction", 18);
+
+        cm1.merge(cm2);
+        expect.equal(cm1.totalProcessed, 30);
+        expect.ok(cm1.estimateFrequency("Books") >= 30);
+        expect.ok(cm1.estimateFrequency("Books / Fiction") >= 12);
+        expect.ok(cm1.estimateFrequency("Books / NonFiction") >= 18);
+      });
+
+      test("F218-T08: Client and Server CountMinHierarchicalHH produce consistent estimates and telemetry", () => {
+        const clientCM = new CountMinHierarchicalHH({ epsilon: 0.02, delta: 0.05, maxDepth: 3, support: 0.1 });
+        const serverCM = new ServerCountMinHierarchicalHH({ epsilon: 0.02, delta: 0.05, maxDepth: 3, support: 0.1 });
+
+        const stream = [
+          "Beauty / Skincare / Serum",
+          "Beauty / Skincare / Serum",
+          "Beauty / Skincare / Cleanser",
+          "Beauty / Makeup / Lipstick",
+          "Tech / Audio / Earbuds"
+        ];
+
+        for (const item of stream) {
+          clientCM.add(item);
+          serverCM.add(item);
+        }
+
+        expect.equal(clientCM.totalProcessed, serverCM.totalProcessed);
+        expect.equal(clientCM.estimateFrequency("Beauty / Skincare"), serverCM.estimateFrequency("Beauty / Skincare"));
+        expect.equal(clientCM.estimateFrequency("Tech / Audio / Earbuds"), serverCM.estimateFrequency("Tech / Audio / Earbuds"));
+
+        const tClient = clientCM.getTelemetry();
+        const tServer = serverCM.getTelemetry();
+        expect.equal(tClient.totalProcessed, tServer.totalProcessed);
+        expect.equal(tClient.activeLevels, tServer.activeLevels);
+      });
+
+      // -----------------------------------------------------------------------
+      // NHÓM 2: PPO-Entropy Safe Dynamic Pricing (F218-T09 -> F218-T16)
+      // -----------------------------------------------------------------------
+      test("F218-T09: PPOEntropySafePricing initializes policy parameters, safety budget, and bounds", () => {
+        const pricer = new PPOEntropySafePricing({
+          stateDim: 5,
+          clipEpsilon: 0.20,
+          entropyCoeff: 0.03,
+          costBudget: 0.06,
+          initLambda: 0.10
+        });
+
+        expect.equal(pricer.stateDim, 5);
+        expect.equal(pricer.clipEpsilon, 0.20);
+        expect.equal(pricer.entropyCoeff, 0.03);
+        expect.equal(pricer.costBudget, 0.06);
+        expect.equal(pricer.lambda, 0.10);
+        expect.equal(pricer.updatesCount, 0);
+      });
+
+      test("F218-T10: predictAction and evaluateCost compute bounded action and safety cost", () => {
+        const pricer = new PPOEntropySafePricing();
+        const state = new Float64Array([1.0, 0.9, 0.5, 0.2, 0.3]);
+        const action = pricer.predictAction(state);
+        const cost = pricer.evaluateCost(state);
+
+        expect.ok(action >= -0.15 && action <= 0.15);
+        expect.ok(cost >= 0.0);
+      });
+
+      test("F218-T11: updatePolicy calculates clipped surrogate loss and updates weights", () => {
+        const pricer = new PPOEntropySafePricing({ policyLr: 0.05 });
+        const initialW = pricer.policyWeights[0];
+
+        const transitions = [
+          { state: [1.0, 0.9, 0.5, 0.2, 0.3], action: 0.05, oldLogPi: -0.5, advantage: 1.2, cost: 0.02 },
+          { state: [0.8, 1.1, 0.4, 0.3, 0.4], action: -0.02, oldLogPi: -0.6, advantage: 0.8, cost: 0.01 }
+        ];
+
+        const res = pricer.updatePolicy(transitions);
+        expect.equal(res.success, true);
+        expect.equal(res.updatesCount, 1);
+        expect.ok(res.clipRatio !== undefined);
+        expect.ok(pricer.policyWeights[0] !== initialW);
+      });
+
+      test("F218-T12: Adaptive entropy regularizer beta maintains non-zero entropy during training", () => {
+        const pricer = new PPOEntropySafePricing({ entropyCoeff: 0.05 });
+        const transitions = [
+          { state: [1.0, 1.0, 0.5, 0.1, 0.2], action: 0.04, oldLogPi: -0.8, advantage: 1.0, cost: 0.0 }
+        ];
+
+        const res = pricer.updatePolicy(transitions);
+        expect.ok(Number.isFinite(res.avgEntropy));
+      });
+
+      test("F218-T13: Dual Lagrangian multiplier lambda increases when safety cost exceeds budget", () => {
+        const pricer = new PPOEntropySafePricing({ initLambda: 0.05, costBudget: 0.02, lambdaLr: 0.1 });
+        const initialLambda = pricer.lambda;
+
+        const unsafeTransitions = [
+          { state: [1.2, 0.8, 0.6, 0.5, 0.5], action: 0.1, oldLogPi: -0.4, advantage: 0.5, cost: 0.20 },
+          { state: [1.1, 0.9, 0.7, 0.4, 0.6], action: 0.08, oldLogPi: -0.5, advantage: 0.6, cost: 0.25 }
+        ];
+
+        const res = pricer.updatePolicy(unsafeTransitions);
+        expect.ok(res.isBudgetExceeded);
+        expect.ok(pricer.lambda > initialLambda);
+      });
+
+      test("F218-T14: Safe advantage penalizes high cost actions proportional to lambda", () => {
+        const pricerLowLambda = new PPOEntropySafePricing({ initLambda: 0.01 });
+        const pricerHighLambda = new PPOEntropySafePricing({ initLambda: 2.0 });
+
+        const transitions = [
+          { state: [1.0, 1.0, 0.5, 0.2, 0.2], action: 0.05, oldLogPi: -0.5, advantage: 1.0, cost: 0.5 }
+        ];
+
+        const resLow = pricerLowLambda.updatePolicy(transitions);
+        const resHigh = pricerHighLambda.updatePolicy(transitions);
+
+        expect.ok(resLow.avgAdvantage > resHigh.avgAdvantage);
+      });
+
+      test("F218-T15: recommendPrice strictly respects 1.05 * COGS floor and provides P&L analysis", () => {
+        const pricer = new PPOEntropySafePricing();
+        const product = { price: 100000, cogs: 80000, msrp: 150000 };
+        const market = { competitorPrice: 60000, inventoryLevel: 90, inventoryCapacity: 100 };
+
+        const rec = pricer.recommendPrice(product, market);
+        expect.ok(rec.recommendedPrice >= 84000); // 80000 * 1.05 = 84000
+        expect.equal(rec.safetyFloor, 84000);
+        expect.ok(rec.grossMarginVnd > 0);
+        expect.ok(rec.grossMarginPct >= 4.5);
+      });
+
+      test("F218-T16: Parity check between Node server and React client PPOEntropySafePricing", () => {
+        const clientPricer = new PPOEntropySafePricing({ initLambda: 0.15, costBudget: 0.05 });
+        const serverPricer = new ServerPPOEntropySafePricing({ initLambda: 0.15, costBudget: 0.05 });
+
+        const product = { price: 200000, cogs: 120000, msrp: 250000 };
+        const market = { competitorPrice: 190000, inventoryLevel: 40, inventoryCapacity: 100 };
+
+        const clientRec = clientPricer.recommendPrice(product, market);
+        const serverRec = serverPricer.recommendPrice(product, market);
+
+        expect.equal(clientRec.recommendedPrice, serverRec.recommendedPrice);
+        expect.equal(clientRec.safetyFloor, serverRec.safetyFloor);
+        expect.equal(clientRec.priceAdjustmentPct, serverRec.priceAdjustmentPct);
+      });
+
+      // -----------------------------------------------------------------------
+      // NHÓM 3: Battery Swapping & Capacity Decay EVRPTW (F218-T17 -> F218-T22)
+      // -----------------------------------------------------------------------
+      test("F218-T17: EVRPTWBatterySwappingDecayRouter initializes fleet, stations, and decay params", () => {
+        const router = new EVRPTWBatterySwappingDecayRouter({
+          nominalBatteryKwh: 50.0,
+          consumptionPerKm: 0.30,
+          swapFeeVnd: 25000,
+          cycleCount: 150
+        });
+
+        expect.equal(router.nominalBatteryKwh, 50.0);
+        expect.equal(router.consumptionPerKm, 0.30);
+        expect.equal(router.swapFeeVnd, 25000);
+        expect.equal(router.cycleCount, 150);
+        expect.ok(router.effectiveBatteryKwh < 50.0); // Degraded capacity
+      });
+
+      test("F218-T18: Battery capacity fading models C_eff = C_nominal * (1 - alpha * sqrt(cycles))", () => {
+        const routerNew = new EVRPTWBatterySwappingDecayRouter({ nominalBatteryKwh: 40.0, cycleCount: 0 });
+        const routerUsed = new EVRPTWBatterySwappingDecayRouter({ nominalBatteryKwh: 40.0, cycleCount: 100 });
+        const routerOld = new EVRPTWBatterySwappingDecayRouter({ nominalBatteryKwh: 40.0, cycleCount: 400 });
+
+        expect.equal(routerNew.effectiveBatteryKwh, 40.0);
+        expect.ok(routerUsed.effectiveBatteryKwh < 40.0);
+        expect.ok(routerOld.effectiveBatteryKwh < routerUsed.effectiveBatteryKwh);
+      });
+
+      test("F218-T19: calculateDistanceKm accurately computes Euclidean metric", () => {
+        const router = new EVRPTWBatterySwappingDecayRouter();
+        const d = router.calculateDistanceKm({ x: 0, y: 0 }, { x: 3, y: 4 });
+        expect.equal(d, 5.0);
+      });
+
+      test("F218-T20: evaluateReplenishmentChoice trades off instant BSS swap vs plug-in charging wear", () => {
+        const router = new EVRPTWBatterySwappingDecayRouter({ swapFeeVnd: 25000, swapDurationMin: 3.0 });
+
+        // Case 1: Urgent (slack = 5 min, needed = 25 kWh -> CS takes too long and incurs high lateness penalty)
+        const choiceUrgent = router.evaluateReplenishmentChoice(10, 35, 5);
+        expect.equal(choiceUrgent.preferred, "BSS");
+        expect.equal(choiceUrgent.bss.durationMin, 3.0);
+        expect.equal(choiceUrgent.bss.swapFeeVnd, 25000);
+
+        // Case 2: Non-urgent (slack = 60 min, needed = 3 kWh -> CS has zero lateness and costs much less than 25k swap fee)
+        const choiceNonUrgent = router.evaluateReplenishmentChoice(30, 33, 60);
+        expect.equal(choiceNonUrgent.preferred, "CS");
+        expect.ok(choiceNonUrgent.cs.totalCostVnd < 25000);
+      });
+
+      test("F218-T21: solvePlan delivers route sequence with battery status and depot return", () => {
+        const router = new EVRPTWBatterySwappingDecayRouter({
+          nominalBatteryKwh: 40.0,
+          cycleCount: 100
+        });
+
+        const customers = [
+          { id: "CUST_1", name: "Khách 1", x: 10.780, y: 106.705, demandKg: 5, readyTime: 10, dueTime: 40, serviceTimeMin: 5 },
+          { id: "CUST_2", name: "Khách 2", x: 10.790, y: 106.715, demandKg: 8, readyTime: 20, dueTime: 60, serviceTimeMin: 5 }
+        ];
+
+        const plan = router.solvePlan(customers, 1.0);
+        expect.equal(plan.success, true);
+        expect.ok(plan.legsCount >= 3); // Depot -> C1 -> C2 -> Depot
+        expect.ok(plan.totalDistanceKm > 0);
+        expect.ok(plan.energyKwh.remainingKwh > 0);
+      });
+
+      test("F218-T22: Client and Server EVRPTWBatterySwappingDecayRouter produce identical routing solutions", () => {
+        const clientRouter = new EVRPTWBatterySwappingDecayRouter();
+        const serverRouter = new ServerEVRPTWBatterySwappingDecayRouter();
+
+        const customers = [
+          { id: "CUST_A", name: "Khách A", x: 10.778, y: 106.702, demandKg: 4, readyTime: 15, dueTime: 45, serviceTimeMin: 5 }
+        ];
+
+        const clientPlan = clientRouter.solvePlan(customers, 0.9);
+        const serverPlan = serverRouter.solvePlan(customers, 0.9);
+
+        expect.equal(clientPlan.success, serverPlan.success);
+        expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+        expect.equal(clientPlan.costsVnd.totalOperatingCost, serverPlan.costsVnd.totalOperatingCost);
+      });
+
+      // -----------------------------------------------------------------------
+      // NHÓM 4: Tri-Role AI Copilot Integration (F218-T23 -> F218-T24)
+      // -----------------------------------------------------------------------
+      test("F218-T23: Admin Sentinel Copilot correctly handles Sections 194, 195, 196", () => {
+        const resHHH = generateAdminCopilotResponse("Phân tích cây danh mục HHH Count-Min Hierarchical Heavy Hitters Cormode");
+        expect.equal(resHHH.tag, "COUNT-MIN HIERARCHICAL HEAVY HITTERS");
+        expect.ok(resHHH.text.includes("CORMODE"));
+
+        const resPPO = generateAdminCopilotResponse("Tư vấn định giá PPO Entropy cắt ngọn an toàn Schulman");
+        expect.equal(resPPO.tag, "PPO-ENTROPY SAFE DYNAMIC PRICING");
+        expect.ok(resPPO.text.includes("SCHULMAN"));
+
+        const resSwap = generateAdminCopilotResponse("Lập lịch định tuyến xe điện EVRPTW-BSD đổi pin suy giảm dung lượng Pelletier");
+        expect.equal(resSwap.tag, "EVRPTW BATTERY SWAPPING & CAPACITY DECAY");
+        expect.ok(resSwap.text.includes("PELLETIER"));
+      });
+
+      test("F218-T24: Seller ShopSmart Copilot and Buyer Shopping Assistant handle Phase 71 algorithms and Intent 73", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn tối ưu hóa giá bán an toàn PPO-Entropy và theo dõi nhánh hàng hot Count-Min HHH");
+        expect.equal(sellerRes.tag, "COUNT-MIN HHH, PPO-ENTROPY & SWAPPING DECAY");
+        expect.ok(sellerRes.text.includes("PPO-Entropy"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích nhánh hot Count-Min HHH hay giao bằng xe điện đổi pin suy giảm không?");
+        expect.equal(buyerRes.intent, "COUNTMIN_HHH_PPO_ENTROPY_SWAP_DECAY");
+        expect.ok(buyerRes.replyText.includes("Count-Min"));
+      });
     });
   });
 });

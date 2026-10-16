@@ -37147,6 +37147,713 @@ export class EVRPTWMultiTierChargingRouter {
   }
 }
 
+// ============================================================================
+// PHASE 71 ENTERPRISE ALGORITHMS SUITE (FEATURE 218)
+// ============================================================================
+
+/**
+ * Count-Min Hierarchical Heavy Hitters (CountMinHierarchicalHH)
+ * Graham Cormode, Shan Muthukrishnan (ACM TODS 2005 / VLDB 2008)
+ */
+export class CountMinHierarchicalHH {
+  /**
+   * @param {Object} [options]
+   * @param {number} [options.epsilon=0.01] Additive error factor (0 < epsilon < 0.2)
+   * @param {number} [options.delta=0.05] Failure probability (0 < delta < 0.5)
+   * @param {number} [options.maxDepth=4] Maximum hierarchy taxonomy depth L
+   * @param {number} [options.support=0.05] Minimum support threshold phi (phi >= epsilon)
+   */
+  constructor(options = {}) {
+    this.epsilon = Math.max(0.001, Math.min(0.2, Number(options.epsilon || 0.01)));
+    this.delta = Math.max(0.001, Math.min(0.5, Number(options.delta || 0.05)));
+    this.maxDepth = Math.max(1, Math.min(8, Math.floor(options.maxDepth || 4)));
+    this.support = Math.max(this.epsilon, Math.min(0.5, Number(options.support || 0.05)));
+
+    this.width = Math.max(16, Math.ceil(Math.E / this.epsilon));
+    this.depth = Math.max(2, Math.ceil(Math.log(1.0 / this.delta)));
+
+    this.sketches = [];
+    for (let l = 0; l <= this.maxDepth; l++) {
+      const levelTables = [];
+      for (let d = 0; d < this.depth; d++) {
+        levelTables.push(new Int32Array(this.width));
+      }
+      this.sketches.push(levelTables);
+    }
+
+    this.observedPathsByLevel = Array.from({ length: this.maxDepth + 1 }, () => new Set());
+    this.totalProcessed = 0;
+  }
+
+  _hash(str, seed) {
+    let h = 2166136261 ^ seed;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0) % this.width;
+  }
+
+  normalizePath(pathInput) {
+    if (Array.isArray(pathInput)) {
+      return pathInput.map(p => String(p).trim()).filter(Boolean).slice(0, this.maxDepth + 1);
+    }
+    const raw = String(pathInput || "").trim();
+    if (!raw) return [];
+    return raw.split(/[/>:]/).map(s => s.trim()).filter(Boolean).slice(0, this.maxDepth + 1);
+  }
+
+  add(path, weight = 1) {
+    const nodes = this.normalizePath(path);
+    if (nodes.length === 0) return;
+
+    const w = Math.max(1, Math.floor(Number(weight) || 1));
+    this.totalProcessed += w;
+
+    let currentPrefix = "";
+    for (let l = 0; l < nodes.length; l++) {
+      currentPrefix = currentPrefix ? `${currentPrefix}/${nodes[l]}` : nodes[l];
+      this.observedPathsByLevel[l].add(currentPrefix);
+
+      const levelTables = this.sketches[l];
+      for (let d = 0; d < this.depth; d++) {
+        const idx = this._hash(currentPrefix, d * 31 + 17);
+        levelTables[d][idx] += w;
+      }
+    }
+  }
+
+  addAll(items) {
+    if (!Array.isArray(items)) return;
+    for (let i = 0; i < items.length; i++) {
+      this.add(items[i]);
+    }
+  }
+
+  estimateFrequency(path) {
+    const nodes = this.normalizePath(path);
+    if (nodes.length === 0) return 0;
+
+    const level = nodes.length - 1;
+    if (level > this.maxDepth || !this.sketches[level]) return 0;
+
+    const prefix = nodes.join("/");
+    const levelTables = this.sketches[level];
+    let minEst = Infinity;
+
+    for (let d = 0; d < this.depth; d++) {
+      const idx = this._hash(prefix, d * 31 + 17);
+      minEst = Math.min(minEst, levelTables[d][idx]);
+    }
+
+    return minEst === Infinity ? 0 : minEst;
+  }
+
+  getHierarchicalHeavyHitters(customSupport = this.support) {
+    const s = Math.max(this.epsilon, Math.min(1.0, Number(customSupport) || this.support));
+    const threshold = s * this.totalProcessed;
+    const hhhResults = [];
+    const hhhDescendantsMap = new Map();
+
+    for (let l = this.maxDepth; l >= 0; l--) {
+      const pathsAtLevel = Array.from(this.observedPathsByLevel[l] || []);
+
+      for (const p of pathsAtLevel) {
+        const rawEst = this.estimateFrequency(p);
+        const descContribution = hhhDescendantsMap.get(p) || 0;
+        const conditionedFreq = Math.max(0, rawEst - descContribution);
+
+        if (conditionedFreq >= threshold && conditionedFreq > 0) {
+          const supportPct = this.totalProcessed > 0
+            ? Number(((conditionedFreq / this.totalProcessed) * 100).toFixed(2))
+            : 0;
+
+          hhhResults.push({
+            path: p,
+            level: l,
+            estimatedFreq: rawEst,
+            conditionedFreq,
+            supportPct
+          });
+
+          const parts = p.split("/");
+          let ancestor = "";
+          for (let a = 0; a < parts.length - 1; a++) {
+            ancestor = ancestor ? `${ancestor}/${parts[a]}` : parts[a];
+            const prev = hhhDescendantsMap.get(ancestor) || 0;
+            hhhDescendantsMap.set(ancestor, prev + conditionedFreq);
+          }
+        }
+      }
+    }
+
+    return hhhResults.sort((a, b) => b.level - a.level || b.conditionedFreq - a.conditionedFreq);
+  }
+
+  merge(other) {
+    if (!other || !(other instanceof CountMinHierarchicalHH)) return;
+    if (this.width !== other.width || this.depth !== other.depth) return;
+
+    const commonDepth = Math.min(this.maxDepth, other.maxDepth);
+    for (let l = 0; l <= commonDepth; l++) {
+      for (let d = 0; d < this.depth; d++) {
+        for (let w = 0; w < this.width; w++) {
+          this.sketches[l][d][w] += other.sketches[l][d][w];
+        }
+      }
+      for (const p of other.observedPathsByLevel[l]) {
+        this.observedPathsByLevel[l].add(p);
+      }
+    }
+
+    this.totalProcessed += other.totalProcessed;
+  }
+
+  getTelemetry() {
+    let totalObservedNodes = 0;
+    for (let l = 0; l <= this.maxDepth; l++) {
+      totalObservedNodes += this.observedPathsByLevel[l].size;
+    }
+
+    return {
+      algorithm: "CountMinHierarchicalHH",
+      epsilon: this.epsilon,
+      delta: this.delta,
+      width: this.width,
+      depth: this.depth,
+      maxDepth: this.maxDepth,
+      support: this.support,
+      totalProcessed: this.totalProcessed,
+      totalObservedNodes,
+      activeLevels: this.sketches.length
+    };
+  }
+}
+
+/**
+ * Proximal Policy Optimization with Adaptive Entropy & Safety Constraints (PPO-Entropy-Safe)
+ * John Schulman et al. (OpenAI 2017) & Pengqian Yu et al. (AAAI 2021)
+ */
+export class PPOEntropySafePricing {
+  constructor(options = {}) {
+    this.stateDim = Math.max(2, Math.floor(options.stateDim || 5));
+    this.clipEpsilon = Math.max(0.05, Math.min(0.4, Number(options.clipEpsilon || 0.20)));
+    this.entropyCoeff = Math.max(0.001, Math.min(0.2, Number(options.entropyCoeff || 0.03)));
+    this.costBudget = Math.max(0.001, Number(options.costBudget || 0.06));
+    this.lambda = Math.max(0.0, Number(options.initLambda || 0.10));
+    this.policyLr = Math.max(0.001, Number(options.policyLr || 0.025));
+    this.lambdaLr = Math.max(0.001, Number(options.lambdaLr || 0.015));
+
+    this.policyWeights = new Float64Array(this.stateDim);
+    this.costCriticWeights = new Float64Array(this.stateDim);
+
+    const initPolicy = [0.04, 0.05, -0.03, 0.02, 0.015];
+    const initCost = [0.03, -0.02, 0.05, 0.025, 0.01];
+
+    for (let i = 0; i < this.stateDim; i++) {
+      this.policyWeights[i] = i < initPolicy.length ? initPolicy[i] : 0.01;
+      this.costCriticWeights[i] = i < initCost.length ? initCost[i] : 0.02;
+    }
+
+    this.updatesCount = 0;
+    this.lastAvgAdvantage = 0;
+    this.lastEntropy = 0;
+  }
+
+  _dot(w, x) {
+    let sum = 0;
+    for (let i = 0; i < this.stateDim; i++) {
+      sum += w[i] * x[i];
+    }
+    return sum;
+  }
+
+  predictAction(state) {
+    const raw = this._dot(this.policyWeights, state);
+    return Math.max(-0.15, Math.min(0.15, raw));
+  }
+
+  evaluateCost(state) {
+    const raw = this._dot(this.costCriticWeights, state);
+    return Math.max(0.0, raw);
+  }
+
+  updatePolicy(transitions) {
+    if (!Array.isArray(transitions) || transitions.length === 0) {
+      return { success: false, reason: "EMPTY_TRANSITIONS" };
+    }
+
+    const N = transitions.length;
+    let avgCost = 0;
+    let avgEntropy = 0;
+    let avgAdvantage = 0;
+    let clippedCount = 0;
+
+    for (let i = 0; i < N; i++) {
+      const item = transitions[i];
+      const s = new Float64Array(this.stateDim);
+      for (let j = 0; j < this.stateDim; j++) {
+        s[j] = Number(item.state ? item.state[j] : 0) || 0;
+      }
+
+      const act = Number(item.action || 0);
+      const mu = this.predictAction(s);
+      const sigma = 0.05;
+      const logPi = -0.5 * Math.log(2 * Math.PI * sigma * sigma) - ((act - mu) ** 2) / (2 * sigma * sigma);
+      const currentEntropy = -logPi;
+      avgEntropy += currentEntropy / N;
+
+      const oldLogPi = Number(item.oldLogPi !== undefined ? item.oldLogPi : logPi);
+      const ratio = Math.exp(Math.max(-10, Math.min(10, logPi - oldLogPi)));
+
+      const rawAdvantage = Number(item.advantage || 0);
+      const actualCost = Math.max(0, Number(item.cost || 0));
+      avgCost += actualCost / N;
+
+      const safeAdvantage = rawAdvantage - this.lambda * actualCost;
+      avgAdvantage += safeAdvantage / N;
+
+      const surr1 = ratio * safeAdvantage;
+      const clippedRatio = Math.max(1.0 - this.clipEpsilon, Math.min(1.0 + this.clipEpsilon, ratio));
+      const surr2 = clippedRatio * safeAdvantage;
+
+      if (ratio !== clippedRatio) {
+        clippedCount++;
+      }
+
+      const chosenSurr = Math.min(surr1, surr2);
+      const policyGrad = chosenSurr * act + this.entropyCoeff * currentEntropy;
+
+      for (let j = 0; j < this.stateDim; j++) {
+        this.policyWeights[j] += (this.policyLr * policyGrad * s[j]) / N;
+      }
+
+      const predictedCost = this.evaluateCost(s);
+      const costError = actualCost - predictedCost;
+      const criticLr = 0.05;
+      for (let j = 0; j < this.stateDim; j++) {
+        this.costCriticWeights[j] += (criticLr * costError * s[j]) / N;
+      }
+    }
+
+    const costViolation = avgCost - this.costBudget;
+    this.lambda = Math.max(0.0, this.lambda + this.lambdaLr * costViolation);
+
+    this.updatesCount++;
+    this.lastAvgAdvantage = avgAdvantage;
+    this.lastEntropy = avgEntropy;
+
+    return {
+      success: true,
+      updatesCount: this.updatesCount,
+      lambda: Number(this.lambda.toFixed(4)),
+      avgCost: Number(avgCost.toFixed(5)),
+      avgEntropy: Number(avgEntropy.toFixed(4)),
+      avgAdvantage: Number(avgAdvantage.toFixed(4)),
+      clipRatio: Number((clippedCount / N).toFixed(3)),
+      isBudgetExceeded: costViolation > 0
+    };
+  }
+
+  recommendPrice(product = {}, marketContext = {}) {
+    const currentPrice = Math.max(1000, Number(product.price || 100000));
+    const cogs = Math.max(500, Number(product.cogs || currentPrice * 0.7));
+    const msrp = Math.max(currentPrice, Number(product.msrp || currentPrice * 1.3));
+
+    const competitorPrice = Number(marketContext.competitorPrice || currentPrice);
+    const stock = Number(marketContext.inventoryLevel || 50);
+    const capacity = Math.max(1, Number(marketContext.inventoryCapacity || 100));
+    const salesVelocity = Number(marketContext.salesVelocity || 1.0);
+    const demandIndex = Number(marketContext.demandIndex || 1.0);
+
+    const state = new Float64Array([
+      Number((currentPrice / msrp).toFixed(4)),
+      Number((competitorPrice / currentPrice).toFixed(4)),
+      Number((stock / capacity).toFixed(4)),
+      Number(Math.min(3.0, salesVelocity / 10.0).toFixed(4)),
+      Number(Math.min(3.0, demandIndex).toFixed(4))
+    ]);
+
+    const rawAction = this.predictAction(state);
+    const predictedCost = this.evaluateCost(state);
+
+    const ppoDamping = Math.max(0.4, 1.0 - this.lambda * predictedCost);
+    const safeAdjustment = rawAction * ppoDamping;
+
+    const rawPrice = currentPrice * (1.0 + safeAdjustment);
+    const safetyFloor = Math.round(cogs * 1.05);
+    const safetyCeiling = Math.round(msrp * 1.25);
+
+    const safePrice = Math.round(Math.max(safetyFloor, Math.min(safetyCeiling, rawPrice)));
+    const priceAdjustmentPct = Number((((safePrice - currentPrice) / currentPrice) * 100).toFixed(2));
+    const grossMarginVnd = safePrice - cogs;
+    const grossMarginPct = Number(((grossMarginVnd / safePrice) * 100).toFixed(2));
+
+    return {
+      currentPrice,
+      recommendedPrice: safePrice,
+      safetyFloor,
+      safetyCeiling,
+      isFloorBounded: safePrice === safetyFloor,
+      isCeilingBounded: safePrice === safetyCeiling,
+      cogs,
+      priceAdjustmentPct,
+      grossMarginVnd,
+      grossMarginPct,
+      predictedCost: Number(predictedCost.toFixed(4)),
+      ppoDamping: Number(ppoDamping.toFixed(3)),
+      lambda: Number(this.lambda.toFixed(4)),
+      isBudgetExceeded: predictedCost > this.costBudget
+    };
+  }
+}
+
+/**
+ * Electric Vehicle Routing Problem with Time Windows, Battery Swapping & Degradation Decay (EVRPTW-BSD)
+ * B. Hof et al. (COR 2017) & P. Pelletier et al. (Trans Sci 2018)
+ */
+export class EVRPTWBatterySwappingDecayRouter {
+  constructor(options = {}) {
+    this.depot = options.depot || { id: "DEPOT_CENTRAL", name: "Central SPX Hub", x: 10.7769, y: 106.7009 };
+    this.nominalBatteryKwh = Math.max(5.0, Number(options.nominalBatteryKwh || 40.0));
+    this.consumptionPerKm = Math.max(0.05, Number(options.consumptionPerKm || 0.35));
+    this.minSocSafetyBuffer = Math.max(0.1, Math.min(0.3, Number(options.minSocSafetyBuffer || 0.20)));
+    this.travelSpeedKmMin = Math.max(0.1, Number(options.travelSpeedKmMin || 0.5));
+
+    this.swapDurationMin = Math.max(1.0, Number(options.swapDurationMin || 3.0));
+    this.swapFeeVnd = Math.max(5000, Number(options.swapFeeVnd || 25000));
+    this.chargeRateKwhPerMin = Math.max(0.1, Number(options.chargeRateKwhPerMin || 0.8));
+    this.chargeTariffVndPerKwh = Math.max(500, Number(options.chargeTariffVndPerKwh || 2500));
+    this.degradationVndPerKwh = Math.max(50, Number(options.degradationVndPerKwh || 350));
+    this.latenessPenaltyVndPerMin = Math.max(10, Number(options.latenessPenaltyVndPerMin || 500));
+
+    this.cycleCount = Math.max(0, Math.floor(Number(options.cycleCount !== undefined ? options.cycleCount : 120)));
+    this.alphaDecay = 0.0035;
+
+    this.effectiveBatteryKwh = Number(
+      (this.nominalBatteryKwh * Math.max(0.70, 1.0 - this.alphaDecay * Math.sqrt(this.cycleCount))).toFixed(2)
+    );
+
+    this.stations = options.stations || [
+      { id: "BSS_Q1", name: "Trạm Đổi Pin BSS Quận 1", type: "BSS", x: 10.7725, y: 106.6980 },
+      { id: "CS_Q3", name: "Trạm Sạc Nhanh CS Quận 3", type: "CS", x: 10.7845, y: 106.6850 },
+      { id: "BSS_BT", name: "Trạm Đổi Pin BSS Bình Thạnh", type: "BSS", x: 10.8010, y: 106.7110 },
+      { id: "CS_THUDUC", name: "Trạm Sạc Nhanh CS Thủ Đức", type: "CS", x: 10.8500, y: 106.7700 }
+    ];
+
+    this.solvedPlansCount = 0;
+  }
+
+  calculateDistanceKm(p1, p2) {
+    if (!p1 || !p2) return 0;
+    const dx = (Number(p1.x) || 0) - (Number(p2.x) || 0);
+    const dy = (Number(p1.y) || 0) - (Number(p2.y) || 0);
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  evaluateReplenishmentChoice(currentKwh, neededKwh, slackMin = 20) {
+    const cur = Math.max(0, Math.min(this.effectiveBatteryKwh, Number(currentKwh) || 0));
+    const target = Math.min(this.effectiveBatteryKwh, Math.max(cur, Number(neededKwh) || cur));
+    const deltaE = target - cur;
+
+    const bssDuration = this.swapDurationMin;
+    const bssLateness = Math.max(0, bssDuration - slackMin);
+    const bssLatePenalty = Math.round(bssLateness * this.latenessPenaltyVndPerMin);
+    const bssTotalCost = this.swapFeeVnd + bssLatePenalty;
+
+    const csDuration = deltaE > 0 ? Number((deltaE / this.chargeRateKwhPerMin).toFixed(2)) : 0;
+    const csElecCost = Math.round(deltaE * this.chargeTariffVndPerKwh);
+    const csDegradationCost = Math.round(deltaE * this.degradationVndPerKwh);
+    const csLateness = Math.max(0, csDuration - slackMin);
+    const csLatePenalty = Math.round(csLateness * this.latenessPenaltyVndPerMin);
+    const csTotalCost = csElecCost + csDegradationCost + csLatePenalty;
+
+    const preferred = bssTotalCost <= csTotalCost ? "BSS" : "CS";
+
+    return {
+      deltaE: Number(deltaE.toFixed(2)),
+      preferred,
+      bss: {
+        durationMin: bssDuration,
+        swapFeeVnd: this.swapFeeVnd,
+        latenessPenaltyVnd: bssLatePenalty,
+        totalCostVnd: bssTotalCost
+      },
+      cs: {
+        durationMin: csDuration,
+        electricityCostVnd: csElecCost,
+        degradationCostVnd: csDegradationCost,
+        latenessPenaltyVnd: csLatePenalty,
+        totalCostVnd: csTotalCost
+      }
+    };
+  }
+
+  selectOptimalStation(currentLocation, currentBatteryKwh, nextCustomer, currentTimeMin = 0) {
+    const minSafeKwh = this.effectiveBatteryKwh * this.minSocSafetyBuffer;
+    let bestCandidate = null;
+    let lowestCost = Infinity;
+
+    for (const st of this.stations) {
+      const distToStation = this.calculateDistanceKm(currentLocation, st);
+      const energyToStation = distToStation * this.consumptionPerKm;
+
+      if (currentBatteryKwh - energyToStation < minSafeKwh * 0.5) {
+        continue;
+      }
+
+      const distStationToNext = this.calculateDistanceKm(st, nextCustomer);
+      const energyToNext = distStationToNext * this.consumptionPerKm;
+      const energyToDepotFromNext = this.calculateDistanceKm(nextCustomer, this.depot) * this.consumptionPerKm;
+
+      const targetKwh = Math.min(
+        this.effectiveBatteryKwh * 0.95,
+        Math.max(minSafeKwh + energyToNext + energyToDepotFromNext, this.effectiveBatteryKwh * 0.70)
+      );
+
+      const arrivalStationTime = currentTimeMin + (distToStation / this.travelSpeedKmMin);
+      const batteryAtStation = Math.max(0, currentBatteryKwh - energyToStation);
+
+      let durationMin = 0;
+      let serviceCostVnd = 0;
+      let degradationCostVnd = 0;
+      let batteryAfterKwh = targetKwh;
+
+      if (st.type === "BSS") {
+        durationMin = this.swapDurationMin;
+        serviceCostVnd = this.swapFeeVnd;
+        batteryAfterKwh = this.effectiveBatteryKwh;
+      } else {
+        const deltaE = Math.max(0, targetKwh - batteryAtStation);
+        durationMin = deltaE / this.chargeRateKwhPerMin;
+        serviceCostVnd = Math.round(deltaE * this.chargeTariffVndPerKwh);
+        degradationCostVnd = Math.round(deltaE * this.degradationVndPerKwh);
+      }
+
+      const departStationTime = arrivalStationTime + durationMin;
+      const arrivalNextTime = departStationTime + (distStationToNext / this.travelSpeedKmMin);
+      const dueTime = Number(nextCustomer.dueTime || 9999);
+      const lateness = Math.max(0, arrivalNextTime - dueTime);
+      const latePenalty = Math.round(lateness * this.latenessPenaltyVndPerMin);
+
+      const combinedCost = serviceCostVnd + degradationCostVnd + latePenalty + (distToStation + distStationToNext) * 200;
+
+      if (combinedCost < lowestCost) {
+        lowestCost = combinedCost;
+        bestCandidate = {
+          station: st,
+          distToStation: Number(distToStation.toFixed(2)),
+          distStationToNext: Number(distStationToNext.toFixed(2)),
+          durationMin: Number(durationMin.toFixed(2)),
+          serviceCostVnd,
+          degradationCostVnd,
+          combinedCost,
+          targetBatteryKwh: batteryAfterKwh
+        };
+      }
+    }
+
+    return bestCandidate;
+  }
+
+  solvePlan(customers = [], initialSoc = 1.0) {
+    this.solvedPlansCount++;
+    const minSafeKwh = this.effectiveBatteryKwh * this.minSocSafetyBuffer;
+    let currentBatteryKwh = Math.min(this.effectiveBatteryKwh, this.effectiveBatteryKwh * Math.max(0.2, initialSoc));
+    let currentTimeMin = 0;
+    let currentLocation = { ...this.depot };
+    let totalDistanceKm = 0;
+    let totalTravelTimeMin = 0;
+    let totalReplenishTimeMin = 0;
+    let totalServiceTimeMin = 0;
+    let totalEnergyConsumedKwh = 0;
+    let totalSwapCount = 0;
+    let totalSwapCostVnd = 0;
+    let totalChargingCostVnd = 0;
+    let totalDegradationCostVnd = 0;
+    let totalLatenessMin = 0;
+
+    const routeLegs = [];
+    routeLegs.push({
+      type: "DEPOT_DEPARTURE",
+      locationId: this.depot.id,
+      name: this.depot.name,
+      timeMin: 0,
+      batteryKwh: Number(currentBatteryKwh.toFixed(2)),
+      socPercent: Number(((currentBatteryKwh / this.effectiveBatteryKwh) * 100).toFixed(1))
+    });
+
+    const pendingStops = [...customers].map((c, idx) => ({
+      ...c,
+      id: c.id || `CUST_${idx + 1}`,
+      demandKg: Number(c.demandKg || 10),
+      readyTime: Number(c.readyTime || 0),
+      dueTime: Number(c.dueTime || 600),
+      serviceDurationMin: Number(c.serviceDurationMin || 10)
+    }));
+
+    while (pendingStops.length > 0) {
+      const nextCust = pendingStops.shift();
+      const directDist = this.calculateDistanceKm(currentLocation, nextCust);
+      const directEnergy = directDist * this.consumptionPerKm;
+      const returnEnergy = this.calculateDistanceKm(nextCust, this.depot) * this.consumptionPerKm;
+
+      const needsReplenish = (currentBatteryKwh - directEnergy - returnEnergy) < minSafeKwh;
+
+      if (needsReplenish) {
+        const selection = this.selectOptimalStation(currentLocation, currentBatteryKwh, nextCust, currentTimeMin);
+
+        if (selection) {
+          const { station, distToStation, durationMin, serviceCostVnd, degradationCostVnd, targetBatteryKwh } = selection;
+          const energyUsedToStation = distToStation * this.consumptionPerKm;
+          const travelTimeToStation = distToStation / this.travelSpeedKmMin;
+
+          totalDistanceKm += distToStation;
+          totalTravelTimeMin += travelTimeToStation;
+          currentTimeMin += travelTimeToStation;
+          currentBatteryKwh -= energyUsedToStation;
+          totalEnergyConsumedKwh += energyUsedToStation;
+
+          currentTimeMin += durationMin;
+          totalReplenishTimeMin += durationMin;
+          currentBatteryKwh = targetBatteryKwh;
+
+          if (station.type === "BSS") {
+            totalSwapCount++;
+            totalSwapCostVnd += serviceCostVnd;
+          } else {
+            totalChargingCostVnd += serviceCostVnd;
+            totalDegradationCostVnd += degradationCostVnd;
+          }
+
+          routeLegs.push({
+            type: station.type === "BSS" ? "BATTERY_SWAP" : "PLUG_CHARGING",
+            locationId: station.id,
+            name: station.name,
+            stationType: station.type,
+            arrivalMin: Number((currentTimeMin - durationMin).toFixed(2)),
+            departureMin: Number(currentTimeMin.toFixed(2)),
+            durationMin,
+            costVnd: serviceCostVnd + degradationCostVnd,
+            batteryAfterKwh: Number(currentBatteryKwh.toFixed(2)),
+            socPercent: Number(((currentBatteryKwh / this.effectiveBatteryKwh) * 100).toFixed(1))
+          });
+
+          currentLocation = station;
+        }
+      }
+
+      const legDist = this.calculateDistanceKm(currentLocation, nextCust);
+      const legTravelTime = legDist / this.travelSpeedKmMin;
+      const legEnergy = legDist * this.consumptionPerKm;
+
+      totalDistanceKm += legDist;
+      totalTravelTimeMin += legTravelTime;
+      currentTimeMin += legTravelTime;
+      currentBatteryKwh = Math.max(0, currentBatteryKwh - legEnergy);
+      totalEnergyConsumedKwh += legEnergy;
+
+      const arrivalTime = currentTimeMin;
+      if (currentTimeMin < nextCust.readyTime) {
+        currentTimeMin = nextCust.readyTime;
+      }
+      const lateness = Math.max(0, arrivalTime - nextCust.dueTime);
+      totalLatenessMin += lateness;
+
+      currentTimeMin += nextCust.serviceDurationMin;
+      totalServiceTimeMin += nextCust.serviceDurationMin;
+
+      routeLegs.push({
+        type: "CUSTOMER_DELIVERY",
+        locationId: nextCust.id,
+        name: nextCust.name || nextCust.id,
+        arrivalMin: Number(arrivalTime.toFixed(2)),
+        latenessMin: Number(lateness.toFixed(2)),
+        serviceDurationMin: nextCust.serviceDurationMin,
+        departureMin: Number(currentTimeMin.toFixed(2)),
+        batteryKwh: Number(currentBatteryKwh.toFixed(2)),
+        socPercent: Number(((currentBatteryKwh / this.effectiveBatteryKwh) * 100).toFixed(1))
+      });
+
+      currentLocation = nextCust;
+    }
+
+    const returnDist = this.calculateDistanceKm(currentLocation, this.depot);
+    const returnTravelTime = returnDist / this.travelSpeedKmMin;
+    const returnEnergy = returnDist * this.consumptionPerKm;
+
+    totalDistanceKm += returnDist;
+    totalTravelTimeMin += returnTravelTime;
+    currentTimeMin += returnTravelTime;
+    currentBatteryKwh = Math.max(0, currentBatteryKwh - returnEnergy);
+    totalEnergyConsumedKwh += returnEnergy;
+
+    routeLegs.push({
+      type: "DEPOT_ARRIVAL",
+      locationId: this.depot.id,
+      name: this.depot.name,
+      arrivalMin: Number(currentTimeMin.toFixed(2)),
+      batteryKwh: Number(currentBatteryKwh.toFixed(2)),
+      socPercent: Number(((currentBatteryKwh / this.effectiveBatteryKwh) * 100).toFixed(1))
+    });
+
+    const totalLatenessCost = Math.round(totalLatenessMin * this.latenessPenaltyVndPerMin);
+    const totalReplenishCost = totalSwapCostVnd + totalChargingCostVnd + totalDegradationCostVnd;
+
+    return {
+      success: true,
+      depot: this.depot,
+      batterySpecs: {
+        nominalCapacityKwh: this.nominalBatteryKwh,
+        effectiveCapacityKwh: this.effectiveBatteryKwh,
+        cycleCount: this.cycleCount,
+        capacityFadeRatio: Number(((1 - this.effectiveBatteryKwh / this.nominalBatteryKwh) * 100).toFixed(2))
+      },
+      totalDistanceKm: Number(totalDistanceKm.toFixed(2)),
+      totalDurationMin: Number(currentTimeMin.toFixed(2)),
+      breakdownTimeMin: {
+        travel: Number(totalTravelTimeMin.toFixed(2)),
+        replenish: Number(totalReplenishTimeMin.toFixed(2)),
+        service: Number(totalServiceTimeMin.toFixed(2))
+      },
+      energyKwh: {
+        consumed: Number(totalEnergyConsumedKwh.toFixed(2)),
+        remainingKwh: Number(currentBatteryKwh.toFixed(2)),
+        remainingSocPercent: Number(((currentBatteryKwh / this.effectiveBatteryKwh) * 100).toFixed(1))
+      },
+      replenishmentMetrics: {
+        totalSwapCount,
+        totalSwapCostVnd,
+        totalChargingCostVnd,
+        totalDegradationCostVnd,
+        totalReplenishCostVnd: totalReplenishCost
+      },
+      costsVnd: {
+        replenishment: totalReplenishCost,
+        latenessPenalty: totalLatenessCost,
+        totalOperatingCost: totalReplenishCost + totalLatenessCost
+      },
+      totalLatenessMin: Number(totalLatenessMin.toFixed(2)),
+      legsCount: routeLegs.length,
+      routeLegs
+    };
+  }
+
+  getTelemetry() {
+    return {
+      algorithm: "EVRPTWBatterySwappingDecayRouter",
+      nominalBatteryKwh: this.nominalBatteryKwh,
+      effectiveBatteryKwh: this.effectiveBatteryKwh,
+      cycleCount: this.cycleCount,
+      swapFeeVnd: this.swapFeeVnd,
+      chargeTariffVndPerKwh: this.chargeTariffVndPerKwh,
+      degradationVndPerKwh: this.degradationVndPerKwh,
+      stationsCount: this.stations.length,
+      solvedPlansCount: this.solvedPlansCount
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -37504,6 +38211,10 @@ export default {
   SpaceSavingStreamSummary,
   SACLagrangianSafePricing,
   EVRPTWMultiTierChargingRouter,
+  // Phase 71 Enterprise Algorithms
+  CountMinHierarchicalHH,
+  PPOEntropySafePricing,
+  EVRPTWBatterySwappingDecayRouter,
 };
 
 
