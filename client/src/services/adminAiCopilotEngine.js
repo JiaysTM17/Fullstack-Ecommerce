@@ -1506,7 +1506,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 65. Xếp Hạng Doanh Số & Phân Vị GMV Bằng Cây Fenwick (BIT) (Phase 28 - Feature 175)
-  if (!/2d|2 chiều|hyperbitbit|hyper-bitbit|ultraloglog|4-bit/i.test(raw) && /fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
+  if (!/2d|2 chiều|hyperbitbit|hyper-bitbit|ultraloglog|4-bit|dgim|đếm bit/i.test(raw) && /fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
     return {
       text: `📊 **XẾP HẠNG DOANH SỐ & PHÂN VỊ GMV BẰNG CÂY FENWICK (BINARY INDEXED TREE - BIT)**:
 - **Cấu trúc dữ liệu Fenwick Tree (Peter Fenwick 1994)**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -2842,7 +2842,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 133. Định Tuyến Xe Điện Đa Kho Kèm Hàm Sạc Phi Tuyến MDEVRP-NL-TW (Phase 50 - Feature 197)
-  if (/mdevrp|sạc phi tuyến|non-linear charging|mdevrp-nl|mạng lưới đa kho bãi xe điện|sạc cc-cv/i.test(raw)) {
+  if (!/evrptw[- ]nl/i.test(raw) && /mdevrp|sạc phi tuyến|non-linear charging|mdevrp-nl|mạng lưới đa kho bãi xe điện|sạc cc-cv/i.test(raw)) {
     return {
       text: `⚡ **ĐỊNH TUYẾN XE ĐIỆN ĐA KHO KÈM HÀM SẠC PHI TUYẾN MDEVRP-NL-TW (MONTOYA 2017, FROGER 2019)**:
 - **Mạng Lưới Đa Bưu Cục SPX Express (Multi-Depot)**:
@@ -3258,7 +3258,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 153. Định Giá Phân Phối QR-DDPG & Quản Trị Rủi Ro CVaR (Phase 57 - Feature 204)
-  if (!/cqrd/i.test(raw) && /qrdpg|qr-ddpg|quantile regression|phân phối lợi nhuận|cvar|đuôi rủi ro|risk-averse pricing/i.test(raw)) {
+  if (!/cqrd|wcsac/i.test(raw) && /qrdpg|qr-ddpg|quantile regression|phân phối lợi nhuận|cvar|đuôi rủi ro|risk-averse pricing/i.test(raw)) {
     return {
       text: `📈 **ĐỊNH GIÁ PHÂN PHỐI & PHÒNG NGỪA RỦI RO ĐUÔI QR-DDPG CVaR (DABNEY ET AL. 2018)**:
 - **Mô Hình Hóa Toàn Diện Phân Phối Lợi Nhuận (Quantile Representations)**:
@@ -3707,7 +3707,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 174. Định Giá Phân Phối Học Tăng Cường CQRD Pricing & Kiểm Soát Rủi Ro CVaR (Phase 64 - Feature 211)
-  if (/cqrd|quantile regression pricing|cvar|value at risk|phân phối lợi nhuận z|huber quantile|chống sụp đổ biên|risk[- ]sensitive pricing/i.test(raw)) {
+  if (!/wcsac/i.test(raw) && /cqrd|quantile regression pricing|cvar|value at risk|phân phối lợi nhuận z|huber quantile|chống sụp đổ biên|risk[- ]sensitive pricing/i.test(raw)) {
     return {
       text: `🏷️ **ĐỊNH GIÁ PHÂN PHỐI HỌC TĂNG CƯỜNG CQRD PRICING & BẢO VỆ RỦI RO CVAR (BELLEMARE 2017, DABNEY 2018)**:
 - **Mô Hình Hóa Toàn Diện Phân Phối Lợi Nhuận $Z(s, a)$**:
@@ -3944,6 +3944,75 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lịch trình phóng và điểm hẹn Rendezvous',
         'Kiểm tra pin và thời gian bay của từng phi vụ Drone',
         'Thống kê thời gian Makespan tiết kiệm được'
+      ]
+    };
+  }
+
+  // 185. Đếm Luồng Bit Cửa Sổ Trượt DGIM (Phase 68 - Feature 215)
+  if (/dgim|sliding window count|cửa sổ trượt dgim|đếm bit luồng|datar gionis/i.test(raw)) {
+    return {
+      text: `⏱️ **THUẬT TOÁN ĐẾM LUỒNG CỬA SỔ TRƯỢT DGIM (DATAR, GIONIS, INDYK, MOTWANI - SODA 2002)**:
+- **Khắc Phục Nút Thắt Bộ Nhớ Cửa Sổ Trượt Khổng Lồ**:
+  - Khi cần theo dõi số lượt chuyển đổi mua hàng hoặc cảnh báo bão đơn trong $W$ giây gần nhất (e.g. $W = 60.000\\text{s}$), lưu trữ toàn bộ $W$ bit tiêu tốn bộ nhớ lớn.
+- **Quy Tắc Gom Xô Lũy Thừa Của 2 (Exponential Buckets Invariant)**:
+  - Mỗi xô (bucket) lưu một nhãn thời gian và kích cỡ là lũy thừa của 2 ($1, 2, 4, 8, \\dots$). Kích thước các xô không giảm khi đi lùi về quá khứ.
+  - Mỗi kích thước $2^j$ chỉ được phép có tối đa $k = \\lceil 1 / \\epsilon \\rceil$ xô (với $\\epsilon = 0.5$, $k = 2$).
+- **Cơ Chế Hợp Nhất Lan Truyền & Ước Lượng Chặn Sai Số**:
+  - Khi thêm bit 1 tạo ra $k+1$ xô cùng cỡ, hai xô cũ nhất được gộp thành xô có kích thước gấp đôi.
+  - Bộ nhớ tiêu thụ giảm kỳ diệu chỉ còn $O\\left(\\frac{1}{\\epsilon} \\log^2 W\\right)$ bit (tiết kiệm hơn **99.5%** RAM), với sai số tương đối không quá $\\frac{\\epsilon}{2}$!`,
+      type: 'analytics',
+      tag: 'DGIM SLIDING WINDOW COUNTER',
+      suggestions: [
+        'Xem số lượng bit 1 trong cửa sổ W',
+        'Kiểm tra mật độ chuyển đổi Density',
+        'Phân tích tỷ lệ nén bộ nhớ DGIM'
+      ]
+    };
+  }
+
+  // 186. Định Giá Kiểm Soát Rủi Ro Đuôi WCSAC (Phase 68 - Feature 215)
+  if (/wcsac|worst[- ]case soft actor|rủi ro đuôi cvar|tail risk pricing|định giá wcsac|conditional value at risk/i.test(raw)) {
+    return {
+      text: `🛡️ **ĐỊNH GIÁ KIỂM SOÁT RỦI RO ĐUÔI WCSAC (QISONG YANG ET AL. AAAI 2021)**:
+- **Phòng Ngừa Thiệt Hại Thảm Khốc Trong Định Giá Động**:
+  - Định giá tự động thông thường chỉ tối ưu doanh thu kỳ vọng $\\mathbb{E}[R]$, dễ dẫn đến các cú sụp đổ biên lợi nhuận nghiêm trọng khi thị trường biến động cực đoan.
+- **Mô Hình Hóa Phân Phối Chi Phí & Thước Đo CVaR**:
+  - WCSAC mô hình hóa đồng thời critic phần thưởng $Q_R(s, a)$ và phân phối chi phí rủi ro $Z_C(s, a) \\sim \\mathcal{N}(\\mu_C, \\sigma_C^2)$.
+  - Tính toán giá trị rủi ro có điều kiện tại mức tin cậy $\\alpha = 0.95$:
+    $$\\text{CVaR}_\\alpha(C) = \\mu_C + \\sigma_C \\cdot \\frac{\\phi(\\Phi^{-1}(\\alpha))}{1 - \\alpha}$$
+- **Tối Ưu Hóa Đối Ngẫu & Sàn Lãi Gộp An Toàn**:
+  - Cập nhật nhân tử đối ngẫu $\\lambda \\leftarrow \\max(0, \\lambda + \\eta_\\lambda (\\text{CVaR}_\\alpha(C) - d_{\\text{risk}}))$.
+  - Khi rủi ro vượt ngân sách $d_{\\text{risk}}$, cơ chế giảm xóc Risk Damping tự động hãm biên độ giá, khóa cứng sàn $P \\ge 1.05 \\times \\text{COGS}$ bảo vệ lợi nhuận tuyệt đối!`,
+      type: 'pricing',
+      tag: 'WCSAC TAIL-RISK PRICING',
+      suggestions: [
+        'Kiểm tra chỉ số CVaR phân vị rủi ro 95%',
+        'Xem nhân tử đối ngẫu Lambda và hệ số giảm chấn',
+        'Xác nhận giá sàn an toàn COGS x 1.05'
+      ]
+    };
+  }
+
+  // 187. Điều Phối Xe Điện & Sạc Phi Tuyến Từng Phần EVRPTW-NL (Phase 68 - Feature 215)
+  if (/evrptw[- ]nl|sạc phi tuyến|sạc từng phần|cc[- ]cv|constant current|constant voltage|montoya|nonlinear charging/i.test(raw)) {
+    return {
+      text: `⚡ **ĐIỀU PHỐI ĐỘI XE ĐIỆN VỚI HÀM SẠC PHI TUYẾN EVRPTW-NL (MONTOYA ET AL. 2017 / FROGER 2019)**:
+- **Đặc Tính Sạc Phi Tuyến Thực Tế Của Pin Lithium-Ion**:
+  - Pin xe điện SPX không sạc tuyến tính. Quá trình sạc gồm 2 giai đoạn khúc xạ rõ rệt:
+    • **Giai đoạn Dòng Không Đổi (CC Phase, $0\\% \\to 80\\%$ SoC)**: Tốc độ sạc cực nhanh $P_1 = 1.0\\text{ kWh/phút}$.
+    • **Giai đoạn Áp Không Đổi (CV Phase, $80\\% \\to 100\\%$ SoC)**: Nội trở cao khiến tốc độ sạc sụt giảm 4 lần $P_2 = 0.25\\text{ kWh/phút}$!
+- **Đột Phá Tối Ưu Hóa Sạc Từng Phần (Partial Charging Policy)**:
+  - Tránh lãng phí thời gian vô ích ở pha CV bão hòa, router chỉ nạp vừa đủ năng lượng đến ngưỡng tối ưu $\\le 80-85\\%$ SoC để hoàn thành chặng tiếp theo và dự trữ an toàn $20\\%$.
+- **Cắt Giảm Đến 40% Thời Gian Chờ Sạc**:
+  - Tính toán chính xác thời gian dừng trạm theo hàm từng đoạn:
+    $$t_{\\text{charge}}(E_{\\text{start}} \\to E_{\\text{target}}) = \\frac{E_{\\text{break}} - E_{\\text{start}}}{P_1} + \\frac{E_{\\text{target}} - E_{\\text{break}}}{P_2}$$
+  - Đảm bảo 100% bưu kiện phát đúng khung giờ hẹn $[e_i, l_i]$ mà không bao giờ bị cạn pin dọc đường!`,
+      type: 'logistics',
+      tag: 'EVRPTW NONLINEAR CHARGING',
+      suggestions: [
+        'Xem thời gian sạc phi tuyến tránh pha CV',
+        'Kiểm tra ngưỡng sạc từng phần Partial SoC',
+        'Tối ưu lộ trình ghé trạm sạc SPX Express'
       ]
     };
   }

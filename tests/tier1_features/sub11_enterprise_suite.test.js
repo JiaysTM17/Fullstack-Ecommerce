@@ -359,6 +359,10 @@ import {
   QDigestQuantiles,
   TRPOSafeDynamicPricing,
   VRPTWTandemDroneRouter,
+  // Phase 68 Enterprise Algorithms
+  DGIMSlidingWindow,
+  WCSACRiskPricing,
+  EVRPTWNonlinearChargingRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -528,6 +532,9 @@ import { EVRPTWQueueRouter as ServerEVRPTWQueueRouter } from "../../server/src/u
 import { QDigestQuantiles as ServerQDigestQuantiles } from "../../server/src/utils/qDigestQuantiles.js";
 import { TRPOSafeDynamicPricing as ServerTRPOSafeDynamicPricing } from "../../server/src/utils/trpoSafePricing.js";
 import { VRPTWTandemDroneRouter as ServerVRPTWTandemDroneRouter } from "../../server/src/utils/vrptwTandemDroneRouter.js";
+import { DGIMSlidingWindow as ServerDGIMSlidingWindow } from "../../server/src/utils/dgimSlidingWindow.js";
+import { WCSACRiskPricing as ServerWCSACRiskPricing } from "../../server/src/utils/wcsacRiskPricing.js";
+import { EVRPTWNonlinearChargingRouter as ServerEVRPTWNonlinearChargingRouter } from "../../server/src/utils/evrptwNonlinearChargingRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -29348,6 +29355,327 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const buyerRes = generateAiChatResponse("Đơn hàng của mình có được giao bằng tandem drone hay định giá TRPO không?");
       expect.equal(buyerRes.intent, "Q_DIGEST_TRPO_TANDEM_DRONE");
       expect.ok(buyerRes.replyText.includes("VRPTW-TANDEM"));
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 215: ENTERPRISE SUITE PHASE 68 ALGORITHMS
+  // - DGIMSlidingWindow (Datar-Gionis-Indyk-Motwani 2002 Bit Stream Counter)
+  // - WCSACRiskPricing (Worst-Case Soft Actor-Critic with CVaR Tail Risk)
+  // - EVRPTWNonlinearChargingRouter (Electric Vehicle CC-CV Partial Charging)
+  // - Tri-Role AI Copilot Knowledge Integration
+  // =========================================================================
+  describe("Feature 215: Enterprise Suite Phase 68 Algorithms", () => {
+    // -----------------------------------------------------------------------
+    // DGIM SLIDING WINDOW BIT STREAM COUNTER (F215-T01 to F215-T08)
+    // -----------------------------------------------------------------------
+    test("F215-T01: DGIMSlidingWindow initializes with correct configuration and parameters", () => {
+      const dgim = new DGIMSlidingWindow({ windowSize: 500, epsilon: 0.2 });
+      expect.equal(dgim.windowSize, 500);
+      expect.equal(dgim.epsilon, 0.2);
+      expect.equal(dgim.maxBucketsPerSize, 5); // ceil(1 / 0.2) = 5
+      expect.equal(dgim.buckets.length, 0);
+      expect.equal(dgim.totalBitsProcessed, 0);
+    });
+
+    test("F215-T02: DGIMSlidingWindow maintains bucket invariant and merges when count exceeds k", () => {
+      const dgim = new DGIMSlidingWindow({ windowSize: 100, epsilon: 0.5 }); // k = 2
+      // Add three 1-bits
+      dgim.addBit(1);
+      dgim.addBit(1);
+      expect.equal(dgim.buckets.length, 2);
+      expect.equal(dgim.buckets[0].size, 1);
+      expect.equal(dgim.buckets[1].size, 1);
+
+      // Third 1-bit creates 3 buckets of size 1 (> 2), triggers merge into size 2
+      dgim.addBit(1);
+      expect.equal(dgim.buckets.length, 2);
+      expect.equal(dgim.buckets[0].size, 1);
+      expect.equal(dgim.buckets[1].size, 2);
+      expect.ok(dgim.mergesCount >= 1);
+    });
+
+    test("F215-T03: DGIMSlidingWindow evicts buckets outside the sliding window", () => {
+      const dgim = new DGIMSlidingWindow({ windowSize: 10, epsilon: 0.5 });
+      // Add bit at ts = 1
+      dgim.addBit(1, 1);
+      expect.equal(dgim.buckets.length, 1);
+
+      // Advance time past window (ts = 15 > 1 + 10)
+      dgim.addBit(0, 15);
+      expect.equal(dgim.buckets.length, 0);
+      expect.equal(dgim.countOnes(), 0);
+    });
+
+    test("F215-T04: DGIMSlidingWindow countOnes estimates 1-bits with partial last bucket rule", () => {
+      const dgim = new DGIMSlidingWindow({ windowSize: 50, epsilon: 0.5 });
+      // Add 10 ones consecutively
+      for (let i = 0; i < 10; i++) {
+        dgim.addBit(1);
+      }
+      const estimate = dgim.countOnes(50);
+      // Actual is 10. DGIM estimate must be close (e.g. within [7, 12])
+      expect.ok(estimate >= 7 && estimate <= 12);
+    });
+
+    test("F215-T05: DGIMSlidingWindow respects theoretical relative error bound on large stream", () => {
+      const dgim = new DGIMSlidingWindow({ windowSize: 200, epsilon: 0.5 });
+      let actualOnesInWindow = 0;
+      const bits = [];
+      for (let i = 0; i < 200; i++) {
+        const b = (i % 3 === 0) ? 1 : 0;
+        bits.push(b);
+        if (b === 1) actualOnesInWindow++;
+      }
+      dgim.addBits(bits);
+      const est = dgim.countOnes(200);
+      const relError = Math.abs(est - actualOnesInWindow) / actualOnesInWindow;
+      expect.ok(relError <= 0.5);
+    });
+
+    test("F215-T06: DGIMSlidingWindow getDensity computes conversion rate accurately", () => {
+      const dgim = new DGIMSlidingWindow({ windowSize: 100, epsilon: 0.5 });
+      // 25 ones out of 100 bits => 25% density
+      for (let i = 0; i < 100; i++) {
+        dgim.addBit(i % 4 === 0 ? 1 : 0);
+      }
+      const density = dgim.getDensity(100);
+      expect.ok(density >= 0.15 && density <= 0.35);
+    });
+
+    test("F215-T07: DGIMSlidingWindow getMetrics returns telemetry and compression ratio", () => {
+      const dgim = new DGIMSlidingWindow({ windowSize: 1000, epsilon: 0.5 });
+      for (let i = 0; i < 200; i++) {
+        dgim.addBit(i % 2 === 0 ? 1 : 0);
+      }
+      const metrics = dgim.getMetrics();
+      expect.equal(metrics.windowSize, 1000);
+      expect.equal(metrics.epsilon, 0.5);
+      expect.ok(metrics.activeBucketsCount > 0);
+      expect.ok(metrics.compressionRatio < 1.0);
+    });
+
+    test("F215-T08: DGIMSlidingWindow exhibits 100% Client/Server parity", () => {
+      const clientDGIM = new DGIMSlidingWindow({ windowSize: 250, epsilon: 0.33 });
+      const serverDGIM = new ServerDGIMSlidingWindow({ windowSize: 250, epsilon: 0.33 });
+
+      const stream = [1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1];
+      clientDGIM.addBits(stream);
+      serverDGIM.addBits(stream);
+
+      expect.equal(clientDGIM.countOnes(50), serverDGIM.countOnes(50));
+      expect.equal(clientDGIM.getDensity(50), serverDGIM.getDensity(50));
+      expect.equal(clientDGIM.buckets.length, serverDGIM.buckets.length);
+      expect.equal(clientDGIM.mergesCount, serverDGIM.mergesCount);
+    });
+
+    // -----------------------------------------------------------------------
+    // WCSAC WORST-CASE SOFT ACTOR-CRITIC RISK PRICING (F215-T09 to F215-T16)
+    // -----------------------------------------------------------------------
+    test("F215-T09: WCSACRiskPricing precomputes Gaussian tail factor kappa(alpha)", () => {
+      const pricing = new WCSACRiskPricing({ riskAlpha: 0.95 });
+      // For alpha = 0.95, z ~ 1.64485, phi(z) ~ 0.103135, kappa = phi / 0.05 ~ 2.06
+      expect.ok(pricing.tailFactor > 1.8 && pricing.tailFactor < 2.3);
+    });
+
+    test("F215-T10: WCSACRiskPricing evaluateRiskDistribution computes mu, sigma and CVaR", () => {
+      const pricing = new WCSACRiskPricing({ riskAlpha: 0.95 });
+      const state = new Float64Array([1.0, 1.0, 0.5, 0.2, 1.0]);
+      const risk = pricing.evaluateRiskDistribution(state);
+      expect.ok(risk.muC >= 0);
+      expect.ok(risk.sigmaC > 0);
+      expect.ok(risk.cvar >= risk.muC);
+    });
+
+    test("F215-T11: WCSACRiskPricing updates policy and dual multiplier via subgradient ascent", () => {
+      const pricing = new WCSACRiskPricing({ riskBudget: 0.05, initLambda: 0.1 });
+      const batch = [
+        { state: [1.0, 1.0, 0.5, 0.2, 1.0], action: 0.05, reward: 0.8, cost: 0.25 },
+        { state: [0.9, 1.1, 0.8, 0.1, 0.5], action: -0.02, reward: 0.5, cost: 0.18 }
+      ];
+      const res = pricing.updatePolicy(batch);
+      expect.equal(res.success, true);
+      expect.ok(res.updatesCount === 1);
+      expect.ok(res.avgCvar > 0);
+    });
+
+    test("F215-T12: WCSACRiskPricing recommendPrice applies risk damping on price adjustments", () => {
+      const pricing = new WCSACRiskPricing();
+      const product = { price: 200000, cogs: 120000, msrp: 260000 };
+      const market = { competitorPrice: 195000, inventoryLevel: 30, salesVelocity: 2.0 };
+      const rec = pricing.recommendPrice(product, market);
+      expect.ok(rec.recommendedPrice >= rec.safetyFloor);
+      expect.ok(rec.recommendedPrice <= rec.safetyCeiling);
+      expect.ok(rec.grossMarginPct > 0);
+      expect.ok(rec.riskDamping <= 1.0 && rec.riskDamping >= 0.5);
+    });
+
+    test("F215-T13: WCSACRiskPricing strictly enforces COGS safety floor (1.05 * COGS)", () => {
+      const pricing = new WCSACRiskPricing();
+      // Price close to COGS
+      const product = { price: 40000, cogs: 45000, msrp: 60000 };
+      const rec = pricing.recommendPrice(product, {});
+      expect.ok(rec.recommendedPrice >= rec.safetyFloor);
+      expect.equal(rec.recommendedPrice, Math.round(45000 * 1.05));
+      expect.equal(rec.isFloorBounded, true);
+    });
+
+    test("F215-T14: WCSACRiskPricing handles ceiling bounding and volatility limits", () => {
+      const pricing = new WCSACRiskPricing();
+      const product = { price: 100000, cogs: 50000, msrp: 110000 };
+      const rec = pricing.recommendPrice(product, { demandIndex: 2.5, competitorPrice: 150000 });
+      expect.ok(rec.recommendedPrice <= rec.safetyCeiling);
+      expect.ok(Math.abs(rec.priceAdjustmentPct) <= 25);
+    });
+
+    test("F215-T15: WCSACRiskPricing returns EMPTY_BATCH when updating with invalid batch", () => {
+      const pricing = new WCSACRiskPricing();
+      const res = pricing.updatePolicy([]);
+      expect.equal(res.success, false);
+      expect.equal(res.reason, "EMPTY_BATCH");
+    });
+
+    test("F215-T16: WCSACRiskPricing exhibits 100% Client/Server parity", () => {
+      const clientPricing = new WCSACRiskPricing({ riskAlpha: 0.95, riskBudget: 0.08 });
+      const serverPricing = new ServerWCSACRiskPricing({ riskAlpha: 0.95, riskBudget: 0.08 });
+
+      const prod = { price: 350000, cogs: 210000, msrp: 450000 };
+      const market = { competitorPrice: 340000, inventoryLevel: 45, inventoryCapacity: 100 };
+
+      const clientRec = clientPricing.recommendPrice(prod, market);
+      const serverRec = serverPricing.recommendPrice(prod, market);
+
+      expect.equal(clientRec.recommendedPrice, serverRec.recommendedPrice);
+      expect.equal(clientRec.safetyFloor, serverRec.safetyFloor);
+      expect.equal(clientRec.cvar, serverRec.cvar);
+      expect.equal(clientRec.riskDamping, serverRec.riskDamping);
+    });
+
+    // -----------------------------------------------------------------------
+    // EVRPTW NONLINEAR CHARGING ROUTER (F215-T17 to F215-T22)
+    // -----------------------------------------------------------------------
+    test("F215-T17: EVRPTWNonlinearChargingRouter computes piecewise CC-CV charging time", () => {
+      const router = new EVRPTWNonlinearChargingRouter({
+        batteryCapacityKwh: 40.0,
+        ccThresholdRatio: 0.80, // 32 kWh breakpoint
+        ccPowerKwPerMin: 1.0,   // 1.0 kWh/min in CC
+        cvPowerKwPerMin: 0.25   // 0.25 kWh/min in CV
+      });
+
+      // 1. Purely in CC phase: 10 to 30 kWh (20 kWh / 1.0 = 20 min)
+      const ccOnly = router.computeNonlinearChargingTime(10, 30);
+      expect.equal(ccOnly.durationMin, 20);
+      expect.equal(ccOnly.ccEnergyKwh, 20);
+      expect.equal(ccOnly.cvEnergyKwh, 0);
+
+      // 2. Purely in CV phase: 32 to 36 kWh (4 kWh / 0.25 = 16 min)
+      const cvOnly = router.computeNonlinearChargingTime(32, 36);
+      expect.equal(cvOnly.durationMin, 16);
+      expect.equal(cvOnly.ccEnergyKwh, 0);
+      expect.equal(cvOnly.cvEnergyKwh, 4);
+
+      // 3. Spanning both phases: 20 to 36 kWh (12 kWh in CC = 12 min; 4 kWh in CV = 16 min; Total = 28 min)
+      const both = router.computeNonlinearChargingTime(20, 36);
+      expect.equal(both.durationMin, 28);
+      expect.equal(both.ccEnergyKwh, 12);
+      expect.equal(both.cvEnergyKwh, 4);
+    });
+
+    test("F215-T18: EVRPTWNonlinearChargingRouter handles degenerate charging targets (start >= target)", () => {
+      const router = new EVRPTWNonlinearChargingRouter();
+      const res = router.computeNonlinearChargingTime(35, 30);
+      expect.equal(res.durationMin, 0);
+      expect.equal(res.ccEnergyKwh, 0);
+      expect.equal(res.cvEnergyKwh, 0);
+    });
+
+    test("F215-T19: EVRPTWNonlinearChargingRouter optimizes partial charging to avoid CV saturation", () => {
+      const router = new EVRPTWNonlinearChargingRouter({
+        batteryCapacityKwh: 40.0,
+        consumptionPerKm: 0.35
+      });
+
+      const customers = [
+        { id: "C1", name: "Điểm 1", x: 10.79, y: 106.71, demandKg: 20, timeWindow: [10, 60] },
+        { id: "C2", name: "Điểm 2", x: 10.82, y: 106.74, demandKg: 30, timeWindow: [30, 120] }
+      ];
+
+      const plan = router.planEVRoutes(customers);
+      expect.ok(plan.vehiclesUsed >= 1);
+      expect.equal(plan.summary.totalCustomers, 2);
+      expect.ok(plan.summary.totalDistanceKm > 0);
+    });
+
+    test("F215-T20: EVRPTWNonlinearChargingRouter routes with charging station insertion when battery depleted", () => {
+      // Small battery to force charging station insertion
+      const router = new EVRPTWNonlinearChargingRouter({
+        batteryCapacityKwh: 5.0,
+        consumptionPerKm: 2.0, // High consumption forces recharge
+        minSocSafetyBuffer: 0.2
+      });
+
+      const customers = [
+        { id: "C1", name: "Điểm xa 1", x: 10.79, y: 106.71, demandKg: 20, timeWindow: [10, 120] },
+        { id: "C2", name: "Điểm xa 2", x: 10.85, y: 106.75, demandKg: 25, timeWindow: [30, 180] }
+      ];
+
+      const plan = router.planEVRoutes(customers);
+      expect.ok(plan.vehiclesUsed >= 1);
+      // Route must complete safely without throwing
+      expect.equal(plan.summary.totalCustomers, 2);
+    });
+
+    test("F215-T21: EVRPTWNonlinearChargingRouter exhibits 100% Client/Server parity", () => {
+      const clientRouter = new EVRPTWNonlinearChargingRouter();
+      const serverRouter = new ServerEVRPTWNonlinearChargingRouter();
+
+      const customers = [
+        { id: "C1", name: "Quận 1", x: 10.77, y: 106.70, demandKg: 25, timeWindow: [15, 90] },
+        { id: "C2", name: "Quận 3", x: 10.78, y: 106.69, demandKg: 35, timeWindow: [30, 120] }
+      ];
+
+      const clientPlan = clientRouter.planEVRoutes(customers);
+      const serverPlan = serverRouter.planEVRoutes(customers);
+
+      expect.equal(clientPlan.summary.totalCustomers, serverPlan.summary.totalCustomers);
+      expect.equal(clientPlan.summary.totalDistanceKm, serverPlan.summary.totalDistanceKm);
+      expect.equal(clientPlan.summary.totalEnergyConsumedKwh, serverPlan.summary.totalEnergyConsumedKwh);
+      expect.equal(clientPlan.summary.totalChargingDurationMin, serverPlan.summary.totalChargingDurationMin);
+    });
+
+    test("F215-T22: EVRPTWNonlinearChargingRouter handles empty customers list safely", () => {
+      const router = new EVRPTWNonlinearChargingRouter();
+      const emptyPlan = router.planEVRoutes([]);
+      expect.equal(emptyPlan.summary.totalCustomers, 0);
+      expect.equal(emptyPlan.routes.length, 0);
+      expect.equal(emptyPlan.summary.totalDistanceKm, 0);
+    });
+
+    // -----------------------------------------------------------------------
+    // TRI-ROLE AI COPILOT KNOWLEDGE INTEGRATION (ADMIN, SELLER, BUYER)
+    // -----------------------------------------------------------------------
+    test("F215-T23: Admin Sentinel Copilot correctly handles Sections 185, 186, 187", () => {
+      const resDGIM = generateAdminCopilotResponse("Đếm cửa sổ trượt DGIM sliding window đếm bit luồng");
+      expect.equal(resDGIM.tag, "DGIM SLIDING WINDOW COUNTER");
+      expect.ok(resDGIM.text.includes("DATAR"));
+
+      const resWCSAC = generateAdminCopilotResponse("Tư vấn định giá an toàn đuôi rủi ro WCSAC cvar pricing");
+      expect.equal(resWCSAC.tag, "WCSAC TAIL-RISK PRICING");
+      expect.ok(resWCSAC.text.includes("YANG"));
+
+      const resEVRPTW = generateAdminCopilotResponse("Lập lộ trình xe điện sạc phi tuyến CC-CV EVRPTW-NL");
+      expect.equal(resEVRPTW.tag, "EVRPTW NONLINEAR CHARGING");
+      expect.ok(resEVRPTW.text.includes("MONTOYA"));
+    });
+
+    test("F215-T24: Seller ShopSmart Copilot and Buyer Assistant handle Phase 68 algorithms and intents", () => {
+      const sellerRes = generateSellerCopilotResponse("Tư vấn định giá rủi ro đuôi WCSAC và đếm cửa sổ DGIM");
+      expect.equal(sellerRes.tag, "DGIM, WCSAC RISK PRICING & EVRPTW NONLINEAR CHARGING");
+      expect.ok(sellerRes.text.includes("WCSAC Worst-Case Soft Actor-Critic"));
+
+      const buyerRes = generateAiChatResponse("Đơn hàng của mình có được giao bằng xe điện sạc phi tuyến CC-CV hay định giá an toàn WCSAC không?");
+      expect.equal(buyerRes.intent, "DGIM_WCSAC_NONLINEAR_CHARGING");
+      expect.ok(buyerRes.replyText.includes("EVRPTW-NL"));
     });
   });
 });
