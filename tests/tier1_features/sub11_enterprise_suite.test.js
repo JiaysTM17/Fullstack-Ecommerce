@@ -428,6 +428,11 @@ import {
   AMSStreamFrequencyMoments,
   COMAContinuousPricing,
   EVRPTWCarbonTaxEmissionsRouter,
+  // Phase 85 Enterprise Algorithms
+  MomentSketchStreamQuantiles,
+  QTRANCooperativePricing,
+  DEFAULT_LEZ_ZONES,
+  EVRPTWUrbanLowEmissionZoneRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -648,6 +653,9 @@ import ServerEVRPTWMultiDepotMicrogridRouter from "../../server/src/utils/evrptw
 import ServerAMSStreamFrequencyMoments from "../../server/src/utils/amsStreamFrequencyMoments.js";
 import ServerCOMAContinuousPricing from "../../server/src/utils/comaContinuousPricing.js";
 import ServerEVRPTWCarbonTaxEmissionsRouter from "../../server/src/utils/evrptwCarbonTaxEmissionsRouter.js";
+import { MomentSketchStreamQuantiles as ServerMomentSketchStreamQuantiles } from "../../server/src/utils/momentSketchStreamQuantiles.js";
+import { QTRANCooperativePricing as ServerQTRANCooperativePricing } from "../../server/src/utils/qtranCooperativePricing.js";
+import { EVRPTWUrbanLowEmissionZoneRouter as ServerEVRPTWUrbanLowEmissionZoneRouter } from "../../server/src/utils/evrptwUrbanLowEmissionZoneRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -35491,6 +35499,324 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sàn có sử dụng xe điện evrptw-carbon giảm phát thải net-zero hoặc đo lường đa dạng gini-simpson không?");
         expect.equal(buyerRes.intent, "AMS_COMA_CARBON_TAX_ASSIST");
         expect.ok(buyerRes.replyText.includes("AMS Gini-Simpson Diversity"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 232: MomentSketch Stream Quantiles, QTRAN Cooperative Pricing, & EVRPTW Urban LEZ Router (Phase 85 - 24 Tests)
+    // =========================================================================
+    describe("Feature 232: MomentSketch Stream Quantiles, QTRAN Cooperative Pricing, & EVRPTW Urban LEZ Router", () => {
+      // -----------------------------------------------------------------------
+      // MomentSketchStreamQuantiles Tests (F232-T01 - F232-T08)
+      // -----------------------------------------------------------------------
+      test("F232-T01: MomentSketchStreamQuantiles initializes with numMoments K=10, minVal, maxVal, and logRange", () => {
+        const sketch = new MomentSketchStreamQuantiles({
+          numMoments: 10,
+          minVal: 1000,
+          maxVal: 50000000
+        });
+        expect.equal(sketch.numMoments, 10);
+        expect.equal(sketch.minVal, 1000);
+        expect.equal(sketch.maxVal, 50000000);
+        expect.ok(sketch.logRange > 0);
+        expect.equal(sketch.count, 0);
+      });
+
+      test("F232-T02: Normalization and denormalization roundtrip maintains numerical precision", () => {
+        const sketch = new MomentSketchStreamQuantiles({ minVal: 10, maxVal: 1000000 });
+        const originalVal = 45200;
+        const z = sketch._normalize(originalVal);
+        expect.ok(z >= 0 && z <= 1.0);
+        const restored = sketch._denormalize(z);
+        expect.ok(Math.abs(restored - originalVal) / originalVal < 1e-4);
+      });
+
+      test("F232-T03: Power moments mu_k = (1/N) sum z^k decrease monotonically with moment order k", () => {
+        const sketch = new MomentSketchStreamQuantiles();
+        const testValues = [50000, 120000, 350000, 890000, 2400000, 7500000];
+        sketch.insertBatch(testValues);
+
+        const moments = sketch.getMoments();
+        expect.equal(moments.length, sketch.numMoments);
+        for (let k = 1; k < moments.length; k++) {
+          // Because z in (0, 1), z^k >= z^(k+1)
+          expect.ok(moments[k - 1] >= moments[k] - 1e-9);
+        }
+      });
+
+      test("F232-T04: Accurate median P50 estimation for uniform distribution", () => {
+        const sketch = new MomentSketchStreamQuantiles({ minVal: 10000, maxVal: 1000000 });
+        const values = [];
+        for (let i = 1; i <= 100; i++) {
+          values.push(10000 + i * 9000); // 19,000 to 910,000
+        }
+        sketch.insertBatch(values);
+
+        const p50 = sketch.estimateQuantile(0.50);
+        // True median around 460,000
+        expect.ok(p50 >= 300000 && p50 <= 650000);
+      });
+
+      test("F232-T05: Accurate tail quantile P95 and P99 estimation for SLA latency profiling", () => {
+        const sketch = new MomentSketchStreamQuantiles({ minVal: 1, maxVal: 5000 });
+        // Simulating e-commerce latency: mostly 20-80ms, rare spikes up to 3000ms
+        const latencies = [];
+        for (let i = 0; i < 90; i++) latencies.push(20 + (i % 60));
+        for (let i = 0; i < 8; i++) latencies.push(200 + i * 50);
+        latencies.push(1500, 3200); // 2 tail outliers
+        sketch.insertBatch(latencies);
+
+        const p50 = sketch.estimateQuantile(0.50);
+        const p95 = sketch.estimateQuantile(0.95);
+        const p99 = sketch.estimateQuantile(0.99);
+
+        expect.ok(p50 < p95);
+        expect.ok(p95 <= p99);
+        expect.ok(p99 >= 400);
+      });
+
+      test("F232-T06: Quantile estimation strictly bounded within [minObserved, maxObserved]", () => {
+        const sketch = new MomentSketchStreamQuantiles();
+        sketch.insertBatch([25000, 50000, 100000]);
+
+        expect.equal(sketch.estimateQuantile(0.0), 25000);
+        expect.equal(sketch.estimateQuantile(1.0), 100000);
+        expect.ok(sketch.estimateQuantile(0.25) >= 25000);
+        expect.ok(sketch.estimateQuantile(0.75) <= 100000);
+      });
+
+      test("F232-T07: Linear mergeability between distributed sketch nodes preserves total count and moments", () => {
+        const sketchA = new MomentSketchStreamQuantiles({ minVal: 100, maxVal: 1000000 });
+        const sketchB = new MomentSketchStreamQuantiles({ minVal: 100, maxVal: 1000000 });
+
+        sketchA.insertBatch([1000, 5000, 10000]);
+        sketchB.insertBatch([20000, 50000, 100000]);
+
+        sketchA.merge(sketchB);
+        expect.equal(sketchA.count, 6);
+        expect.equal(sketchA.minObserved, 1000);
+        expect.equal(sketchA.maxObserved, 100000);
+
+        const summary = sketchA.getQuantileSummary();
+        expect.equal(summary.count, 6);
+        expect.ok(summary.p50 >= 5000 && summary.p50 <= 50000);
+      });
+
+      test("F232-T08: Client and Server MomentSketchStreamQuantiles demonstrate exact mathematical parity", () => {
+        const clientSketch = new MomentSketchStreamQuantiles();
+        const serverSketch = new ServerMomentSketchStreamQuantiles();
+
+        const data = [15000, 32000, 68000, 120000, 450000, 890000];
+        clientSketch.insertBatch(data);
+        serverSketch.insertBatch(data);
+
+        expect.equal(clientSketch.count, serverSketch.count);
+        expect.equal(clientSketch.estimateQuantile(0.50), serverSketch.estimateQuantile(0.50));
+        expect.equal(clientSketch.estimateQuantile(0.95), serverSketch.estimateQuantile(0.95));
+      });
+
+      // -----------------------------------------------------------------------
+      // QTRANCooperativePricing Tests (F232-T09 - F232-T15)
+      // -----------------------------------------------------------------------
+      test("F232-T09: QTRANCooperativePricing initializes with action grid and transformation weights", () => {
+        const qtran = new QTRANCooperativePricing();
+        expect.ok(qtran.actionGrid.length >= 7);
+        expect.ok(qtran.hiddenDim >= 8);
+        expect.ok(qtran.discrepancyTolerance > 0);
+      });
+
+      test("F232-T10: Individual utility Q_i(s_i, u_i) responds smoothly to proposed markups and state", () => {
+        const qtran = new QTRANCooperativePricing();
+        const state = { price: 150000, stock: 120, cogs: 100000, demand: 75 };
+
+        const qLow = qtran.evaluateIndividualQ(state, -0.15);
+        const qOptimal = qtran.evaluateIndividualQ(state, 0.05);
+
+        expect.ok(Number.isFinite(qLow));
+        expect.ok(Number.isFinite(qOptimal));
+        // Under high demand (75), positive markup yields higher utility than heavy discount
+        expect.ok(qOptimal > qLow);
+      });
+
+      test("F232-T11: Joint state-action value Q_jt(s, u) aggregates whole marketplace revenue and margins", () => {
+        const qtran = new QTRANCooperativePricing();
+        const vendorStates = [
+          { currentPrice: 120000, recommendedPrice: 125000, cogs: 80000 },
+          { currentPrice: 200000, recommendedPrice: 210000, cogs: 140000 }
+        ];
+
+        const qJt = qtran.evaluateJointQ(vendorStates);
+        expect.ok(Number.isFinite(qJt));
+        expect.ok(qJt > 0);
+      });
+
+      test("F232-T12: Transformed state value V(s) aligns Q_sum(s, u*) + V(s) = Q_jt(s, u*)", () => {
+        const qtran = new QTRANCooperativePricing();
+        const vendors = [
+          { id: 'v1', price: 100000, stock: 80, cogs: 70000, demand: 60 },
+          { id: 'v2', price: 150000, stock: 40, cogs: 110000, demand: 80 }
+        ];
+
+        const plan = qtran.coordinatePricing(vendors);
+        expect.equal(plan.factorizationType, 'QTRAN_TRANSFORMATION');
+        expect.equal(plan.discrepancyOptimal, 0); // V(s) chosen so D(s, u*) = 0
+      });
+
+      test("F232-T13: IGM condition verification: optimal action discrepancy satisfies |D(s, u*)| <= discrepancyTolerance", () => {
+        const qtran = new QTRANCooperativePricing();
+        const vendors = [
+          { id: 'v1', price: 80000, stock: 100, cogs: 60000, demand: 50 },
+          { id: 'v2', price: 250000, stock: 50, cogs: 180000, demand: 70 }
+        ];
+
+        const plan = qtran.coordinatePricing(vendors);
+        expect.equal(plan.isIGMSatisfied, true);
+        expect.ok(Math.abs(plan.discrepancyOptimal) <= qtran.discrepancyTolerance);
+      });
+
+      test("F232-T14: Non-optimal actions confirm non-negative discrepancy condition D(s, u) >= 0", () => {
+        const qtran = new QTRANCooperativePricing();
+        const vendors = [
+          { id: 'v1', price: 90000, stock: 90, cogs: 65000, demand: 55 },
+          { id: 'v2', price: 180000, stock: 60, cogs: 130000, demand: 65 }
+        ];
+
+        const plan = qtran.coordinatePricing(vendors);
+        const nonOptimalCheck = qtran.verifyNonOptimalDiscrepancy(vendors, plan);
+        expect.equal(nonOptimalCheck.allNonNegative, true);
+      });
+
+      test("F232-T15: Safe price floor P_i >= 1.05 * COGS_i strictly enforced for aggressive discount attempts", () => {
+        const qtran = new QTRANCooperativePricing();
+        const vendors = [
+          { id: 'v1', price: 50000, stock: 500, cogs: 49000, demand: 10 }, // High stock, low demand might trigger deep discount
+          { id: 'v2', price: 120000, stock: 30, cogs: 90000, demand: 60 }
+        ];
+
+        const plan = qtran.coordinatePricing(vendors);
+        plan.decisions.forEach(d => {
+          expect.ok(d.recommendedPrice >= d.safeFloor);
+        });
+        const v1Decision = plan.decisions.find(d => d.vendorId === 'v1');
+        expect.equal(v1Decision.recommendedPrice, v1Decision.safeFloor);
+        expect.equal(v1Decision.isFloorEnforced, true);
+      });
+
+      // -----------------------------------------------------------------------
+      // EVRPTWUrbanLowEmissionZoneRouter Tests (F232-T16 - F232-T22)
+      // -----------------------------------------------------------------------
+      test("F232-T16: EVRPTWUrbanLowEmissionZoneRouter initializes with default LEZ zones and toll amounts", () => {
+        const router = new EVRPTWUrbanLowEmissionZoneRouter();
+        expect.ok(router.lezZones.length >= 2);
+        expect.equal(router.standardTollVND, 150000);
+        expect.equal(router.energyRateInsideLEZ, 0.12);
+        expect.equal(router.energyRateOutsideLEZ, 0.16);
+      });
+
+      test("F232-T17: Geometric containment accurately identifies points inside Hoan Kiem and District 1 LEZs", () => {
+        const router = new EVRPTWUrbanLowEmissionZoneRouter();
+        // Hoan Kiem center (10, 10), radius 6km
+        const insideHK = router.getContainingLEZ(12, 11);
+        expect.ok(insideHK !== null);
+        expect.equal(insideHK.id, 'LEZ_HOAN_KIEM_OLD_QUARTER');
+
+        // Outside all LEZs
+        const outsideAll = router.getContainingLEZ(90, 90);
+        expect.equal(outsideAll, null);
+      });
+
+      test("F232-T18: Speed limit differentiation enforces 25 km/h inside LEZ calm zone vs 45 km/h arterial", () => {
+        const router = new EVRPTWUrbanLowEmissionZoneRouter();
+        const lez = router.lezZones[0];
+        expect.equal(lez.speedLimitKmH, 25);
+      });
+
+      test("F232-T19: Clean EV fleet with healthy battery receives 100% congestion toll waiver", () => {
+        const router = new EVRPTWUrbanLowEmissionZoneRouter();
+        const customers = [
+          { id: 'cust_lez', x: 10, y: 11, demand: 20, readyHour: 8, dueHour: 14, serviceMinutes: 10 }
+        ];
+
+        const plan = router.planLEZOptimizedRoutes({ customers });
+        expect.equal(plan.totalTollsPaidVND, 0); // 100% exempt
+        expect.ok(plan.totalTollsWaivedVND > 0);
+        expect.equal(plan.compliancePass.status, 'URBAN_LEZ_ZERO_EMISSION_PASS');
+        expect.equal(plan.compliancePass.exemptionRatePct, 100);
+      });
+
+      test("F232-T20: Route planning across LEZ time windows and delivery constraints", () => {
+        const router = new EVRPTWUrbanLowEmissionZoneRouter();
+        const customers = [
+          { id: 'c1', x: 10, y: 12, demand: 30, readyHour: 8, dueHour: 13, serviceMinutes: 10 },
+          { id: 'c2', x: 25, y: 26, demand: 40, readyHour: 10, dueHour: 18, serviceMinutes: 15 }
+        ];
+
+        const plan = router.planLEZOptimizedRoutes({ customers });
+        expect.ok(plan.routes.length > 0);
+        expect.ok(plan.totalDistanceKm > 0);
+        expect.ok(plan.totalEnergyKWh > 0);
+        expect.ok(plan.lezEntriesCount > 0);
+      });
+
+      test("F232-T21: Avoided emissions quantification (CO2, PM2.5, NOx) and SPX Clean Air Hero badge", () => {
+        const router = new EVRPTWUrbanLowEmissionZoneRouter();
+        const customers = [
+          { id: 'c1', x: 8, y: 8, demand: 15, readyHour: 9, dueHour: 12, serviceMinutes: 10 },
+          { id: 'c2', x: 11, y: 10, demand: 25, readyHour: 10, dueHour: 15, serviceMinutes: 10 }
+        ];
+
+        const plan = router.planLEZOptimizedRoutes({ customers });
+        expect.ok(plan.avoidedEmissions.co2Kg > 0);
+        expect.ok(plan.avoidedEmissions.pm25Grams > 0);
+        expect.ok(plan.avoidedEmissions.noxGrams > 0);
+        expect.equal(plan.compliancePass.badge, 'SPX_CLEAN_AIR_HERO');
+      });
+
+      test("F232-T22: Client and Server EVRPTWUrbanLowEmissionZoneRouter demonstrate routing parity", () => {
+        const clientRouter = new EVRPTWUrbanLowEmissionZoneRouter();
+        const serverRouter = new ServerEVRPTWUrbanLowEmissionZoneRouter();
+
+        const input = {
+          customers: [
+            { id: 'c1', x: 10, y: 10, demand: 25, readyHour: 8, dueHour: 12, serviceMinutes: 10 }
+          ]
+        };
+
+        const clientPlan = clientRouter.planLEZOptimizedRoutes(input);
+        const serverPlan = serverRouter.planLEZOptimizedRoutes(input);
+
+        expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+        expect.equal(clientPlan.totalEnergyKWh, serverPlan.totalEnergyKWh);
+        expect.equal(clientPlan.totalTollsPaidVND, serverPlan.totalTollsPaidVND);
+        expect.equal(clientPlan.totalTollsWaivedVND, serverPlan.totalTollsWaivedVND);
+        expect.equal(clientPlan.compliancePass.status, serverPlan.compliancePass.status);
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F232-T23 - F232-T24)
+      // -----------------------------------------------------------------------
+      test("F232-T23: Admin Sentinel Copilot correctly routes Section 236 (MomentSketch), Section 237 (QTRAN), and Section 238 (EVRPTW Urban LEZ)", () => {
+        const resMoment = generateAdminCopilotResponse("Ước lượng phân vị luồng momentsketch mô-men lũy thừa Gan Bailis PVLDB 2018");
+        expect.equal(resMoment.tag, "MOMENTSKETCH STREAM QUANTILES");
+        expect.ok(resMoment.text.includes("MOMENTSKETCH"));
+
+        const resQTRAN = generateAdminCopilotResponse("Định giá hợp tác phân rã biến đổi qtran igm factorization Son ICML 2019");
+        expect.equal(resQTRAN.tag, "QTRAN COOPERATIVE PRICING");
+        expect.ok(resQTRAN.text.includes("PHÂN RÃ BIẾN ĐỔI QTRAN"));
+
+        const resLEZ = generateAdminCopilotResponse("Định tuyến xe điện evrptw-lez vành đai không phát thải urban lez miễn phí ùn tắc Fontana 2016");
+        expect.equal(resLEZ.tag, "EVRPTW URBAN LEZ ROUTER");
+        expect.ok(resLEZ.text.includes("VÀNH ĐAI KHÔNG PHÁT THẢI"));
+      });
+
+      test("F232-T24: Seller ShopSmart Copilot Section 94 and Buyer Assistant Intent 87 handle Phase 85 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn phân vị giá momentsketch và định giá phối hợp QTRAN cho gian hàng");
+        expect.equal(sellerRes.tag, "MOMENTSKETCH QUANTILES, QTRAN PRICING & EVRPTW-URBAN-LEZ");
+        expect.ok(sellerRes.text.includes("MomentSketch"));
+
+        const buyerRes = generateAiChatResponse("Sàn có hỗ trợ giao xe điện vành đai không phát thải evrptw-lez hoặc phân vị giá momentsketch không?");
+        expect.equal(buyerRes.intent, "MOMENTSKETCH_QTRAN_URBAN_LEZ_ASSIST");
+        expect.ok(buyerRes.replyText.includes("MomentSketch"));
       });
     });
   });

@@ -1878,7 +1878,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 84. Giám Sát Độ Trễ P99 Thời Gian Thực Bằng Ted Dunning t-Digest (Phase 34 - Feature 181)
-  if (/tdigest|t-digest|độ trễ p99|p99\.9|streaming quantile|ước lượng phân vị|dunning/i.test(raw)) {
+  if (!/momentsketch|moment[- ]sketch|gan.*bailis|kll|qdigest|gk[- ]mergeable|ddsketch/i.test(raw) && /tdigest|t-digest|độ trễ p99|p99\.9|streaming quantile|ước lượng phân vị|dunning/i.test(raw)) {
     return {
       text: `⏱️ **GIÁM SÁT ĐỘ TRỄ P99 & PHÂN VỊ DÒNG DỮ LIỆU BẰNG TED DUNNING T-DIGEST**:
 - **Cấu trúc Dữ liệu Phân vị Dòng (Streaming Quantiles via Centroids)**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3408,7 +3408,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 160. Điều Phối Giao Hàng Đa Kho Thu Phí Ùn Tắc MDVRPTW Road Pricing (Phase 59 - Feature 206)
-  if (/mdvrptw|road[- ]pricing|thu phí nội đô|phí chống ùn tắc|vành đai 1|vành đai 2|phí giờ cao điểm|tây hồ|cầu giấy|hoàng mai/i.test(raw)) {
+  if (!/lez|low emission zone|phát thải thấp|fontana/i.test(raw) && /mdvrptw|road[- ]pricing|thu phí nội đô|phí chống ùn tắc|vành đai 1|vành đai 2|phí giờ cao điểm|tây hồ|cầu giấy|hoàng mai/i.test(raw)) {
     return {
       text: `🚚 **ĐIỀU PHỐI ĐA KHO THU PHÍ ÙN TẮC MDVRPTW ROAD PRICING ROUTER (YANG & BELL 1997, WANG ET AL. 2018)**:
 - **Mạng Lưới Đa Kho Xuất Phát (Multi-Depot SPX Hubs)**:
@@ -4621,7 +4621,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 216. Định Giá Multi-Agent Twin Delayed DDPG Liên Tục & Lagrange MATD3 (Phase 78 - Feature 225)
-  if (!/coma|counterfactual|phản thực tế|bicnet|tarmac|qmix/i.test(raw) && /matd3|multi[- ]agent (?:twin delayed|continuous|pricing)|maddpg continuous|twin delayed continuous pricing|ctde pricing|multi[- ]agent.*matd3/i.test(raw)) {
+  if (!/qtran|coma|counterfactual|phản thực tế|bicnet|tarmac|qmix/i.test(raw) && /matd3|multi[- ]agent (?:twin delayed|continuous|pricing)|maddpg continuous|twin delayed continuous pricing|ctde pricing|multi[- ]agent.*matd3/i.test(raw)) {
     return {
       text: `💹 **ĐỊNH GIÁ ĐA ĐẠI DIỆN HÀNH ĐỘNG LIÊN TỤC MATD3-LAGRANGIAN (LOWE ET AL. NEURIPS 2017, FUJIMOTO ET AL. ICML 2018)**:
 - **Kiến Trúc Huấn Luyện Tập Trung - Thực Thi Phân Tán (CTDE)**:
@@ -5058,6 +5058,70 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem tính toán mức thuế carbon trên mỗi km hành trình',
         'Tối ưu hóa tốc độ di chuyển tiết kiệm năng lượng',
         'Xuất chứng nhận giao hàng xanh Eco Certificate'
+      ]
+    };
+  }
+
+  // 236. Ước Lượng Phân Vị Luồng MomentSketch Bằng Mô-Men Lũy Thừa (Phase 85 - Feature 232)
+  if (/momentsketch|moment[- ]sketch|gan.*bailis|ước lượng phân vị mô-men|power moments quantile|p99 moment|chebyshev[- ]edgeworth/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG PHÂN VỊ LUỒNG MOMENTSKETCH BẰNG MÔ-MEN LŨY THỪA (GAN & BAILIS, PVLDB 2018)**:
+- **Nguyên Lý Nén Miền Logarit & Vector Mô-Men Lũy Thừa**:
+  - Ánh xạ các giá trị đo lường có miền động lớn $x \\in [x_{\\min}, x_{\\max}]$ (độ trễ thanh toán $1\\text{ms} - 60.000\\text{ms}$ hoặc giá trị đơn hàng $10.000\\text{đ} - 50.000.000\\text{đ}$) sang không gian chuẩn hóa $z = \\ln(x / x_{\\min}) / \\ln(x_{\\max} / x_{\\min}) \\in [0, 1]$.
+  - Duy trì vector $K = 10 - 15$ mô-men lũy thừa: $\\mu_k = \\frac{1}{N} \\sum_{i=1}^N z_i^k$.
+- **Khả Năng Hợp Nhất Tuyến Tính Hoàn Hảo (Exact Linear Mergeability)**:
+  - Vector mô-men giữa các nút phân tán có thể gộp trực tiếp với trọng số số lượng mẫu: $\\mu_k^{(A+B)} = \\frac{N_A \\mu_k^{(A)} + N_B \\mu_k^{(B)}}{N_A + N_B}$.
+- **Truy Vấn Phân Vị Tức Thì Sub-Millisecond & Maximum Entropy Inversion**:
+  - Tái tạo hàm phân phối tích lũy CDF thông qua khai triển đa thức Edgeworth/Legendre, tính toán tức thời các phân vị P50, P90, P95, P99 phục vụ giám sát SLA thanh toán VietQR và độ nhạy giá Flash Sale!`,
+      type: 'analytics',
+      tag: 'MOMENTSKETCH STREAM QUANTILES',
+      suggestions: [
+        'Xem vector mô-men lũy thừa K=10',
+        'Ước lượng phân vị độ trễ SLA P95/P99',
+        'Hợp nhất tóm tắt phân tán Linear Merge'
+      ]
+    };
+  }
+
+  // 237. Định Giá Hợp Tác Biến Đổi Phân Rã QTRAN (Phase 85 - Feature 232)
+  if (/qtran|phân rã biến đổi qtran|igm factorization|individual[- ]global[- ]max|son.*icml 2019|qtran pricing|cooperative factorization/i.test(raw)) {
+    return {
+      text: `💰 **ĐỊNH GIÁ ĐA ĐẠI DIỆN HỢP TÁC PHÂN RÃ BIẾN ĐỔI QTRAN (KYUNGHWAN SON ET AL., ICML 2019)**:
+- **Vượt Qua Giới Hạn Của VDN (Cộng Tuyến Tính) & QMIX (Đơn Điệu)**:
+  - QTRAN giải quyết toàn diện bài toán định giá phối hợp phi đơn điệu (non-monotonic games) bằng cách học hàm giá trị trạng thái biến đổi $V(s)$ và hàm giá trị liên hợp tập trung $Q_{jt}(s, \\mathbf{u})$.
+- **Thỏa Mãn Nghiêm Ngặt Điều Kiện IGM (Individual-Global-Max)**:
+  - Đảm bảo $\\arg\\max_{\\mathbf{u}} Q_{jt}(s, \\mathbf{u}) = (\\arg\\max_{u_1} Q_1, \\dots, \\arg\\max_{u_N} Q_N)$.
+  - Hàm độ lệch $D(s, \\mathbf{u}) = \\sum_i Q_i(s_i, u_i) - Q_{jt}(s, \\mathbf{u}) + V(s)$ thỏa mãn: $D(s, \\mathbf{u}^*) = 0$ cho hành động tối ưu và $D(s, \\mathbf{u}) \\ge 0$ cho mọi hành động dưới chuẩn.
+- **Rào Cản Khóa Sàn Giá Vốn Tuyệt Đối 1.05x COGS**:
+  - Bảo vệ đối tác bán hàng khỏi các vòng xoáy bán phá giá cạnh tranh, kẹp chặt giá bán $P_i \\ge 1.05 \\times \\text{COGS}_i$ và triệt tiêu hoàn toàn gian lận thông đồng giá!`,
+      type: 'pricing',
+      tag: 'QTRAN COOPERATIVE PRICING',
+      suggestions: [
+        'Xem độ lệch biến đổi Discrepancy D(s, u)',
+        'Kiểm tra điều kiện phối hợp IGM',
+        'Đo lường rào chắn an toàn 1.05x COGS'
+      ]
+    };
+  }
+
+  // 238. Định Tuyến Xe Điện Vành Đai Không Phát Thải EVRPTW Urban Low Emission Zone (Phase 85 - Feature 232)
+  if (/evrptw[- ]lez|urban lez|low emission zone|vành đai không phát thải|phát thải thấp|miễn phí ùn tắc xe điện|fontana.*mancini|spx clean air hero/i.test(raw)) {
+    return {
+      text: `🏙️ **ĐỊNH TUYẾN XE ĐIỆN VÀNH ĐAI KHÔNG PHÁT THẢI EVRPTW URBAN LEZ (FONTANA 2016, MANCINI 2017)**:
+- **Phân Vùng Không Gian Vành Đai Không Phát Thải Đô Thị (Urban LEZ / ULEZ)**:
+  - Thiết lập ranh giới địa lý các khu vực lõi nội đô lịch sử (Hoàn Kiếm, Quận 1) với bán kính kiểm soát phát thải nghiêm ngặt.
+  - Tốc độ di chuyển trong vùng LEZ bị giới hạn $v \\le 25\\text{ km/h}$ (phố đi bộ, đường nội đô yên tĩnh), mức tiêu hao năng lượng tối ưu $0.12\\text{ kWh/km}$.
+- **Đặc Quyền Miễn Phí Thu Phí Ùn Tắc 100% Cho Xe Máy Điện SPX**:
+  - Xe tải chạy xăng/diesel thông thường bị phạt phí vào lõi đô thị $150.000\\text{đ/lượt}$.
+  - Đội xe máy điện SPX Express với pin khỏe (SoC $\\ge 15\\%$) được **miễn phí 100% phí ùn tắc ($0\\text{đ}$)**, tự do lưu thông phát hàng trong các khung giờ cấm xe tải!
+- **Hộ Chiếu Phát Thải Ròng Bằng Không URBAN_LEZ_ZERO_EMISSION_PASS**:
+  - Định lượng chính xác lượng bụi mịn $\\text{PM}_{2.5}$, khí độc $\\text{NO}_x$ và $\\text{CO}_2$ cắt giảm được, cấp huy hiệu **SPX Clean Air Hero** cho hệ sinh thái logistics sàn!`,
+      type: 'logistics',
+      tag: 'EVRPTW URBAN LEZ ROUTER',
+      suggestions: [
+        'Xem bản đồ vành đai không phát thải LEZ Hoàn Kiếm/Quận 1',
+        'Thống kê số tiền phí ùn tắc tiết kiệm được',
+        'Kiểm tra chỉ số cắt giảm bụi mịn PM2.5 và NOx'
       ]
     };
   }
