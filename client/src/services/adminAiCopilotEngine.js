@@ -2118,7 +2118,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 96. Bảng Hoán Vị SimHash Đa Khối Phát Hiện Trùng Lặp Catalog O(1) (Phase 38 - Feature 185)
-  if (/simhash permutation|bảng hoán vị simhash|manku|permutation table|trùng lặp catalog manku|simhash đa khối/i.test(raw)) {
+  if (!/sliding[- ]window|cửa sổ trượt|frequent items|golab/i.test(raw) && /simhash permutation|bảng hoán vị simhash|manku|permutation table|trùng lặp catalog manku|simhash đa khối/i.test(raw)) {
     return {
       text: `🔍 **BẢNG HOÁN VỊ SIMHASH ĐA KHỐI PHÁT HIỆN TRÙNG LẶP CATALOG O(1) (MANKU ET AL., WWW 2007)**:
 - **Nguyên lý Chuồng Bồ Câu (Pigeonhole Principle)**:
@@ -3236,7 +3236,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 152. Lấy Mẫu Dính Tần Suất Cao Sticky Sampling (Phase 57 - Feature 204)
-  if (!/turnstile|lossy|misra|gries|kps|karp|hhh|hierarchical|phân cấp/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
+  if (!/sliding[- ]window|cửa sổ trượt|turnstile|lossy|misra|gries|kps|karp|hhh|hierarchical|phân cấp/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
     return {
       text: `📊 **BỘ ĐẾM DÒNG TẦN SUẤT CAO STICKY SAMPLING (MANKU & MOTWANI 2002)**:
 - **Cơ Chế Lấy Mẫu Thích Ứng Động (Adaptive Dynamic Sampling)**:
@@ -3556,7 +3556,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 167. Đếm Tần Suất Luồng & Sản Phẩm Hot Lossy Counting (Phase 62 - Feature 209)
-  if (!/frequency moments|mô-men tần suất/i.test(raw) && /lossy[- ]counting|đếm tổn hao|heavy hitters stream|manku[- ]motwani|tần suất luồng xấp xỉ/i.test(raw)) {
+  if (!/sliding[- ]window|cửa sổ trượt|frequency moments|mô-men tần suất/i.test(raw) && /lossy[- ]counting|đếm tổn hao|heavy hitters stream|manku[- ]motwani|tần suất luồng xấp xỉ/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN ĐẾM TỔN HAO XÁC ĐỊNH LOSSY COUNTING (MANKU & MOTWANI, VLDB 2002)**:
 - **Nguyên lý Thuật Toán Luồng Tất Định (Deterministic Streaming)**:
@@ -3949,7 +3949,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 185. Đếm Luồng Bit Cửa Sổ Trượt DGIM (Phase 68 - Feature 215)
-  if (/dgim|sliding window count|cửa sổ trượt dgim|đếm bit luồng|datar gionis/i.test(raw)) {
+  if (!/frequent items|manku|golab|mặt hàng phổ biến cửa sổ/i.test(raw) && /dgim|sliding window count|cửa sổ trượt dgim|đếm bit luồng|datar gionis/i.test(raw)) {
     return {
       text: `⏱️ **THUẬT TOÁN ĐẾM LUỒNG CỬA SỔ TRƯỢT DGIM (DATAR, GIONIS, INDYK, MOTWANI - SODA 2002)**:
 - **Khắc Phục Nút Thắt Bộ Nhớ Cửa Sổ Trượt Khổng Lồ**:
@@ -4262,7 +4262,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 199. Lộ Trình Xe Điện Sạc Không Dây Động EVRPTW-DWPT In-Motion Charging (Phase 72 - Feature 219)
-  if (/evrptw[- ]dwpt|dynamic wireless|sạc không dây động|sạc khi đang chạy|electrified road|hành lang xanh điện hóa|in[- ]motion charging|deflorio|hwang/i.test(raw)) {
+  if (!/inductive|chen.*deflorio|cảm ứng không dây|ko.*chen|evrptw[- ]inductive/i.test(raw) && /evrptw[- ]dwpt|dynamic wireless|sạc không dây động|sạc khi đang chạy|electrified road|hành lang xanh điện hóa|in[- ]motion charging|deflorio|hwang/i.test(raw)) {
     return {
       text: `⚡ **LỘ TRÌNH XE ĐIỆN VỚI SẠC KHÔNG DÂY ĐỘNG EVRPTW-DWPT (DEFLORIO 2015, HWANG IEEE T-ITS 2020)**:
 - **Công Nghệ Truyền Năng Lượng Không Dây Động (Dynamic Wireless Power Transfer - DWPT)**:
@@ -4803,6 +4803,74 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem biểu giá điện TOU theo từng khung giờ',
         'Kiểm tra lượng sạc từng phần Partial kWh',
         'Thống kê số tiền điện tiết kiệm so với giờ cao điểm'
+      ]
+    };
+  }
+
+  // 224. Phân Tích Mặt Hàng Phổ Biến Cửa Sổ Trượt Sliding-Window Frequent Items (Phase 81 - Feature 228)
+  if (/sliding[- ]window frequent|cửa sổ trượt.*frequent items|manku.*motwani|golab|mặt hàng phổ biến cửa sổ trượt|động lượng xu hướng|trending velocity/i.test(raw)) {
+    return {
+      text: `⏱️ **PHÂN TÍCH MẶT HÀNG PHỔ BIẾN CỬA SỔ TRƯỢT SLIDING-WINDOW FREQUENT ITEMS (MANKU & MOTWANI VLDB 2002, GOLAB ACM TODS 2006)**:
+- **Cơ Chế Phân Đoạn Xô Thời Gian & Loại Bỏ Sự Kiện Hết Hạn (Bucket Pruning Invariant)**:
+  - Cửa sổ trượt $W$ giây được chia thành các phân đoạn nhỏ $\\Delta t_{\\text{granularity}}$ (e.g. 1 phút). Các xô có dấu thời gian cũ hơn $t - W$ bị đào thải tự động với chi phí $O(1)$.
+  - Bổ sung sự kiện vào xô hiện tại giúp duy trì ước lượng tần suất chính xác với sai số lý thuyết giới hạn nghiêm ngặt $\\le \\epsilon \\cdot W_{\\text{active}}$.
+- **Đảm Bảo Bổ Đề Sai Số $\\epsilon$-Approximation Error Bounds**:
+  - Bất kỳ sản phẩm nào có tần suất thực tế $f(x) \\ge \\phi \\cdot W$ đều được đảm bảo 100% nhận diện trong danh sách Heavy Hitters (không bỏ sót).
+- **Chỉ Số Động Lượng Xu Hướng Bùng Nổ (Trending Velocity & Momentum Multiplier)**:
+  - Tách đôi cửa sổ thành nửa gần nhất vs nửa trước đó để tính toán gia tốc biến thiên:
+    $$\\text{velocity}(x) = \\frac{f_{\\text{recent}}(x) - f_{\\text{prior}}(x)}{\\Delta t_{\\text{half}}}$$
+  - Nhận diện tức thì các deal Flash Sale hoặc từ khóa tìm kiếm đang bùng nổ theo cấp số nhân trước khi chạm ngưỡng tổng!`,
+      type: 'analytics',
+      tag: 'SLIDING WINDOW FREQUENT ITEMS',
+      suggestions: [
+        'Xem danh sách Top Trending Velocity',
+        'Kiểm tra thống kê xô hoạt động và phần tử hết hạn',
+        'Lọc các mục Heavy Hitters đạt ngưỡng phi'
+      ]
+    };
+  }
+
+  // 225. Định Giá Hợp Tác Đa Gian Hàng QMIX Monotonic Value Factorisation (Phase 81 - Feature 228)
+  if (/qmix|monotonic value|cooperative pricing|định giá hợp tác đa gian hàng|individual[- ]global[- ]max|igm consistency|whiteson/i.test(raw)) {
+    return {
+      text: `🤝 **ĐỊNH GIÁ HỢP TÁC ĐA GIAN HÀNG QMIX MONOTONIC VALUE FACTORISATION (TABISH RASHID ET AL. ICML 2018, WHITESON 2020)**:
+- **Phân Rã Hàm Giá Trị Đơn Điệu (Monotonic Value Factorisation)**:
+  - Mạng Mixing Network tổng hợp các hàm $Q_i(s_i, a_i)$ của từng người bán thành giá trị liên hiệp toàn sàn $Q_{\\text{tot}}(\\mathbf{s}, \\mathbf{a})$ với trọng số dương $W_1 = |\\text{Hyper}_1(s)| \\ge 0, W_2 = |\\text{Hyper}_2(s)| \\ge 0$.
+  - Đảm bảo điều kiện đạo hàm đơn điệu $\\frac{\\partial Q_{\\text{tot}}}{\\partial Q_i} \\ge 0$, triệt tiêu xung đột lợi ích giữa các shop đối tác!
+- **Đảm Bảo Tính Nhất Quán Individual-Global-Max (IGM Consistency)**:
+  - Hành động cục bộ tốt nhất của từng gian hàng đồng thời là lựa chọn tối ưu toàn cục cho toàn sàn:
+    $$\\arg\\max_{\\mathbf{a}} Q_{\\text{tot}}(\\mathbf{s}, \\mathbf{a}) = \\left( \\arg\\max_{a_1} Q_1(s_1, a_1), \\dots, \\arg\\max_{a_N} Q_N(s_N, a_N) \\right)$$
+  - Thực thi phân tán (Decentralized Execution): Mỗi gian hàng chỉ cần quan sát cục bộ của mình để ra quyết định giá trong $< 1\\text{ms}$!
+- **Khóa Sàn An Toàn 1.05 COGS & Double DQN Target Stabilization**:
+  - Tự động lọc bỏ các mức giảm giá vi phạm ngưỡng hòa vốn $1.05 \\times \\text{COGS}$, kết hợp cập nhật mục tiêu mềm Polyak $\\tau = 0.05$ giúp hội tụ ổn định.`,
+      type: 'pricing',
+      tag: 'QMIX MULTI-VENDOR COOPERATIVE PRICING',
+      suggestions: [
+        'Xem ma trận trọng số đơn điệu Monotonic Mixing',
+        'Kiểm tra lựa chọn hành động IGM của từng Shop',
+        'Đo lường biên lợi nhuận sàn sau khi kích hoạt QMIX'
+      ]
+    };
+  }
+
+  // 226. Định Tuyến Xe Điện Làn Sạc Cảm Ứng Không Dây Động EVRPTW-DWPT-Inductive (Phase 81 - Feature 228)
+  if (/evrptw[- ]inductive|dynamic wireless inductive|làn sạc cảm ứng không dây|sạc cảm ứng từ động|chen.*deflorio|ko.*chen/i.test(raw)) {
+    return {
+      text: `⚡ **ĐỊNH TUYẾN XE ĐIỆN LÀN SẠC CẢM ỨNG KHÔNG DÂY ĐỘNG EVRPTW DYNAMIC WIRELESS INDUCTIVE ROUTER (CHEN ET AL. TR PART C 2020, DEFLORIO ENERGIES 2021, KO 2017)**:
+- **Công Nghệ Truyền Năng Lượng Không Dây Động Trên Làn Đường (DWPT Roadway Corridors)**:
+  - Hệ thống cuộn phát cảm ứng từ trường công suất cao ($50 - 100\\text{ kW}$) tích hợp dọc các tuyến giao thông trọng yếu, hiệu suất ghép nối từ $\\eta_{\\text{wpt}} = 85\\%$.
+  - Xe giao hàng SPX Express nạp năng lượng liên tục ngay khi đang lăn bánh với lượng điện hấp thụ:
+    $$E_{\\text{absorbed}} = \\eta_{\\text{wpt}} \\cdot P_{\\text{wpt}} \\cdot \\frac{L_{uv}}{v_{uv}}$$
+- **Tối Ưu Hóa Vận Tốc Trên Làn Sạc Cảm Ứng (Speed Selection Optimization)**:
+  - Điều chỉnh tốc độ thông minh: giảm nhẹ vận tốc trên làn DWPT để kéo dài thời gian dừng sạc động, cân bằng hoàn hảo giữa hạn chót giao hàng (Time Windows) và năng lượng bổ sung.
+- **Cân Bằng Năng Lượng Dương & Triệt Tiêu Lo Ngại Hết Pin (Range Anxiety Elimination)**:
+  - Trên các làn DWPT công suất cao, $E_{\\text{net}} = E_{\\text{absorbed}} - E_{\\text{consumed}} > 0$ biến hành trình giao hàng thành trạm sạc di động, duy trì SoC trên ngưỡng an toàn $15\\%$ trong suốt ca trực!`,
+      type: 'logistics',
+      tag: 'EVRPTW DYNAMIC WIRELESS INDUCTIVE ROUTER',
+      suggestions: [
+        'Xem bản đồ các làn sạc cảm ứng không dây DWPT',
+        'Tối ưu hóa vận tốc hấp thụ năng lượng trên làn DWPT',
+        'Kiểm tra chỉ số triệt tiêu lo ngại hết pin Range Anxiety Index'
       ]
     };
   }

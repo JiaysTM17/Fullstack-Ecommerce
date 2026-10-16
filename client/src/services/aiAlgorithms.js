@@ -44795,6 +44795,651 @@ export class EVRPTWPartialChargingTOURouter {
   }
 }
 
+// ==============================================================================
+// PHASE 81: Sliding Window Frequent Items, QMIX Multi-Vendor Cooperative Pricing
+// & EVRPTW Dynamic Wireless Inductive Router
+// ==============================================================================
+
+export class SlidingWindowFrequentItems {
+  constructor(options = {}) {
+    this.windowSizeMs = Math.max(1000, Number(options.windowSizeMs) || 900000);
+    this.granularityMs = Math.max(100, Math.min(this.windowSizeMs / 2, Number(options.granularityMs) || 60000));
+    this.phi = Math.max(0.001, Math.min(1.0, Number(options.phi) || 0.05));
+    this.epsilon = Math.max(0.0001, Math.min(this.phi / 2, Number(options.epsilon) || 0.01));
+
+    this.buckets = [];
+    this.aggregateCounts = new Map();
+    this.totalWeight = 0;
+    this.totalEvictedWeight = 0;
+    this.lastPruneTime = 0;
+  }
+
+  record(itemId, weight = 1, timestamp = Date.now()) {
+    if (!itemId) return;
+    const strId = String(itemId).trim();
+    if (!strId) return;
+
+    const w = Math.max(0.0001, Number(weight) || 1);
+    const ts = Number(timestamp) || Date.now();
+
+    this.evict(ts);
+
+    let currentBucket = null;
+    if (this.buckets.length > 0) {
+      const latest = this.buckets[this.buckets.length - 1];
+      if (ts - latest.timestamp < this.granularityMs && ts >= latest.timestamp) {
+        currentBucket = latest;
+      }
+    }
+
+    if (!currentBucket) {
+      currentBucket = {
+        timestamp: ts,
+        counts: new Map(),
+        totalWeight: 0
+      };
+      this.buckets.push(currentBucket);
+    }
+
+    const prevBucketCount = currentBucket.counts.get(strId) || 0;
+    currentBucket.counts.set(strId, prevBucketCount + w);
+    currentBucket.totalWeight += w;
+
+    const prevAgg = this.aggregateCounts.get(strId) || 0;
+    this.aggregateCounts.set(strId, prevAgg + w);
+    this.totalWeight += w;
+  }
+
+  recordBatch(events = []) {
+    if (!Array.isArray(events)) return;
+    for (const ev of events) {
+      if (ev && ev.itemId) {
+        this.record(ev.itemId, ev.weight, ev.timestamp);
+      }
+    }
+  }
+
+  evict(currentTime = Date.now()) {
+    const cutoff = currentTime - this.windowSizeMs;
+    this.lastPruneTime = currentTime;
+
+    let evictIndex = 0;
+    while (evictIndex < this.buckets.length && this.buckets[evictIndex].timestamp < cutoff) {
+      const expiredBucket = this.buckets[evictIndex];
+      for (const [id, count] of expiredBucket.counts.entries()) {
+        const curAgg = this.aggregateCounts.get(id) || 0;
+        const remaining = curAgg - count;
+        if (remaining <= 0.00001) {
+          this.aggregateCounts.delete(id);
+        } else {
+          this.aggregateCounts.set(id, remaining);
+        }
+      }
+      this.totalWeight = Math.max(0, this.totalWeight - expiredBucket.totalWeight);
+      this.totalEvictedWeight += expiredBucket.totalWeight;
+      evictIndex++;
+    }
+
+    if (evictIndex > 0) {
+      this.buckets.splice(0, evictIndex);
+    }
+  }
+
+  query(itemId, currentTime = Date.now()) {
+    this.evict(currentTime);
+    const strId = String(itemId).trim();
+    return this.aggregateCounts.get(strId) || 0;
+  }
+
+  getFrequentItems(customPhi, currentTime = Date.now()) {
+    this.evict(currentTime);
+    const thresholdFraction = (typeof customPhi === 'number' && customPhi > 0) ? customPhi : this.phi;
+    const minWeightThreshold = thresholdFraction * this.totalWeight;
+
+    const results = [];
+    if (this.totalWeight <= 0) return results;
+
+    for (const [itemId, freq] of this.aggregateCounts.entries()) {
+      if (freq >= minWeightThreshold) {
+        const relativeShare = Number((freq / this.totalWeight).toFixed(6));
+        const isGuaranteed = (freq - this.epsilon * this.totalWeight) >= (thresholdFraction * this.totalWeight);
+        results.push({
+          itemId,
+          frequency: Math.round(freq * 1000) / 1000,
+          relativeShare,
+          isGuaranteed
+        });
+      }
+    }
+
+    results.sort((a, b) => b.frequency - a.frequency);
+    return results;
+  }
+
+  getVelocity(itemId, currentTime = Date.now()) {
+    this.evict(currentTime);
+    const strId = String(itemId).trim();
+    const halfWindow = this.windowSizeMs / 2;
+    const splitTime = currentTime - halfWindow;
+
+    let recentFreq = 0;
+    let priorFreq = 0;
+
+    for (const b of this.buckets) {
+      const c = b.counts.get(strId) || 0;
+      if (b.timestamp >= splitTime) {
+        recentFreq += c;
+      } else {
+        priorFreq += c;
+      }
+    }
+
+    const deltaTSeconds = Math.max(1, halfWindow / 1000);
+    const velocity = (recentFreq - priorFreq) / deltaTSeconds;
+    const momentumMultiplier = priorFreq > 0 ? Number((recentFreq / priorFreq).toFixed(2)) : (recentFreq > 0 ? 99.9 : 1.0);
+
+    return {
+      itemId: strId,
+      velocity: Number(velocity.toFixed(6)),
+      recentFreq: Math.round(recentFreq * 1000) / 1000,
+      priorFreq: Math.round(priorFreq * 1000) / 1000,
+      momentumMultiplier
+    };
+  }
+
+  getTopTrending(limit = 10, currentTime = Date.now()) {
+    this.evict(currentTime);
+    const items = Array.from(this.aggregateCounts.keys());
+    const trending = items.map(id => this.getVelocity(id, currentTime));
+    trending.sort((a, b) => b.velocity - a.velocity);
+    return trending.slice(0, Math.max(1, limit));
+  }
+
+  getDiagnostics() {
+    return {
+      windowSizeMs: this.windowSizeMs,
+      granularityMs: this.granularityMs,
+      phi: this.phi,
+      epsilon: this.epsilon,
+      activeBucketCount: this.buckets.length,
+      distinctItemsCount: this.aggregateCounts.size,
+      totalWeight: Math.round(this.totalWeight * 1000) / 1000,
+      totalEvictedWeight: Math.round(this.totalEvictedWeight * 1000) / 1000,
+      earliestBucketTimestamp: this.buckets.length > 0 ? this.buckets[0].timestamp : null,
+      latestBucketTimestamp: this.buckets.length > 0 ? this.buckets[this.buckets.length - 1].timestamp : null
+    };
+  }
+
+  reset() {
+    this.buckets = [];
+    this.aggregateCounts.clear();
+    this.totalWeight = 0;
+    this.totalEvictedWeight = 0;
+    this.lastPruneTime = 0;
+  }
+}
+
+export class QMIXMultiVendorCooperativePricing {
+  constructor(options = {}) {
+    this.agentCount = Math.max(2, Math.min(10, Number(options.agentCount) || 3));
+    this.actionDiscounts = Array.isArray(options.actionDiscounts) && options.actionDiscounts.length > 0
+      ? options.actionDiscounts
+      : [0.0, 0.05, 0.10, 0.15, 0.20];
+    this.actionCount = this.actionDiscounts.length;
+    this.stateDim = Math.max(2, Number(options.stateDim) || 6);
+    this.jointStateDim = this.agentCount * this.stateDim;
+    this.mixingHiddenDim = Math.max(4, Number(options.mixingHiddenDim) || 16);
+    this.learningRate = Math.max(0.0001, Number(options.learningRate) || 0.005);
+    this.gamma = Math.max(0.1, Math.min(0.999, Number(options.gamma) || 0.95));
+    this.tau = Math.max(0.001, Math.min(1.0, Number(options.targetUpdateTau) || 0.05));
+    this.seed = Number(options.seed) || 42;
+
+    this.rngState = this.seed;
+
+    this.agentWeights = [];
+    this.agentBiases = [];
+    this.targetAgentWeights = [];
+    this.targetAgentBiases = [];
+
+    for (let i = 0; i < this.agentCount; i++) {
+      const w = this._createMatrix(this.stateDim, this.actionCount, 0.05);
+      const b = new Array(this.actionCount).fill(0.01);
+      this.agentWeights.push(w);
+      this.agentBiases.push(b);
+      this.targetAgentWeights.push(this._cloneMatrix(w));
+      this.targetAgentBiases.push([...b]);
+    }
+
+    this.hyper1Weight = this._createMatrix(this.jointStateDim, this.agentCount * this.mixingHiddenDim, 0.05);
+    this.hyper1Bias = new Array(this.agentCount * this.mixingHiddenDim).fill(0.05);
+    this.targetHyper1Weight = this._cloneMatrix(this.hyper1Weight);
+    this.targetHyper1Bias = [...this.hyper1Bias];
+
+    this.hyper2Weight = this._createMatrix(this.jointStateDim, this.mixingHiddenDim, 0.05);
+    this.hyper2Bias = new Array(this.mixingHiddenDim).fill(0.05);
+    this.targetHyper2Weight = this._cloneMatrix(this.hyper2Weight);
+    this.targetHyper2Bias = [...this.hyper2Bias];
+
+    this.stateBiasWeight = this._createMatrix(this.jointStateDim, 1, 0.05);
+    this.stateBiasBias = [0.0];
+    this.targetStateBiasWeight = this._cloneMatrix(this.stateBiasWeight);
+    this.targetStateBiasBias = [...this.stateBiasBias];
+
+    this.trainStepCount = 0;
+  }
+
+  _seededRandom() {
+    this.rngState = (this.rngState * 1664525 + 1013904223) % 4294967296;
+    return this.rngState / 4294967296;
+  }
+
+  _createMatrix(rows, cols, scale = 0.1) {
+    const matrix = [];
+    for (let r = 0; r < rows; r++) {
+      const row = [];
+      for (let c = 0; c < cols; c++) {
+        row.push((this._seededRandom() - 0.5) * 2 * scale);
+      }
+      matrix.push(row);
+    }
+    return matrix;
+  }
+
+  _cloneMatrix(matrix) {
+    return matrix.map(row => [...row]);
+  }
+
+  getAgentQValues(agentIdx, localState, useTarget = false) {
+    const w = useTarget ? this.targetAgentWeights[agentIdx] : this.agentWeights[agentIdx];
+    const b = useTarget ? this.targetAgentBiases[agentIdx] : this.agentBiases[agentIdx];
+
+    const qVals = new Array(this.actionCount).fill(0);
+    for (let a = 0; a < this.actionCount; a++) {
+      let sum = b[a];
+      for (let s = 0; s < Math.min(localState.length, this.stateDim); s++) {
+        sum += localState[s] * w[s][a];
+      }
+      qVals[a] = sum;
+    }
+    return qVals;
+  }
+
+  selectActionDecentralized(agentIdx, localState, marketContext = {}) {
+    const qVals = this.getAgentQValues(agentIdx, localState, false);
+
+    const basePrice = Math.max(1000, Number(marketContext.basePrice) || 100000);
+    const cogs = Math.max(500, Number(marketContext.cogs) || (basePrice * 0.7));
+    const safeFloor = cogs * 1.05;
+
+    let bestAction = 0;
+    let maxQ = -Infinity;
+    let isFloorConstrained = false;
+
+    for (let a = 0; a < this.actionCount; a++) {
+      const discount = this.actionDiscounts[a];
+      const nominalPrice = basePrice * (1 - discount);
+      if (nominalPrice >= safeFloor) {
+        if (qVals[a] > maxQ) {
+          maxQ = qVals[a];
+          bestAction = a;
+        }
+      } else {
+        if (qVals[a] > maxQ && bestAction === 0) {
+          isFloorConstrained = true;
+        }
+      }
+    }
+
+    const finalDiscount = this.actionDiscounts[bestAction];
+    const executedPrice = Math.max(safeFloor, basePrice * (1 - finalDiscount));
+
+    return {
+      actionIndex: bestAction,
+      discountFraction: finalDiscount,
+      executedPrice: Math.round(executedPrice),
+      qValue: Number(maxQ.toFixed(4)),
+      isFloorConstrained: executedPrice > (basePrice * (1 - finalDiscount)) || isFloorConstrained
+    };
+  }
+
+  mixQValues(chosenQValues, jointState, useTarget = false) {
+    const h1W = useTarget ? this.targetHyper1Weight : this.hyper1Weight;
+    const h1B = useTarget ? this.targetHyper1Bias : this.hyper1Bias;
+    const h2W = useTarget ? this.targetHyper2Weight : this.hyper2Weight;
+    const h2B = useTarget ? this.targetHyper2Bias : this.hyper2Bias;
+    const bW = useTarget ? this.targetStateBiasWeight : this.stateBiasWeight;
+    const bB = useTarget ? this.targetStateBiasBias : this.stateBiasBias;
+
+    const w1Flat = new Array(this.agentCount * this.mixingHiddenDim).fill(0);
+    for (let j = 0; j < w1Flat.length; j++) {
+      let sum = h1B[j];
+      for (let s = 0; s < Math.min(jointState.length, this.jointStateDim); s++) {
+        sum += jointState[s] * h1W[s][j];
+      }
+      w1Flat[j] = Math.abs(sum);
+    }
+
+    const w1 = [];
+    for (let i = 0; i < this.agentCount; i++) {
+      const row = [];
+      for (let h = 0; h < this.mixingHiddenDim; h++) {
+        row.push(w1Flat[i * this.mixingHiddenDim + h]);
+      }
+      w1.push(row);
+    }
+
+    const hidden = new Array(this.mixingHiddenDim).fill(0);
+    for (let h = 0; h < this.mixingHiddenDim; h++) {
+      let sum = 0;
+      for (let i = 0; i < this.agentCount; i++) {
+        sum += (chosenQValues[i] || 0) * w1[i][h];
+      }
+      hidden[h] = sum > 0 ? sum : (Math.exp(Math.max(-10, sum)) - 1);
+    }
+
+    const w2 = new Array(this.mixingHiddenDim).fill(0);
+    for (let h = 0; h < this.mixingHiddenDim; h++) {
+      let sum = h2B[h];
+      for (let s = 0; s < Math.min(jointState.length, this.jointStateDim); s++) {
+        sum += jointState[s] * h2W[s][h];
+      }
+      w2[h] = Math.abs(sum);
+    }
+
+    let stateBias = bB[0];
+    for (let s = 0; s < Math.min(jointState.length, this.jointStateDim); s++) {
+      stateBias += jointState[s] * bW[s][0];
+    }
+
+    let qTot = stateBias;
+    for (let h = 0; h < this.mixingHiddenDim; h++) {
+      qTot += hidden[h] * w2[h];
+    }
+
+    return {
+      qTot,
+      hiddenActs: hidden,
+      w1,
+      w2,
+      stateBias
+    };
+  }
+
+  trainStep(transition) {
+    const {
+      localStates,
+      jointState,
+      actions,
+      jointReward,
+      nextLocalStates,
+      nextJointState,
+      done
+    } = transition;
+
+    const chosenQValues = [];
+    for (let i = 0; i < this.agentCount; i++) {
+      const qVals = this.getAgentQValues(i, localStates[i], false);
+      chosenQValues.push(qVals[actions[i]]);
+    }
+    const currentMix = this.mixQValues(chosenQValues, jointState, false);
+    const qTotCurrent = currentMix.qTot;
+
+    const targetChosenQValues = [];
+    for (let i = 0; i < this.agentCount; i++) {
+      const currentNextQVals = this.getAgentQValues(i, nextLocalStates[i], false);
+      let bestA = 0;
+      let maxQ = -Infinity;
+      for (let a = 0; a < this.actionCount; a++) {
+        if (currentNextQVals[a] > maxQ) {
+          maxQ = currentNextQVals[a];
+          bestA = a;
+        }
+      }
+      const targetNextQVals = this.getAgentQValues(i, nextLocalStates[i], true);
+      targetChosenQValues.push(targetNextQVals[bestA]);
+    }
+
+    const targetMix = this.mixQValues(targetChosenQValues, nextJointState, true);
+    const targetQTot = done ? jointReward : (jointReward + this.gamma * targetMix.qTot);
+
+    const tdError = targetQTot - qTotCurrent;
+    const clippedTdError = Math.max(-1.0, Math.min(1.0, tdError));
+
+    for (let i = 0; i < this.agentCount; i++) {
+      const a = actions[i];
+      for (let s = 0; s < Math.min(localStates[i].length, this.stateDim); s++) {
+        const grad = clippedTdError * localStates[i][s] * 0.1;
+        this.agentWeights[i][s][a] += this.learningRate * grad;
+      }
+      this.agentBiases[i][a] += this.learningRate * clippedTdError * 0.1;
+    }
+
+    this._softUpdateTargets();
+    this.trainStepCount++;
+
+    return {
+      tdError: Number(tdError.toFixed(6)),
+      clippedTdError: Number(clippedTdError.toFixed(6)),
+      qTotCurrent: Number(qTotCurrent.toFixed(4)),
+      targetQTot: Number(targetQTot.toFixed(4)),
+      trainStepCount: this.trainStepCount
+    };
+  }
+
+  _softUpdateTargets() {
+    for (let i = 0; i < this.agentCount; i++) {
+      for (let s = 0; s < this.stateDim; s++) {
+        for (let a = 0; a < this.actionCount; a++) {
+          this.targetAgentWeights[i][s][a] = (1 - this.tau) * this.targetAgentWeights[i][s][a] + this.tau * this.agentWeights[i][s][a];
+        }
+      }
+      for (let a = 0; a < this.actionCount; a++) {
+        this.targetAgentBiases[i][a] = (1 - this.tau) * this.targetAgentBiases[i][a] + this.tau * this.agentBiases[i][a];
+      }
+    }
+  }
+
+  verifyMonotonicity(jointState) {
+    const dummyQ = new Array(this.agentCount).fill(1.0);
+    const mix = this.mixQValues(dummyQ, jointState, false);
+
+    let minW1 = Infinity;
+    let minW2 = Infinity;
+
+    for (const row of mix.w1) {
+      for (const val of row) {
+        if (val < minW1) minW1 = val;
+      }
+    }
+    for (const val of mix.w2) {
+      if (val < minW2) minW2 = val;
+    }
+
+    const allNonNegative = minW1 >= 0 && minW2 >= 0;
+    return {
+      isMonotonic: allNonNegative,
+      minWeight: Math.min(minW1, minW2),
+      allNonNegative
+    };
+  }
+}
+
+export class EVRPTWDynamicWirelessInductiveRouter {
+  constructor(options = {}) {
+    this.batteryCapacityKWh = Math.max(10, Number(options.batteryCapacityKWh) || 60);
+    this.minSoCFraction = Math.max(0.05, Math.min(0.40, Number(options.minSoCFraction) || 0.15));
+    this.minEnergyBufferKWh = this.batteryCapacityKWh * this.minSoCFraction;
+    this.defaultPowerKW = Math.max(20, Number(options.defaultPowerKW) || 60);
+    this.couplingEfficiency = Math.max(0.5, Math.min(0.98, Number(options.couplingEfficiency) || 0.85));
+    this.electricityRatePerKWh = Math.max(500, Number(options.electricityRatePerKWh) || 2500);
+    this.baseConsumptionPerKm = Math.max(0.05, Number(options.baseConsumptionPerKm) || 0.22);
+    this.speedMinKmh = Math.max(10, Number(options.speedMinKmh) || 20);
+    this.speedMaxKmh = Math.max(this.speedMinKmh + 5, Number(options.speedMaxKmh) || 60);
+  }
+
+  calculateEdgeDynamics(edge) {
+    const dist = Math.max(0.1, Number(edge.distanceKm) || 1.0);
+    const speed = Math.max(this.speedMinKmh, Math.min(this.speedMaxKmh, Number(edge.targetSpeedKmh) || 40));
+    const transitTimeHours = dist / speed;
+
+    const consumptionRate = this.baseConsumptionPerKm + 0.00005 * Math.pow(speed, 2);
+    const energyConsumedKWh = dist * consumptionRate;
+
+    let energyAbsorbedKWh = 0;
+    let wirelessCostVND = 0;
+
+    if (edge.isDwptLane) {
+      const dwptLen = Math.min(dist, Math.max(0.1, Number(edge.dwptLengthKm) || dist));
+      const powerKW = Math.max(10, Number(edge.dwptPowerKW) || this.defaultPowerKW);
+      const dwptTimeHours = dwptLen / speed;
+      energyAbsorbedKWh = this.couplingEfficiency * powerKW * dwptTimeHours;
+      wirelessCostVND = energyAbsorbedKWh * this.electricityRatePerKWh;
+    }
+
+    const netEnergyKWh = energyAbsorbedKWh - energyConsumedKWh;
+
+    return {
+      transitTimeHours: Number(transitTimeHours.toFixed(4)),
+      transitTimeMinutes: Number((transitTimeHours * 60).toFixed(2)),
+      energyConsumedKWh: Number(energyConsumedKWh.toFixed(4)),
+      energyAbsorbedKWh: Number(energyAbsorbedKWh.toFixed(4)),
+      netEnergyKWh: Number(netEnergyKWh.toFixed(4)),
+      wirelessCostVND: Math.round(wirelessCostVND)
+    };
+  }
+
+  optimizeDwptSpeed(lengthKm, requiredEnergyKWh, maxAllowableTimeMinutes) {
+    const dist = Math.max(0.1, Number(lengthKm) || 2.0);
+    const targetEnergy = Math.max(0.1, Number(requiredEnergyKWh) || 2.0);
+    const maxTimeHours = Math.max(0.01, (Number(maxAllowableTimeMinutes) || 30) / 60);
+
+    const vIdeal = (this.couplingEfficiency * this.defaultPowerKW * dist) / targetEnergy;
+    const vTimeLimit = dist / maxTimeHours;
+    const clampedSpeed = Math.max(this.speedMinKmh, Math.min(this.speedMaxKmh, Math.max(vIdeal, vTimeLimit)));
+
+    const transitTimeHours = dist / clampedSpeed;
+    const energyAbsorbedKWh = this.couplingEfficiency * this.defaultPowerKW * transitTimeHours;
+
+    return {
+      optimalSpeedKmh: Number(clampedSpeed.toFixed(1)),
+      energyAbsorbedKWh: Number(energyAbsorbedKWh.toFixed(3)),
+      transitTimeMinutes: Number((transitTimeHours * 60).toFixed(2))
+    };
+  }
+
+  planInductiveTour(params) {
+    const {
+      depot = { id: 'DEPOT_HUB', readyTimeMin: 0, dueTimeMin: 720 },
+      customers = [],
+      dwptSegments = [],
+      initialSoC = 1.0
+    } = params;
+
+    let currentSoCKWh = Math.min(this.batteryCapacityKWh, this.batteryCapacityKWh * Math.max(0.2, initialSoC));
+    let currentTimeMin = Number(depot.readyTimeMin) || 0;
+    let totalDistanceKm = 0;
+    let totalAbsorbedKWh = 0;
+    let totalConsumedKWh = 0;
+    let totalWirelessCostVND = 0;
+    let totalTardinessMin = 0;
+    let minObservedSoCKWh = currentSoCKWh;
+
+    const stops = [depot, ...customers, depot];
+    const itinerary = [];
+
+    const findDwpt = (uId, vId) => {
+      return dwptSegments.find(s => (s.from === uId && s.to === vId) || (s.to === uId && s.from === vId));
+    };
+
+    for (let i = 0; i < stops.length - 1; i++) {
+      const fromNode = stops[i];
+      const toNode = stops[i + 1];
+
+      let distKm = 3.5;
+      if (toNode.distanceFromPrevKm) {
+        distKm = Number(toNode.distanceFromPrevKm);
+      } else if (fromNode.lat && fromNode.lng && toNode.lat && toNode.lng) {
+        const dLat = (toNode.lat - fromNode.lat) * 111.0;
+        const dLng = (toNode.lng - fromNode.lng) * 105.0;
+        distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+      }
+
+      const dwptInfo = findDwpt(fromNode.id, toNode.id);
+      const isDwpt = Boolean(dwptInfo || toNode.hasDwptLane);
+      const targetSpeed = isDwpt ? 30 : 45;
+
+      const edgeDyn = this.calculateEdgeDynamics({
+        distanceKm: distKm,
+        isDwptLane: isDwpt,
+        dwptLengthKm: isDwpt ? distKm : 0,
+        dwptPowerKW: dwptInfo ? dwptInfo.powerKW : this.defaultPowerKW,
+        targetSpeedKmh: targetSpeed
+      });
+
+      totalDistanceKm += distKm;
+      totalAbsorbedKWh += edgeDyn.energyAbsorbedKWh;
+      totalConsumedKWh += edgeDyn.energyConsumedKWh;
+      totalWirelessCostVND += edgeDyn.wirelessCostVND;
+
+      currentTimeMin += edgeDyn.transitTimeMinutes;
+
+      currentSoCKWh = Math.min(this.batteryCapacityKWh, currentSoCKWh + edgeDyn.netEnergyKWh);
+      if (currentSoCKWh < minObservedSoCKWh) {
+        minObservedSoCKWh = currentSoCKWh;
+      }
+
+      let tardinessMin = 0;
+      const readyMin = Number(toNode.readyTimeMin) || 0;
+      const dueMin = Number(toNode.dueTimeMin) || 9999;
+
+      if (currentTimeMin < readyMin) {
+        currentTimeMin = readyMin;
+      } else if (currentTimeMin > dueMin) {
+        tardinessMin = currentTimeMin - dueMin;
+        totalTardinessMin += tardinessMin;
+      }
+
+      const serviceMin = Number(toNode.serviceDurationMin) || 0;
+      currentTimeMin += serviceMin;
+
+      itinerary.push({
+        legIndex: i + 1,
+        from: fromNode.id,
+        to: toNode.id,
+        distanceKm: Number(distKm.toFixed(2)),
+        isDwptLane: isDwpt,
+        transitMinutes: edgeDyn.transitTimeMinutes,
+        energyAbsorbedKWh: edgeDyn.energyAbsorbedKWh,
+        energyConsumedKWh: edgeDyn.energyConsumedKWh,
+        netEnergyKWh: edgeDyn.netEnergyKWh,
+        wirelessCostVND: edgeDyn.wirelessCostVND,
+        arrivalSoCKWh: Number(currentSoCKWh.toFixed(2)),
+        arrivalSoCPercent: Number(((currentSoCKWh / this.batteryCapacityKWh) * 100).toFixed(1)),
+        arrivalTimeMin: Number(currentTimeMin.toFixed(1)),
+        tardinessMinutes: Number(tardinessMin.toFixed(1))
+      });
+    }
+
+    const isFeasible = minObservedSoCKWh >= this.minEnergyBufferKWh && totalTardinessMin <= 15.0;
+    const rangeAnxietyEliminationIndex = Number(((minObservedSoCKWh / this.batteryCapacityKWh) * 100).toFixed(1));
+
+    return {
+      totalDistanceKm: Number(totalDistanceKm.toFixed(2)),
+      totalTransitMinutes: Number(currentTimeMin.toFixed(1)),
+      totalAbsorbedKWh: Number(totalAbsorbedKWh.toFixed(3)),
+      totalConsumedKWh: Number(totalConsumedKWh.toFixed(3)),
+      netEnergyBalanceKWh: Number((totalAbsorbedKWh - totalConsumedKWh).toFixed(3)),
+      totalWirelessCostVND: Math.round(totalWirelessCostVND),
+      totalTardinessMin: Number(totalTardinessMin.toFixed(1)),
+      minObservedSoCKWh: Number(minObservedSoCKWh.toFixed(2)),
+      rangeAnxietyEliminationIndex,
+      isFeasible,
+      stopsCount: stops.length,
+      itinerary
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -45193,6 +45838,10 @@ export default {
   MAPPOContinuousPricing,
   TOU_TARIFF_TIERS,
   EVRPTWPartialChargingTOURouter,
+  // Phase 81 Enterprise Algorithms
+  SlidingWindowFrequentItems,
+  QMIXMultiVendorCooperativePricing,
+  EVRPTWDynamicWirelessInductiveRouter,
 };
 
 

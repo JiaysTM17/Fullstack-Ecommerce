@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal|gk[- ]mergeable|mergeable.*quantile|safe[- ]sac|active cooling|btms|turnstile|matd3|multi[- ]agent.*pricing|drone[- ]recharge|mothership|cmm|count[- ]mean[- ]min|masac|payload.*terrain|dynamic payload|time[- ]decayed|decayed count[- ]min|mappo|tou|partial charging|biểu giá điện/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal|gk[- ]mergeable|mergeable.*quantile|safe[- ]sac|active cooling|btms|turnstile|matd3|multi[- ]agent.*pricing|drone[- ]recharge|mothership|cmm|count[- ]mean[- ]min|masac|payload.*terrain|dynamic payload|time[- ]decayed|decayed count[- ]min|mappo|tou|partial charging|biểu giá điện|sliding[- ]window|qmix|monotonic value|cooperative pricing|evrptw[- ]inductive|dynamic wireless inductive|làn sạc cảm ứng/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1552,7 +1552,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 77. Bộ Ba Thuật Toán DGIM Sliding Window, WCSAC Risk Pricing & EVRPTW-NL Nonlinear Charging (Phase 68 - Feature 215)
-  if (/dgim|sliding window|cửa sổ trượt|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến/i.test(raw)) {
+  if (!/frequent items|qmix|trending velocity|manku|golab|inductive/i.test(raw) && /dgim|sliding window|cửa sổ trượt|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến/i.test(raw)) {
     return {
       text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 68 (${currentShop.name})**:
 - **Đếm lượt tương tác & bão đơn cửa sổ trượt DGIM (Datar et al. SODA 2002)**:
@@ -1807,6 +1807,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem xu hướng nóng Time-Decayed CMS',
         'Tư vấn định giá cạnh tranh đa bên MAPPO',
         'Theo dõi xe điện sạc từng phần biểu giá TOU'
+      ]
+    };
+  }
+
+  // 90. Bộ Ba Thuật Toán Sliding-Window Frequent Items, QMIX Multi-Vendor & EVRPTW Dynamic Wireless (Phase 81 - Feature 228)
+  if (/sliding[- ]window frequent|cửa sổ trượt.*frequent items|manku.*motwani|golab|trending velocity|động lượng xu hướng|qmix|monotonic value|cooperative pricing|định giá hợp tác đa gian hàng|evrptw[- ]inductive|dynamic wireless inductive|làn sạc cảm ứng/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 81 (${currentShop.name})**:
+- **Bắt Xu Hướng Cửa Sổ Trượt Sliding-Window Frequent Items (Manku & Motwani 2002, Golab 2006)**:
+  - Cửa sổ trượt $W$ phút với cơ chế cắt tỉa xô $O(1)$ tự động đào thải các lượt nhấp và đơn hàng cũ, nhận diện chính xác các sản phẩm đạt ngưỡng $\\phi$ và đo lường gia tốc bùng nổ Trending Velocity!
+- **Định Giá Hợp Tác Đa Gian Hàng QMIX Monotonic Value (Tabish Rashid 2018, Whiteson 2020)**:
+  - Mạng Mixing Network đơn điệu đảm bảo điều kiện IGM $\\frac{\\partial Q_{\\text{tot}}}{\\partial Q_i} \\ge 0$, cho phép gian hàng của bạn phối hợp mức giảm giá tối ưu cho gói combo liên shop mà không bao giờ vi phạm sàn an toàn $1.05 \\times \\text{COGS}$!
+- **Định Tuyến Xe Điện Làn Sạc Cảm Ứng Không Dây EVRPTW-DWPT-Inductive (Chen 2020, Deflorio 2021)**:
+  - Đội xe SPX Express sạc pin liên tục khi đang di chuyển qua các làn sạc cảm ứng từ trường $50 - 100\\text{ kW}$, tối ưu hóa vận tốc trên làn DWPT để vừa giao hàng đúng giờ vừa duy trì SoC an toàn $> 15\\%$!`,
+      type: 'recommendation',
+      tag: 'SLIDING-WINDOW FREQUENT, QMIX COOPERATIVE & INDUCTIVE DWPT EVRPTW',
+      suggestions: [
+        'Xem gia tốc xu hướng Trending Velocity',
+        'Tư vấn định giá combo liên shop QMIX',
+        'Theo dõi hành trình xe điện sạc cảm ứng không dây'
       ]
     };
   }

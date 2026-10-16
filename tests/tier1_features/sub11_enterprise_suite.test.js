@@ -412,6 +412,10 @@ import {
   MAPPOContinuousPricing,
   TOU_TARIFF_TIERS,
   EVRPTWPartialChargingTOURouter,
+  // Phase 81 Enterprise Algorithms
+  SlidingWindowFrequentItems,
+  QMIXMultiVendorCooperativePricing,
+  EVRPTWDynamicWirelessInductiveRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -620,6 +624,9 @@ import { EVRPTWPayloadTerrainRouter as ServerEVRPTWPayloadTerrainRouter } from "
 import { TimeDecayedCountMinSketch as ServerTimeDecayedCountMinSketch } from "../../server/src/utils/timeDecayedCountMinSketch.js";
 import { MAPPOContinuousPricing as ServerMAPPOContinuousPricing } from "../../server/src/utils/mappoContinuousPricing.js";
 import { EVRPTWPartialChargingTOURouter as ServerEVRPTWPartialChargingTOURouter, TOU_TARIFF_TIERS as ServerTOUTariffTiers } from "../../server/src/utils/evrptwPartialChargingTOURouter.js";
+import ServerSlidingWindowFrequentItems from "../../server/src/utils/slidingWindowFrequentItems.js";
+import ServerQMIXMultiVendorCooperativePricing from "../../server/src/utils/qmixMultiVendorCooperativePricing.js";
+import ServerEVRPTWDynamicWirelessInductiveRouter from "../../server/src/utils/evrptwDynamicWirelessInductiveRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -34043,6 +34050,405 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích bằng Time-Decayed CMS hoặc giao bằng xe điện sạc từng phần TOU không?");
         expect.equal(buyerRes.intent, "TIME_DECAYED_MAPPO_TOU_PARTIAL_CHARGING_ASSIST");
         expect.ok(buyerRes.replyText.includes("Time-Decayed Count-Min Sketch"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 228: Phase 81 Enterprise Algorithms Suite (24 Tests)
+    //   - Sliding-Window Frequent Items (Manku-Motwani VLDB 2002, Golab ACM TODS 2006) (F228-T01 - F228-T08)
+    //   - QMIX Multi-Vendor Cooperative Pricing (Tabish Rashid et al. ICML 2018) (F228-T09 - F228-T15)
+    //   - EVRPTW Dynamic Wireless Inductive Router (Chen et al. TR Part C 2020) (F228-T16 - F228-T22)
+    //   - Tri-Role AI Copilots Deep Integration (F228-T23 - F228-T24)
+    // =========================================================================
+    describe("Feature 228: Phase 81 Enterprise Algorithms Suite", () => {
+      // -----------------------------------------------------------------------
+      // Sliding-Window Frequent Items Tests (F228-T01 - F228-T08)
+      // -----------------------------------------------------------------------
+      test("F228-T01: SlidingWindowFrequentItems initializes window duration, granularity, phi, and epsilon", () => {
+        const tracker = new SlidingWindowFrequentItems({
+          windowSizeMs: 600000, // 10 minutes
+          granularityMs: 30000, // 30 seconds
+          phi: 0.04,
+          epsilon: 0.01
+        });
+        expect.equal(tracker.windowSizeMs, 600000);
+        expect.equal(tracker.granularityMs, 30000);
+        expect.equal(tracker.phi, 0.04);
+        expect.equal(tracker.epsilon, 0.01);
+        expect.equal(tracker.buckets.length, 0);
+        expect.equal(tracker.totalWeight, 0);
+      });
+
+      test("F228-T02: SlidingWindowFrequentItems records single and batch events into active buckets", () => {
+        const tracker = new SlidingWindowFrequentItems({ windowSizeMs: 60000, granularityMs: 10000 });
+        const now = 1000000;
+        tracker.record("IPHONE_15_PRO", 2, now);
+        tracker.record("MACBOOK_M3", 1, now + 1000);
+        tracker.recordBatch([
+          { itemId: "IPHONE_15_PRO", weight: 3, timestamp: now + 2000 },
+          { itemId: "SONY_WH1000XM5", weight: 1, timestamp: now + 3000 }
+        ]);
+
+        expect.equal(tracker.query("IPHONE_15_PRO", now + 4000), 5);
+        expect.equal(tracker.query("MACBOOK_M3", now + 4000), 1);
+        expect.equal(tracker.query("SONY_WH1000XM5", now + 4000), 1);
+        expect.equal(tracker.totalWeight, 7);
+      });
+
+      test("F228-T03: SlidingWindowFrequentItems automatically evicts buckets older than cutoff", () => {
+        const tracker = new SlidingWindowFrequentItems({ windowSizeMs: 60000, granularityMs: 10000 });
+        const t0 = 1000000;
+        tracker.record("OLD_HOT_DEAL", 10, t0);
+        tracker.record("MID_HOT_DEAL", 5, t0 + 30000);
+        tracker.record("NEW_HOT_DEAL", 8, t0 + 55000);
+
+        // At t0 + 65000: t0 (1000000) is older than 1065000 - 60000 = 1005000, so OLD_HOT_DEAL is evicted
+        tracker.evict(t0 + 65000);
+        expect.equal(tracker.query("OLD_HOT_DEAL", t0 + 65000), 0);
+        expect.equal(tracker.query("MID_HOT_DEAL", t0 + 65000), 5);
+        expect.equal(tracker.query("NEW_HOT_DEAL", t0 + 65000), 8);
+        expect.equal(tracker.totalWeight, 13);
+        expect.equal(tracker.totalEvictedWeight, 10);
+      });
+
+      test("F228-T04: SlidingWindowFrequentItems query returns 0 for non-existent items", () => {
+        const tracker = new SlidingWindowFrequentItems();
+        expect.equal(tracker.query("NON_EXISTENT_SKU"), 0);
+      });
+
+      test("F228-T05: SlidingWindowFrequentItems getFrequentItems filters by phi threshold and marks guarantee", () => {
+        const tracker = new SlidingWindowFrequentItems({
+          windowSizeMs: 60000,
+          granularityMs: 10000,
+          phi: 0.20,
+          epsilon: 0.05
+        });
+        const now = 2000000;
+        tracker.record("HEAVY_ITEM_A", 50, now);
+        tracker.record("MEDIUM_ITEM_B", 25, now + 1000);
+        tracker.record("LIGHT_ITEM_C", 5, now + 2000);
+        tracker.record("LIGHT_ITEM_D", 5, now + 3000);
+        // Total weight = 85. Threshold = 0.20 * 85 = 17.
+        // A (50 >= 17) and B (25 >= 17) qualify.
+        const frequent = tracker.getFrequentItems(0.20, now + 4000);
+        expect.equal(frequent.length, 2);
+        expect.equal(frequent[0].itemId, "HEAVY_ITEM_A");
+        expect.equal(frequent[0].frequency, 50);
+        expect.equal(frequent[0].isGuaranteed, true);
+        expect.equal(frequent[1].itemId, "MEDIUM_ITEM_B");
+        expect.equal(frequent[1].frequency, 25);
+      });
+
+      test("F228-T06: SlidingWindowFrequentItems getVelocity computes positive momentum for surging items", () => {
+        const tracker = new SlidingWindowFrequentItems({ windowSizeMs: 60000, granularityMs: 10000 });
+        const now = 3000000;
+        // Prior half: [now - 60000, now - 30000)
+        tracker.record("VIRAL_SKU", 2, now - 45000);
+        // Recent half: [now - 30000, now]
+        tracker.record("VIRAL_SKU", 20, now - 10000);
+
+        const vel = tracker.getVelocity("VIRAL_SKU", now);
+        expect.equal(vel.itemId, "VIRAL_SKU");
+        expect.equal(vel.priorFreq, 2);
+        expect.equal(vel.recentFreq, 20);
+        expect.ok(vel.velocity > 0);
+        expect.equal(vel.momentumMultiplier, 10.0);
+      });
+
+      test("F228-T07: SlidingWindowFrequentItems getTopTrending ranks items by highest positive surge", () => {
+        const tracker = new SlidingWindowFrequentItems({ windowSizeMs: 60000, granularityMs: 10000 });
+        const now = 4000000;
+        tracker.record("SKU_STEADY", 10, now - 50000);
+        tracker.record("SKU_STEADY", 10, now - 10000);
+
+        tracker.record("SKU_EXPLOSIVE", 1, now - 50000);
+        tracker.record("SKU_EXPLOSIVE", 30, now - 5000);
+
+        const trending = tracker.getTopTrending(2, now);
+        expect.equal(trending.length, 2);
+        expect.equal(trending[0].itemId, "SKU_EXPLOSIVE");
+        expect.ok(trending[0].velocity > trending[1].velocity);
+      });
+
+      test("F228-T08: Parity check between Server and Client SlidingWindowFrequentItems implementations", () => {
+        const clientTracker = new SlidingWindowFrequentItems({ windowSizeMs: 30000, phi: 0.1 });
+        const serverTracker = new ServerSlidingWindowFrequentItems({ windowSizeMs: 30000, phi: 0.1 });
+
+        const ts = 5000000;
+        clientTracker.record("SKU_TEST", 15, ts);
+        serverTracker.record("SKU_TEST", 15, ts);
+
+        expect.equal(clientTracker.query("SKU_TEST", ts), serverTracker.query("SKU_TEST", ts));
+        expect.equal(clientTracker.totalWeight, serverTracker.totalWeight);
+      });
+
+      // -----------------------------------------------------------------------
+      // QMIX Multi-Vendor Cooperative Pricing Tests (F228-T09 - F228-T15)
+      // -----------------------------------------------------------------------
+      test("F228-T09: QMIXMultiVendorCooperativePricing initializes agent count, discount tiers, and hypernetworks", () => {
+        const qmix = new QMIXMultiVendorCooperativePricing({
+          agentCount: 3,
+          actionDiscounts: [0.0, 0.05, 0.10, 0.15, 0.20],
+          stateDim: 4,
+          mixingHiddenDim: 8
+        });
+
+        expect.equal(qmix.agentCount, 3);
+        expect.equal(qmix.actionCount, 5);
+        expect.equal(qmix.stateDim, 4);
+        expect.equal(qmix.jointStateDim, 12);
+        expect.equal(qmix.agentWeights.length, 3);
+        expect.equal(qmix.agentWeights[0].length, 4);
+        expect.equal(qmix.agentWeights[0][0].length, 5);
+      });
+
+      test("F228-T10: QMIXMultiVendorCooperativePricing computes local agent Q-values correctly", () => {
+        const qmix = new QMIXMultiVendorCooperativePricing({ agentCount: 2, stateDim: 3, seed: 100 });
+        const localState = [0.5, 1.2, -0.3];
+        const qVals = qmix.getAgentQValues(0, localState, false);
+
+        expect.equal(qVals.length, qmix.actionCount);
+        for (const v of qVals) {
+          expect.equal(typeof v, "number");
+          expect.equal(Number.isNaN(v), false);
+        }
+      });
+
+      test("F228-T11: QMIXMultiVendorCooperativePricing mixQValues computes Q_tot with non-negative hypernetwork weights", () => {
+        const qmix = new QMIXMultiVendorCooperativePricing({ agentCount: 3, stateDim: 2, mixingHiddenDim: 6, seed: 777 });
+        const jointState = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6];
+        const chosenQ = [1.5, 2.0, 0.8];
+
+        const mix = qmix.mixQValues(chosenQ, jointState, false);
+        expect.equal(typeof mix.qTot, "number");
+        expect.equal(Number.isNaN(mix.qTot), false);
+        expect.equal(mix.w1.length, 3);
+        expect.equal(mix.w2.length, 6);
+
+        // Every weight in W1 and W2 must be >= 0 (monotonicity condition)
+        for (let i = 0; i < 3; i++) {
+          for (let h = 0; h < 6; h++) {
+            expect.ok(mix.w1[i][h] >= 0);
+          }
+        }
+        for (let h = 0; h < 6; h++) {
+          expect.ok(mix.w2[h] >= 0);
+        }
+      });
+
+      test("F228-T12: QMIXMultiVendorCooperativePricing verifyMonotonicity confirms d(Q_tot)/d(Q_i) >= 0", () => {
+        const qmix = new QMIXMultiVendorCooperativePricing({ agentCount: 3, stateDim: 2, seed: 999 });
+        const jointState = [1.0, -0.5, 0.2, 0.8, -1.2, 0.4];
+        const mono = qmix.verifyMonotonicity(jointState);
+
+        expect.equal(mono.isMonotonic, true);
+        expect.equal(mono.allNonNegative, true);
+        expect.ok(mono.minWeight >= 0);
+      });
+
+      test("F228-T13: QMIXMultiVendorCooperativePricing selectActionDecentralized enforces 1.05 * COGS safe price floor", () => {
+        const qmix = new QMIXMultiVendorCooperativePricing({
+          agentCount: 2,
+          actionDiscounts: [0.0, 0.10, 0.25, 0.40],
+          stateDim: 3
+        });
+        const localState = [1.0, 0.5, -0.2];
+        const basePrice = 100000;
+        const cogs = 80000; // safeFloor = 84000.
+        // Discount 0%: 100k >= 84k (OK)
+        // Discount 10%: 90k >= 84k (OK)
+        // Discount 25%: 75k < 84k (VIOLATES FLOOR)
+        // Discount 40%: 60k < 84k (VIOLATES FLOOR)
+
+        const decision = qmix.selectActionDecentralized(0, localState, { basePrice, cogs });
+        expect.ok(decision.executedPrice >= 84000);
+        expect.ok(decision.discountFraction <= 0.16);
+      });
+
+      test("F228-T14: QMIXMultiVendorCooperativePricing trainStep completes TD-error backprop and target soft updates", () => {
+        const qmix = new QMIXMultiVendorCooperativePricing({ agentCount: 2, stateDim: 2, seed: 123 });
+        const transition = {
+          localStates: [[0.5, 0.2], [0.8, -0.1]],
+          jointState: [0.5, 0.2, 0.8, -0.1],
+          actions: [1, 2],
+          jointReward: 15.0,
+          nextLocalStates: [[0.6, 0.3], [0.9, 0.0]],
+          nextJointState: [0.6, 0.3, 0.9, 0.0],
+          done: false
+        };
+
+        const result = qmix.trainStep(transition);
+        expect.equal(typeof result.tdError, "number");
+        expect.equal(typeof result.qTotCurrent, "number");
+        expect.equal(typeof result.targetQTot, "number");
+        expect.equal(result.trainStepCount, 1);
+      });
+
+      test("F228-T15: Parity check between Server and Client QMIXMultiVendorCooperativePricing", () => {
+        const clientQMIX = new QMIXMultiVendorCooperativePricing({ agentCount: 2, stateDim: 2, seed: 555 });
+        const serverQMIX = new ServerQMIXMultiVendorCooperativePricing({ agentCount: 2, stateDim: 2, seed: 555 });
+
+        const local = [0.4, 0.7];
+        const clientQ = clientQMIX.getAgentQValues(0, local);
+        const serverQ = serverQMIX.getAgentQValues(0, local);
+
+        expect.equal(clientQ.length, serverQ.length);
+        for (let i = 0; i < clientQ.length; i++) {
+          expect.equal(Number(clientQ[i].toFixed(4)), Number(serverQ[i].toFixed(4)));
+        }
+      });
+
+      // -----------------------------------------------------------------------
+      // EVRPTW Dynamic Wireless Inductive Router Tests (F228-T16 - F228-T22)
+      // -----------------------------------------------------------------------
+      test("F228-T16: EVRPTWDynamicWirelessInductiveRouter initializes battery, efficiency, and DWPT parameters", () => {
+        const router = new EVRPTWDynamicWirelessInductiveRouter({
+          batteryCapacityKWh: 75,
+          minSoCFraction: 0.20,
+          defaultPowerKW: 80,
+          couplingEfficiency: 0.88,
+          electricityRatePerKWh: 2800
+        });
+
+        expect.equal(router.batteryCapacityKWh, 75);
+        expect.equal(router.minSoCFraction, 0.20);
+        expect.equal(router.minEnergyBufferKWh, 15);
+        expect.equal(router.defaultPowerKW, 80);
+        expect.equal(router.couplingEfficiency, 0.88);
+        expect.equal(router.electricityRatePerKWh, 2800);
+      });
+
+      test("F228-T17: calculateEdgeDynamics computes transit time, resistance consumption, and wireless power absorption", () => {
+        const router = new EVRPTWDynamicWirelessInductiveRouter({
+          defaultPowerKW: 60,
+          couplingEfficiency: 0.85,
+          electricityRatePerKWh: 2500
+        });
+
+        // 3 km regular road at 40 km/h: time = 3 / 40 = 0.075h (4.5 min)
+        const regularEdge = router.calculateEdgeDynamics({
+          distanceKm: 3.0,
+          isDwptLane: false,
+          targetSpeedKmh: 40
+        });
+        expect.equal(regularEdge.transitTimeMinutes, 4.5);
+        expect.equal(regularEdge.energyAbsorbedKWh, 0);
+        expect.ok(regularEdge.energyConsumedKWh > 0);
+        expect.ok(regularEdge.netEnergyKWh < 0);
+
+        // 3 km DWPT inductive lane at 30 km/h: time = 3 / 30 = 0.1h (6 min)
+        // Energy absorbed = 0.85 * 60 * 0.1 = 5.1 kWh
+        const dwptEdge = router.calculateEdgeDynamics({
+          distanceKm: 3.0,
+          isDwptLane: true,
+          dwptLengthKm: 3.0,
+          dwptPowerKW: 60,
+          targetSpeedKmh: 30
+        });
+        expect.equal(dwptEdge.transitTimeMinutes, 6.0);
+        expect.equal(dwptEdge.energyAbsorbedKWh, 5.1);
+        expect.ok(dwptEdge.energyConsumedKWh < 1.0);
+        expect.ok(dwptEdge.netEnergyKWh > 0); // Positive net energy!
+        expect.equal(dwptEdge.wirelessCostVND, Math.round(5.1 * 2500));
+      });
+
+      test("F228-T18: High-power DWPT roadway segments produce positive net energy E_net > 0", () => {
+        const router = new EVRPTWDynamicWirelessInductiveRouter({ defaultPowerKW: 100, couplingEfficiency: 0.90 });
+        const edge = router.calculateEdgeDynamics({
+          distanceKm: 2.0,
+          isDwptLane: true,
+          dwptPowerKW: 100,
+          targetSpeedKmh: 25
+        });
+        // Slower transit (25 km/h) absorbs more energy per km: time = 2 / 25 = 0.08h
+        // Absorbed = 0.90 * 100 * 0.08 = 7.2 kWh. Consumed ~ 0.5 kWh.
+        expect.ok(edge.netEnergyKWh > 5.0);
+      });
+
+      test("F228-T19: optimizeDwptSpeed calculates speed balancing energy absorption and deadline constraints", () => {
+        const router = new EVRPTWDynamicWirelessInductiveRouter({ defaultPowerKW: 60, couplingEfficiency: 0.85 });
+        // Target: absorb 3 kWh over 2 km lane within 10 minutes (0.166h)
+        const opt = router.optimizeDwptSpeed(2.0, 3.0, 10.0);
+
+        expect.ok(opt.optimalSpeedKmh >= router.speedMinKmh);
+        expect.ok(opt.optimalSpeedKmh <= router.speedMaxKmh);
+        expect.ok(opt.transitTimeMinutes <= 10.0);
+        expect.ok(opt.energyAbsorbedKWh >= 2.5);
+      });
+
+      test("F228-T20: planInductiveTour routes delivery fleet with DWPT lanes and maintains SoC", () => {
+        const router = new EVRPTWDynamicWirelessInductiveRouter({ batteryCapacityKWh: 50, minSoCFraction: 0.15 });
+        const tour = router.planInductiveTour({
+          depot: { id: "HUB_CENTRAL", readyTimeMin: 0, dueTimeMin: 600 },
+          customers: [
+            { id: "CUST_A", readyTimeMin: 20, dueTimeMin: 60, serviceDurationMin: 5, distanceFromPrevKm: 4.0, hasDwptLane: true },
+            { id: "CUST_B", readyTimeMin: 60, dueTimeMin: 120, serviceDurationMin: 5, distanceFromPrevKm: 5.0, hasDwptLane: false },
+            { id: "CUST_C", readyTimeMin: 120, dueTimeMin: 180, serviceDurationMin: 5, distanceFromPrevKm: 3.0, hasDwptLane: true }
+          ],
+          initialSoC: 0.5 // Start at 50% SoC (25 kWh)
+        });
+
+        expect.equal(tour.stopsCount, 5); // depot -> A -> B -> C -> depot
+        expect.equal(tour.itinerary.length, 4);
+        expect.ok(tour.totalDistanceKm > 10.0);
+        expect.ok(tour.totalAbsorbedKWh > 0);
+        expect.ok(tour.minObservedSoCKWh >= router.minEnergyBufferKWh);
+        expect.equal(tour.isFeasible, true);
+      });
+
+      test("F228-T21: Range Anxiety Elimination Index reflects minimum safe battery buffer throughout tour", () => {
+        const router = new EVRPTWDynamicWirelessInductiveRouter({ batteryCapacityKWh: 60 });
+        const tour = router.planInductiveTour({
+          depot: { id: "DEPOT_SPX" },
+          customers: [
+            { id: "CUST_1", distanceFromPrevKm: 5.0, hasDwptLane: true }
+          ],
+          initialSoC: 0.8
+        });
+
+        expect.ok(tour.rangeAnxietyEliminationIndex >= 15.0);
+        expect.equal(tour.itinerary[0].isDwptLane, true);
+      });
+
+      test("F228-T22: Parity check between Server and Client EVRPTWDynamicWirelessInductiveRouter", () => {
+        const clientRouter = new EVRPTWDynamicWirelessInductiveRouter({ batteryCapacityKWh: 60, defaultPowerKW: 70 });
+        const serverRouter = new ServerEVRPTWDynamicWirelessInductiveRouter({ batteryCapacityKWh: 60, defaultPowerKW: 70 });
+
+        const edge = { distanceKm: 4.0, isDwptLane: true, dwptPowerKW: 70, targetSpeedKmh: 35 };
+        const clientDyn = clientRouter.calculateEdgeDynamics(edge);
+        const serverDyn = serverRouter.calculateEdgeDynamics(edge);
+
+        expect.equal(clientDyn.transitTimeMinutes, serverDyn.transitTimeMinutes);
+        expect.equal(clientDyn.energyAbsorbedKWh, serverDyn.energyAbsorbedKWh);
+        expect.equal(clientDyn.netEnergyKWh, serverDyn.netEnergyKWh);
+        expect.equal(clientDyn.wirelessCostVND, serverDyn.wirelessCostVND);
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F228-T23 - F228-T24)
+      // -----------------------------------------------------------------------
+      test("F228-T23: Admin Sentinel Copilot correctly routes Section 224 (Sliding-Window), Section 225 (QMIX), and Section 226 (EVRPTW Inductive)", () => {
+        const resSliding = generateAdminCopilotResponse("Phân tích mặt hàng phổ biến cửa sổ trượt Sliding-Window Frequent Items Manku Motwani Golab");
+        expect.equal(resSliding.tag, "SLIDING WINDOW FREQUENT ITEMS");
+        expect.ok(resSliding.text.includes("SLIDING-WINDOW FREQUENT ITEMS"));
+
+        const resQMIX = generateAdminCopilotResponse("Định giá hợp tác đa gian hàng QMIX Monotonic Value Factorisation Tabish Rashid Whiteson");
+        expect.equal(resQMIX.tag, "QMIX MULTI-VENDOR COOPERATIVE PRICING");
+        expect.ok(resQMIX.text.includes("QMIX MONOTONIC VALUE FACTORISATION"));
+
+        const resInductive = generateAdminCopilotResponse("Định tuyến xe điện làn sạc cảm ứng không dây động EVRPTW Dynamic Wireless Inductive Router Chen Deflorio Ko");
+        expect.equal(resInductive.tag, "EVRPTW DYNAMIC WIRELESS INDUCTIVE ROUTER");
+        expect.ok(resInductive.text.includes("EVRPTW DYNAMIC WIRELESS INDUCTIVE ROUTER"));
+      });
+
+      test("F228-T24: Seller ShopSmart Copilot Section 90 and Buyer Assistant Intent 83 handle Phase 81 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn xu hướng bùng nổ Trending Velocity cửa sổ trượt và định giá combo đa gian hàng QMIX");
+        expect.equal(sellerRes.tag, "SLIDING-WINDOW FREQUENT, QMIX COOPERATIVE & INDUCTIVE DWPT EVRPTW");
+        expect.ok(sellerRes.text.includes("Sliding-Window Frequent Items"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có nằm trong cửa sổ trượt hot trend hoặc giao bằng xe điện sạc cảm ứng không dây không?");
+        expect.equal(buyerRes.intent, "SLIDING_WINDOW_QMIX_INDUCTIVE_ASSIST");
+        expect.ok(buyerRes.replyText.includes("Sliding-Window Frequent Items"));
       });
     });
   });
