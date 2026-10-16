@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -1268,7 +1268,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 53. Định Tuyến Đội Xe Đa Kho Đa Điểm Dừng SPX VRP (Phase 23 - Feature 170)
-  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock|road[- ]pricing|mdvrptw|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|mtvrptw|multi[- ]trip|soft time window|cửa sổ mềm|vrptw[- ]soft/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
+  if (!/vrptw|branch[- ]and[- ]cut|mdevrp|sạc phi tuyến|evrptw|hfvrptw|sdvrptw|evrp[- ]bss|đổi pin siêu tốc|đổi pin 3 phút|dtrp|vrptw[- ]crs|evrp[- ]bds|drone|vrptw[- ]d|vrptw[- ]cc|cross[- ]dock|road[- ]pricing|mdvrptw|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|mtvrptw|multi[- ]trip|soft time window|cửa sổ mềm|vrptw[- ]soft|battery degradation|evrptw[- ]battery/i.test(raw) && /vrp|multi-depot|định tuyến đội xe|multi-stop|giao hàng đa kho|green logistics|giảm phát thải co2|tối ưu lộ trình xe tải/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE ĐA KHO ĐA ĐIỂM DỪNG (SPX MULTI-DEPOT VRP HEURISTIC)**:
 - **Nguyên lý Tối ưu Tổ hợp Đa tầng (NP-hard Fleet Routing)**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (/evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/battery degradation|evrptw[- ]battery/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3213,7 +3213,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 151. Định Tuyến Xe Tải Điện & Trạm Sạc Năng Lượng Mặt Trời EVRP-BDS (Phase 56 - Feature 203)
-  if (/evrp-bds|evrp bds|solar charging|sạc mặt trời|battery degradation|hao mòn cell pin|solar micro-hub/i.test(raw)) {
+  if (!/evrptw/i.test(raw) && /evrp-bds|evrp bds|solar charging|sạc mặt trời|battery degradation|hao mòn cell pin|solar micro-hub/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN XE ĐIỆN & TRẠM SẠC MẶT TRỜI BẢO VỆ TUỔI THỌ PIN EVRP-BDS (PELLETIER ET AL. 2017)**:
 - **Mô Hình Hao Mòn Cell Pin Lithium Phi Tuyến (NMC Degradation Model)**:
@@ -3236,7 +3236,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 152. Lấy Mẫu Dính Tần Suất Cao Sticky Sampling (Phase 57 - Feature 204)
-  if (!/lossy|misra|gries/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
+  if (!/lossy|misra|gries|kps|karp/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
     return {
       text: `📊 **BỘ ĐẾM DÒNG TẦN SUẤT CAO STICKY SAMPLING (MANKU & MOTWANI 2002)**:
 - **Cơ Chế Lấy Mẫu Thích Ứng Động (Adaptive Dynamic Sampling)**:
@@ -3258,7 +3258,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 153. Định Giá Phân Phối QR-DDPG & Quản Trị Rủi Ro CVaR (Phase 57 - Feature 204)
-  if (/qrdpg|qr-ddpg|quantile regression|phân phối lợi nhuận|cvar|đuôi rủi ro|risk-averse pricing/i.test(raw)) {
+  if (!/cqrd/i.test(raw) && /qrdpg|qr-ddpg|quantile regression|phân phối lợi nhuận|cvar|đuôi rủi ro|risk-averse pricing/i.test(raw)) {
     return {
       text: `📈 **ĐỊNH GIÁ PHÂN PHỐI & PHÒNG NGỪA RỦI RO ĐUÔI QR-DDPG CVaR (DABNEY ET AL. 2018)**:
 - **Mô Hình Hóa Toàn Diện Phân Phối Lợi Nhuận (Quantile Representations)**:
@@ -3679,6 +3679,69 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem xác suất giao đúng hẹn OTD Probability',
         'Kiểm tra đệm tin cậy Reliability Buffer',
         'Phân tích phương sai tích lũy dọc lộ trình'
+      ]
+    };
+  }
+
+  // 173. Phát Hiện Phần Tử Phổ Biến Luồng KPS Frequent Items (Phase 64 - Feature 211)
+  if (/kps|karp[- ]papadimitriou|kps frequent|giảm đồng thời kps|ngưỡng theta luồng|thuật toán karp/i.test(raw)) {
+    return {
+      text: `📊 **THUẬT TOÁN DÒNG DỮ LIỆU KPS FREQUENT ITEMS (KARP, PAPADIMITRIOU & SHENKER 2003 / ACM TODS 2003)**:
+- **Nguyên lý Giảm Đồng Thời Tất Định (Simultaneous Counter Decrement)**:
+  - Chỉ duy trì tối đa $m = \\lceil 1/\\theta \\rceil$ bộ đếm trong suốt dòng dữ liệu luồng $N$ sự kiện.
+  - Khi bảng đếm đầy và gặp phần tử mới, toàn bộ $m$ bộ đếm được giảm đồng loạt 1 đơn vị, xóa bỏ triệt để các phần tử rơi về $0$.
+- **Cận Sai Số Lý Thuyết Tuyệt Đối**:
+  - Tần suất ước lượng $\\hat{f}(x)$ thỏa mãn:
+    $$f(x) - \\theta \\cdot N \\le \\hat{f}(x) \\le f(x)$$
+  - **Zero False Negatives**: Mọi sản phẩm hoặc từ khóa có tần suất $f(x) > \\theta \\cdot N$ chắc chắn được giữ lại trong bảng tổng kết!
+- **Tối Ưu Tài Nguyên Bộ Nhớ**:
+  - Không gian nhớ cố định $O(1/\\theta)$ bất biến theo độ dài luồng $N$, bảo đảm giám sát ổn định triệu giao dịch Flash Sale!`,
+      type: 'analytics',
+      tag: 'KPS FREQUENT ITEMS',
+      suggestions: [
+        'Xem danh sách Frequent Items KPS',
+        'Kiểm tra ngưỡng phân vị Theta (10%)',
+        'Thống kê số lượt Purge Passes'
+      ]
+    };
+  }
+
+  // 174. Định Giá Phân Phối Học Tăng Cường CQRD Pricing & Kiểm Soát Rủi Ro CVaR (Phase 64 - Feature 211)
+  if (/cqrd|quantile regression pricing|cvar|value at risk|phân phối lợi nhuận z|huber quantile|chống sụp đổ biên|risk[- ]sensitive pricing/i.test(raw)) {
+    return {
+      text: `🏷️ **ĐỊNH GIÁ PHÂN PHỐI HỌC TĂNG CƯỜNG CQRD PRICING & BẢO VỆ RỦI RO CVAR (BELLEMARE 2017, DABNEY 2018)**:
+- **Mô Hình Hóa Toàn Diện Phân Phối Lợi Nhuận $Z(s, a)$**:
+  - Thay vì chỉ tối ưu giá trị trung bình $\\mathbb{E}[Q]$, thuật toán xấp xỉ toàn bộ phân phối xác suất lợi nhuận qua $N$ điểm phân vị $\\tau_i = \\frac{2i - 1}{2N}$ với hàm mất mát Huber Quantile Loss.
+- **Tiêu Chuẩn Quyết Định Nhạy Cảm Rủi Ro (CVaR Tail Protection)**:
+  - Tối ưu hóa kết hợp giữa lợi nhuận kỳ vọng và rủi ro đuôi xấu nhất:
+    $$Q_{\\text{risk}}(s, a) = (1 - \\lambda) \\cdot \\mathbb{E}[Z] + \\lambda \\cdot \\text{CVaR}_\\alpha(Z)$$
+  - Ngăn chặn triệt để các đợt giảm giá kích cầu mạo hiểm dẫn đến bùng nổ nợ xấu hoặc sập sàn biên lợi nhuận trong kịch bản nhu cầu tiêu cực!`,
+      type: 'pricing',
+      tag: 'CQRD DISTRIBUTIONAL PRICING',
+      suggestions: [
+        'Kiểm tra thước đo rủi ro đuôi CVaR 20%',
+        'Xem phân vị lợi nhuận Value at Risk (VaR)',
+        'Kiểm toán hệ số phạt rủi ro Lambda (0.40)'
+      ]
+    };
+  }
+
+  // 175. Định Tuyến Xe Điện Bảo Vệ Tuổi Thọ Pin EVRPTW Battery Degradation (Phase 64 - Feature 211)
+  if (/battery degradation|hao mòn pin phi tuyến|tuổi thọ pin xe điện|evrptw[- ]battery|độ xả sâu dod|chi phí thay pin pack|cell aging stress/i.test(raw)) {
+    return {
+      text: `🚚 **ĐỊNH TUYẾN XE ĐIỆN BẢO VỆ TUỔI THỌ PIN EVRPTW BATTERY DEGRADATION (PELLETIER ET AL. 2017, SCHIFFER 2018)**:
+- **Mô Hình Hao Mòn Pin Lithium-Ion Phi Tuyến (Nonlinear Battery Aging)**:
+  - Chi phí hao mòn pin không tỉ lệ tuyến tính với quãng đường: Khi xả sâu vượt ngưỡng $75\\%$ DoD, ứng suất hóa học tăng vọt theo hàm lũy thừa $\\Psi(\\text{DoD}) \\sim (\\text{DoD})^{1.85}$.
+- **Tối Ưu Chi Phí Vòng Đời Đội Xe (Generalized Lifecycle Cost)**:
+  $$\\text{Total Cost} = \\text{Tiền Điện} + \\text{Khấu Hao Pin Phi Tuyến} + \\text{Lương Tài Xế} + \\text{Phạt Trễ}$$
+- **Bảo Vệ Đội Xe Xanh SPX**:
+  - Duy trì mức pin an toàn $\\ge 20\\%$ SoC, kéo dài tuổi thọ cụm pin thêm **$30\\%$**, tiết kiệm hàng trăm triệu đồng chi phí thay thế cell pin cho sàn!`,
+      type: 'logistics',
+      tag: 'EVRPTW BATTERY DEGRADATION',
+      suggestions: [
+        'Xem chi phí hao mòn pin phi tuyến',
+        'Kiểm tra độ xả sâu cao nhất Peak DoD',
+        'Phân tích chi phí vòng đời Generalized Cost'
       ]
     };
   }

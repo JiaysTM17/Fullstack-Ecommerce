@@ -343,6 +343,10 @@ import {
   MisraGriesHeavyHitters,
   LapDynamicPricing,
   VRPTWStochasticServiceTimeRouter,
+  // Phase 64 Enterprise Algorithms
+  KPSFrequentItems,
+  CQRDPricing,
+  EVRPTWBatteryDegradationRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -500,6 +504,9 @@ import { VRPTWSoftTimeWindowsRouter as ServerVRPTWSoftTimeWindowsRouter } from "
 import { MisraGriesHeavyHitters as ServerMisraGriesHeavyHitters } from "../../server/src/utils/misraGriesHeavyHitters.js";
 import { LapDynamicPricing as ServerLapDynamicPricing } from "../../server/src/utils/lapDynamicPricing.js";
 import { VRPTWStochasticServiceTimeRouter as ServerVRPTWStochasticServiceTimeRouter } from "../../server/src/utils/vrptwStochasticServiceTimeRouter.js";
+import { KPSFrequentItems as ServerKPSFrequentItems } from "../../server/src/utils/kpsFrequentItems.js";
+import { CQRDPricing as ServerCQRDPricing } from "../../server/src/utils/cqrdPricing.js";
+import { EVRPTWBatteryDegradationRouter as ServerEVRPTWBatteryDegradationRouter } from "../../server/src/utils/evrptwBatteryDegradationRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -27764,6 +27771,383 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
       const routePlan = router.planRoutes(dispatchCustomers);
       expect.equal(routePlan.totalVehicles, 1);
       expect.ok(routePlan.averageOTDProbability >= 0.95);
+      expect.equal(routePlan.allFeasible, true);
+    });
+  });
+
+  // =========================================================================
+  // FEATURE 211: Enterprise Algorithms Suite - Phase 64
+  // 1. KPSFrequentItems (Karp, Papadimitriou, Shenker ACM TODS 2003)
+  // 2. CQRDPricing (Categorical / Quantile Regression Distributional RL with CVaR)
+  // 3. EVRPTWBatteryDegradationRouter (EV Routing with Nonlinear Battery Aging)
+  // =========================================================================
+  describe("Feature 211: Enterprise Algorithms Suite - Phase 64", () => {
+    // -----------------------------------------------------------------------
+    // Sub-suite 1: KPSFrequentItems (T01 - T07)
+    // -----------------------------------------------------------------------
+    test("F211-T01: Initializes with theta, maxCounters, 0 totalItems, 0 purgePasses", () => {
+      const kps = new KPSFrequentItems({ theta: 0.20 });
+      const metrics = kps.getMetrics();
+      expect.equal(metrics.theta, 0.20);
+      expect.equal(metrics.maxCounters, 5); // ceil(1 / 0.2)
+      expect.equal(metrics.activeCounters, 0);
+      expect.equal(metrics.totalItems, 0);
+      expect.equal(metrics.purgePasses, 0);
+      expect.equal(metrics.errorBound, 0);
+    });
+
+    test("F211-T02: Updates counters and estimates frequency accurately when table has capacity", () => {
+      const kps = new KPSFrequentItems({ theta: 0.10 });
+      kps.update("sku_phone", 4);
+      kps.update("sku_case", 2);
+      kps.update("sku_charger", 1);
+
+      expect.equal(kps.estimate("sku_phone"), 4);
+      expect.equal(kps.estimate("sku_case"), 2);
+      expect.equal(kps.estimate("sku_charger"), 1);
+      expect.equal(kps.estimate("sku_nonexistent"), 0);
+      expect.equal(kps.totalItems, 7);
+    });
+
+    test("F211-T03: Triggers simultaneous decrement when table is full and removes zeroes", () => {
+      // theta = 0.50 => maxCounters = 2
+      const kps = new KPSFrequentItems({ theta: 0.50 });
+      kps.update("item_A"); // A: 1
+      kps.update("item_B"); // B: 1
+      expect.equal(kps.counters.size, 2);
+
+      // Inserting item_C when table is full triggers purge pass
+      kps.update("item_C");
+      expect.equal(kps.purgePasses, 1);
+      expect.equal(kps.estimate("item_A"), 0);
+      expect.equal(kps.estimate("item_B"), 0);
+      expect.equal(kps.estimate("item_C"), 0);
+      expect.equal(kps.counters.size, 0);
+      expect.equal(kps.totalItems, 3);
+    });
+
+    test("F211-T04: Theoretical error bound satisfies f(x) - theta * N <= c_x <= f(x)", () => {
+      const theta = 0.20;
+      const kps = new KPSFrequentItems({ theta });
+      const stream = [
+        "top_item", "top_item", "top_item", "top_item", "top_item", // true count = 5
+        "noise_a", "noise_b", "noise_c", "noise_d", "noise_e" // each 1
+      ];
+      kps.updateBatch(stream);
+
+      const N = 10;
+      const maxErr = theta * N; // 2.0
+      const est = kps.estimate("top_item");
+
+      expect.ok(est <= 5, "Estimate cannot exceed true count");
+      expect.ok(est >= 5 - maxErr, "Estimate must satisfy lower bound");
+      expect.equal(kps.getErrorBound(), maxErr);
+    });
+
+    test("F211-T05: Guarantees 0 False Negatives: items with true frequency > theta * N remain present", () => {
+      const theta = 0.25; // threshold = 25%
+      const kps = new KPSFrequentItems({ theta });
+
+      // Total 100 items: dominant item has 40 occurrences (> 25)
+      for (let i = 0; i < 40; i++) kps.update("super_viral_deal");
+      for (let i = 0; i < 60; i++) kps.update(`bg_noise_${i % 10}`);
+
+      const frequent = kps.getFrequentItems();
+      expect.ok(frequent.length > 0);
+      expect.equal(frequent[0].item, "super_viral_deal");
+      expect.ok(frequent[0].estimatedCount > 0);
+      expect.ok(frequent[0].maxPossibleCount >= 40);
+    });
+
+    test("F211-T06: Merges two KPS summaries of compatible parameters accurately", () => {
+      const kps1 = new KPSFrequentItems({ theta: 0.20 });
+      const kps2 = new KPSFrequentItems({ theta: 0.20 });
+
+      kps1.update("flash_sku_1", 12);
+      kps1.update("flash_sku_2", 8);
+
+      kps2.update("flash_sku_1", 6);
+      kps2.update("flash_sku_3", 10);
+
+      kps1.merge(kps2);
+      expect.equal(kps1.totalItems, 36);
+      expect.ok(kps1.estimate("flash_sku_1") >= 12);
+      expect.ok(kps1.counters.size <= kps1.maxCounters);
+    });
+
+    test("F211-T07: Server and Client KPSFrequentItems implementations produce identical results", () => {
+      const clientKPS = new KPSFrequentItems({ theta: 0.15 });
+      const serverKPS = new ServerKPSFrequentItems({ theta: 0.15 });
+
+      const stream = ["k1", "k2", "k1", "k3", "k1", "k4", "k2", "k1", "k5", "k1"];
+      clientKPS.updateBatch(stream);
+      serverKPS.updateBatch(stream);
+
+      expect.equal(clientKPS.estimate("k1"), serverKPS.estimate("k1"));
+      expect.equal(clientKPS.estimate("k2"), serverKPS.estimate("k2"));
+      expect.equal(clientKPS.totalItems, serverKPS.totalItems);
+      expect.equal(clientKPS.getErrorBound(), serverKPS.getErrorBound());
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 2: CQRDPricing (T08 - T14)
+    // -----------------------------------------------------------------------
+    test("F211-T08: Initializes quantile atoms and midpoint locations taus accurately", () => {
+      const pricing = new CQRDPricing({ numQuantiles: 8, basePrice: 300000 });
+      expect.equal(pricing.numQuantiles, 8);
+      expect.equal(pricing.taus.length, 8);
+      // tau_0 = (2*1 - 1) / 16 = 1/16 = 0.0625
+      expect.equal(pricing.taus[0], 0.0625);
+      // tau_7 = (2*8 - 1) / 16 = 15/16 = 0.9375
+      expect.equal(pricing.taus[7], 0.9375);
+      expect.ok(pricing.quantileModels.size > 0);
+    });
+
+    test("F211-T09: Computes Huber Loss and Quantile Huber Loss with asymmetric penalization", () => {
+      const pricing = new CQRDPricing({ huberKappa: 1.0 });
+      // delta within kappa
+      expect.equal(pricing.huberLoss(0.5), 0.125);
+      // delta outside kappa
+      expect.equal(pricing.huberLoss(2.0), 1.5);
+
+      // Quantile Huber Loss: underestimation (delta > 0) vs overestimation (delta < 0)
+      const lossUnder = pricing.quantileHuberLoss(1.0, 0.9); // weight = |0.9 - 0| = 0.9
+      const lossOver = pricing.quantileHuberLoss(-1.0, 0.9); // weight = |0.9 - 1| = 0.1
+      expect.ok(lossUnder > lossOver, "High quantile tau penalizes underestimation more heavily");
+    });
+
+    test("F211-T10: Computes Expected Return and Quantile Risk Metrics (VaR_alpha and CVaR_alpha)", () => {
+      const pricing = new CQRDPricing({ numQuantiles: 10, riskAlpha: 0.20 });
+      const testAtoms = new Float64Array([100, 150, 200, 250, 300, 350, 400, 450, 500, 550]);
+
+      const expected = pricing.computeExpectedReturn(testAtoms);
+      expect.equal(expected, 325);
+
+      const riskMetrics = pricing.computeRiskMetrics(testAtoms);
+      // kAlpha = floor(0.20 * 10) = 2
+      expect.equal(riskMetrics.kAlpha, 2);
+      expect.equal(riskMetrics.varAlpha, 150); // 2nd atom
+      expect.equal(riskMetrics.cvarAlpha, 125); // (100 + 150) / 2
+    });
+
+    test("F211-T11: Evaluates risk-sensitive score combining expected return and CVaR_alpha", () => {
+      const pricing = new CQRDPricing({ lambdaRisk: 0.40, riskAlpha: 0.20 });
+      const testAtoms = new Float64Array([100, 200, 300, 400, 500]);
+      const evalScore = pricing.evaluateRiskScore(testAtoms);
+
+      expect.ok(evalScore.mean > 0);
+      expect.ok(evalScore.cvarAlpha <= evalScore.mean);
+      expect.ok(evalScore.riskScore <= evalScore.mean);
+    });
+
+    test("F211-T12: Optimizes price and strictly enforces COGS safety floor (1.05x)", () => {
+      const cogs = 200000;
+      const pricing = new CQRDPricing({ basePrice: 220000, cogs, cogsSafetyFloorRatio: 1.05 });
+      const decision = pricing.optimizePrice({
+        basePrice: 220000,
+        cogs,
+        competitorPrice: 210000,
+        demandIndex: 0.8
+      });
+
+      const safetyFloor = Math.round(cogs * 1.05); // 210,000
+      expect.ok(decision.recommendedPrice >= safetyFloor, "Price cannot breach COGS safety floor");
+      expect.ok(decision.marginAnalysis.marginVnd >= 0);
+      expect.equal(decision.evaluatedActions.length, 9);
+    });
+
+    test("F211-T13: Updates quantile distributions with observed rewards and adapts estimates", () => {
+      const pricing = new CQRDPricing({ basePrice: 200000 });
+      const action = 0.90;
+      const initialAtoms = Float64Array.from(pricing.quantileModels.get(action));
+
+      // Observe high realized sales
+      for (let i = 0; i < 5; i++) {
+        pricing.updateQuantiles(action, 280000, 0.10);
+      }
+      const updatedAtoms = pricing.quantileModels.get(action);
+      expect.ok(pricing.computeExpectedReturn(updatedAtoms) >= pricing.computeExpectedReturn(initialAtoms));
+    });
+
+    test("F211-T14: Server and Client CQRDPricing implementations produce identical results", () => {
+      const clientCQRD = new CQRDPricing({ basePrice: 180000, cogs: 120000 });
+      const serverCQRD = new ServerCQRDPricing({ basePrice: 180000, cogs: 120000 });
+
+      const item = { basePrice: 180000, cogs: 120000, competitorPrice: 185000, demandIndex: 1.2 };
+      const clientDec = clientCQRD.optimizePrice(item);
+      const serverDec = serverCQRD.optimizePrice(item);
+
+      expect.equal(clientDec.recommendedPrice, serverDec.recommendedPrice);
+      expect.equal(clientDec.priceRatio, serverDec.priceRatio);
+      expect.equal(clientDec.riskScore, serverDec.riskScore);
+      expect.equal(clientDec.safetyFloorVnd, serverDec.safetyFloorVnd);
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 3: EVRPTWBatteryDegradationRouter (T15 - T20)
+    // -----------------------------------------------------------------------
+    test("F211-T15: Initializes EV fleet routing parameters and nominal battery wear cost", () => {
+      const router = new EVRPTWBatteryDegradationRouter({
+        batteryCapacityKwh: 60,
+        batteryPackCostVnd: 100000000,
+        nominalCycleLife: 2000
+      });
+
+      expect.equal(router.batteryCapacityKwh, 60);
+      expect.equal(router.nominalCycleLife, 2000);
+      expect.equal(router.nominalWearPerKwh, 100000000 / (2000 * 60));
+    });
+
+    test("F211-T16: Calculates nonlinear battery degradation cost penalizing deep DoD > 75%", () => {
+      const router = new EVRPTWBatteryDegradationRouter({ batteryCapacityKwh: 80 });
+      // Moderate DoD (60% <= 75%)
+      const costModerate = router.computeBatteryDegradationCost(20, 0.60);
+      // Severe deep DoD (90% > 75%)
+      const costDeep = router.computeBatteryDegradationCost(20, 0.90);
+
+      expect.ok(costModerate > 0);
+      expect.ok(costDeep > costModerate, "Deep discharge > 75% incurs nonlinear aging stress penalty");
+    });
+
+    test("F211-T17: Evaluates single route with time windows, arrival times, and battery SoC tracking", () => {
+      const router = new EVRPTWBatteryDegradationRouter();
+      const sequence = [
+        { id: "C1", x: 3, y: 4, demand: 10, timeWindow: [0, 60], serviceTime: 10 },
+        { id: "C2", x: 6, y: 8, demand: 15, timeWindow: [30, 90], serviceTime: 10 }
+      ];
+
+      const evaluation = router.evaluateRoute(sequence);
+      expect.equal(evaluation.stops.length, 2);
+      expect.ok(evaluation.totalDistanceKm > 0);
+      expect.ok(evaluation.totalEnergyKwh > 0);
+      expect.ok(evaluation.batteryDegradationCostVnd > 0);
+      expect.ok(evaluation.electricityCostVnd > 0);
+      expect.equal(evaluation.isFeasible, true);
+    });
+
+    test("F211-T18: Detects infeasibility when battery SoC breaches safe lower threshold (20%)", () => {
+      const router = new EVRPTWBatteryDegradationRouter({
+        batteryCapacityKwh: 10, // tiny battery that drains quickly
+        minSafeSoCRatio: 0.20
+      });
+      const farSequence = [
+        { id: "FAR1", x: 50, y: 50, demand: 5, timeWindow: [0, 300] }
+      ];
+
+      const evaluation = router.evaluateRoute(farSequence);
+      expect.equal(evaluation.isFeasible, false);
+    });
+
+    test("F211-T19: Plans multi-customer routes minimizing total generalized lifecycle cost", () => {
+      const router = new EVRPTWBatteryDegradationRouter({ vehicleCapacityKg: 50 });
+      const customers = [
+        { id: "CUST_1", x: 2, y: 2, demand: 20, timeWindow: [0, 90] },
+        { id: "CUST_2", x: 3, y: 3, demand: 25, timeWindow: [0, 90] },
+        { id: "CUST_3", x: 8, y: 8, demand: 20, timeWindow: [30, 120] }
+      ];
+
+      const plan = router.planRoutes(customers);
+      expect.ok(plan.totalVehicles >= 2, "Payload capacity forces multiple vehicles");
+      expect.ok(plan.totalDistanceKm > 0);
+      expect.ok(plan.totalDegradationCostVnd > 0);
+      expect.equal(plan.allFeasible, true);
+    });
+
+    test("F211-T20: Server and Client EVRPTWBatteryDegradationRouter implementations produce identical results", () => {
+      const clientRouter = new EVRPTWBatteryDegradationRouter({ batteryCapacityKwh: 75 });
+      const serverRouter = new ServerEVRPTWBatteryDegradationRouter({ batteryCapacityKwh: 75 });
+
+      const customers = [
+        { id: "P1", x: 3, y: 4, demand: 10, timeWindow: [0, 60] },
+        { id: "P2", x: 5, y: 6, demand: 12, timeWindow: [10, 90] }
+      ];
+
+      const clientPlan = clientRouter.planRoutes(customers);
+      const serverPlan = serverRouter.planRoutes(customers);
+
+      expect.equal(clientPlan.totalVehicles, serverPlan.totalVehicles);
+      expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+      expect.equal(clientPlan.totalDegradationCostVnd, serverPlan.totalDegradationCostVnd);
+      expect.equal(clientPlan.totalGeneralizedCostVnd, serverPlan.totalGeneralizedCostVnd);
+    });
+
+    // -----------------------------------------------------------------------
+    // Sub-suite 4: Deep AI Copilot & End-to-End Integration (T21 - T24)
+    // -----------------------------------------------------------------------
+    test("F211-T21: Admin Sentinel Copilot handles KPS Frequent Items queries with mathematical details", () => {
+      const adminRes = generateAdminCopilotResponse("Phân tích luồng sản phẩm hot KPS Frequent Items Karp-Papadimitriou-Shenker");
+      expect.equal(adminRes.type, "analytics");
+      expect.equal(adminRes.tag, "KPS FREQUENT ITEMS");
+      expect.ok(adminRes.text.includes("KARP, PAPADIMITRIOU & SHENKER"));
+      expect.ok(adminRes.text.includes("ACM TODS 2003"));
+      expect.ok(adminRes.text.includes("Zero False Negatives"));
+    });
+
+    test("F211-T22: Admin Sentinel Copilot handles CQRD Pricing and EVRPTW Battery Degradation queries", () => {
+      const adminRes1 = generateAdminCopilotResponse("Tư vấn định giá phân phối kiểm soát rủi ro CQRD CVaR");
+      expect.equal(adminRes1.type, "pricing");
+      expect.equal(adminRes1.tag, "CQRD DISTRIBUTIONAL PRICING");
+      expect.ok(adminRes1.text.includes("CQRD"));
+      expect.ok(adminRes1.text.includes("CVaR"));
+
+      const adminRes2 = generateAdminCopilotResponse("Điều phối đội xe điện tính đến hao mòn pin EVRPTW Battery Degradation");
+      expect.equal(adminRes2.type, "logistics");
+      expect.equal(adminRes2.tag, "EVRPTW BATTERY DEGRADATION");
+      expect.ok(adminRes2.text.includes("EVRPTW"));
+      expect.ok(adminRes2.text.includes("BATTERY DEGRADATION"));
+    });
+
+    test("F211-T23: Seller ShopSmart Copilot & Buyer Assistant handle Phase 64 algorithms and intents", () => {
+      const sellerRes = generateSellerCopilotResponse("Tư vấn sản phẩm bão đơn KPS và định giá kiểm soát rủi ro CQRD");
+      expect.equal(sellerRes.type, "recommendation");
+      expect.equal(sellerRes.tag, "KPS, CQRD & EVRPTW-BATTERY");
+      expect.ok(sellerRes.text.includes("KPS"));
+      expect.ok(sellerRes.text.includes("CQRD"));
+
+      const buyerRes = generateAiChatResponse("Hỏi về định giá an toàn rủi ro CQRD và giao hàng xe điện bền pin");
+      expect.equal(buyerRes.intent, "KPS_CQRD_EVRPTW_BATTERY");
+      expect.ok(buyerRes.replyText.includes("KPS"));
+      expect.ok(buyerRes.replyText.includes("CQRD"));
+      expect.ok(buyerRes.replyText.includes("EVRPTW Battery Degradation"));
+    });
+
+    test("F211-T24: Full end-to-end integration: KPS viral stream detection -> CQRD risk-sensitive pricing -> EVRPTW Battery Degradation green fleet dispatch", () => {
+      // Step 1: Detect viral items in live stream with KPS
+      const kps = new ServerKPSFrequentItems({ theta: 0.15 });
+      const stream = [
+        "gadget_viral", "gadget_viral", "gadget_viral", "gadget_viral", "gadget_viral",
+        "earphones_pro", "earphones_pro", "earphones_pro",
+        "item_c", "item_d", "item_e", "item_f"
+      ];
+      kps.updateBatch(stream);
+      const topItems = kps.getFrequentItems();
+      expect.ok(topItems.length > 0);
+      expect.equal(topItems[0].item, "gadget_viral");
+
+      // Step 2: Risk-sensitive pricing with CQRDPricing
+      const cqrd = new ServerCQRDPricing({ basePrice: 320000, cogs: 210000 });
+      const priceRec = cqrd.optimizePrice({
+        basePrice: 320000,
+        cogs: 210000,
+        competitorPrice: 330000,
+        demandIndex: 1.3
+      });
+      expect.ok(priceRec.recommendedPrice >= 210000 * 1.05);
+      expect.ok(priceRec.evaluatedActions.length === 9);
+      expect.ok(priceRec.riskScore > 0);
+
+      // Step 3: Green fleet routing with EVRPTWBatteryDegradationRouter
+      const router = new ServerEVRPTWBatteryDegradationRouter({
+        batteryCapacityKwh: 75,
+        vehicleCapacityKg: 60
+      });
+      const dispatchCustomers = [
+        { id: "ORD_P64_1", x: 3, y: 4, demand: 15, timeWindow: [0, 90] },
+        { id: "ORD_P64_2", x: 5, y: 7, demand: 20, timeWindow: [15, 120] }
+      ];
+      const routePlan = router.planRoutes(dispatchCustomers);
+      expect.equal(routePlan.totalVehicles, 1);
+      expect.ok(routePlan.totalDegradationCostVnd > 0);
       expect.equal(routePlan.allFeasible, true);
     });
   });

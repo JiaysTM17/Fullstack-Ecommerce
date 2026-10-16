@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1452,7 +1452,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 72. Bộ Ba Thuật Toán Misra-Gries Heavy Hitters, Laplacian Dynamic Pricing & Định Tuyến Ngẫu Nhiên VRPTW-Stochastic (Phase 63 - Feature 210)
-  if (/misra[- ]gries|misra|gries|laplacian|lap dynamic pricing|chính quy hóa laplacian|độ trơn đa tạp|vrptw[- ]stochastic|stochastic service time|thời gian phục vụ ngẫu nhiên|reliability buffer|đệm độ tin cậy/i.test(raw)) {
+  if (!/kps|karp|cqrd|cvar|battery degradation|evrptw[- ]battery/i.test(raw) && /misra[- ]gries|misra|gries|laplacian|lap dynamic pricing|chính quy hóa laplacian|độ trơn đa tạp|vrptw[- ]stochastic|stochastic service time|thời gian phục vụ ngẫu nhiên|reliability buffer|đệm độ tin cậy/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN MISRA-GRIES, LAPLACIAN PRICING & ĐỊNH TUYẾN NGẪU NHIÊN VRPTW-STOCHASTIC (${currentShop.name})**:
 - **Bắt trọn sản phẩm Hot Trend Misra-Gries Heavy Hitters**:
@@ -1467,6 +1467,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem sản phẩm hot trend Misra-Gries',
         'Tư vấn định giá an toàn Laplacian Pricing',
         'Theo dõi tỷ lệ giao đúng hẹn VRPTW-Stochastic'
+      ]
+    };
+  }
+
+  // 73. Bộ Ba Thuật Toán KPS Frequent Items, CQRD Distributional Pricing & Định Tuyến Xe Điện Hao Mòn Pin EVRPTW-Battery (Phase 64 - Feature 211)
+  if (/kps|karp[- ]papadimitriou|cqrd|cvar pricing|quantile risk|định giá cqrd|pin xe điện|hao mòn pin|battery degradation|evrptw[- ]battery/i.test(raw)) {
+    return {
+      text: `🌟 **BỘ BA THUẬT TOÁN KPS FREQUENT ITEMS, CQRD DISTRIBUTIONAL PRICING & ĐỊNH TUYẾN HAO MÒN PIN EVRPTW-BATTERY (${currentShop.name})**:
+- **Bắt trọn sản phẩm bão đơn Karp-Papadimitriou-Shenker (KPS)**:
+  - Thuật toán luồng một lượt với kích thước bộ nhớ cố định $O(1/\\theta)$ bảo đảm sai số cận trên $\\le \\theta N$ và **100% không bỏ sót** các SKU của shop có lượng truy cập đột biến trong chiến dịch Flash Sale.
+- **Định giá phân phối thích ứng rủi ro CQRD Dynamic Pricing**:
+  - Tối ưu hóa phân phối lượng tử (Quantile Representation) kết hợp kiểm soát rủi ro đuôi $\\text{CVaR}_\\alpha$, bảo vệ biên lợi nhuận của shop khỏi nguy cơ ế hàng hoặc biến động nhu cầu cực đoan, khóa cứng giá sàn $\\ge \\text{COGS} \\times 1.05$.
+- **Định tuyến giao hàng xanh EVRPTW Battery Degradation**:
+  - Tối ưu hóa lộ trình xe điện giao hàng tích hợp mô hình suy giảm tuổi thọ pin theo chu kỳ sạc-xả và nhiệt độ cell pin, giảm chi phí khấu hao phương tiện vận chuyển và đảm bảo tỷ lệ giao đúng hẹn OTD cao nhất cho shop!`,
+      type: 'recommendation',
+      tag: 'KPS, CQRD & EVRPTW-BATTERY',
+      suggestions: [
+        'Xem sản phẩm bão đơn KPS',
+        'Tư vấn định giá an toàn rủi ro CQRD',
+        'Tối ưu giao hàng xe điện EVRPTW-Battery'
       ]
     };
   }
