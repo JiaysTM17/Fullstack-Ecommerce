@@ -374,7 +374,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 14. Thuật toán Tối ưu Lộ trình Giao hàng Chặng Cuối (TSP Nearest Neighbor & 2-Opt)
-  if (!/hungarian/i.test(raw) && /tsp|lộ trình giao hàng|tối ưu tuyến đường|nearest neighbor|2-opt|bưu tá spx|giao hàng chặng cuối/i.test(raw)) {
+  if (!/hungarian|evrptw|vrptw|drone|mothership/i.test(raw) && /tsp|lộ trình giao hàng|tối ưu tuyến đường|nearest neighbor|2-opt|bưu tá spx|giao hàng chặng cuối/i.test(raw)) {
     return {
       text: `🚚 **THUẬT TOÁN TỐI ƯU TUYẾN ĐƯỜNG GIAO VẬN SPX (TSP NEAREST NEIGHBOR & 2-OPT)**:
 - **Mục đích thiết kế**: Giải bài toán người du lịch (Traveling Salesperson Problem) cho bưu tá SPX, giảm thiểu quãng đường di chuyển và hạ tỷ lệ giao trễ LSR xuống mức tối thiểu ($< 2\\%$).
@@ -393,7 +393,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 15. Ước Lượng Tần Suất Dữ Liệu Luồng Lớn (Count-Min Sketch Heavy Hitters)
-  if (!/conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp|frequent[- ]directions|matrix sketch|dyadic[- ]range|dyadic/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
+  if (!/turnstile|conservative|cập nhật thận trọng|count-min-log|cml sketch|logarithmic count|lossy[- ]counting|manku[- ]motwani|đếm tổn hao|misra[- ]gries|misra|gries|kps|karp[- ]papadimitriou|kps frequent|hhh|hierarchical|phân cấp|frequent[- ]directions|matrix sketch|dyadic[- ]range|dyadic/i.test(raw) && /count-min sketch|heavy hitters|top trending|tần suất luồng|sketch matrix/i.test(raw)) {
     return {
       text: `📊 **THUẬT TOÁN COUNT-MIN SKETCH (REAL-TIME HEAVY HITTERS & STREAM FREQUENCY)**:
 - **Mục đích thiết kế**: Thống kê tần suất xem và truy vấn của hàng chục triệu sản phẩm trong sự kiện Mega Sale mà không làm tràn bộ nhớ RAM ($O(d \\times w)$ cố định).
@@ -2629,7 +2629,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 122. Ước Lượng Dòng Dữ Liệu Không Thiên Lệch Bằng Count-Sketch Trung Vị (Phase 47 - Feature 194)
-  if (!/dyadic[- ]range count[- ]sketch|unbiased dyadic|cormode|count[- ]sketch hierarchical|count[- ]sketch hhh|charikar hhh/i.test(raw) && /count[- ]sketch|count sketch|ước lượng không thiên lệch|median of means|rademacher/i.test(raw)) {
+  if (!/turnstile|dyadic[- ]range count[- ]sketch|unbiased dyadic|cormode|count[- ]sketch hierarchical|count[- ]sketch hhh|charikar hhh/i.test(raw) && /count[- ]sketch|count sketch|ước lượng không thiên lệch|median of means|rademacher/i.test(raw)) {
     return {
       text: `📊 **ƯỚC LƯỢNG DÒNG DỮ LIỆU KHÔNG THIÊN LỆCH BẰNG COUNT-SKETCH TRUNG VỊ (CHARIKAR ET AL. 2004)**:
 - **Khắc Phục Hoàn Toàn Điểm Yếu Dương Tính Của Count-Min Sketch**:
@@ -2648,7 +2648,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 123. Tối Ưu Hóa Đấu Thầu Shopee Ads Bằng Twin Delayed DDPG (TD3) (Phase 47 - Feature 194)
-  if (!/td3\+bc|td3-bc|td3[- ]lagrangian|td3 safe pricing/i.test(raw) && /td3|twin delayed|clipped double[- ]q|target policy smoothing|đấu thầu td3/i.test(raw)) {
+  if (!/matd3|td3\+bc|td3-bc|td3[- ]lagrangian|td3 safe pricing/i.test(raw) && /td3|twin delayed|clipped double[- ]q|target policy smoothing|đấu thầu td3/i.test(raw)) {
     return {
       text: `🎯 **TỐI ƯU HÓA ĐẤU THẦU SHOPEE ADS BẰNG TWIN DELAYED DDPG (TD3 - FUJIMOTO ET AL. 2018)**:
 - **Đột Phá 3 Cơ Chế Khắc Phục Lỗi Xấp Xỉ Giá Trị Của DDPG**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3236,7 +3236,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 152. Lấy Mẫu Dính Tần Suất Cao Sticky Sampling (Phase 57 - Feature 204)
-  if (!/lossy|misra|gries|kps|karp|hhh|hierarchical|phân cấp/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
+  if (!/turnstile|lossy|misra|gries|kps|karp|hhh|hierarchical|phân cấp/i.test(raw) && /sticky[- ]sampling|sticky sampling|lấy mẫu dính|heavy hitters|tần suất cao luồng|manku motwani/i.test(raw)) {
     return {
       text: `📊 **BỘ ĐẾM DÒNG TẦN SUẤT CAO STICKY SAMPLING (MANKU & MOTWANI 2002)**:
 - **Cơ Chế Lấy Mẫu Thích Ứng Động (Adaptive Dynamic Sampling)**:
@@ -3279,7 +3279,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 154. Định Tuyến Xe Tải Mẹ & Drone Tự Hành VRPTW-D (Phase 57 - Feature 204)
-  if (!/tandem|truck[- ]drone|vrptw[- ]tandem|dwpt|sạc không dây|dynamic wireless/i.test(raw) && /drone|\bvrptw-d\b|vrptw pd drone|giao hàng drone|máy bay không người lái|mothership van|fstsp/i.test(raw)) {
+  if (!/autonomous drone recharge|rooftop drone|sạc nóc|poikonen|tandem|truck[- ]drone|vrptw[- ]tandem|dwpt|sạc không dây|dynamic wireless/i.test(raw) && /drone|\bvrptw-d\b|vrptw pd drone|giao hàng drone|máy bay không người lái|mothership van|fstsp/i.test(raw)) {
     return {
       text: `🚁 **ĐỊNH TUYẾN ĐỘI XE TẢI KẾT HỢP DRONE TỰ HÀNH VRPTW-D (MURRAY & CHU 2015, AGATZ 2018)**:
 - **Mô Hình Phối Hợp Mẹ - Con Đồng Bộ (Mothership Van + Rooftop Drone)**:
@@ -3926,7 +3926,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 184. Điều Phối Xe Tải & Drone Đồng Hành VRPTW-Tandem Drone (Phase 67 - Feature 214)
-  if (/tandem drone|truck[- ]drone|vrptw[- ]tandem|máy bay không người lái đồng hành|giao hàng drone kết hợp xe tải|murray chu/i.test(raw)) {
+  if (!/autonomous drone recharge|rooftop drone|sạc nóc|poikonen/i.test(raw) && /tandem drone|truck[- ]drone|vrptw[- ]tandem|máy bay không người lái đồng hành|giao hàng drone kết hợp xe tải|murray chu/i.test(raw)) {
     return {
       text: `🚁 **ĐIỀU PHỐI ĐỒNG HÀNH XE TẢI & DRONE VRPTW-TANDEM DRONE (MURRAY & CHU 2015 / FERRANDEZ ET AL. 2016)**:
 - **Mô Hình Giao Vận Phối Hợp Song Song (Tandem Truck-Drone Flying Sidekick)**:
@@ -4593,6 +4593,74 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem công suất làm mát chủ động BTMS',
         'Kiểm tra năng lượng làm mát phụ trợ Cooling kWh',
         'So sánh chi phí hao mòn pin có và không có BTMS'
+      ]
+    };
+  }
+
+  // 215. Giám Sát Phần Tử Nổi Bật Luồng Turnstile Count-Sketch Heavy Hitters (Phase 78 - Feature 225)
+  if (/turnstile|turnstile count[- ]sketch|rademacher.*count[- ]sketch|unbiased heavy hitters|hủy đơn âm|turnstile stream/i.test(raw)) {
+    return {
+      text: `📊 **GIÁM SÁT PHẦN TỬ NỔI BẬT LUỒNG TURNSTILE COUNT-SKETCH HEAVY HITTERS (CHARIKAR ET AL. 2004, CORMODE & HADJIELEFTHERIOU 2008)**:
+- **Hỗ Trợ Luồng Hai Chiều Turnstile Model (Arbitrary Additions & Deletions)**:
+  - Khác với mô hình Cash Register chỉ nhận giá trị dương ($\Delta > 0$), mô hình Turnstile tiếp nhận các cập nhật số âm ($\Delta < 0$) từ các giao dịch hủy đơn hàng, hoàn tiền khiếu nại hoặc rút giỏ hàng.
+  - Ma trận bộ đếm $d \times w$ ($C[j][k]$) kết hợp hàm băm chỉ số $h_j(x)$ và biến ngẫu nhiên dấu Rademacher $s_j(x) \in \{-1, +1\}$ 2-universal.
+- **Ước Lượng Điểm Hoàn Toàn Không Thiên Lệch & Triệt Tiêu Nhiễu**:
+  - Ước lượng tần suất điểm $\hat{f}(x) = \text{median}_{j=0}^{d-1} s_j(x) \cdot C[j][h_j(x)]$.
+  - Cam kết toán học nghiêm ngặt: Kỳ vọng $\mathbb{E}[\hat{f}(x)] = f(x)$ và phương sai $\text{Var}[\hat{f}(x)] \le \frac{\|f\|_2^2}{w}$, loại trừ hoàn toàn rủi ro thiên lệch phóng đại của Count-Min khi có luồng hoàn tiền.
+- **Tính Chất Khả Hợp Tuyến Tính (Linear Mergeability) & Ứng Viên Động**:
+  - Hai ma trận Count-Sketch từ các Edge Server có thể cộng trực tiếp theo từng phần tử: $C_{A+B} = C_A + C_B$.
+  - Tự động duy trì danh sách ứng viên Top-K Heavy Hitters có tần suất ròng $|f(x)| \ge \phi N$!`,
+      type: 'analytics',
+      tag: 'TURNSTILE COUNT-SKETCH HEAVY HITTERS',
+      suggestions: [
+        'Xem ma trận bộ đếm Turnstile Count-Sketch',
+        'Kiểm tra danh sách Heavy Hitters luồng hai chiều',
+        'Hợp nhất tuyến tính các tóm tắt phân tán'
+      ]
+    };
+  }
+
+  // 216. Định Giá Multi-Agent Twin Delayed DDPG Liên Tục & Lagrange MATD3 (Phase 78 - Feature 225)
+  if (/matd3|multi[- ]agent (?:twin delayed|continuous|pricing)|maddpg continuous|twin delayed continuous pricing|ctde pricing|multi[- ]agent.*matd3/i.test(raw)) {
+    return {
+      text: `💹 **ĐỊNH GIÁ ĐA ĐẠI DIỆN HÀNH ĐỘNG LIÊN TỤC MATD3-LAGRANGIAN (LOWE ET AL. NEURIPS 2017, FUJIMOTO ET AL. ICML 2018)**:
+- **Kiến Trúc Huấn Luyện Tập Trung - Thực Thi Phân Tán (CTDE)**:
+  - Mỗi người bán/gian hàng là một Actor phân tán $\mu_{\theta_i}(s_i)$ chỉ quan sát trạng thái cục bộ, xuất hành động giá liên tục $a_i \in [-1, 1] \rightarrow [P_{\min}, P_{\max}]$.
+  - Mạng Twin Critics tập trung $Q_{\phi_1}(s, a_1, \dots, a_N)$ và $Q_{\phi_2}(s, a_1, \dots, a_N)$ quan sát toàn bộ thị trường để đánh giá trạng thái cạnh tranh đa bên.
+- **3 Trụ Cột Ổn Định Học Tăng Cường Cạnh Tranh Liên Tục**:
+  - **Clipped Double-Q**: Lấy $\min(Q_1, Q_2)$ ngăn chặn thổi phồng lợi nhuận ảo giữa các bên cạnh tranh.
+  - **Target Policy Smoothing**: Bổ sung nhiễu Gauss cắt ngọn $\epsilon \sim \text{clip}(\mathcal{N}(0, \sigma^2), -c, c)$ vào hành động mục tiêu để làm phẳng bề mặt giá trị.
+  - **Delayed Policy Updates**: Cứ mỗi $d = 2$ chu kỳ cập nhật Critic mới cập nhật Actor 1 lần, ổn định hội tụ chính sách giá.
+- **Cost Critic & Đối Ngẫu Lagrange Bảo Vệ Biên Lợi Nhuận Sàn**:
+  - Mạng Cost Critic $C(s, a_1, \dots, a_N)$ giám sát rủi ro bán phá giá, cập nhật nhân tử $\lambda_i \leftarrow \max(0, \lambda_i + \eta_\lambda(c_i - d_{\text{budget}}))$ và khóa cứng sàn giá an toàn $p_i \ge 1.05 \times \text{COGS}$!`,
+      type: 'pricing',
+      tag: 'MATD3 MULTI-AGENT CONTINUOUS PRICING',
+      suggestions: [
+        'Xem chính sách giá liên tục MATD3',
+        'Kiểm tra nhân tử đối ngẫu Lagrange Lambda',
+        'Đo lường rào chắn chống bán phá giá 1.05 COGS'
+      ]
+    };
+  }
+
+  // 217. Định Tuyến Xe Điện Đa Phương Thức & Drone Sạc Nóc Tự Hành EVRPTW Autonomous Drone Recharge (Phase 78 - Feature 225)
+  if (/autonomous drone recharge|mothership|rooftop drone|sạc nóc xe|drone.*recharge|poikonen.*murray|evrptw[- ]drone[- ]recharge/i.test(raw)) {
+    return {
+      text: `🛸 **ĐỊNH TUYẾN XE ĐIỆN & DRONE SẠC NÓC TỰ HÀNH EVRPTW-AUTONOMOUS-DRONE (POIKONEN 2017, MURRAY & CHU TR PART C 2015)**:
+- **Mô Hình Phối Hợp Mẹ - Con Kèm Trạm Sạc Di Động Nóc Xe (Rooftop In-Transit Charging)**:
+  - Xe tải điện Mothership ($75\text{ kWh}$, tải trọng $1000\text{ kg}$) tích hợp bệ phóng/tiếp nhận drone trên nóc xe với cổng sạc nhanh tiếp xúc dẫn điện ($P_{\text{dock}} = 3.5\text{ kW}$).
+  - Drone tự hành ($1.8\text{ kWh}$, tải trọng $5.0\text{ kg}$, vận tốc bay $65\text{ km/h}$) xuất phát từ nóc xe để giao các bưu kiện khẩn cấp hoặc địa hình cao tầng hiểm trở.
+- **Tái Hội Tụ Động & Sạc Bổ Sung Trong Khi Xe Tải Di Chuyển**:
+  - Drone sau khi hoàn thành nhiệm vụ bay đến điểm hẹn tái hội tụ (Rendezvous) với xe tải tại một khách hàng downstream $V_j$ hoặc khi xe tải đang trên đường luân chuyển.
+  - Năng lượng sạc được rút trực tiếp từ cụm pin xe tải mẹ trong suốt thời gian di chuyển, triệt tiêu 100% thời gian chết do drone phải quay về trạm sạc trung tâm.
+- **Hiệu Năng Vận Hành Vượt Trội**:
+  - Rút ngắn thời gian phục vụ toàn mạng lưới từ **35% đến 50%**, mở rộng bán kính giao hàng của drone lên gấp 3 lần và tối ưu hóa năng lượng toàn đội xe SPX Express!`,
+      type: 'logistics',
+      tag: 'EVRPTW AUTONOMOUS DRONE ROOFTOP RECHARGE ROUTER',
+      suggestions: [
+        'Xem lộ trình phối hợp Xe Tải Mẹ & Drone',
+        'Kiểm tra công suất sạc nóc xe In-Transit Dock',
+        'Đo lường thời gian hoàn tất đơn hàng song song'
       ]
     };
   }

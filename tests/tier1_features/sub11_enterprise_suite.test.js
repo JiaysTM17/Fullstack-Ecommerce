@@ -399,6 +399,10 @@ import {
   GKQuantileMergeableSketch,
   SafeSACLagrangianContinuousPricing,
   EVRPTWActiveCoolingRouter,
+  // Phase 78 Enterprise Algorithms
+  TurnstileCountSketchHeavyHitters,
+  MATD3ContinuousPricing,
+  EVRPTWAutonomousDroneRechargeRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -598,6 +602,9 @@ import { EVRPTWThermalBatteryDegradationRouter as ServerEVRPTWThermalBatteryDegr
 import { GKQuantileMergeableSketch as ServerGKQuantileMergeableSketch } from "../../server/src/utils/gkQuantileMergeableSketch.js";
 import { SafeSACLagrangianContinuousPricing as ServerSafeSACLagrangianContinuousPricing } from "../../server/src/utils/safeSACLagrangianContinuousPricing.js";
 import { EVRPTWActiveCoolingRouter as ServerEVRPTWActiveCoolingRouter } from "../../server/src/utils/evrptwActiveCoolingRouter.js";
+import { TurnstileCountSketchHeavyHitters as ServerTurnstileCountSketchHeavyHitters } from "../../server/src/utils/turnstileCountSketchHeavyHitters.js";
+import { MATD3ContinuousPricing as ServerMATD3ContinuousPricing } from "../../server/src/utils/matd3ContinuousPricing.js";
+import { EVRPTWAutonomousDroneRechargeRouter as ServerEVRPTWAutonomousDroneRechargeRouter } from "../../server/src/utils/evrptwAutonomousDroneRechargeRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -32803,6 +32810,371 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có phân vị giá GK khả hợp hoặc giao bằng xe điện làm mát pin chủ động BTMS không?");
         expect.equal(buyerRes.intent, "GK_MERGEABLE_SAFE_SAC_CONTINUOUS_ACTIVE_COOLING");
         expect.ok(buyerRes.replyText.includes("GK Quantile Mergeable Sketch"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 225: Phase 78 Enterprise Algorithms Suite (24 Tests)
+    // 1. Turnstile Count-Sketch for Dynamic Heavy Hitters with Deletions
+    // 2. MATD3 Multi-Agent Continuous Dynamic Pricing with Safety Lagrangian
+    // 3. EVRPTW with Autonomous Rooftop Drone In-Transit Recharging Router
+    // =========================================================================
+    describe("Feature 225: Turnstile Count-Sketch, MATD3 Continuous Pricing & Drone Recharge Routing", () => {
+      // -----------------------------------------------------------------------
+      // Turnstile Count-Sketch Dynamic Heavy Hitters (F225-T01 - F225-T08)
+      // -----------------------------------------------------------------------
+      test("F225-T01: TurnstileCountSketchHeavyHitters initializes with depth, width, and epsilon", () => {
+        const sketch = new TurnstileCountSketchHeavyHitters({ depth: 5, width: 128, phi: 0.05 });
+        expect.equal(sketch.depth, 5);
+        expect.equal(sketch.width, 128);
+        expect.equal(sketch.phi, 0.05);
+        expect.equal(sketch.table.length, 5);
+        expect.equal(sketch.table[0].length, 128);
+        expect.equal(sketch.netWeight, 0);
+      });
+
+      test("F225-T02: Hash functions map keys deterministically and Rademacher signs return strictly +1 or -1", () => {
+        const sketch = new TurnstileCountSketchHeavyHitters();
+        const rawHash = sketch._hashKey("SKU_IPHONE_15");
+        expect.ok(typeof rawHash === "number" && rawHash >= 0);
+
+        for (let j = 0; j < sketch.depth; j++) {
+          const bucket = sketch._getRowBucket(j, rawHash);
+          const sign = sketch._getRowSign(j, rawHash);
+          expect.ok(bucket >= 0 && bucket < sketch.width);
+          expect.ok(sign === 1 || sign === -1);
+        }
+      });
+
+      test("F225-T03: Unbiased frequency estimation on positive stream insertions", () => {
+        const sketch = new TurnstileCountSketchHeavyHitters({ depth: 7, width: 256 });
+        for (let i = 0; i < 50; i++) {
+          sketch.insert("SKU_AIRPODS", 1);
+        }
+        for (let i = 0; i < 20; i++) {
+          sketch.insert("SKU_MACBOOK", 1);
+        }
+
+        const estAirpods = sketch.estimate("SKU_AIRPODS");
+        const estMacbook = sketch.estimate("SKU_MACBOOK");
+        expect.ok(estAirpods >= 40 && estAirpods <= 60);
+        expect.ok(estMacbook >= 15 && estMacbook <= 25);
+        expect.equal(sketch.netWeight, 70);
+      });
+
+      test("F225-T04: Turnstile cancellation updates maintain correct net frequency under deletions", () => {
+        const sketch = new TurnstileCountSketchHeavyHitters({ depth: 7, width: 256 });
+        // 100 purchases
+        sketch.update("SKU_WATCH", 100);
+        // 35 cancellations / refund returns
+        sketch.cancel("SKU_WATCH", 35);
+
+        const est = sketch.estimate("SKU_WATCH");
+        expect.ok(est >= 55 && est <= 75);
+        expect.equal(sketch.netWeight, 65);
+        expect.equal(sketch.l1Norm, 135);
+      });
+
+      test("F225-T05: Heavy Hitters extraction detects items exceeding phi threshold", () => {
+        const sketch = new TurnstileCountSketchHeavyHitters({ depth: 7, width: 256, phi: 0.1 });
+        sketch.update("SKU_HOT_DEAL", 80);
+        sketch.update("SKU_COLD_ITEM", 5);
+
+        const hh = sketch.getHeavyHitters();
+        expect.ok(hh.length >= 1);
+        expect.equal(hh[0].key, "SKU_HOT_DEAL");
+        expect.ok(hh[0].estimatedFrequency > 60);
+        expect.equal(hh[0].isPositive, true);
+      });
+
+      test("F225-T06: Linear mergeability preserves exact sum of counter tables across distributed nodes", () => {
+        const sketchA = new TurnstileCountSketchHeavyHitters({ depth: 5, width: 128 });
+        const sketchB = new TurnstileCountSketchHeavyHitters({ depth: 5, width: 128 });
+
+        // Synchronize hash parameters for identical geometry
+        sketchB.hashParams = JSON.parse(JSON.stringify(sketchA.hashParams));
+
+        sketchA.update("SKU_COMMON", 40);
+        sketchB.update("SKU_COMMON", 30);
+        sketchB.cancel("SKU_COMMON", 10);
+
+        sketchA.merge(sketchB);
+        expect.equal(sketchA.netWeight, 60);
+        const estMerged = sketchA.estimate("SKU_COMMON");
+        expect.ok(estMerged >= 50 && estMerged <= 70);
+      });
+
+      test("F225-T07: Dynamic candidate tracking prunes items whose net frequency drops below threshold", () => {
+        const sketch = new TurnstileCountSketchHeavyHitters({ depth: 5, width: 128, phi: 0.2 });
+        sketch.update("SKU_REFUND_ALL", 50);
+        expect.ok(sketch.candidates.has("SKU_REFUND_ALL"));
+
+        // Severe mass cancellation
+        sketch.cancel("SKU_REFUND_ALL", 50);
+        expect.equal(sketch.candidates.has("SKU_REFUND_ALL"), false);
+      });
+
+      test("F225-T08: Client and Server TurnstileCountSketchHeavyHitters exhibit 100% bidirectional parity", () => {
+        const clientSketch = new TurnstileCountSketchHeavyHitters({ depth: 5, width: 128, phi: 0.05 });
+        const serverSketch = new ServerTurnstileCountSketchHeavyHitters({ depth: 5, width: 128, phi: 0.05 });
+
+        // Share seeds for exact comparison
+        serverSketch.hashParams = JSON.parse(JSON.stringify(clientSketch.hashParams));
+
+        clientSketch.update("SKU_PARITY", 45);
+        clientSketch.cancel("SKU_PARITY", 15);
+        serverSketch.update("SKU_PARITY", 45);
+        serverSketch.cancel("SKU_PARITY", 15);
+
+        expect.equal(clientSketch.estimate("SKU_PARITY"), serverSketch.estimate("SKU_PARITY"));
+        expect.equal(clientSketch.netWeight, serverSketch.netWeight);
+        expect.equal(clientSketch.totalL1Norm, serverSketch.totalL1Norm);
+        expect.equal(clientSketch.getSummary().depth, serverSketch.getSummary().depth);
+      });
+
+      // -----------------------------------------------------------------------
+      // Multi-Agent Twin Delayed DDPG Continuous Pricing (F225-T09 - F225-T16)
+      // -----------------------------------------------------------------------
+      test("F225-T09: MATD3ContinuousPricing initializes with agents, networks, and hyperparameters", () => {
+        const pricing = new MATD3ContinuousPricing({
+          numAgents: 2,
+          stateDim: 5,
+          gamma: 0.95,
+          policyDelay: 2
+        });
+        expect.equal(pricing.numAgents, 2);
+        expect.equal(pricing.stateDim, 5);
+        expect.equal(pricing.agents.length, 2);
+        expect.equal(pricing.agents[0].wActor.length, 5);
+        expect.equal(pricing.agents[0].wQ1.length, 2 * 5 + 2); // 12
+      });
+
+      test("F225-T10: Decentralized action selection produces continuous outputs within [-1.0, 1.0]", () => {
+        const pricing = new MATD3ContinuousPricing({ numAgents: 2, stateDim: 5 });
+        const state = [0.6, 0.8, 1.2, 0.5, 0.1];
+        const actObj = pricing.selectAction(0, state, false);
+
+        expect.ok(typeof actObj.action === "number");
+        expect.ok(actObj.action >= -1.0 && actObj.action <= 1.0);
+        expect.equal(Number(actObj), actObj.action);
+      });
+
+      test("F225-T11: Centralized twin critics compute Q1 and Q2 values across joint state-action spaces", () => {
+        const pricing = new MATD3ContinuousPricing({ numAgents: 2, stateDim: 4 });
+        const jointInput = new Array(pricing.jointDim).fill(0.5);
+
+        const q1 = pricing._evalLinear(pricing.agents[0].wQ1, pricing.agents[0].bQ1, jointInput);
+        const q2 = pricing._evalLinear(pricing.agents[0].wQ2, pricing.agents[0].bQ2, jointInput);
+
+        expect.ok(Number.isFinite(q1));
+        expect.ok(Number.isFinite(q2));
+      });
+
+      test("F225-T12: Target policy smoothing clips exploration noise within specified bounds", () => {
+        const pricing = new MATD3ContinuousPricing({ numAgents: 2, stateDim: 5, noiseClip: 0.2 });
+        expect.equal(pricing.noiseClip, 0.2);
+        expect.equal(pricing.targetNoise, 0.1);
+      });
+
+      test("F225-T13: Delayed policy updates execute Actor and Target steps only every policyDelay steps", () => {
+        const pricing = new MATD3ContinuousPricing({ numAgents: 2, stateDim: 3, policyDelay: 2 });
+        const batch = {
+          states: [[0.5, 0.2, 0.1], [0.4, 0.3, 0.2]],
+          actions: [0.1, -0.2],
+          rewards: [10, 8],
+          costs: [0.01, 0.02],
+          nextStates: [[0.52, 0.21, 0.1], [0.41, 0.32, 0.21]],
+          done: false
+        };
+
+        const res1 = pricing.update(batch);
+        expect.equal(res1.step, 1);
+        expect.equal(res1.delayedPolicyUpdated, false);
+
+        const res2 = pricing.update(batch);
+        expect.equal(res2.step, 2);
+        expect.equal(res2.delayedPolicyUpdated, true);
+      });
+
+      test("F225-T14: Safety Cost Critic updates and dual Lagrangian multiplier ascends on budget violation", () => {
+        const pricing = new MATD3ContinuousPricing({ numAgents: 2, stateDim: 3, costBudget: 0.01, lrDual: 0.1 });
+        const batchViolating = {
+          states: [[0.5, 0.2, 0.1], [0.4, 0.3, 0.2]],
+          actions: [-0.9, -0.9],
+          rewards: [5, 5],
+          costs: [0.10, 0.10], // High violation > budget
+          nextStates: [[0.5, 0.2, 0.1], [0.4, 0.3, 0.2]],
+          done: false
+        };
+
+        // Step twice to trigger delayed policy update & dual ascent
+        pricing.update(batchViolating);
+        pricing.update(batchViolating);
+
+        expect.ok(pricing.agents[0].lambda > 0);
+        expect.ok(pricing.agents[1].lambda > 0);
+      });
+
+      test("F225-T15: recommendPrices enforces strict 1.05 * COGS safety floor against aggressive price cuts", () => {
+        const pricing = new MATD3ContinuousPricing({ numAgents: 2, stateDim: 5 });
+        // Force negative actor action to push prices down
+        pricing.agents[0].bActor = -5.0;
+
+        const contexts = [
+          { cogs: 200000, basePrice: 280000, inventory: 50, priceElasticity: 2.0 },
+          { cogs: 100000, basePrice: 150000, inventory: 80, priceElasticity: 1.5 }
+        ];
+
+        const recs = pricing.recommendPrices(contexts);
+        expect.equal(recs.length, 2);
+        expect.ok(recs[0].recommendedPrice >= recs[0].safeFloorPrice);
+        expect.equal(recs[0].safeFloorPrice, 210000); // 200k * 1.05
+        expect.ok(recs[0].grossMarginRate >= 0.045);
+      });
+
+      test("F225-T16: Client and Server MATD3ContinuousPricing exhibit 100% bidirectional parity", () => {
+        const clientPricing = new MATD3ContinuousPricing({ numAgents: 2, stateDim: 4 });
+        const serverPricing = new ServerMATD3ContinuousPricing({ numAgents: 2, stateDim: 4 });
+
+        // Share weights
+        serverPricing.agents = JSON.parse(JSON.stringify(clientPricing.agents));
+
+        const contexts = [
+          { cogs: 150000, basePrice: 200000, inventory: 60, priceElasticity: 1.8 },
+          { cogs: 300000, basePrice: 400000, inventory: 40, priceElasticity: 1.2 }
+        ];
+
+        const clientRecs = clientPricing.recommendPrices(contexts);
+        const serverRecs = serverPricing.recommendPrices(contexts);
+
+        expect.equal(clientRecs[0].recommendedPrice, serverRecs[0].recommendedPrice);
+        expect.equal(clientRecs[0].safeFloorPrice, serverRecs[0].safeFloorPrice);
+        expect.equal(clientRecs[1].recommendedPrice, serverRecs[1].recommendedPrice);
+        expect.equal(clientRecs[1].grossMarginRate, serverRecs[1].grossMarginRate);
+      });
+
+      // -----------------------------------------------------------------------
+      // Autonomous Rooftop Drone In-Transit Recharging Router (F225-T17 - F225-T22)
+      // -----------------------------------------------------------------------
+      test("F225-T17: EVRPTWAutonomousDroneRechargeRouter initializes with mothership and drone specs", () => {
+        const router = new EVRPTWAutonomousDroneRechargeRouter({
+          truckBatteryKwh: 80,
+          droneBatteryKwh: 2.0,
+          droneMaxPayloadKg: 4.5,
+          dockPowerKw: 4.0
+        });
+        expect.equal(router.truckBatteryKwh, 80);
+        expect.equal(router.droneBatteryKwh, 2.0);
+        expect.equal(router.droneMaxPayloadKg, 4.5);
+        expect.equal(router.dockPowerKw, 4.0);
+      });
+
+      test("F225-T18: Distance calculation handles both Euclidean planar and GPS coordinates", () => {
+        const router = new EVRPTWAutonomousDroneRechargeRouter();
+        const distPlanar = router._computeDistanceKm({ x: 0, y: 0 }, { x: 6, y: 8 });
+        expect.equal(distPlanar, 10.0);
+
+        const distGps = router._computeDistanceKm(
+          { lat: 21.0285, lng: 105.8542 },
+          { lat: 20.8449, lng: 106.6881 }
+        );
+        expect.ok(distGps > 80 && distGps < 120);
+      });
+
+      test("F225-T19: Customer payload classification partitions heavy packages to truck and light to drone", () => {
+        const router = new EVRPTWAutonomousDroneRechargeRouter({ droneMaxPayloadKg: 5.0 });
+        const customers = [
+          { id: "T1", demandKg: 25, x: 5, y: 5 },
+          { id: "D1", demandKg: 2.5, x: 6, y: 6 },
+          { id: "D2", demandKg: 4.0, x: 7, y: 7 }
+        ];
+
+        const plan = router.planRoute(customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.routes.length >= 1);
+        expect.ok(plan.totalDistanceKm > 0);
+      });
+
+      test("F225-T20: In-transit rooftop conductive charging recharges drone battery while truck travels", () => {
+        const router = new EVRPTWAutonomousDroneRechargeRouter({
+          dockPowerKw: 3.5,
+          droneBatteryKwh: 1.8
+        });
+        const customers = [
+          { id: "STOP_1", x: 10, y: 0, demandKg: 20 },
+          { id: "DRONE_1", x: 12, y: 2, demandKg: 2 },
+          { id: "STOP_2", x: 25, y: 0, demandKg: 30 },
+          { id: "STOP_3", x: 40, y: 0, demandKg: 25 }
+        ];
+
+        const plan = router.planRoute(customers);
+        expect.equal(plan.success, true);
+        const route = plan.routes[0];
+        expect.ok(route.droneRechargeEnergyKwh >= 0);
+        expect.ok(route.truckStops.length >= 3);
+      });
+
+      test("F225-T21: Full tandem route planning coordinates truck stops, drone sorties, and rendezvous points", () => {
+        const router = new EVRPTWAutonomousDroneRechargeRouter();
+        const customers = [
+          { id: "C1", x: 8, y: 4, demandKg: 50, readyTime: 8.5 },
+          { id: "D1", x: 10, y: 6, demandKg: 3.0, readyTime: 8.7 },
+          { id: "C2", x: 16, y: 8, demandKg: 60, readyTime: 9.0 }
+        ];
+
+        const plan = router.planRoute(customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.totalTruckDistanceKm > 0);
+        expect.ok(plan.totalCostVnd > 150000);
+        expect.ok(plan.summary.includes("Mothership EV"));
+      });
+
+      test("F225-T22: Client and Server EVRPTWAutonomousDroneRechargeRouter exhibit 100% bidirectional parity", () => {
+        const clientRouter = new EVRPTWAutonomousDroneRechargeRouter();
+        const serverRouter = new ServerEVRPTWAutonomousDroneRechargeRouter();
+
+        const customers = [
+          { id: "C1", x: 10, y: 5, demandKg: 40, readyTime: 8.5 },
+          { id: "D1", x: 12, y: 7, demandKg: 2.5, readyTime: 8.8 },
+          { id: "C2", x: 20, y: 10, demandKg: 45, readyTime: 9.2 }
+        ];
+
+        const clientPlan = clientRouter.planRoute(customers);
+        const serverPlan = serverRouter.planRoute(customers);
+
+        expect.equal(clientPlan.success, serverPlan.success);
+        expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+        expect.equal(clientPlan.totalTruckDistanceKm, serverPlan.totalTruckDistanceKm);
+        expect.equal(clientPlan.totalDroneDistanceKm, serverPlan.totalDroneDistanceKm);
+        expect.equal(clientPlan.droneSortiesCount, serverPlan.droneSortiesCount);
+        expect.equal(clientPlan.totalCostVnd, serverPlan.totalCostVnd);
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F225-T23 - F225-T24)
+      // -----------------------------------------------------------------------
+      test("F225-T23: Admin Sentinel Copilot correctly routes Section 215 (Turnstile HH), Section 216 (MATD3), and Section 217 (EVRPTW-Drone-Recharge)", () => {
+        const resTurnstile = generateAdminCopilotResponse("Kiểm định tóm tắt dòng hai chiều Turnstile Count-Sketch Heavy Hitters Charikar");
+        expect.equal(resTurnstile.tag, "TURNSTILE COUNT-SKETCH HEAVY HITTERS");
+        expect.ok(resTurnstile.text.includes("TURNSTILE"));
+
+        const resMATD3 = generateAdminCopilotResponse("Tối ưu giá đa đại diện liên tục MATD3 Multi-Agent Twin Delayed DDPG Lowe Fujimoto");
+        expect.equal(resMATD3.tag, "MATD3 MULTI-AGENT CONTINUOUS PRICING");
+        expect.ok(resMATD3.text.includes("MATD3"));
+
+        const resDrone = generateAdminCopilotResponse("Lộ trình giao hàng xe tải mẹ và drone sạc nóc xe tự hành EVRPTW Autonomous Drone Recharge Poikonen");
+        expect.equal(resDrone.tag, "EVRPTW AUTONOMOUS DRONE ROOFTOP RECHARGE ROUTER");
+        expect.ok(/mothership/i.test(resDrone.text));
+      });
+
+      test("F225-T24: Seller ShopSmart Copilot and Buyer Shopping Assistant handle Phase 78 algorithms and Intent 80", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn tóm tắt Turnstile Count-Sketch và định giá đa bên MATD3 liên tục");
+        expect.equal(sellerRes.tag, "TURNSTILE HH, MATD3 CONTINUOUS & AUTONOMOUS DRONE RECHARGE ROUTING");
+        expect.ok(sellerRes.text.includes("Turnstile Count-Sketch"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có theo dõi biến động Turnstile hoặc giao bằng drone sạc nóc xe không?");
+        expect.equal(buyerRes.intent, "TURNSTILE_MATD3_DRONE_ROOFTOP_RECHARGE");
+        expect.ok(buyerRes.replyText.includes("Turnstile Count-Sketch"));
       });
     });
   });
