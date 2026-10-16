@@ -424,6 +424,10 @@ import {
   ConservativeUpdateCountMinSketch,
   BiCNetMultiVendorPricing,
   EVRPTWMultiDepotMicrogridRouter,
+  // Phase 84 Enterprise Algorithms
+  AMSStreamFrequencyMoments,
+  COMAContinuousPricing,
+  EVRPTWCarbonTaxEmissionsRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -641,6 +645,9 @@ import ServerEVRPTWVehicleToGridPeakShavingRouter from "../../server/src/utils/e
 import ServerConservativeUpdateCountMinSketch from "../../server/src/utils/conservativeUpdateCountMinSketch.js";
 import ServerBiCNetMultiVendorPricing from "../../server/src/utils/bicnetMultiVendorPricing.js";
 import ServerEVRPTWMultiDepotMicrogridRouter from "../../server/src/utils/evrptwMultiDepotMicrogridRouter.js";
+import ServerAMSStreamFrequencyMoments from "../../server/src/utils/amsStreamFrequencyMoments.js";
+import ServerCOMAContinuousPricing from "../../server/src/utils/comaContinuousPricing.js";
+import ServerEVRPTWCarbonTaxEmissionsRouter from "../../server/src/utils/evrptwCarbonTaxEmissionsRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -35138,6 +35145,352 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sàn có sử dụng xe điện sạc từ đa kho microgrid mặt trời hoặc định giá hai chiều BiCNet không?");
         expect.equal(buyerRes.intent, "CU_CMS_BICNET_MICROGRID_ASSIST");
         expect.ok(buyerRes.replyText.includes("EVRPTW-MD-Microgrid"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 231: AMS Frequency Moments, COMA Counterfactual Pricing, & EVRPTW Carbon Tax (Phase 84) (24 Tests)
+    // =========================================================================
+    describe("Feature 231: AMS Frequency Moments, COMA Counterfactual Pricing, & EVRPTW Carbon Tax (Phase 84)", () => {
+      // -----------------------------------------------------------------------
+      // AMSStreamFrequencyMoments Tests (F231-T01 - F231-T07)
+      // -----------------------------------------------------------------------
+      test("F231-T01: AMSStreamFrequencyMoments initializes correctly with error bounds and 4-wise hash params", () => {
+        const sketch = new AMSStreamFrequencyMoments({
+          epsilon: 0.05,
+          delta: 0.01
+        });
+        expect.ok(sketch.width >= 400);
+        expect.ok(sketch.depth >= 13);
+        expect.equal(sketch.getF1(), 0);
+        expect.equal(sketch.getF0(), 0);
+      });
+
+      test("F231-T02: Tug-of-War sign evaluation produces balanced +/- 1 values", () => {
+        const sketch = new AMSStreamFrequencyMoments({ width: 16, depth: 5 });
+        let plusOneCount = 0;
+        let minusOneCount = 0;
+
+        for (let i = 0; i < 100; i++) {
+          const sign = sketch._getTugOfWarSign(`sku_test_${i}`, 0, 0);
+          if (sign === 1) plusOneCount++;
+          else if (sign === -1) minusOneCount++;
+        }
+
+        expect.equal(plusOneCount + minusOneCount, 100);
+        expect.ok(plusOneCount > 25 && minusOneCount > 25);
+      });
+
+      test("F231-T03: Point frequency stream updates and F1 length tracking", () => {
+        const sketch = new AMSStreamFrequencyMoments();
+        sketch.update("item_a", 10);
+        sketch.update("item_b", 25);
+        sketch.update("item_a", 5);
+
+        expect.equal(sketch.getF1(), 40);
+        expect.equal(sketch.getF0(), 2);
+      });
+
+      test("F231-T04: Batch update processing accurately registers items and weights", () => {
+        const sketch = new AMSStreamFrequencyMoments();
+        sketch.updateBatch([
+          { item: "laptop_gaming", weight: 4 },
+          { item: "mouse_pad", weight: 12 },
+          "usb_cable",
+          "usb_cable"
+        ]);
+
+        expect.equal(sketch.getF1(), 18);
+        expect.equal(sketch.getF0(), 3);
+        expect.equal(sketch.getExactF2(), (4 * 4) + (12 * 12) + (2 * 2));
+      });
+
+      test("F231-T05: Median-of-means estimator for second moment F2 approximates ground-truth exact F2", () => {
+        const sketch = new AMSStreamFrequencyMoments({ epsilon: 0.05, delta: 0.01 });
+        const items = ["phone_case", "charger_gan", "screen_protector", "cable_usbc"];
+        const freqs = [50, 30, 20, 10];
+
+        items.forEach((item, idx) => {
+          sketch.update(item, freqs[idx]);
+        });
+
+        const exactF2 = sketch.getExactF2();
+        const estF2 = sketch.estimateF2();
+
+        // Exact F2 = 50^2 + 30^2 + 20^2 + 10^2 = 2500 + 900 + 400 + 100 = 3900
+        expect.equal(exactF2, 3900);
+        expect.ok(Math.abs(estF2 - exactF2) / exactF2 <= 0.35);
+      });
+
+      test("F231-T06: Gini-Simpson diversity index and surprise anomaly index calculations", () => {
+        const sketch = new AMSStreamFrequencyMoments();
+        // High diversity: many items with frequency 1
+        for (let i = 0; i < 50; i++) {
+          sketch.update(`diverse_item_${i}`, 1);
+        }
+
+        const divHigh = sketch.computeGiniSimpsonDiversity();
+        expect.ok(divHigh >= 0.70 && divHigh <= 1.0);
+
+        const surprise = sketch.computeSurpriseIndex();
+        expect.ok(surprise > 0);
+      });
+
+      test("F231-T07: Client and Server AMSStreamFrequencyMoments demonstrate strict parity", () => {
+        const clientSketch = new AMSStreamFrequencyMoments({ width: 64, depth: 7 });
+        const serverSketch = new ServerAMSStreamFrequencyMoments({ width: 64, depth: 7 });
+
+        const testStream = [
+          { item: "product_1", weight: 20 },
+          { item: "product_2", weight: 15 },
+          { item: "product_3", weight: 5 }
+        ];
+
+        clientSketch.updateBatch(testStream);
+        serverSketch.updateBatch(testStream);
+
+        expect.equal(clientSketch.getF1(), serverSketch.getF1());
+        expect.equal(clientSketch.getExactF2(), serverSketch.getExactF2());
+      });
+
+      // -----------------------------------------------------------------------
+      // COMAContinuousPricing Tests (F231-T08 - F231-T15)
+      // -----------------------------------------------------------------------
+      test("F231-T08: COMAContinuousPricing initializes correctly with hyper-parameters", () => {
+        const engine = new COMAContinuousPricing({
+          maxAdjustment: 0.18,
+          learningRate: 0.02,
+          numCounterfactualSamples: 7
+        });
+        expect.equal(engine.maxAdjustment, 0.18);
+        expect.equal(engine.actionGrid.length, 7);
+      });
+
+      test("F231-T09: Centralized critic evaluates joint Q(s, u) for multi-vendor basket", () => {
+        const engine = new COMAContinuousPricing();
+        const vendors = [
+          { currentPrice: 500000, recommendedPrice: 480000, cogs: 350000, marketDemand: 80 },
+          { currentPrice: 150000, recommendedPrice: 140000, cogs: 90000, marketDemand: 120 }
+        ];
+
+        const q = engine.evaluateJointQ(vendors);
+        expect.ok(typeof q === 'number');
+        expect.ok(q > 0);
+      });
+
+      test("F231-T10: Counterfactual baseline and advantage function isolate vendor marginal contribution", () => {
+        const engine = new COMAContinuousPricing();
+        const vendors = [
+          { id: 'v_anchor', currentPrice: 2000000, cogs: 1400000, stock: 40, marketDemand: 60, category: 'Main' },
+          { id: 'v_cross_sell', currentPrice: 300000, cogs: 180000, stock: 150, marketDemand: 100, category: 'Addon' }
+        ];
+
+        const result = engine.optimizePricing(vendors);
+        expect.equal(result.numVendors, 2);
+        expect.equal(result.decisions.length, 2);
+
+        result.decisions.forEach(d => {
+          expect.ok(typeof d.counterfactualBaseline === 'number');
+          expect.ok(typeof d.counterfactualAdvantage === 'number');
+          expect.ok(typeof d.marginalContributionVND === 'number');
+        });
+      });
+
+      test("F231-T11: Multi-vendor coordinated pricing strictly enforces 1.05x COGS safe floor", () => {
+        const engine = new COMAContinuousPricing({ maxAdjustment: 0.35 });
+        const vendors = [
+          { id: 'v_loss', currentPrice: 100000, cogs: 120000, stock: 500, marketDemand: 50 },
+          { id: 'v_safe', currentPrice: 300000, cogs: 200000, stock: 80, marketDemand: 40 }
+        ];
+
+        const result = engine.optimizePricing(vendors);
+        const lossLeader = result.decisions.find(d => d.vendorId === 'v_loss');
+        expect.equal(lossLeader.recommendedPrice, Math.round(120000 * 1.05));
+        expect.equal(lossLeader.isFloorEnforced, true);
+      });
+
+      test("F231-T12: Decentralized action clamping respects maxAdjustment constraint", () => {
+        const engine = new COMAContinuousPricing({ maxAdjustment: 0.15 });
+        const vendors = [
+          { id: 'v1', currentPrice: 100000, cogs: 60000, stock: 30, marketDemand: 50 },
+          { id: 'v2', currentPrice: 200000, cogs: 120000, stock: 200, marketDemand: 80 }
+        ];
+
+        const result = engine.optimizePricing(vendors);
+        result.decisions.forEach(d => {
+          if (!d.isFloorEnforced) {
+            expect.ok(Math.abs(d.actionPct) <= 15.5);
+          }
+        });
+      });
+
+      test("F231-T13: Evaluation of cooperative marketplace steps computes GMV, gross profit, and marginal credit", () => {
+        const engine = new COMAContinuousPricing();
+        const decisions = [
+          { vendorId: 'v1', recommendedPrice: 120000, cogs: 80000, marginalContributionVND: 50000 },
+          { vendorId: 'v2', recommendedPrice: 250000, cogs: 160000, marginalContributionVND: 80000 }
+        ];
+        const sales = [
+          { vendorId: 'v1', unitsSold: 15 },
+          { vendorId: 'v2', unitsSold: 8 }
+        ];
+
+        const outcome = engine.evaluateCooperativeMarketplace(decisions, sales);
+        expect.equal(outcome.totalGmv, (15 * 120000) + (8 * 250000));
+        expect.equal(outcome.totalGrossProfit, (15 * 40000) + (8 * 90000));
+        expect.ok(outcome.averageGrossMarginPct > 0);
+      });
+
+      test("F231-T14: Multi-step pricing simulation preserves positive gross margins and fair credit assignment", () => {
+        const engine = new COMAContinuousPricing();
+        const vendors = [
+          { id: 'vA', currentPrice: 400000, cogs: 300000, stock: 80, marketDemand: 50 },
+          { id: 'vB', currentPrice: 600000, cogs: 450000, stock: 60, marketDemand: 70 }
+        ];
+
+        for (let t = 0; t < 3; t++) {
+          const res = engine.optimizePricing(vendors);
+          res.decisions.forEach(d => {
+            expect.ok(d.recommendedPrice >= d.safeFloor);
+          });
+        }
+      });
+
+      test("F231-T15: Client and Server COMAContinuousPricing demonstrate architectural parity", () => {
+        const clientEngine = new COMAContinuousPricing();
+        const serverEngine = new ServerCOMAContinuousPricing();
+
+        const decisions = [
+          { vendorId: 'v1', recommendedPrice: 180000, cogs: 120000 },
+          { vendorId: 'v2', recommendedPrice: 320000, cogs: 200000 }
+        ];
+        const sales = [
+          { vendorId: 'v1', unitsSold: 25 },
+          { vendorId: 'v2', unitsSold: 12 }
+        ];
+
+        const clientRes = clientEngine.evaluateCooperativeMarketplace(decisions, sales);
+        const serverRes = serverEngine.evaluateCooperativeMarketplace(decisions, sales);
+
+        expect.equal(clientRes.totalGmv, serverRes.totalGmv);
+        expect.equal(clientRes.totalGrossProfit, serverRes.totalGrossProfit);
+        expect.equal(clientRes.averageGrossMarginPct, serverRes.averageGrossMarginPct);
+      });
+
+      // -----------------------------------------------------------------------
+      // EVRPTWCarbonTaxEmissionsRouter Tests (F231-T16 - F231-T22)
+      // -----------------------------------------------------------------------
+      test("F231-T16: EVRPTWCarbonTaxEmissionsRouter initializes correctly with vehicle mass, carbon tax rate, and drag constants", () => {
+        const router = new EVRPTWCarbonTaxEmissionsRouter({
+          batteryCapacityKWh: 85,
+          vehicleMassKg: 2000,
+          carbonTaxRateVNDPerTon: 500000
+        });
+        expect.equal(router.batteryCapacityKWh, 85);
+        expect.equal(router.vehicleMassKg, 2000);
+        expect.equal(router.carbonTaxPerGramVND, 0.50);
+      });
+
+      test("F231-T17: Speed-dependent energy consumption P(v) confirms superlinear scaling with velocity", () => {
+        const router = new EVRPTWCarbonTaxEmissionsRouter();
+        const energyAt30 = router.computeEnergyPerKm(30, 100);
+        const energyAt60 = router.computeEnergyPerKm(60, 100);
+
+        expect.ok(energyAt60 > energyAt30);
+        // Drag scales with v^3, so energy per km at 60 km/h is noticeably higher than at 30 km/h
+        expect.ok(energyAt60 >= energyAt30 * 1.25);
+      });
+
+      test("F231-T18: Time-varying grid emission factor gamma_grid(t) returns low carbon at midday and high at evening", () => {
+        const router = new EVRPTWCarbonTaxEmissionsRouter();
+        expect.equal(router.getGridCarbonIntensity(12), 320); // Midday solar peak
+        expect.equal(router.getGridCarbonIntensity(19), 680); // Evening thermal peak
+        expect.equal(router.getGridCarbonIntensity(2), 520);  // Night off-peak
+        expect.equal(router.getGridCarbonIntensity(9), 450);  // Normal
+      });
+
+      test("F231-T19: Dual-objective fleet routing plans deliveries balancing travel time and carbon emissions", () => {
+        const router = new EVRPTWCarbonTaxEmissionsRouter();
+        const customers = [
+          { id: 'c1', x: 6, y: 8, demand: 25, readyHour: 8, dueHour: 13, serviceMinutes: 10 },
+          { id: 'c2', x: 12, y: 15, demand: 35, readyHour: 10, dueHour: 16, serviceMinutes: 15 }
+        ];
+
+        const plan = router.planCarbonOptimizedRoutes({ customers });
+        expect.ok(plan.routes.length > 0);
+        expect.ok(plan.totalDistanceKm > 0);
+        expect.ok(plan.totalEnergyKWh > 0);
+        expect.ok(plan.totalCO2EmissionsKg >= 0);
+      });
+
+      test("F231-T20: Carbon tax penalty calculation at 450,000 VND / ton CO2", () => {
+        const router = new EVRPTWCarbonTaxEmissionsRouter();
+        const customers = [
+          { id: 'c_mid', x: 10, y: 10, demand: 40, readyHour: 9, dueHour: 12, serviceMinutes: 10 }
+        ];
+
+        const plan = router.planCarbonOptimizedRoutes({ customers });
+        expect.ok(plan.totalCarbonTaxVND >= 0);
+        expect.equal(plan.totalCarbonTaxVND, Math.round(plan.totalCO2EmissionsKg * 1000 * router.carbonTaxPerGramVND));
+      });
+
+      test("F231-T21: Verified green delivery eco-certificate and net CO2 savings vs diesel fleet", () => {
+        const router = new EVRPTWCarbonTaxEmissionsRouter();
+        const customers = [
+          { id: 'c1', x: 4, y: 6, demand: 20, readyHour: 8, dueHour: 11, serviceMinutes: 10 },
+          { id: 'c2', x: 8, y: 10, demand: 30, readyHour: 10, dueHour: 14, serviceMinutes: 15 }
+        ];
+
+        const plan = router.planCarbonOptimizedRoutes({ customers });
+        expect.ok(plan.dieselSavedCO2Kg > 0);
+        expect.equal(plan.ecoCertificate.status, 'VERIFIED_GREEN_DELIVERY');
+        expect.equal(plan.ecoCertificate.badge, 'SPX_ZERO_CARBON_PLEDGE');
+      });
+
+      test("F231-T22: Client and Server EVRPTWCarbonTaxEmissionsRouter demonstrate routing parity", () => {
+        const clientRouter = new EVRPTWCarbonTaxEmissionsRouter();
+        const serverRouter = new ServerEVRPTWCarbonTaxEmissionsRouter();
+
+        const input = {
+          customers: [
+            { id: 'c1', x: 5, y: 5, demand: 20, readyHour: 8, dueHour: 12, serviceMinutes: 10 }
+          ]
+        };
+
+        const clientPlan = clientRouter.planCarbonOptimizedRoutes(input);
+        const serverPlan = serverRouter.planCarbonOptimizedRoutes(input);
+
+        expect.equal(clientPlan.totalDistanceKm, serverPlan.totalDistanceKm);
+        expect.equal(clientPlan.totalEnergyKWh, serverPlan.totalEnergyKWh);
+        expect.equal(clientPlan.totalCO2EmissionsKg, serverPlan.totalCO2EmissionsKg);
+        expect.equal(clientPlan.totalCarbonTaxVND, serverPlan.totalCarbonTaxVND);
+      });
+
+      // -----------------------------------------------------------------------
+      // Tri-Role AI Copilots Tests (F231-T23 - F231-T24)
+      // -----------------------------------------------------------------------
+      test("F231-T23: Admin Sentinel Copilot correctly routes Section 233 (AMS Frequency Moments & Gini-Simpson), Section 234 (COMA Counterfactual Pricing), and Section 235 (EVRPTW Carbon Tax & Pollution Routing)", () => {
+        const resAMS = generateAdminCopilotResponse("Ước lượng moment tần suất ams stream và chỉ số đa dạng gini-simpson Alon JCSS 1999");
+        expect.equal(resAMS.tag, "AMS FREQUENCY MOMENTS & GINI-SIMPSON");
+        expect.ok(resAMS.text.includes("ƯỚC LƯỢNG MOMENT TẦN SUẤT LUỒNG"));
+
+        const resCOMA = generateAdminCopilotResponse("Định giá phản thực tế coma counterfactual multi-agent pricing Foerster AAAI 2018");
+        expect.equal(resCOMA.tag, "COMA COUNTERFACTUAL PRICING");
+        expect.ok(resCOMA.text.includes("ĐỊNH GIÁ ĐA ĐẠI DIỆN PHÂN BỔ CÔNG TRẠNG PHẢN THỰC TẾ COMA"));
+
+        const resCarbon = generateAdminCopilotResponse("Định tuyến xe điện evrptw-carbon giảm thuế carbon logistics và ô nhiễm Bektas Laporte 2011");
+        expect.equal(resCarbon.tag, "EVRPTW CARBON TAX & POLLUTION ROUTER");
+        expect.ok(resCarbon.text.includes("EVRPTW-CARBON-TAX"));
+      });
+
+      test("F231-T24: Seller ShopSmart Copilot Section 93 and Buyer Assistant Intent 86 handle Phase 84 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn định giá phản thực tế COMA và đo lường đa dạng danh mục AMS cho shop");
+        expect.equal(sellerRes.tag, "AMS STREAM MOMENTS, COMA PRICING & EVRPTW-CARBON-TAX");
+        expect.ok(sellerRes.text.includes("Định Giá Đa Đại Diện Phản Thực Tế COMA"));
+
+        const buyerRes = generateAiChatResponse("Sàn có sử dụng xe điện evrptw-carbon giảm phát thải net-zero hoặc đo lường đa dạng gini-simpson không?");
+        expect.equal(buyerRes.intent, "AMS_COMA_CARBON_TAX_ASSIST");
+        expect.ok(buyerRes.replyText.includes("AMS Gini-Simpson Diversity"));
       });
     });
   });

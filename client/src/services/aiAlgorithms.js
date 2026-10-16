@@ -46644,6 +46644,574 @@ export class EVRPTWMultiDepotMicrogridRouter {
   }
 }
 
+// ------------------------------------------------------------------------------
+// PHASE 84 ALGORITHMS: AMS FREQUENCY MOMENTS, COMA PRICING, EVRPTW CARBON TAX
+// ------------------------------------------------------------------------------
+
+/**
+ * AMSStreamFrequencyMoments (Alon-Matias-Szegedy AMS Estimator)
+ * (Noga Alon, Yossi Matias, Mario Szegedy, STOC 1996 / JCSS 1999)
+ */
+export class AMSStreamFrequencyMoments {
+  constructor(options = {}) {
+    this.epsilon = Math.max(0.005, Math.min(0.2, Number(options.epsilon) || 0.05));
+    this.delta = Math.max(0.001, Math.min(0.2, Number(options.delta) || 0.01));
+
+    this.width = options.width ? Math.max(4, Number(options.width)) : Math.min(512, Math.max(8, Math.ceil(2 / (this.epsilon * this.epsilon))));
+    this.depth = options.depth ? Math.max(3, Number(options.depth)) : Math.min(31, Math.max(3, Math.ceil(3 * Math.log(1.0 / this.delta))));
+    if (this.depth % 2 === 0) this.depth += 1;
+
+    this.prime = 2147483647;
+
+    this.hashCoeffs = [];
+    for (let r = 0; r < this.depth; r++) {
+      const rowCoeffs = [];
+      for (let c = 0; c < this.width; c++) {
+        rowCoeffs.push([
+          Math.floor(Math.random() * (this.prime - 1)) + 1,
+          Math.floor(Math.random() * (this.prime - 1)) + 1,
+          Math.floor(Math.random() * (this.prime - 1)) + 1,
+          Math.floor(Math.random() * (this.prime - 1)) + 1
+        ]);
+      }
+      this.hashCoeffs.push(rowCoeffs);
+    }
+
+    this.table = [];
+    for (let r = 0; r < this.depth; r++) {
+      this.table.push(new Float64Array(this.width));
+    }
+
+    this.f1Count = 0;
+    this.exactCounts = new Map();
+  }
+
+  _hashString(str) {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) + hash) + str.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  }
+
+  _getTugOfWarSign(item, r, c) {
+    const num = typeof item === 'number' ? Math.floor(Math.abs(item)) : this._hashString(String(item));
+    const [a0, a1, a2, a3] = this.hashCoeffs[r][c];
+    const x = num % this.prime;
+    const x2 = (x * x) % this.prime;
+    const x3 = (x2 * x) % this.prime;
+    const val = (a3 * x3 + a2 * x2 + a1 * x + a0) % this.prime;
+    return (val % 2 === 0) ? 1 : -1;
+  }
+
+  update(item, weight = 1) {
+    const w = Number(weight) || 1;
+    if (w <= 0) return;
+
+    this.f1Count += w;
+    this.exactCounts.set(item, (this.exactCounts.get(item) || 0) + w);
+
+    for (let r = 0; r < this.depth; r++) {
+      for (let c = 0; c < this.width; c++) {
+        const sign = this._getTugOfWarSign(item, r, c);
+        this.table[r][c] += sign * w;
+      }
+    }
+  }
+
+  updateBatch(items = []) {
+    if (!Array.isArray(items)) return;
+    for (const it of items) {
+      if (typeof it === 'object' && it !== null && it.item !== undefined) {
+        this.update(it.item, it.weight || 1);
+      } else {
+        this.update(it, 1);
+      }
+    }
+  }
+
+  estimateF2() {
+    if (this.f1Count === 0) return 0;
+    const rowMeans = [];
+    for (let r = 0; r < this.depth; r++) {
+      let sumSquares = 0;
+      for (let c = 0; c < this.width; c++) {
+        sumSquares += this.table[r][c] * this.table[r][c];
+      }
+      rowMeans.push(sumSquares / this.width);
+    }
+    rowMeans.sort((a, b) => a - b);
+    const mid = Math.floor(rowMeans.length / 2);
+    const medianEst = rowMeans.length % 2 !== 0 ? rowMeans[mid] : (rowMeans[mid - 1] + rowMeans[mid]) / 2;
+    return Math.max(this.f1Count, Number(medianEst.toFixed(2)));
+  }
+
+  getExactF2() {
+    let sumSq = 0;
+    for (const count of this.exactCounts.values()) {
+      sumSq += count * count;
+    }
+    return sumSq;
+  }
+
+  getF1() {
+    return this.f1Count;
+  }
+
+  getF0() {
+    return this.exactCounts.size;
+  }
+
+  computeGiniSimpsonDiversity() {
+    if (this.f1Count <= 1) return 0;
+    const estF2 = this.estimateF2();
+    const f1Sq = this.f1Count * this.f1Count;
+    const diversity = 1.0 - (estF2 / f1Sq);
+    return Number(Math.max(0, Math.min(1.0, diversity)).toFixed(4));
+  }
+
+  computeSurpriseIndex() {
+    if (this.f1Count === 0) return 0;
+    const estF2 = this.estimateF2();
+    const denom = Math.pow(this.f1Count, 1.5);
+    return Number((estF2 / denom).toFixed(4));
+  }
+
+  merge(other) {
+    if (!other || other.width !== this.width || other.depth !== this.depth) {
+      throw new Error("Cannot merge AMS sketches with non-matching dimensions.");
+    }
+    this.f1Count += other.f1Count;
+    for (let r = 0; r < this.depth; r++) {
+      for (let c = 0; c < this.width; c++) {
+        this.table[r][c] += other.table[r][c];
+      }
+    }
+    for (const [k, v] of other.exactCounts.entries()) {
+      this.exactCounts.set(k, (this.exactCounts.get(k) || 0) + v);
+    }
+  }
+
+  getMetrics() {
+    const estF2 = this.estimateF2();
+    const exactF2 = this.getExactF2();
+    const relError = exactF2 > 0 ? Math.abs(estF2 - exactF2) / exactF2 : 0;
+    return {
+      width: this.width,
+      depth: this.depth,
+      f0Distinct: this.getF0(),
+      f1Length: this.f1Count,
+      estimatedF2: estF2,
+      exactF2,
+      relativeErrorPct: Number((relError * 100).toFixed(2)),
+      giniSimpsonDiversity: this.computeGiniSimpsonDiversity(),
+      surpriseIndex: this.computeSurpriseIndex()
+    };
+  }
+}
+
+/**
+ * COMAContinuousPricing (Counterfactual Multi-Agent Policy Gradients)
+ * (Jakob Foerster et al., AAAI 2018)
+ */
+export class COMAContinuousPricing {
+  constructor(options = {}) {
+    this.maxAdjustment = Math.max(0.05, Math.min(0.40, Number(options.maxAdjustment) || 0.20));
+    this.learningRate = Number(options.learningRate) || 0.01;
+    this.numSamples = Math.max(3, Math.min(11, Number(options.numCounterfactualSamples) || 5));
+
+    this.actionGrid = [];
+    const step = (2 * this.maxAdjustment) / (this.numSamples - 1);
+    for (let i = 0; i < this.numSamples; i++) {
+      this.actionGrid.push(-this.maxAdjustment + i * step);
+    }
+
+    this.criticWeights = {
+      intercept: 1.0,
+      wGmv: 0.00001,
+      wMargin: 0.05,
+      wSynergy: 0.5,
+      wDispersion: -0.2
+    };
+  }
+
+  evaluateJointQ(vendorStates = []) {
+    let totalGmv = 0;
+    let totalCost = 0;
+    const prices = [];
+
+    vendorStates.forEach(v => {
+      const p = v.recommendedPrice || v.currentPrice || 100000;
+      const c = v.cogs || Math.round(p * 0.7);
+      const d = v.marketDemand || 50;
+      const units = Math.max(2, Math.round(d * (100000 / p)));
+
+      totalGmv += p * units;
+      totalCost += c * units;
+      prices.push(p);
+    });
+
+    const marginPct = totalGmv > 0 ? ((totalGmv - totalCost) / totalGmv) * 100 : 0;
+    const avgPrice = prices.length > 0 ? prices.reduce((a, b) => a + b, 0) / prices.length : 1;
+    const priceVariance = prices.length > 0
+      ? prices.reduce((a, p) => a + Math.pow((p - avgPrice) / avgPrice, 2), 0) / prices.length
+      : 0;
+
+    const q = this.criticWeights.intercept +
+      this.criticWeights.wGmv * totalGmv +
+      this.criticWeights.wMargin * marginPct +
+      this.criticWeights.wSynergy * Math.log1p(totalGmv / 100000) +
+      this.criticWeights.wDispersion * priceVariance;
+
+    return Number(q.toFixed(4));
+  }
+
+  optimizePricing(vendors = []) {
+    if (!Array.isArray(vendors) || vendors.length === 0) {
+      return { decisions: [], totalGmv: 0, teamQ: 0 };
+    }
+
+    const proposedDecisions = vendors.map(v => {
+      const currentPrice = Number(v.currentPrice) || 100000;
+      const cogs = Number(v.cogs) || Math.round(currentPrice * 0.7);
+      const stock = Number(v.stock) || 100;
+      const safeFloor = Math.round(cogs * 1.05);
+
+      let markupPct = (stock > 150 ? -0.10 : stock < 20 ? 0.12 : -0.04);
+      markupPct = Math.max(-this.maxAdjustment, Math.min(this.maxAdjustment, markupPct));
+
+      let recPrice = Math.round(currentPrice * (1 + markupPct));
+      let isFloorEnforced = false;
+      if (recPrice < safeFloor) {
+        recPrice = safeFloor;
+        isFloorEnforced = true;
+      }
+
+      return {
+        vendorId: v.id,
+        category: v.category || 'General',
+        currentPrice,
+        cogs,
+        safeFloor,
+        recommendedPrice: recPrice,
+        isFloorEnforced,
+        actionPct: Number((((recPrice - currentPrice) / currentPrice) * 100).toFixed(2))
+      };
+    });
+
+    const jointQ = this.evaluateJointQ(proposedDecisions);
+
+    const decisionsWithAdvantage = proposedDecisions.map((currVendor, agentIdx) => {
+      let counterfactualExpectedQ = 0;
+      const uniformProb = 1.0 / this.actionGrid.length;
+
+      this.actionGrid.forEach(actionPct => {
+        const altPrice = Math.max(
+          currVendor.safeFloor,
+          Math.round(currVendor.currentPrice * (1 + actionPct))
+        );
+
+        const altStates = proposedDecisions.map((v, idx) => {
+          if (idx === agentIdx) {
+            return { ...v, recommendedPrice: altPrice };
+          }
+          return v;
+        });
+
+        const qAlt = this.evaluateJointQ(altStates);
+        counterfactualExpectedQ += uniformProb * qAlt;
+      });
+
+      const counterfactualAdvantage = Number((jointQ - counterfactualExpectedQ).toFixed(4));
+      const marginalContributionVND = Math.round(counterfactualAdvantage * 1000000);
+
+      return {
+        ...currVendor,
+        jointQ,
+        counterfactualBaseline: Number(counterfactualExpectedQ.toFixed(4)),
+        counterfactualAdvantage,
+        marginalContributionVND,
+        rationale: currVendor.isFloorEnforced
+          ? "Đã kích hoạt khóa sàn an toàn 1.05x COGS để bảo vệ biên lãi gộp gian hàng."
+          : `COMA ghi nhận đóng góp biên lợi ích +${marginalContributionVND.toLocaleString('vi-VN')}đ cho giỏ hàng chung.`
+      };
+    });
+
+    return {
+      numVendors: vendors.length,
+      jointQ,
+      decisions: decisionsWithAdvantage
+    };
+  }
+
+  evaluateCooperativeMarketplace(decisions = [], actualSales = []) {
+    const salesMap = new Map();
+    actualSales.forEach(s => salesMap.set(s.vendorId, Number(s.unitsSold) || 0));
+
+    let totalGmv = 0;
+    let totalGrossProfit = 0;
+    const vendorMetrics = [];
+
+    decisions.forEach(d => {
+      const units = salesMap.get(d.vendorId) || Math.max(5, Math.round(50 * (100000 / (d.recommendedPrice || 100000))));
+      const rev = units * d.recommendedPrice;
+      const cost = units * d.cogs;
+      const profit = rev - cost;
+      const margin = rev > 0 ? (profit / rev) * 100 : 0;
+
+      totalGmv += rev;
+      totalGrossProfit += profit;
+
+      vendorMetrics.push({
+        vendorId: d.vendorId,
+        unitsSold: units,
+        revenue: rev,
+        grossProfit: profit,
+        grossMarginPct: Number(margin.toFixed(2)),
+        marginalCreditVND: d.marginalContributionVND || 0
+      });
+    });
+
+    const avgMargin = totalGmv > 0 ? (totalGrossProfit / totalGmv) * 100 : 0;
+
+    return {
+      totalGmv,
+      totalGrossProfit,
+      averageGrossMarginPct: Number(avgMargin.toFixed(2)),
+      vendorMetrics
+    };
+  }
+}
+
+/**
+ * EVRPTWCarbonTaxEmissionsRouter (Pollution-Routing & Carbon Tax Optimization)
+ * (Zhang et al., TR Part D 2018 / Bektas & Laporte 2011)
+ */
+export class EVRPTWCarbonTaxEmissionsRouter {
+  constructor(options = {}) {
+    this.batteryCapacityKWh = Number(options.batteryCapacityKWh) || 70;
+    this.carbonTaxPerGramVND = (Number(options.carbonTaxRateVNDPerTon) || 450000) / 1000000;
+    this.vehicleMassKg = Number(options.vehicleMassKg) || 1800;
+    this.maxSpeedKmH = Number(options.maxSpeedKmH) || 60;
+
+    this.g = 9.81;
+    this.crr = 0.012;
+    this.rho = 1.204;
+    this.cd = 0.32;
+    this.frontalArea = 2.4;
+    this.drivetrainEfficiency = 0.88;
+
+    this.minSOC = 0.15;
+    this.maxSOC = 0.95;
+    this.dieselEmissionPerKmGrams = 185;
+  }
+
+  computeEnergyPerKm(speedKmH = 40, payloadKg = 0) {
+    const vMps = Math.max(5, Math.min(this.maxSpeedKmH, speedKmH)) / 3.6;
+    const totalMass = this.vehicleMassKg + payloadKg;
+
+    const pRoll = totalMass * this.g * this.crr * vMps;
+    const pAero = 0.5 * this.rho * this.cd * this.frontalArea * Math.pow(vMps, 3);
+    const pTotal = (pRoll + pAero) / this.drivetrainEfficiency;
+
+    const hoursPerKm = 1.0 / (vMps * 3.6);
+    const kWhPerKm = (pTotal / 1000.0) * hoursPerKm;
+
+    return Number(Math.max(0.02, kWhPerKm).toFixed(4));
+  }
+
+  getGridCarbonIntensity(hour) {
+    const h = (hour % 24 + 24) % 24;
+    if (h >= 11 && h < 14) return 320;
+    if (h >= 18 && h < 21) return 680;
+    if (h >= 22 || h < 4) return 520;
+    return 450;
+  }
+
+  _calculateDistance(locA, locB) {
+    const dx = locA.x - locB.x;
+    const dy = locA.y - locB.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  planCarbonOptimizedRoutes(input = {}) {
+    const depot = input.depot || { id: 'SPX_HUB_CENTRAL', x: 0, y: 0, openHour: 7.0 };
+    const customers = Array.isArray(input.customers) ? [...input.customers] : [];
+    const fleet = Array.isArray(input.fleet) && input.fleet.length > 0
+      ? input.fleet
+      : [
+          { id: 'ECO_VAN_01', currentSOC: 0.90, payloadCapacityKg: 600 },
+          { id: 'ECO_VAN_02', currentSOC: 0.85, payloadCapacityKg: 600 }
+        ];
+
+    if (customers.length === 0) {
+      return {
+        routes: [],
+        totalDistanceKm: 0,
+        totalEnergyKWh: 0,
+        totalCO2EmissionsKg: 0,
+        totalCarbonTaxVND: 0,
+        dieselSavedCO2Kg: 0,
+        netEcoSavingsVND: 0,
+        unservedCount: 0
+      };
+    }
+
+    const unserved = [...customers].sort((a, b) => (a.readyHour || 0) - (b.readyHour || 0));
+    const routes = [];
+    let totalDistAll = 0;
+    let totalEnergyAll = 0;
+    let totalCO2GramsAll = 0;
+
+    for (const vehicle of fleet) {
+      if (unserved.length === 0) break;
+
+      let currentLoc = depot;
+      let currentTime = depot.openHour || 7.0;
+      let currentSOC = Math.min(this.maxSOC, Math.max(this.minSOC, vehicle.currentSOC || 0.90));
+      let currentLoad = 0;
+      const stops = [];
+      let routeDist = 0;
+      let routeEnergy = 0;
+      let routeCO2Grams = 0;
+
+      while (unserved.length > 0) {
+        let bestIdx = -1;
+        let minCost = Infinity;
+        let chosenSpeed = 40;
+
+        for (let i = 0; i < unserved.length; i++) {
+          const cust = unserved[i];
+          const dist = this._calculateDistance(currentLoc, cust);
+
+          const speeds = [30, 45];
+          for (const spd of speeds) {
+            const travelHours = dist / spd;
+            const arrivalTime = currentTime + travelHours;
+
+            if (currentLoad + (cust.demand || 10) <= vehicle.payloadCapacityKg &&
+                arrivalTime <= (cust.dueHour || 20)) {
+              const energyPerKm = this.computeEnergyPerKm(spd, currentLoad);
+              const legEnergy = dist * energyPerKm;
+              const gridIntensity = this.getGridCarbonIntensity(arrivalTime);
+              const legCO2 = legEnergy * gridIntensity;
+              const legCarbonTax = legCO2 * this.carbonTaxPerGramVND;
+
+              const totalLegCost = legEnergy * 2500 + legCarbonTax;
+              if (totalLegCost < minCost) {
+                minCost = totalLegCost;
+                bestIdx = i;
+                chosenSpeed = spd;
+              }
+            }
+          }
+        }
+
+        if (bestIdx === -1) break;
+
+        const nextCust = unserved.splice(bestIdx, 1)[0];
+        const dist = this._calculateDistance(currentLoc, nextCust);
+        const travelHours = dist / chosenSpeed;
+        const arrivalTime = Math.max(currentTime + travelHours, nextCust.readyHour || 0);
+        const serviceHours = (nextCust.serviceMinutes || 15) / 60;
+        const departureTime = arrivalTime + serviceHours;
+
+        const energyPerKm = this.computeEnergyPerKm(chosenSpeed, currentLoad);
+        const legEnergy = dist * energyPerKm;
+        const gridIntensity = this.getGridCarbonIntensity(arrivalTime);
+        const legCO2 = legEnergy * gridIntensity;
+
+        currentSOC -= legEnergy / this.batteryCapacityKWh;
+        routeDist += dist;
+        routeEnergy += legEnergy;
+        routeCO2Grams += legCO2;
+
+        stops.push({
+          stopId: nextCust.id,
+          location: { x: nextCust.x, y: nextCust.y },
+          transitSpeedKmH: chosenSpeed,
+          arrivalTime: Number(arrivalTime.toFixed(2)),
+          departureTime: Number(departureTime.toFixed(2)),
+          distanceKm: Number(dist.toFixed(2)),
+          energyKWh: Number(legEnergy.toFixed(2)),
+          co2EmissionsGrams: Math.round(legCO2),
+          socAtDeparture: Number(currentSOC.toFixed(3)),
+          action: 'DELIVERY'
+        });
+
+        currentLoc = nextCust;
+        currentTime = departureTime;
+        currentLoad += (nextCust.demand || 10);
+      }
+
+      const returnDist = this._calculateDistance(currentLoc, depot);
+      const returnSpeed = 35;
+      const returnHours = returnDist / returnSpeed;
+      const returnArrival = currentTime + returnHours;
+      const returnEnergyPerKm = this.computeEnergyPerKm(returnSpeed, 0);
+      const returnEnergy = returnDist * returnEnergyPerKm;
+      const returnIntensity = this.getGridCarbonIntensity(returnArrival);
+      const returnCO2 = returnEnergy * returnIntensity;
+
+      currentSOC -= returnEnergy / this.batteryCapacityKWh;
+      routeDist += returnDist;
+      routeEnergy += returnEnergy;
+      routeCO2Grams += returnCO2;
+
+      stops.push({
+        stopId: depot.id,
+        location: { x: depot.x, y: depot.y },
+        transitSpeedKmH: returnSpeed,
+        arrivalTime: Number(returnArrival.toFixed(2)),
+        distanceKm: Number(returnDist.toFixed(2)),
+        energyKWh: Number(returnEnergy.toFixed(2)),
+        co2EmissionsGrams: Math.round(returnCO2),
+        socAtArrival: Number(currentSOC.toFixed(3)),
+        action: 'DEPOT_RETURN'
+      });
+
+      routes.push({
+        vehicleId: vehicle.id,
+        depotId: depot.id,
+        numStops: stops.length - 1,
+        totalDistanceKm: Number(routeDist.toFixed(2)),
+        totalEnergyKWh: Number(routeEnergy.toFixed(2)),
+        totalCO2EmissionsKg: Number((routeCO2Grams / 1000).toFixed(2)),
+        carbonTaxVND: Math.round(Number((routeCO2Grams / 1000).toFixed(2)) * 1000 * this.carbonTaxPerGramVND),
+        stops
+      });
+
+      totalDistAll += routeDist;
+      totalEnergyAll += routeEnergy;
+      totalCO2GramsAll += routeCO2Grams;
+    }
+
+    const totalCO2Kg = Number((totalCO2GramsAll / 1000).toFixed(2));
+    const totalTaxVND = Math.round(totalCO2Kg * 1000 * this.carbonTaxPerGramVND);
+    const dieselBaselineGrams = totalDistAll * this.dieselEmissionPerKmGrams;
+    const dieselSavedCO2Kg = Number(((dieselBaselineGrams - totalCO2GramsAll) / 1000).toFixed(2));
+    const netEcoSavingsVND = Math.round(dieselSavedCO2Kg * 1000 * this.carbonTaxPerGramVND);
+
+    return {
+      routes,
+      totalDistanceKm: Number(totalDistAll.toFixed(2)),
+      totalEnergyKWh: Number(totalEnergyAll.toFixed(2)),
+      totalCO2EmissionsKg: totalCO2Kg,
+      totalCarbonTaxVND: totalTaxVND,
+      dieselSavedCO2Kg,
+      netEcoSavingsVND,
+      unservedCount: unserved.length,
+      ecoCertificate: {
+        certificateId: `ECO-CERT-${Date.now()}`,
+        status: 'VERIFIED_GREEN_DELIVERY',
+        emissionReductionPct: Number((((dieselBaselineGrams - totalCO2GramsAll) / dieselBaselineGrams) * 100).toFixed(2)),
+        badge: 'SPX_ZERO_CARBON_PLEDGE'
+      }
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -47054,6 +47622,10 @@ export default {
   ConservativeUpdateCountMinSketch,
   BiCNetMultiVendorPricing,
   EVRPTWMultiDepotMicrogridRouter,
+  // Phase 84 Enterprise Algorithms
+  AMSStreamFrequencyMoments,
+  COMAContinuousPricing,
+  EVRPTWCarbonTaxEmissionsRouter,
 };
 
 

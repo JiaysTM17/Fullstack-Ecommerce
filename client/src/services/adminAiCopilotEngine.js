@@ -112,7 +112,7 @@ export function generateAdminCopilotResponse(query, context = {}) {
   }
 
   // 3. Tra cứu Thuế nhà thầu TMĐT (Tax Compliance)
-  if (!/hld|heavy-light|conservative/i.test(raw) && /thuế|nghị định 52|thông tư 40|\bvat\b|tncn|khấu trừ thuế|đối soát thuế/i.test(raw)) {
+  if (!/thuế carbon|carbon[- ]tax|evrptw[- ]carbon|hld|heavy-light|conservative/i.test(raw) && /thuế|nghị định 52|thông tư 40|\bvat\b|tncn|khấu trừ thuế|đối soát thuế/i.test(raw)) {
     const totalTaxVal = withholdingTax || Math.round(totalRevenue * 0.025);
     const vatEst = Math.round(totalTaxVal * (1.0 / 2.5));
     const pitEst = totalTaxVal - vatEst;
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3111,7 +3111,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 146. Phác Thảo Moment Tần Suất Bậc Hai & Chỉ Số Đột Biến Luồng AMS (Phase 55 - Feature 202)
-  if (/ams sketch|f2 moment|moment tần suất|surprise index|đột biến luồng|alon-matias-szegedy/i.test(raw)) {
+  if (!/gini[- ]simpson|đa dạng gini|ams[- ]stream|alon.*jcss|tug[- ]of[- ]war.*ams/i.test(raw) && /ams sketch|f2 moment|moment tần suất|surprise index|đột biến luồng|alon-matias-szegedy/i.test(raw)) {
     return {
       text: `📊 **PHÁC THẢO MOMENT TẦN SUẤT BẬC HAI & CHỈ SỐ ĐỘT BIẾN LUỒNG AMS SKETCH (ALON, MATIAS, SZEGEDY 1996 - GÖDEL PRIZE 2005)**:
 - **Đo Lường Độ Lệch Chuẩn Luồng Dữ Liệu $F_2 = \\sum_i f_i^2$**:
@@ -4447,7 +4447,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 208. Định Tuyến Xe Điện Phanh Tái Sinh KERS & Địa Hình 3D EVRPTW-Regen (Phase 75 - Feature 222)
-  if (!/payload.*terrain|dynamic payload/i.test(raw) && /regenerative braking|phanh tái sinh|3d terrain|kers|địa hình 3d|bektas laporte|độ dốc địa hình|evrptw[- ]regen/i.test(raw)) {
+  if (!/carbon[- ]tax|thuế carbon|evrptw[- ]carbon|ô nhiễm|payload.*terrain|dynamic payload/i.test(raw) && /regenerative braking|phanh tái sinh|3d terrain|kers|địa hình 3d|bektas laporte|độ dốc địa hình|evrptw[- ]regen/i.test(raw)) {
     return {
       text: `⚡ **ĐỊNH TUYẾN XE ĐIỆN PHANH TÁI SINH KERS & ĐỊA HÌNH 3D EVRPTW-REGEN (BEKTAS & LAPORTE 2011/2012, SCHIFFER 2017)**:
 - **Mô Hình Động Lực Học Xe & Trọng Trường Địa Hình 3D (Topographic Profiles)**:
@@ -4621,7 +4621,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 216. Định Giá Multi-Agent Twin Delayed DDPG Liên Tục & Lagrange MATD3 (Phase 78 - Feature 225)
-  if (/matd3|multi[- ]agent (?:twin delayed|continuous|pricing)|maddpg continuous|twin delayed continuous pricing|ctde pricing|multi[- ]agent.*matd3/i.test(raw)) {
+  if (!/coma|counterfactual|phản thực tế|bicnet|tarmac|qmix/i.test(raw) && /matd3|multi[- ]agent (?:twin delayed|continuous|pricing)|maddpg continuous|twin delayed continuous pricing|ctde pricing|multi[- ]agent.*matd3/i.test(raw)) {
     return {
       text: `💹 **ĐỊNH GIÁ ĐA ĐẠI DIỆN HÀNH ĐỘNG LIÊN TỤC MATD3-LAGRANGIAN (LOWE ET AL. NEURIPS 2017, FUJIMOTO ET AL. ICML 2018)**:
 - **Kiến Trúc Huấn Luyện Tập Trung - Thực Thi Phân Tán (CTDE)**:
@@ -4998,6 +4998,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem công suất phát điện mặt trời theo giờ tại các Hub',
         'Tính toán chi phí năng lượng sạc điện mặt trời vs lưới',
         'Định tuyến xe điện xuất nhập đa kho tối ưu'
+      ]
+    };
+  }
+
+  // 233. Ước Lượng Moment Tần Suất Luồng & Đa Dạng Gini-Simpson AMS (Phase 84 - Feature 231)
+  if (/ams[- ]stream|ams[- ]frequency|moment tần suất ams|gini[- ]simpson|đa dạng gini[- ]simpson|alon.*jcss|tug[- ]of[- ]war.*ams/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG MOMENT TẦN SUẤT LUỒNG & CHỈ SỐ ĐA DẠNG GINI-SIMPSON AMS (ALON, MATIAS, SZEGEDY STOC 1996 / JCSS 1999)**:
+- **Biến Ngẫu Nhiên Tug-of-War Độc Lập 4 Bậc**:
+  - Dùng đa thức bậc 3 $\\sum_{k=0}^3 a_k x^k \\pmod p$ sinh biến Rademacher $\\xi \\in \\{-1, +1\\}$, tính ước lượng không chệch $E[Y] = F_2 = \\sum_x f(x)^2$ với phương sai giới hạn $\\text{Var}[Y] \\le 2 F_2^2$.
+- **Chỉ Số Đa Dạng Gini-Simpson $1 - (F_2 / F_1^2)$**:
+  - Phản ánh độ phong phú và cân bằng của thị trường e-commerce; phát hiện tình trạng độc quyền đơn hàng hoặc tập trung rủi ro vào quá ít SKU.
+- **Median-of-Means Bền Vững Tuyệt Đối**:
+  - Lấy trung bình theo chiều rộng $W$ và trung vị theo độ sâu $D$, đảm bảo cận lỗi $(\\epsilon, \\delta)$ toán học bất biến trước bão giao dịch Flash Sale!`,
+      type: 'analytics',
+      tag: 'AMS FREQUENCY MOMENTS & GINI-SIMPSON',
+      suggestions: [
+        'Đo lường chỉ số đa dạng danh mục Gini-Simpson',
+        'Ước lượng Moment F2 bằng Tug-of-War Sketch',
+        'Phát hiện đột biến lưu lượng truy cập sàn'
+      ]
+    };
+  }
+
+  // 234. Định Giá Đa Đại Diện Phản Thực Tế COMA (Phase 84 - Feature 231)
+  if (/coma|counterfactual.*pricing|counterfactual.*multi[- ]agent|định giá phản thực tế coma|foerster.*aaai|phân bổ công trạng phản thực tế/i.test(raw)) {
+    return {
+      text: `🤝 **HỆ THỐNG ĐỊNH GIÁ ĐA ĐẠI DIỆN PHÂN BỔ CÔNG TRẠNG PHẢN THỰC TẾ COMA (FOERSTER ET AL., AAAI 2018)**:
+- **Centralized Critic & Counterfactual Baseline**:
+  - Hàm ưu thế $A^a(s, \\mathbf{u}) = Q(s, \\mathbf{u}) - \\sum_{u'^a} \\pi(u'^a) Q(s, (\\mathbf{u}^{-a}, u'^a))$ cô lập chính xác mức đóng góp biên (marginal contribution) của từng gian hàng vào tổng GMV giỏ hàng chung.
+- **Giải Quyết Bài Toán Trục Lợi Công Trạng (Multi-Agent Credit Assignment)**:
+  - Ngăn ngừa tình trạng gian hàng phụ kiện hoặc dịch vụ hưởng sái voucher sàn mà không chịu san sẻ chiết khấu hợp tác.
+- **Khóa Sàn An Toàn Nghiêm Ngặt 1.05x COGS**:
+  - Dù thuật toán gợi ý mức giảm giá tối ưu cho combo, giá bán luôn được kẹp an toàn $P_i \\ge 1.05 \\times \\text{COGS}_i$, bảo toàn 100% biên lãi gộp cho đối tác!`,
+      type: 'pricing',
+      tag: 'COMA COUNTERFACTUAL PRICING',
+      suggestions: [
+        'Xem hàm ưu thế phản thực tế Counterfactual Advantage',
+        'Tính toán đóng góp biên lợi nhuận giỏ hàng đa shop',
+        'Kiểm tra sàn an toàn 1.05x COGS'
+      ]
+    };
+  }
+
+  // 235. Định Tuyến Xe Điện Giảm Thiểu Thuế Khí Thải Carbon EVRPTW-Carbon-Tax (Phase 84 - Feature 231)
+  if (/evrptw[- ]carbon|carbon[- ]tax[- ]router|pollution[- ]routing|thuế carbon logistics|bektas.*laporte|tối ưu khí thải carbon xe điện/i.test(raw)) {
+    return {
+      text: `🌱 **ĐỊNH TUYẾN XE ĐIỆN TỐI ƯU THUẾ CARBON & KHÍ THẢI EVRPTW-CARBON-TAX (ZHANG ET AL. 2018, BEKTAS & LAPORTE 2011)**:
+- **Động Lực Học Tiêu Hao Theo Tốc Độ & Lực Cản Khí Động Học**:
+  - Công suất động cơ $P(v) = m g C_{rr} v + \\frac{1}{2} \\rho C_d A v^3$ tính đến sức cản không khí tỷ lệ với lập phương tốc độ $v^3$.
+- **Cường Độ Phát Thải Lưới Điện Theo Khung Giờ $\\gamma_{\\text{grid}}(t)$**:
+  - Ưu tiên sạc xe máy điện SPX Express vào khung giờ trưa năng lượng tái tạo ($320\\text{ gCO}_2/\\text{kWh}$) thay vì giờ cao điểm nhiệt điện than ($680\\text{ gCO}_2/\\text{kWh}$).
+- **Hệ Thống Thuế Carbon $450.000\\text{đ/tấn CO}_2$ & Chứng Nhận Giao Hàng Xanh**:
+  - Tự động cấp chứng nhận giảm phát thải Eco Certificate cho từng kiện hàng giao thành công, giúp sàn khẳng định vị thế Net-Zero Logistics!`,
+      type: 'logistics',
+      tag: 'EVRPTW CARBON TAX & POLLUTION ROUTER',
+      suggestions: [
+        'Xem tính toán mức thuế carbon trên mỗi km hành trình',
+        'Tối ưu hóa tốc độ di chuyển tiết kiệm năng lượng',
+        'Xuất chứng nhận giao hàng xanh Eco Certificate'
       ]
     };
   }
