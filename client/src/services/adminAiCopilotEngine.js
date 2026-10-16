@@ -2629,7 +2629,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 122. Ước Lượng Dòng Dữ Liệu Không Thiên Lệch Bằng Count-Sketch Trung Vị (Phase 47 - Feature 194)
-  if (!/count[- ]sketch hierarchical|count[- ]sketch hhh|charikar hhh/i.test(raw) && /count[- ]sketch|count sketch|ước lượng không thiên lệch|median of means|rademacher/i.test(raw)) {
+  if (!/dyadic[- ]range count[- ]sketch|unbiased dyadic|cormode|count[- ]sketch hierarchical|count[- ]sketch hhh|charikar hhh/i.test(raw) && /count[- ]sketch|count sketch|ước lượng không thiên lệch|median of means|rademacher/i.test(raw)) {
     return {
       text: `📊 **ƯỚC LƯỢNG DÒNG DỮ LIỆU KHÔNG THIÊN LỆCH BẰNG COUNT-SKETCH TRUNG VỊ (CHARIKAR ET AL. 2004)**:
 - **Khắc Phục Hoàn Toàn Điểm Yếu Dương Tính Của Count-Min Sketch**:
@@ -2721,7 +2721,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 127. Định Tuyến Đội Xe Hỗn Hợp Đa Chủng Loại HFVRPTW (Phase 48 - Feature 195)
-  if (/hfvrptw|đội xe hỗn hợp|heterogeneous fleet|chủng loại xe|xe máy ba gác tải nhẹ/i.test(raw)) {
+  if (!/evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu|hydro/i.test(raw) && /hfvrptw|đội xe hỗn hợp|heterogeneous fleet|chủng loại xe|xe máy ba gác tải nhẹ/i.test(raw)) {
     return {
       text: `🚚 **ĐỊNH TUYẾN ĐỘI XE HỖN HỢP ĐA CHỦNG LOẠI CÓ CỬA SỔ THỜI GIAN (HFVRPTW - TAILLARD 1999)**:
 - **Mô Phỏng Thực Tế Mạng Lưới SPX Express Toàn Quốc**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -2948,7 +2948,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 138. Định Giá Bán Tối Ưu Hành Động Liên Tục Bằng CQL Continuous (Phase 52 - Feature 199)
-  if (!/ddpg[- ]lagrangian|ddpg|td3[- ]lagrangian|td3/i.test(raw) && /cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
+  if (!/sac[- ]lagrangian|sac continuous|ddpg[- ]lagrangian|ddpg|td3[- ]lagrangian|td3/i.test(raw) && /cql continuous|cql liên tục|conservative q-learning continuous|học tăng cường liên tục/i.test(raw)) {
     return {
       text: `💰 **ĐỊNH GIÁ BÁN TỐI ƯU HÀNH ĐỘNG LIÊN TỤC CONSERVATIVE Q-LEARNING (CQL) (KUMAR ET AL., NEURIPS 2020)**:
 - **Kiến Trúc Actor-Critic Liên Tục**:
@@ -3051,7 +3051,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 143. Phác Thảo Nhanh Tần Suất Luồng & Truy Vấn Khoảng Dyadic FCM-CU (Phase 54 - Feature 201)
-  if (!/dyadic[- ]range count[- ]min|dyadic range sketch|dyadic range count min|cormode pods/i.test(raw) && /fcm|conservative update|cu-cms|cập nhật thận trọng fcm|dyadic range|khoảng dyadic|cây dyadic/i.test(raw)) {
+  if (!/dyadic[- ]range count[- ]sketch|unbiased dyadic|dyadic[- ]range count[- ]min|dyadic range sketch|dyadic range count min|cormode pods/i.test(raw) && /fcm|conservative update|cu-cms|cập nhật thận trọng fcm|dyadic range|khoảng dyadic|cây dyadic/i.test(raw)) {
     return {
       text: `📊 **PHÁC THẢO NHANH TẦN SUẤT LUỒNG VỚI CẬP NHẬT THẬN TRỌNG & KHOẢNG DYADIC FCM-CU (CORMODE & MUTHUKRISHNAN 2005, GOYAL ET AL. 2012)**:
 - **Cập Nhật Thận Trọng Triệt Tiêu Sai Số (Conservative Update)**:
@@ -4109,7 +4109,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 192. Định Giá An Toàn Tự Điều Chỉnh Entropy SAC-Lagrangian (Phase 70 - Feature 217)
-  if (/sac[- ]lagrangian|adaptive entropy|sac lagrangian safe pricing|haarnoja.*ray/i.test(raw)) {
+  if (!/sac.*(continuous|liên tục)|achiam|sac[- ]lagrangian continuous|sac continuous safe pricing/i.test(raw) && /sac[- ]lagrangian|adaptive entropy|sac lagrangian safe pricing|haarnoja.*ray/i.test(raw)) {
     return {
       text: `🏷️ **ĐỊNH GIÁ AN TOÀN SOFT ACTOR-CRITIC TỰ ĐIỀU CHỈNH ENTROPY SAC-LAGRANGIAN (HAARNOJA 2018, RAY 2019)**:
 - **Hàm Mục Tiêu Tối Ưu Kép Maximum Entropy & Ràng Buộc Kép Lagrangian**:
@@ -4219,7 +4219,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 197. Phác Thảo Khoảng Nhị Phân Dyadic Range Count-Min Sketch (Phase 72 - Feature 219)
-  if (/dyadic[- ]range|phác thảo khoảng nhị phân|dyadic count[- ]min|dyadic sketch|truy vấn khoảng streaming|cormode.*korn/i.test(raw)) {
+  if (!/dyadic[- ]range count[- ]sketch|unbiased dyadic/i.test(raw) && /dyadic[- ]range|phác thảo khoảng nhị phân|dyadic count[- ]min|dyadic sketch|truy vấn khoảng streaming|cormode.*korn/i.test(raw)) {
     return {
       text: `📊 **PHÁC THẢO KHOẢNG NHỊ PHÂN DYADIC RANGE COUNT-MIN SKETCH (CORMODE, KORN, MUTHUKRISHNAN PODS 2005 / VLDB 2006)**:
 - **Đột Phá Truy Vấn Khoảng Tức Thì Trong $O(\\log U)$ Thay Vì $O(U)$**:
@@ -4339,6 +4339,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem công suất quang điện nóc xe P_solar',
         'Tính toán lượng điện mặt trời thu được',
         'Lập lịch định tuyến xe điện EVRPTW-PV'
+      ]
+    };
+  }
+
+  // 203. Phác Thảo Khoảng Nhị Phân Không Thiên Lệch Dyadic Range Count-Sketch (Phase 74 - Feature 221)
+  if (/dyadic[- ]range count[- ]sketch|unbiased dyadic|phác thảo khoảng count[- ]sketch|dyadic charikar|cormode.*unbiased/i.test(raw)) {
+    return {
+      text: `📊 **PHÁC THẢO KHOẢNG NHỊ PHÂN KHÔNG THIÊN LỆCH DYADIC RANGE COUNT-SKETCH (CORMODE 2005, CHARIKAR 2002)**:
+- **Đột Phá Ước Lượng Không Thiên Lệch Bằng Dấu Rademacher**:
+  - Khắc phục hoàn toàn hiện tượng thiên lệch dương (Overcounting) của Count-Min Sketch, phiên bản Count-Sketch sử dụng biến ngẫu nhiên Rademacher $s_r(x) \\in \\{-1, +1\\}$ và lấy trung vị qua $d$ dòng để đảm bảo kỳ vọng $\\mathbb{E}[\\hat{f}([l, r])] = f([l, r])$ hoàn toàn không thiên lệch.
+- **Phân Rã Nhị Phân Chính Tắc Tối Đa $2\\log_2 U$ Khoảng**:
+  - Mọi khoảng giá $[l, r]$ bất kỳ trong miền vũ trụ $U = 2^B$ được phân rã thành tối đa $2\\log_2 U$ khoảng nhị phân $I_{j, k} = [j \\cdot 2^k, (j+1) \\cdot 2^k - 1]$. Tổng ước lượng các khoảng thành phần cho ra kết quả chỉ trong $O(\\log U)$ thời gian!
+- **Tìm Kiếm Phân Vị Nhị Phân Siêu Tốc (Quantile Binary Search)**:
+  - Cho phép xác định tức thì ngưỡng phân vị giá (ví dụ Median $q = 0.5$ hay P95) phục vụ phân tầng khách hàng Flash Sale mà không cần sắp xếp toàn bộ dữ liệu!`,
+      type: 'analytics',
+      tag: 'DYADIC RANGE COUNT-SKETCH',
+      suggestions: [
+        'Truy vấn doanh thu khoảng giá Dyadic Count-Sketch',
+        'Tìm kiếm phân vị Flash Sale Quantile',
+        'So sánh sai số với Dyadic Count-Min'
+      ]
+    };
+  }
+
+  // 204. Định Giá Soft Actor-Critic Liên Tục Với Ràng Buộc Lagrange SAC-Lagrangian Continuous (Phase 74 - Feature 221)
+  if (/sac[- ]lagrangian[ -](continuous|liên tục)|(continuous|liên tục)[ -].*sac[- ]lagrangian|sac continuous safe pricing|soft actor[- ]critic continuous lagrangian|haarnoja.*achiam/i.test(raw)) {
+    return {
+      text: `💰 **ĐỊNH GIÁ SOFT ACTOR-CRITIC LIÊN TỤC RÀNG BUỘC LAGRANGE (HAARNOJA ICML 2018, ACHIAM 2017)**:
+- **Mạng Actor Gaussian Tái Tham Số Hóa (Reparameterized Gaussian Actor)**:
+  - Sinh hành động điều chỉnh giá liên tục $a = a_{\\text{max}} \\cdot \\tanh(\\mu + \\sigma \\odot \\xi)$ với entropy tối đa, ngăn ngừa chính sách bị mắc kẹt vào các cực trị địa phương kém tối ưu.
+- **Tự Động Điều Chỉnh Nhiệt Độ Entropy (Temperature Auto-Tuning)**:
+  - Hệ số $\\alpha$ liên tục thích ứng theo mục tiêu $\\bar{\\mathcal{H}} = -1.0$: $\\mathcal{L}(\\alpha) = \\mathbb{E}[-\\alpha(\\log \\pi + \\bar{\\mathcal{H}})]$, cân bằng hoàn hảo giữa Thám hiểm (Exploration) và Khai thác (Exploitation).
+- **Ràng Buộc Kép Nhân Tử Lagrange & Sàn An Toàn $\\ge 1.05 \\times \\text{COGS}$**:
+  - Mạng Cost Critic $Q_C(s, a)$ và nhân tử đối ngẫu $\\lambda$ tự động siết chặt biên độ giảm giá khi chi phí vượt ngân sách, đảm bảo biên lợi nhuận gộp an toàn tuyệt đối!`,
+      type: 'pricing',
+      tag: 'SAC-LAGRANGIAN CONTINUOUS PRICING',
+      suggestions: [
+        'Xem hành động giá SAC-Lagrangian liên tục',
+        'Kiểm tra nhiệt độ alpha và nhân tử lambda',
+        'Đo lường độ an toàn sàn 1.05 COGS'
+      ]
+    };
+  }
+
+  // 205. Định Tuyến Đội Xe Hỗn Hợp Hydro FCEV & Quang Điện Mặt Trời EVRPTW-FCEV-Solar (Phase 74 - Feature 221)
+  if (/evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|xe điện hydro|fchev[- ]vrptw|carrion fuel cell/i.test(raw)) {
+    return {
+      text: `🚀 **ĐỊNH TUYẾN ĐỘI XE HỖN HỢP HYDRO FCEV & QUANG ĐIỆN NÓC XE (CARRIÓN 2018, HIERMANN 2016)**:
+- **Cơ Cấu Đội Xe Xanh Đa Tầng (BEV & FCEV)**:
+  - Xe máy điện BEV đảm nhận các chặng giao nội đô bán kính ngắn ($40\\text{ kWh}$), trong khi xe tải van pin nhiên liệu Hydro FCEV đảm nhận các chuyến đường dài tải trọng lớn với bình chứa $6.0\\text{ kg } \\text{H}_2$ áp suất $700\\text{ bar}$.
+- **Tốc Độ Nạp Nhiên Liệu Cực Nhanh (Fast Hydrogen Refueling)**:
+  - Tiếp nạp đầy bình Hydro tại các trạm HRS chỉ trong **3-5 phút** ($1.5\\text{ kg/phút}$), vượt trội hoàn toàn thời gian chờ sạc điện truyền thống.
+- **Tích Hợp Pin Mặt Trời Nóc Xe (VIPV Trickle Charging)**:
+  - Cả hai dòng xe đều được trang bị pin quang điện nóc xe ($1.2\\text{ kW}$), liên tục bù đắp năng lượng di chuyển và đỗ giao hàng, đưa tổng phát thải ròng tiến về Zero Carbon!`,
+      type: 'logistics',
+      tag: 'EVRPTW MIXED FLEET FUEL CELL & SOLAR ROUTING',
+      suggestions: [
+        'Lập lịch đội xe hỗn hợp FCEV & BEV',
+        'Theo dõi lượng tiêu thụ Hydro và điện mặt trời',
+        'Tối ưu hóa thời gian ghé trạm nạp HRS'
       ]
     };
   }

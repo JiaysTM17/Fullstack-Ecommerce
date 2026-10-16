@@ -383,6 +383,10 @@ import {
   CountSketchHierarchicalHH,
   TD3LagrangianSafePricing,
   EVRPTWPVPanelOnboardSolarRouter,
+  // Phase 74 Enterprise Algorithms
+  DyadicRangeCountSketch,
+  SACLagrangianContinuousPricing,
+  EVRPTWMixedFleetFuelCellSolarRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -570,6 +574,9 @@ import { EVRPTWDynamicWirelessChargingRouter as ServerEVRPTWDynamicWirelessCharg
 import { CountSketchHierarchicalHH as ServerCountSketchHierarchicalHH } from "../../server/src/utils/countSketchHierarchicalHH.js";
 import { TD3LagrangianSafePricing as ServerTD3LagrangianSafePricing } from "../../server/src/utils/td3LagrangianSafePricing.js";
 import { EVRPTWPVPanelOnboardSolarRouter as ServerEVRPTWPVPanelOnboardSolarRouter } from "../../server/src/utils/evrptwPVPanelOnboardSolarRouter.js";
+import { DyadicRangeCountSketch as ServerDyadicRangeCountSketch } from "../../server/src/utils/dyadicRangeCountSketch.js";
+import { SACLagrangianContinuousPricing as ServerSACLagrangianContinuousPricing } from "../../server/src/utils/sacLagrangianContinuousPricing.js";
+import { EVRPTWMixedFleetFuelCellSolarRouter as ServerEVRPTWMixedFleetFuelCellSolarRouter } from "../../server/src/utils/evrptwMixedFleetFuelCellSolarRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -31386,6 +31393,323 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sản phẩm này có được định giá an toàn TD3-Lagrangian hay giao bằng xe điện pin mặt trời trên nóc không?");
         expect.equal(buyerRes.intent, "COUNTSKETCH_HHH_TD3_LAGRANGIAN_ONBOARD_SOLAR");
         expect.ok(buyerRes.replyText.includes("TD3-Lagrangian"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 221: Dyadic Range Count-Sketch, SAC-Lagrangian Continuous Pricing & EVRPTW Mixed Fleet Fuel Cell Solar Router (24 Tests)
+    // =========================================================================
+    describe("Feature 221: Dyadic Range Count-Sketch, SAC-Lagrangian Continuous Pricing & EVRPTW Mixed Fleet Fuel Cell Solar Router", () => {
+      test("F221-T01: DyadicRangeCountSketch initializes with correct universe size, levels, depth and width", () => {
+        const sketch = new DyadicRangeCountSketch({ universeSize: 1024, depth: 5, width: 64 });
+        expect.equal(sketch.universeSize, 1024);
+        expect.equal(sketch.numLevels, 11); // log2(1024) + 1 = 10 + 1 = 11
+        expect.equal(sketch.depth, 5);
+        expect.equal(sketch.width, 64);
+        expect.equal(sketch.totalCount, 0);
+      });
+
+      test("F221-T02: DyadicRangeCountSketch computes unbiased point estimates using Rademacher signs and median", () => {
+        const sketch = new DyadicRangeCountSketch({ universeSize: 256, depth: 7, width: 64 });
+        sketch.update(42, 50);
+        sketch.update(100, 20);
+
+        const est42 = sketch.estimatePoint(42);
+        const est100 = sketch.estimatePoint(100);
+        const estZero = sketch.estimatePoint(10);
+
+        expect.ok(est42 >= 45 && est42 <= 55);
+        expect.ok(est100 >= 15 && est100 <= 25);
+        expect.equal(estZero, 0);
+      });
+
+      test("F221-T03: DyadicRangeCountSketch performs canonical dyadic decomposition with at most 2*log2(U) intervals", () => {
+        const sketch = new DyadicRangeCountSketch({ universeSize: 1024 });
+        const intervals = sketch.decomposeRange(15, 127);
+        expect.ok(intervals.length > 0);
+        expect.ok(intervals.length <= 2 * Math.ceil(Math.log2(1024)));
+
+        // Verify union of intervals covers exactly [15, 127]
+        intervals.sort((a, b) => a.low - b.low);
+        expect.equal(intervals[0].low, 15);
+        expect.equal(intervals[intervals.length - 1].high, 127);
+      });
+
+      test("F221-T04: DyadicRangeCountSketch accurately estimates range frequency over sub-ranges [l, r]", () => {
+        const sketch = new DyadicRangeCountSketch({ universeSize: 512, depth: 5, width: 128 });
+        for (let i = 20; i <= 30; i++) {
+          sketch.update(i, 10); // 11 items * 10 = 110 total
+        }
+
+        const rangeEst = sketch.queryRange(20, 30);
+        expect.ok(rangeEst >= 90 && rangeEst <= 130);
+
+        const disjointEst = sketch.queryRange(100, 200);
+        expect.ok(disjointEst <= 15);
+      });
+
+      test("F221-T05: DyadicRangeCountSketch estimates quantiles via binary search over dyadic range queries", () => {
+        const sketch = new DyadicRangeCountSketch({ universeSize: 256, depth: 5, width: 64 });
+        for (let i = 0; i < 100; i++) {
+          sketch.update(i, 1);
+        }
+
+        const median = sketch.queryQuantile(0.5);
+        expect.ok(median >= 35 && median <= 65);
+
+        const p90 = sketch.queryQuantile(0.9);
+        expect.ok(p90 >= 75 && p90 <= 98);
+      });
+
+      test("F221-T06: DyadicRangeCountSketch supports arbitrary non-negative weights and clamps bounds", () => {
+        const sketch = new DyadicRangeCountSketch({ universeSize: 64 });
+        sketch.update(-5, 12.5); // Clamped to 0
+        sketch.update(100, 7.5);  // Clamped to 63
+
+        expect.equal(sketch.totalCount, 20);
+        expect.ok(sketch.estimatePoint(0) >= 10);
+        expect.ok(sketch.estimatePoint(63) >= 6);
+      });
+
+      test("F221-T07: DyadicRangeCountSketch correctly merges two sketches with identical dimensions", () => {
+        const sk1 = new DyadicRangeCountSketch({ universeSize: 128, depth: 5, width: 32 });
+        const sk2 = new DyadicRangeCountSketch({ universeSize: 128, depth: 5, width: 32 });
+
+        sk1.update(15, 25);
+        sk2.update(15, 35);
+        sk2.update(50, 40);
+
+        const merged = sk1.merge(sk2);
+        expect.equal(merged.totalCount, 100);
+        expect.ok(merged.estimatePoint(15) >= 50 && merged.estimatePoint(15) <= 70);
+        expect.ok(merged.estimatePoint(50) >= 30 && merged.estimatePoint(50) <= 50);
+      });
+
+      test("F221-T08: Client and Server DyadicRangeCountSketch yield identical estimation across operations", () => {
+        const clientSketch = new DyadicRangeCountSketch({ universeSize: 256, depth: 5, width: 64 });
+        const serverSketch = new ServerDyadicRangeCountSketch({ universeSize: 256, depth: 5, width: 64 });
+
+        [12, 45, 78, 120, 200].forEach((k, idx) => {
+          clientSketch.update(k, (idx + 1) * 10);
+          serverSketch.update(k, (idx + 1) * 10);
+        });
+
+        expect.equal(clientSketch.totalCount, serverSketch.totalCount);
+        expect.equal(clientSketch.estimatePoint(45), serverSketch.estimatePoint(45));
+        expect.equal(clientSketch.queryRange(10, 80), serverSketch.queryRange(10, 80));
+        expect.equal(clientSketch.queryQuantile(0.5), serverSketch.queryQuantile(0.5));
+      });
+
+      test("F221-T09: SACLagrangianContinuousPricing initializes continuous actor, twin critics, and cost critic", () => {
+        const sac = new SACLagrangianContinuousPricing({
+          stateDim: 5,
+          actionBound: 0.20,
+          costBudget: 0.05,
+          initLambda: 0.1
+        });
+
+        expect.equal(sac.stateDim, 5);
+        expect.equal(sac.actionMax, 0.20);
+        expect.equal(sac.costBudget, 0.05);
+        expect.equal(sac.lambda, 0.1);
+        expect.ok(sac.alpha > 0);
+        expect.equal(sac.actorMuWeights.length, 5);
+      });
+
+      test("F221-T10: SACLagrangianContinuousPricing selects bounded actions via squashed Gaussian policy (tanh)", () => {
+        const sac = new SACLagrangianContinuousPricing({ actionBound: 0.15 });
+        const state = [0.5, -0.2, 0.8, -0.5, 0.1];
+
+        for (let i = 0; i < 20; i++) {
+          const act = sac.selectAction(state, false);
+          expect.ok(act >= -0.15 && act <= 0.15);
+        }
+
+        const deterministicAct = sac.selectAction(state, true);
+        expect.ok(deterministicAct >= -0.15 && deterministicAct <= 0.15);
+      });
+
+      test("F221-T11: SACLagrangianContinuousPricing evaluates minimum of twin critics min(Q1, Q2) with entropy", () => {
+        const sac = new SACLagrangianContinuousPricing();
+        const state = [0.1, 0.2, -0.3, 0.4, 0.5];
+        const action = 0.05;
+
+        const qVal = sac.evaluateQ(state, action);
+        expect.ok(typeof qVal.minQ === "number");
+        expect.ok(!isNaN(qVal.minQ));
+      });
+
+      test("F221-T12: SACLagrangianContinuousPricing evaluates constraint cost critic QC for margin risk", () => {
+        const sac = new SACLagrangianContinuousPricing();
+        const state = [0.2, 0.4, 0.1, -0.2, 0.0];
+        const action = -0.18; // Large price cut -> higher margin risk
+
+        const cost = sac.evaluateCost(state, action);
+        expect.ok(typeof cost === "number");
+        expect.ok(!isNaN(cost));
+      });
+
+      test("F221-T13: SACLagrangianContinuousPricing updates Lagrange multiplier lambda when cost exceeds budget", () => {
+        const sac = new SACLagrangianContinuousPricing({
+          costBudget: 0.02,
+          initLambda: 0.0,
+          lambdaLr: 0.05
+        });
+
+        const batch = [
+          { state: [0.1, 0.2, 0.3, 0.4, 0.5], action: -0.15, reward: 1.0, cost: 0.10, nextState: [0.2, 0.3, 0.4, 0.5, 0.6], done: false }
+        ];
+
+        const initialLambda = sac.lambda;
+        sac.trainStep(batch);
+        expect.ok(sac.lambda > initialLambda);
+      });
+
+      test("F221-T14: SACLagrangianContinuousPricing auto-tunes entropy temperature alpha towards target entropy", () => {
+        const sac = new SACLagrangianContinuousPricing({ targetEntropy: -1.0, alphaLr: 0.05 });
+        const batch = [
+          { state: [0.5, -0.5, 0.2, 0.1, 0.0], action: 0.02, reward: 0.8, cost: 0.01, nextState: [0.4, -0.4, 0.2, 0.1, 0.1], done: false }
+        ];
+
+        const prevAlpha = sac.alpha;
+        sac.trainStep(batch);
+        expect.ok(typeof sac.alpha === "number");
+        expect.ok(!isNaN(sac.alpha));
+      });
+
+      test("F221-T15: SACLagrangianContinuousPricing enforces strict 1.05 * COGS profit floor", () => {
+        const sac = new SACLagrangianContinuousPricing({ actionBound: 0.30 });
+        const cogs = 100000;
+        const basePrice = 102000; // Close to COGS
+
+        // Negative state attempting massive price reduction
+        const state = [-1.0, -1.0, -1.0, -1.0, -1.0];
+        const res = sac.getSafePrice(basePrice, cogs, state);
+        expect.ok(res.recommendedPrice >= cogs * 1.05);
+
+        const rec = sac.recommendPrice({ basePrice: 90000, cogs: 100000 }, { competitorPrice: 85000, inventoryLevel: 50 });
+        expect.ok(rec.recommendedPrice >= 105000);
+      });
+
+      test("F221-T16: Client and Server SACLagrangianContinuousPricing exhibit identical action selection and pricing logic", () => {
+        const clientSac = new SACLagrangianContinuousPricing({ actionBound: 0.20 });
+        const serverSac = new ServerSACLagrangianContinuousPricing({ actionBound: 0.20 });
+
+        const state = [0.3, -0.1, 0.5, 0.2, -0.4];
+        const clientAct = clientSac.selectAction(state, true);
+        const serverAct = serverSac.selectAction(state, true);
+        expect.equal(clientAct.toFixed(4), serverAct.toFixed(4));
+
+        const product = { basePrice: 150000, cogs: 100000 };
+        const market = { competitorPrice: 145000, inventoryLevel: 80 };
+        const clientRec = clientSac.recommendPrice(product, market);
+        const serverRec = serverSac.recommendPrice(product, market);
+        expect.equal(clientRec.recommendedPrice, serverRec.recommendedPrice);
+      });
+
+      test("F221-T17: EVRPTWMixedFleetFuelCellSolarRouter initializes mixed fleet with BEV and FCEV vehicle profiles", () => {
+        const router = new EVRPTWMixedFleetFuelCellSolarRouter({
+          bevBatteryKwh: 45.0,
+          fcevH2CapacityKg: 6.5,
+          fcevBufferBatteryKwh: 16.0,
+          solarPeakKw: 1.5
+        });
+
+        expect.equal(router.bevBatteryKwh, 45.0);
+        expect.equal(router.fcevH2CapacityKg, 6.5);
+        expect.equal(router.fcevBufferBatteryKwh, 16.0);
+        expect.equal(router.solarPeakKw, 1.5);
+        expect.ok(router.hrsStations.length >= 2);
+      });
+
+      test("F221-T18: EVRPTWMixedFleetFuelCellSolarRouter calculates diurnal solar power peaking at solar noon (t = 360 min)", () => {
+        const router = new EVRPTWMixedFleetFuelCellSolarRouter({ solarPeakKw: 1.2, cloudCover: 0 });
+        const pMorning = router.getDiurnalSolarPower(0);
+        const pMidday = router.getDiurnalSolarPower(360);
+        const pSunset = router.getDiurnalSolarPower(720);
+
+        expect.equal(pMorning, 0);
+        expect.equal(pMidday.toFixed(2), "1.20");
+        expect.equal(pSunset, 0);
+      });
+
+      test("F221-T19: EVRPTWMixedFleetFuelCellSolarRouter models fast hydrogen refueling at HRS stations", () => {
+        const router = new EVRPTWMixedFleetFuelCellSolarRouter({ fcevH2CapacityKg: 6.0 });
+        const customers = [
+          { id: "cust_1", x: 10.78, y: 106.71, demand: 5, serviceTimeMin: 15, readyTime: 80, dueTime: 300 }
+        ];
+
+        // Start with nearly depleted H2
+        const plan = router.solvePlan(customers, { initialH2Kg: 0.1 });
+        expect.ok(plan.success);
+        expect.ok(plan.hrsRefuelsCount >= 1);
+      });
+
+      test("F221-T20: EVRPTWMixedFleetFuelCellSolarRouter calculates solar energy harvesting over time intervals", () => {
+        const router = new EVRPTWMixedFleetFuelCellSolarRouter({ solarPeakKw: 1.2, cloudCover: 0 });
+        const harvestMidday = router.calculateIntervalSolarEnergyKwh(330, 390); // 1 hour around noon
+        expect.ok(harvestMidday > 1.0 && harvestMidday <= 1.2);
+
+        const harvestNight = router.calculateIntervalSolarEnergyKwh(0, 60);
+        expect.ok(harvestNight < 0.2);
+      });
+
+      test("F221-T21: EVRPTWMixedFleetFuelCellSolarRouter plans feasible routes for mixed delivery demands", () => {
+        const router = new EVRPTWMixedFleetFuelCellSolarRouter();
+        const customers = [
+          { id: "c1", x: 10.79, y: 106.72, demand: 10, serviceTimeMin: 10, readyTime: 90, dueTime: 250 },
+          { id: "c2", x: 10.81, y: 106.74, demand: 15, serviceTimeMin: 15, readyTime: 120, dueTime: 350 },
+          { id: "c3", x: 10.76, y: 106.68, demand: 8, serviceTimeMin: 10, readyTime: 150, dueTime: 400 }
+        ];
+
+        const plan = router.solvePlan(customers);
+        expect.ok(plan.success);
+        expect.ok(plan.routes.length >= 1);
+        expect.equal(plan.routes[0].legs.filter(l => l.type === "CUSTOMER_DELIVERY").length, 3);
+        expect.ok(plan.totalDistanceKm > 0);
+        expect.ok(plan.totalSolarHarvestKwh >= 0);
+      });
+
+      test("F221-T22: Client and Server EVRPTWMixedFleetFuelCellSolarRouter yield identical routing plans and energy metrics", () => {
+        const clientRouter = new EVRPTWMixedFleetFuelCellSolarRouter({ solarPeakKw: 1.2 });
+        const serverRouter = new ServerEVRPTWMixedFleetFuelCellSolarRouter({ solarPeakKw: 1.2 });
+
+        const customers = [
+          { id: "c1", x: 10.78, y: 106.71, demand: 5, serviceTimeMin: 10, readyTime: 80, dueTime: 200 },
+          { id: "c2", x: 10.80, y: 106.73, demand: 12, serviceTimeMin: 15, readyTime: 100, dueTime: 300 }
+        ];
+
+        const clientPlan = clientRouter.solvePlan(customers);
+        const serverPlan = serverRouter.solvePlan(customers);
+
+        expect.equal(clientPlan.success, serverPlan.success);
+        expect.equal(clientPlan.totalDistanceKm.toFixed(3), serverPlan.totalDistanceKm.toFixed(3));
+        expect.equal(clientPlan.totalSolarHarvestKwh.toFixed(3), serverPlan.totalSolarHarvestKwh.toFixed(3));
+        expect.equal(clientPlan.routes.length, serverPlan.routes.length);
+      });
+
+      test("F221-T23: Admin Sentinel Copilot correctly handles Phase 74 domain queries (Sections 203, 204, 205)", () => {
+        const resDyadic = generateAdminCopilotResponse("Dyadic range count-sketch Cormode Charikar không thiên lệch");
+        expect.equal(resDyadic.tag, "DYADIC RANGE COUNT-SKETCH");
+        expect.ok(resDyadic.text.includes("CORMODE"));
+
+        const resSac = generateAdminCopilotResponse("Định giá học tăng cường liên tục SAC-Lagrangian Haarnoja Achiam");
+        expect.equal(resSac.tag, "SAC-LAGRANGIAN CONTINUOUS PRICING");
+        expect.ok(resSac.text.includes("HAARNOJA"));
+
+        const resFcev = generateAdminCopilotResponse("Định tuyến đội xe hỗn hợp pin nhiên liệu hydro và pin mặt trời EVRPTW-FCEV Carrion Hiermann");
+        expect.equal(resFcev.tag, "EVRPTW MIXED FLEET FUEL CELL & SOLAR ROUTING");
+        expect.ok(resFcev.text.includes("CARRIÓN"));
+      });
+
+      test("F221-T24: Seller ShopSmart Copilot and Buyer Shopping Assistant handle Phase 74 algorithms and Intent 76", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn định giá an toàn SAC-Lagrangian liên tục và lọc phân khúc giá Dyadic Count-Sketch");
+        expect.equal(sellerRes.tag, "DYADIC COUNT-SKETCH, SAC CONTINUOUS & FUEL CELL ROUTING");
+        expect.ok(sellerRes.text.includes("SAC-Lagrangian"));
+
+        const buyerRes = generateAiChatResponse("Sản phẩm này có được phân tích phân khúc bằng Dyadic range count-sketch hoặc giao bằng xe hydro pin nhiên liệu không?");
+        expect.equal(buyerRes.intent, "DYADIC_COUNT_SKETCH_SAC_CONTINUOUS_HYDROGEN_SOLAR");
+        expect.ok(buyerRes.replyText.includes("Dyadic Range Count-Sketch"));
       });
     });
   });

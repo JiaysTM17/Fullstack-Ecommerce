@@ -1132,7 +1132,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 56. Biến Động Ròng Count-Sketch, Đấu Thầu TD3 & Giao Hàng Chia Kiện SDVRPTW (Phase 47 - Feature 194)
-  if (!/td3\+bc|td3-bc|td3[- ]lagrangian|td3 safe pricing|count[- ]sketch hierarchical|count[- ]sketch hhh/i.test(raw) && /count[- ]sketch|count sketch|td3|đấu thầu td3|sdvrptw|split delivery|chia nhỏ đơn hàng sdvrptw/i.test(raw)) {
+  if (!/dyadic|sac[- ]lagrangian continuous|sac continuous safe pricing|unbiased dyadic|td3\+bc|td3-bc|td3[- ]lagrangian|td3 safe pricing|count[- ]sketch hierarchical|count[- ]sketch hhh/i.test(raw) && /count[- ]sketch|count sketch|td3|đấu thầu td3|sdvrptw|split delivery|chia nhỏ đơn hàng sdvrptw/i.test(raw)) {
     return {
       text: `🎯 **BIẾN ĐỘNG RÒNG COUNT-SKETCH, ĐẤU THẦU TD3 & GIAO HÀNG CHIA KIỆN SDVRPTW (${currentShop.name})**:
 - **Theo dõi biến động bán ròng chính xác không thiên lệch (Count-Sketch Median)**:
@@ -1592,7 +1592,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 79. Bộ Ba Thuật Toán Space-Saving StreamSummary, SAC-Lagrangian & Multi-Tier Charging (Phase 70 - Feature 217)
-  if (/space[- ]saving stream|streamsummary|stream[- ]summary|space[- ]saving summary|sac[- ]lagrangian|adaptive entropy|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier/i.test(raw)) {
+  if (!/sac.*(continuous|liên tục)|dyadic|pin nhiên liệu hydro|sac[- ]lagrangian continuous|sac continuous safe pricing/i.test(raw) && /space[- ]saving stream|streamsummary|stream[- ]summary|space[- ]saving summary|sac[- ]lagrangian|adaptive entropy|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier/i.test(raw)) {
     return {
       text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 70 (${currentShop.name})**:
 - **Bắt sóng sản phẩm thịnh hành Space-Saving StreamSummary (Metwally 2005)**:
@@ -1632,7 +1632,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 81. Bộ Ba Thuật Toán Dyadic Range Sketch, DDPG-Lagrangian Safe Pricing & Sạc Không Dây Động DWPT (Phase 72 - Feature 219)
-  if (/dyadic[- ]range|phác thảo khoảng nhị phân|ddpg[- ]lagrangian|ddpg safe pricing|evrptw[- ]dwpt|sạc không dây động|dynamic wireless/i.test(raw)) {
+  if (!/dyadic[- ]range count[- ]sketch|unbiased dyadic/i.test(raw) && /dyadic[- ]range|phác thảo khoảng nhị phân|ddpg[- ]lagrangian|ddpg safe pricing|evrptw[- ]dwpt|sạc không dây động|dynamic wireless/i.test(raw)) {
     return {
       text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 72 (${currentShop.name})**:
 - **Truy vấn khoảng giá siêu tốc Dyadic Range Count-Min Sketch (Cormode & Korn PODS 2005)**:
@@ -1667,6 +1667,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem cây danh mục hot Count-Sketch HHH',
         'Tư vấn định giá an toàn TD3-Lagrangian',
         'Theo dõi xe điện năng lượng mặt trời SPX'
+      ]
+    };
+  }
+
+  // 83. Bộ Ba Thuật Toán Dyadic Range Count-Sketch, SAC-Lagrangian Continuous & Đội Xe Hydro Mặt Trời EVRPTW-FCEV (Phase 74 - Feature 221)
+  if (/dyadic.*count[- ]sketch|unbiased dyadic|sac[- ]lagrangian[ -](continuous|liên tục)|(continuous|liên tục)[ -].*sac[- ]lagrangian|sac continuous safe pricing|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro/i.test(raw)) {
+    return {
+      text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 74 (${currentShop.name})**:
+- **Truy vấn khoảng không thiên lệch Dyadic Range Count-Sketch (Cormode 2005, Charikar 2002)**:
+  - Phân rã nhị phân chính tắc kết hợp dấu Rademacher và trung vị, giúp shop tính toán chính xác tuyệt đối tổng doanh thu và lượng khách trong bất kỳ phân khúc giá nào $[l, r]$ mà không bị sai số thổi phồng!
+- **Định giá Soft Actor-Critic liên tục ràng buộc an toàn SAC-Lagrangian (Haarnoja 2018, Achiam 2017)**:
+  - Mạng Gaussian Actor với nhiệt độ entropy tự điều chỉnh $\\alpha$ tối ưu hóa chiến lược giá Flash Sale, phối hợp nhân tử Lagrange khóa cứng sàn $\\ge 1.05 \\times \\text{COGS}$ bảo vệ 100% lợi nhuận của shop!
+- **Đội xe giao hàng hỗn hợp Hydro FCEV & Quang điện mặt trời EVRPTW-FCEV (Carrión 2018, Hiermann 2016)**:
+  - Đội xe SPX bổ sung xe pin nhiên liệu Hydro nạp cực nhanh 3-5 phút cho chặng dài, kết hợp tấm pin quang điện nóc xe tự sạc liên tục, đảm bảo giao hàng hỏa tốc liên tỉnh mà chi phí vận hành siêu tiết kiệm!`,
+      type: 'recommendation',
+      tag: 'DYADIC COUNT-SKETCH, SAC CONTINUOUS & FUEL CELL ROUTING',
+      suggestions: [
+        'Xem phân khúc giá Dyadic Count-Sketch',
+        'Tư vấn định giá an toàn SAC-Lagrangian liên tục',
+        'Theo dõi đội xe pin nhiên liệu Hydro FCEV'
       ]
     };
   }
