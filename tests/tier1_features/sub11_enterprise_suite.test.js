@@ -433,6 +433,10 @@ import {
   QTRANCooperativePricing,
   DEFAULT_LEZ_ZONES,
   EVRPTWUrbanLowEmissionZoneRouter,
+  // Phase 86 Enterprise Algorithms
+  BipartiteGraphEdgeStreamSketch,
+  FACMACContinuousPricing,
+  EVRPTWDroneTandemRechargeRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -656,6 +660,9 @@ import ServerEVRPTWCarbonTaxEmissionsRouter from "../../server/src/utils/evrptwC
 import { MomentSketchStreamQuantiles as ServerMomentSketchStreamQuantiles } from "../../server/src/utils/momentSketchStreamQuantiles.js";
 import { QTRANCooperativePricing as ServerQTRANCooperativePricing } from "../../server/src/utils/qtranCooperativePricing.js";
 import { EVRPTWUrbanLowEmissionZoneRouter as ServerEVRPTWUrbanLowEmissionZoneRouter } from "../../server/src/utils/evrptwUrbanLowEmissionZoneRouter.js";
+import { BipartiteGraphEdgeStreamSketch as ServerBipartiteGraphEdgeStreamSketch } from "../../server/src/utils/bipartiteGraphEdgeStreamSketch.js";
+import { FACMACContinuousPricing as ServerFACMACContinuousPricing } from "../../server/src/utils/facmacContinuousPricing.js";
+import { EVRPTWDroneTandemRechargeRouter as ServerEVRPTWDroneTandemRechargeRouter } from "../../server/src/utils/evrptwDroneTandemRechargeRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -35817,6 +35824,318 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sàn có hỗ trợ giao xe điện vành đai không phát thải evrptw-lez hoặc phân vị giá momentsketch không?");
         expect.equal(buyerRes.intent, "MOMENTSKETCH_QTRAN_URBAN_LEZ_ASSIST");
         expect.ok(buyerRes.replyText.includes("MomentSketch"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 233: Bipartite Graph Stream Sketch, FACMAC Continuous Pricing, & EVRPTW Drone Tandem Router (Phase 86 - 24 Tests)
+    // =========================================================================
+    describe("Feature 233: Bipartite Graph Stream Sketch, FACMAC Continuous Pricing, & EVRPTW Drone Tandem Router", () => {
+      test("F233-T01: BipartiteGraphEdgeStreamSketch initializes with valid depth, width, and table", () => {
+        const sketch = new BipartiteGraphEdgeStreamSketch({ depth: 5, width: 256 });
+        expect.equal(sketch.depth, 5);
+        expect.equal(sketch.width, 256);
+        expect.equal(sketch.table.length, 5);
+        expect.equal(sketch.table[0].length, 256);
+        expect.equal(sketch.totalInteractions, 0);
+      });
+
+      test("F233-T02: addEdge updates 2D sketch table and tracks node degrees", () => {
+        const sketch = new BipartiteGraphEdgeStreamSketch({ depth: 4, width: 128 });
+        sketch.addEdge("user_101", "prod_999", 5);
+        expect.equal(sketch.totalInteractions, 5);
+        expect.equal(sketch.userDegrees.get("user_101"), 5);
+        expect.equal(sketch.itemDegrees.get("prod_999"), 5);
+
+        let nonZeroCount = 0;
+        for (let j = 0; j < sketch.depth; j++) {
+          for (let k = 0; k < sketch.width; k++) {
+            if (sketch.table[j][k] !== 0) nonZeroCount++;
+          }
+        }
+        expect.equal(nonZeroCount, sketch.depth);
+      });
+
+      test("F233-T03: estimateEdgeFrequency returns accurate median frequency for repeated edges", () => {
+        const sketch = new BipartiteGraphEdgeStreamSketch({ depth: 7, width: 512 });
+        for (let i = 0; i < 20; i++) {
+          sketch.addEdge("buyer_alpha", "sku_beta", 1);
+        }
+        const freq = sketch.estimateEdgeFrequency("buyer_alpha", "sku_beta");
+        expect.ok(freq >= 18 && freq <= 22, `Expected ~20 frequency, got ${freq}`);
+
+        const nonExistentFreq = sketch.estimateEdgeFrequency("buyer_alpha", "sku_ghost");
+        expect.ok(nonExistentFreq <= 3, `Expected low ghost frequency, got ${nonExistentFreq}`);
+      });
+
+      test("F233-T04: computeAffinityScore normalizes bipartite connection between 0.0 and 1.0", () => {
+        const sketch = new BipartiteGraphEdgeStreamSketch({ depth: 5, width: 256 });
+        sketch.addEdge("user_A", "item_X", 10);
+        sketch.addEdge("user_A", "item_Y", 10);
+        sketch.addEdge("user_B", "item_X", 10);
+
+        const scoreAX = sketch.computeAffinityScore("user_A", "item_X");
+        expect.ok(scoreAX > 0.3 && scoreAX <= 1.0, `Expected normalized affinity, got ${scoreAX}`);
+
+        const scoreAY = sketch.computeAffinityScore("user_A", "item_Y");
+        expect.ok(scoreAY > 0.3 && scoreAY <= 1.0);
+
+        const scoreGhost = sketch.computeAffinityScore("user_unknown", "item_unknown");
+        expect.equal(scoreGhost, 0);
+      });
+
+      test("F233-T05: getGraphTelemetry calculates bipartite density and interaction metrics", () => {
+        const sketch = new BipartiteGraphEdgeStreamSketch({ depth: 4, width: 128 });
+        sketch.addEdge("u1", "i1", 2);
+        sketch.addEdge("u1", "i2", 3);
+        sketch.addEdge("u2", "i2", 5);
+
+        const telemetry = sketch.getGraphTelemetry();
+        expect.equal(telemetry.totalInteractions, 10);
+        expect.equal(telemetry.numDistinctUsers, 2);
+        expect.equal(telemetry.numDistinctItems, 2);
+        expect.ok(telemetry.density > 0);
+      });
+
+      test("F233-T06: merge combines two bipartite sketches additively", () => {
+        const s1 = new BipartiteGraphEdgeStreamSketch({ depth: 5, width: 256 });
+        const s2 = new BipartiteGraphEdgeStreamSketch({ depth: 5, width: 256 });
+        s2.hashCoeffs = s1.hashCoeffs;
+
+        s1.addEdge("user_1", "item_1", 10);
+        s2.addEdge("user_1", "item_1", 15);
+        s1.merge(s2);
+
+        expect.equal(s1.totalInteractions, 25);
+        const mergedFreq = s1.estimateEdgeFrequency("user_1", "item_1");
+        expect.ok(mergedFreq >= 23 && mergedFreq <= 27, `Expected ~25 merged frequency, got ${mergedFreq}`);
+      });
+
+      test("F233-T07: ServerBipartiteGraphEdgeStreamSketch maintains 100% parity with Client implementation", () => {
+        const serverSketch = new ServerBipartiteGraphEdgeStreamSketch({ depth: 5, width: 256 });
+        const clientSketch = new BipartiteGraphEdgeStreamSketch({ depth: 5, width: 256 });
+        serverSketch.hashCoeffs = clientSketch.hashCoeffs;
+
+        serverSketch.addEdge("u_test", "i_test", 8);
+        clientSketch.addEdge("u_test", "i_test", 8);
+
+        const serverFreq = serverSketch.estimateEdgeFrequency("u_test", "i_test");
+        const clientFreq = clientSketch.estimateEdgeFrequency("u_test", "i_test");
+        expect.equal(serverFreq, clientFreq);
+        expect.equal(serverSketch.getGraphTelemetry().totalInteractions, clientSketch.getGraphTelemetry().totalInteractions);
+      });
+
+      test("F233-T08: Merge throws error when sketch dimensions do not match", () => {
+        const s1 = new BipartiteGraphEdgeStreamSketch({ depth: 5, width: 256 });
+        const s2 = new BipartiteGraphEdgeStreamSketch({ depth: 4, width: 128 });
+        expect.throws(() => s1.merge(s2));
+        expect.throws(() => s1.merge(null));
+      });
+
+      test("F233-T09: FACMACContinuousPricing initializes with actor, critic, and mixing weights", () => {
+        const facmac = new FACMACContinuousPricing({ maxAdjustment: 0.20, learningRate: 0.01 });
+        expect.equal(facmac.maxAdjustment, 0.20);
+        expect.equal(facmac.learningRate, 0.01);
+        expect.ok(facmac.actorWeights.length === 4);
+        expect.ok(facmac.criticWeights.length === 4);
+        expect.ok(facmac.mixingWeights.length === 4);
+      });
+
+      test("F233-T10: actorPolicy maps vendor state to continuous action in [-maxAdjustment, +maxAdjustment]", () => {
+        const facmac = new FACMACContinuousPricing({ maxAdjustment: 0.20 });
+        const action = facmac.actorPolicy({
+          currentPrice: 150000,
+          stock: 60,
+          cogs: 90000,
+          marketDemand: 80
+        });
+        expect.ok(typeof action === "number");
+        expect.ok(action >= -0.20 && action <= 0.20, `Action ${action} outside [-0.20, +0.20]`);
+      });
+
+      test("F233-T11: evaluateIndividualQ computes positive individual utility Q_i(s_i, a_i)", () => {
+        const facmac = new FACMACContinuousPricing();
+        const qi = facmac.evaluateIndividualQ({ currentPrice: 100000, stock: 50, cogs: 70000 }, 0.05);
+        expect.ok(qi > 0, `Expected positive Q-value, got ${qi}`);
+      });
+
+      test("F233-T12: mixingNetwork generates strictly non-negative partial derivatives dQ_jt / dQ_i >= 0", () => {
+        const facmac = new FACMACContinuousPricing();
+        const individualQs = [0.45, 0.62, 0.38];
+        const res = facmac.mixingNetwork(individualQs, { basketSynergy: 0.20 });
+        expect.ok(res.jointQ > 0);
+        expect.equal(res.partialDerivatives.length, 3);
+        res.partialDerivatives.forEach(grad => {
+          expect.ok(grad >= 0, `Monotonicity violated: gradient ${grad} < 0`);
+        });
+      });
+
+      test("F233-T13: optimizePricing enforces strict safe floor P_i >= 1.05 * COGS_i for all vendors", () => {
+        const facmac = new FACMACContinuousPricing({ maxAdjustment: 0.30 });
+        const vendors = [
+          { id: "v1", name: "Shop Alpha", currentPrice: 85000, cogs: 80000, stock: 40, marketDemand: 30 },
+          { id: "v2", name: "Shop Beta", currentPrice: 200000, cogs: 120000, stock: 90, marketDemand: 70 }
+        ];
+        const opt = facmac.optimizePricing(vendors);
+        expect.equal(opt.algorithm, "FACMAC_CONTINUOUS_PRICING");
+        expect.ok(opt.isMonotonicGuaranteed);
+        expect.equal(opt.recommendations.length, 2);
+
+        opt.recommendations.forEach(r => {
+          expect.ok(r.recommendedPrice >= r.safeFloor, `Price ${r.recommendedPrice} below safe floor ${r.safeFloor}`);
+          expect.ok(r.grossMarginPct >= 4.5, `Gross margin ${r.grossMarginPct}% too low`);
+        });
+      });
+
+      test("F233-T14: optimizePricing computes jointQ, merchant margins, and credit attribution", () => {
+        const facmac = new FACMACContinuousPricing();
+        const vendors = [
+          { id: "v1", currentPrice: 100000, cogs: 60000, stock: 50 },
+          { id: "v2", currentPrice: 150000, cogs: 100000, stock: 80 }
+        ];
+        const opt = facmac.optimizePricing(vendors);
+        expect.ok(opt.jointQ > 0);
+        expect.ok(opt.totalGmv > 0);
+        expect.ok(opt.totalProfit > 0);
+        opt.recommendations.forEach(r => {
+          expect.ok(typeof r.creditAttributionScore === "number");
+          expect.ok(r.creditAttributionScore > 0);
+        });
+      });
+
+      test("F233-T15: generateFACMACReport produces executive audit report with all mathematical guarantees", () => {
+        const facmac = new FACMACContinuousPricing();
+        const vendors = [
+          { id: "v1", currentPrice: 120000, cogs: 80000, stock: 50 },
+          { id: "v2", currentPrice: 90000, cogs: 70000, stock: 30 }
+        ];
+        const report = facmac.generateFACMACReport(vendors);
+        expect.equal(report.success, true);
+        expect.equal(report.summary.totalVendors, 2);
+        expect.equal(report.summary.allMonotonic, true);
+        expect.equal(report.mathematicalGuarantees.length, 3);
+      });
+
+      test("F233-T16: ServerFACMACContinuousPricing maintains 100% parity with Client implementation", () => {
+        const serverFacmac = new ServerFACMACContinuousPricing();
+        const clientFacmac = new FACMACContinuousPricing();
+        const testVendor = { id: "v_parity", currentPrice: 140000, cogs: 95000, stock: 75, marketDemand: 60 };
+
+        const serverAction = serverFacmac.actorPolicy(testVendor);
+        const clientAction = clientFacmac.actorPolicy(testVendor);
+        expect.equal(serverAction, clientAction);
+
+        const serverQ = serverFacmac.evaluateIndividualQ(testVendor, serverAction);
+        const clientQ = clientFacmac.evaluateIndividualQ(testVendor, clientAction);
+        expect.equal(serverQ, clientQ);
+      });
+
+      test("F233-T17: EVRPTWDroneTandemRechargeRouter initializes with van, drone, and dock specs", () => {
+        const router = new EVRPTWDroneTandemRechargeRouter({
+          vanBatteryKWh: 75.0,
+          droneBatteryKWh: 2.5,
+          dockPowerKW: 3.5
+        });
+        expect.equal(router.vanBatteryKWh, 75.0);
+        expect.equal(router.droneBatteryKWh, 2.5);
+        expect.equal(router.dockPowerKW, 3.5);
+        expect.equal(router.maxDronePayloadKg, 3.0);
+      });
+
+      test("F233-T18: calculateDistance and isDroneEligible evaluate payload and access constraints", () => {
+        const router = new EVRPTWDroneTandemRechargeRouter();
+        const dist = router.calculateDistance({ x: 0, y: 0 }, { x: 3, y: 4 });
+        expect.equal(dist, 5.0);
+
+        expect.equal(router.isDroneEligible({ weightKg: 2.0, accessType: "ROOFTOP" }), true);
+        expect.equal(router.isDroneEligible({ weightKg: 1.2 }), true);
+        expect.equal(router.isDroneEligible({ weightKg: 4.5, accessType: "ROOFTOP" }), false);
+      });
+
+      test("F233-T19: planTandemRoute synchronizes van road legs with drone aerial sorties", () => {
+        const router = new EVRPTWDroneTandemRechargeRouter();
+        const depot = { id: "hub_central", x: 0, y: 0 };
+        const customers = [
+          { id: "cust_ground1", x: 2, y: 1, weightKg: 8.0, accessType: "STANDARD_ROAD" },
+          { id: "cust_rooftop1", x: 2.5, y: 2.5, weightKg: 1.5, accessType: "ROOFTOP" },
+          { id: "cust_ground2", x: 4, y: 2, weightKg: 10.0, accessType: "STANDARD_ROAD" }
+        ];
+
+        const plan = router.planTandemRoute(depot, customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.vanRoute.length >= 3);
+        expect.ok(plan.droneSorties.length >= 1);
+        expect.equal(plan.droneSorties[0].customer.id, "cust_rooftop1");
+      });
+
+      test("F233-T20: In-transit contact dock transfer recharges drone battery dynamically", () => {
+        const router = new EVRPTWDroneTandemRechargeRouter();
+        const depot = { id: "hub_0", x: 0, y: 0 };
+        const customers = [
+          { id: "c1", x: 5, y: 0, weightKg: 12.0 },
+          { id: "c_drone", x: 2.5, y: 3, weightKg: 1.0, isRooftop: true },
+          { id: "c2", x: 10, y: 0, weightKg: 15.0 }
+        ];
+        const plan = router.planTandemRoute(depot, customers);
+        expect.ok(plan.metrics.totalInTransitRechargeKWh >= 0);
+        expect.ok(plan.metrics.droneBatteryRemainingKWh > 0);
+        expect.ok(plan.metrics.vanBatteryRemainingKWh > 0);
+      });
+
+      test("F233-T21: planTandemRoute calculates travel time savings, CO2 reduction, and issues pass", () => {
+        const router = new EVRPTWDroneTandemRechargeRouter();
+        const depot = { id: "depot_main", x: 0, y: 0 };
+        const customers = [
+          { id: "stop1", x: 4, y: 0, weightKg: 5.0 },
+          { id: "stop_air", x: 4, y: 3, weightKg: 1.2, isAlley: true },
+          { id: "stop2", x: 8, y: 0, weightKg: 6.0 }
+        ];
+        const plan = router.planTandemRoute(depot, customers);
+        expect.ok(plan.metrics.totalTravelTimeHours > 0);
+        expect.ok(plan.certificate.passId.startsWith("TANDEM_DRONE_ROOFTOP_CLEARANCE_PASS"));
+        expect.equal(plan.certificate.status, "VERIFIED_ZERO_CONGESTION_DELIVERY");
+      });
+
+      test("F233-T22: ServerEVRPTWDroneTandemRechargeRouter maintains 100% parity with Client implementation", () => {
+        const serverRouter = new ServerEVRPTWDroneTandemRechargeRouter();
+        const clientRouter = new EVRPTWDroneTandemRechargeRouter();
+        const depot = { id: "hub_parity", x: 0, y: 0 };
+        const customers = [
+          { id: "cp1", x: 3, y: 1, weightKg: 6.0 },
+          { id: "cp2", x: 3.5, y: 2, weightKg: 1.5, accessType: "ROOFTOP" },
+          { id: "cp3", x: 6, y: 1, weightKg: 7.0 }
+        ];
+
+        const serverPlan = serverRouter.planTandemRoute(depot, customers);
+        const clientPlan = clientRouter.planTandemRoute(depot, customers);
+
+        expect.equal(serverPlan.metrics.totalVanDistanceKm, clientPlan.metrics.totalVanDistanceKm);
+        expect.equal(serverPlan.metrics.totalDroneDistanceKm, clientPlan.metrics.totalDroneDistanceKm);
+        expect.equal(serverPlan.droneSorties.length, clientPlan.droneSorties.length);
+      });
+
+      test("F233-T23: Admin Sentinel Copilot Sections 239, 240, 241 respond accurately to Phase 86 queries", () => {
+        const resBipartite = generateAdminCopilotResponse("Tóm tắt tần suất cạnh đồ thị hai phía BipartiteGraphEdgeStreamSketch Ahmed KDD 2017");
+        expect.equal(resBipartite.tag, "BIPARTITE GRAPH STREAM SKETCH");
+        expect.ok(resBipartite.text.includes("BIPARTITE GRAPH STREAM SKETCH"));
+
+        const resFACMAC = generateAdminCopilotResponse("Gradient chính sách tập trung phân rã liên tục facmac monotonic mixing continuous Peng NeurIPS");
+        expect.equal(resFACMAC.tag, "FACMAC CONTINUOUS PRICING");
+        expect.ok(resFACMAC.text.includes("FACMAC"));
+
+        const resDrone = generateAdminCopilotResponse("Định tuyến xe điện flycam giao hàng evrptw-drone tandem sạc tiếp điểm động Murray Chu Poikonen");
+        expect.equal(resDrone.tag, "EVRPTW DRONE TANDEM RECHARGE ROUTER");
+        expect.ok(resDrone.text.includes("EVRPTW DRONE TANDEM"));
+      });
+
+      test("F233-T24: Seller ShopSmart Copilot Section 95 and Buyer Assistant Intent 88 handle Phase 86 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn đồ thị hai phía bipartite sketch và định giá liên tục facmac cho gian hàng");
+        expect.equal(sellerRes.tag, "BIPARTITE SKETCH, FACMAC PRICING & DRONE TANDEM ROUTER");
+        expect.ok(sellerRes.text.includes("FACMAC"));
+
+        const buyerRes = generateAiChatResponse("Sàn có hỗ trợ giao hàng bằng flycam evrptw-drone tandem sạc tiếp điểm hoặc đồ thị hai phía bipartite không?");
+        expect.equal(buyerRes.intent, "BIPARTITE_FACMAC_DRONE_ASSIST");
+        expect.ok(buyerRes.replyText.includes("BIPARTITE"));
       });
     });
   });
