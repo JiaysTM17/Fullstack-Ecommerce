@@ -7,7 +7,8 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI/CD](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/JiaysTM17/Fullstack-Ecommerce/actions)
-[![Tests Passing](https://img.shields.io/badge/Tests-636%2F636%20Passing%20(100%25)-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/JiaysTM17/Fullstack-Ecommerce)
+[![Tests Passing](https://img.shields.io/badge/Tests-3055%2F3055%20Passing%20(100%25)-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](tests/run-all.js)
+[![Phases](https://img.shields.io/badge/Enterprise_Algorithms-86_Phases-blue?style=for-the-badge&logo=probot&logoColor=white)](docs/BAO_CAO_NGHIEN_CUU_VA_PHAN_TICH_THUAT_TOAN_DOANH_NGHIEP.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
@@ -340,7 +341,23 @@ Hệ thống tích hợp sẵn tính năng **Đăng Nhập Nhanh 1-Click** tại
 
 ---
 
-## 📚 Hệ Thống Tài Liệu Kỹ Thuật Chi Tiết (Technical Documentation)
+## 📦 BỘ HỒ SƠ TÀI LIỆU & BÁO CÁO BÀN GIAO PHẦN MỀM CHO KHÁCH HÀNG (ENTERPRISE DELIVERY PACKAGE)
+
+Nhằm đảm bảo sản phẩm phần mềm khi chuyển giao cho Khách hàng / Chủ đầu tư đạt chuẩn chuyên nghiệp cấp doanh nghiệp, toàn bộ hồ sơ phân tích, thiết kế, báo cáo kiểm định và sổ tay vận hành đã được biên soạn chi tiết:
+
+| STT | Hồ Sơ Tài Liệu & Báo Cáo Chuyên Sâu | Vị Trí Lưu Trữ | Nội Dung & Giá Trị Bàn Giao |
+| :---: | :--- | :--- | :--- |
+| **1** | **Báo Cáo Phân Tích Yêu Cầu & Nghiệp Vụ Hệ Thống (SRS/BRD)** | [docs/BAO_CAO_PHAN_TICH_YEU_CAU_VA_NGHIEP_VU_SRS.md](docs/BAO_CAO_PHAN_TICH_YEU_CAU_VA_NGHIEP_VU_SRS.md) | Phân tích bài toán TMĐT Multi-Vendor, 4 nhóm đối tượng, quy trình Escrow Vault, đối soát thuế Nghị định 52/2018/NĐ-CP & TT 40/2021, ma trận RBAC. |
+| **2** | **Báo Cáo Thiết Kế Kiến Trúc & Công Nghệ Hệ Thống (SAD/TDD)** | [docs/BAO_CAO_THIET_KE_KIEN_TRUC_HE_THONG_SAD.md](docs/BAO_CAO_THIET_KE_KIEN_TRUC_HE_THONG_SAD.md) | Kiến trúc tầng, Optimistic Concurrency Control (OCC CAS) chống bán vượt kho Flash Sale, Circuit Breaker, Token Bucket, ERD & Data Dictionary. |
+| **3** | **Báo Cáo Nghiên Cứu & Phân Tích 86 Phase Thuật Toán Doanh Nghiệp** | [docs/BAO_CAO_NGHIEN_CUU_VA_PHAN_TICH_THUAT_TOAN_DOANH_NGHIEP.md](docs/BAO_CAO_NGHIEN_CUU_VA_PHAN_TICH_THUAT_TOAN_DOANH_NGHIEP.md) | Phân tích 233+ tính năng toán học & AI/ML: Streaming Sketches (MomentSketch, Bipartite Sketch), Multi-Agent RL (QMIX, QTRAN, FACMAC), EVRPTW Drone Tandem Recharging, Tri-Role AI Copilots. |
+| **4** | **Báo Cáo Đảm Bảo Chất Lượng & Kiểm Thử Tự Động Toàn Diện (QA Report)** | [docs/BAO_CAO_KIEM_THU_CHAT_LUONG_TOAN_DIEN_QA.md](docs/BAO_CAO_KIEM_THU_CHAT_LUONG_TOAN_DIEN_QA.md) | Kết quả kiểm thử tự động 100% Pass (3.055/3.055 tests qua 4 tầng kim tự tháp), Stress test Concurrency OCC, kiểm thử bảo mật OWASP Top 10, kiểm tra build Production 0 lỗi. |
+| **5** | **Hướng Dẫn Cài Đặt, Triển Khai & Vận Hành Hệ Thống (DevOps Runbook)** | [docs/HUONG_DAN_CAI_DAT_TRIEN_KHAI_VAN_HANH_RUNBOOK.md](docs/HUONG_DAN_CAI_DAT_TRIEN_KHAI_VAN_HANH_RUNBOOK.md) | Cài đặt từ mã nguồn, Docker Compose, Nginx Reverse Proxy với HTTPS SSL Let's Encrypt, biến môi trường `.env`, sao lưu và phục hồi dữ liệu thảm họa (Disaster Recovery). |
+| **6** | **Sổ Tay Hướng Dẫn Sử Dụng Dành Cho Khách Hàng (Customer User Manual)** | [docs/SO_TAY_HUONG_DAN_SU_DUNG_KHACH_HANG.md](docs/SO_TAY_HUONG_DAN_SU_DUNG_KHACH_HANG.md) | Cẩm nang chi tiết 3 phân hệ: Người mua (Buyer Portal), Người bán (Seller Center), và Ban Quản trị Sàn (Admin Portal) kèm hướng dẫn tương tác 3 Trợ lý AI Copilot. |
+| **7** | **Biên Bản Nghiệm Thu Kỹ Thuật & Bàn Giao Phần Mềm** | [docs/BIEN_BAN_NGHIEM_THU_VA_BAN_GIAO_PHAN_MEM.md](docs/BIEN_BAN_NGHIEM_THU_VA_BAN_GIAO_PHAN_MEM.md) | Văn bản bàn giao chính thức, danh mục sản phẩm, ma trận nghiệm thu chức năng & cam kết bảo hành, hỗ trợ kỹ thuật (SLA 12 tháng). |
+
+---
+
+## 📚 Hệ Thống Tài Liệu Kỹ Thuật Bổ Trợ (Supplementary Technical Documentation)
 
 * [🗺️ Lộ Trình Phát Triển & Đối Chiếu 8 Giai Đoạn (docs/roadmap.md)](docs/roadmap.md)
 * [🔌 Tài Liệu Đặc Tả 9 Nhóm RESTful API (docs/api.md)](docs/api.md)
@@ -348,25 +365,25 @@ Hệ thống tích hợp sẵn tính năng **Đăng Nhập Nhanh 1-Click** tại
 * [🏗️ Kiến Trúc Hệ Thống & Luồng Request-Response (docs/architecture.md)](docs/architecture.md)
 * [🗄️ Thiết Kế Cơ Sở Dữ Liệu & Data Dictionary 7 Bảng (docs/database.md)](docs/database.md)
 * [🔒 Chính Sách Bảo Mật, Chuẩn OWASP & Phân Quyền RBAC (docs/security.md)](docs/security.md)
-* [🧪 Chiến Lược & Cấu Trúc 4 Tầng Kiểm Thử 450 Tests (docs/testing.md)](docs/testing.md)
+* [🧪 Chiến Lược & Cấu Trúc 4 Tầng Kiểm Thử (docs/testing.md)](docs/testing.md)
 * [🚀 Hướng Dẫn Triển Khai Production: VPS, Nginx, PM2 & Docker (docs/deployment.md)](docs/deployment.md)
 
 ---
 
 ## 🧪 Kiểm Thử & Đảm Bảo Chất Lượng (Quality Assurance & Tests)
 
-Dự án áp dụng quy trình kiểm thử tự động nghiêm ngặt gồm **621 tests** được tổ chức theo 4 tầng tiêu chuẩn:
+Dự án áp dụng quy trình kiểm thử tự động nghiêm ngặt gồm **3.055 tests** được tổ chức theo 4 tầng tiêu chuẩn:
 
-* **Tier 1 (Core Features - 355 tests):** Kiểm thử toàn diện 56 tính năng độc lập thuộc 9 phân hệ chính (Phân quyền RBAC, Hệ thống Voucher kép, Trợ lý ảo AI & Handover, Hậu mãi & Đổi trả, Danh mục & Tìm kiếm, Chất lượng mã nguồn, Phân hệ Người mua Phase 1 & 2, và Backend Full Overhaul v3.0).
+* **Tier 1 (Core Features & 86 Phase Algorithms - 2.789 tests):** Kiểm thử toàn diện 233+ tính năng độc lập thuộc các phân hệ chính (Phân quyền RBAC, Hệ thống Voucher kép, Trợ lý ảo AI Tri-Role, Két ký quỹ Escrow, Hậu mãi & Đổi trả, Toàn bộ 86 Phase thuật toán doanh nghiệp).
 * **Tier 2 (Boundary & Validation - 230 tests):** Kiểm tra giá trị biên và bảo mật khắt khe (tồn kho âm, tấn công XSS/SQL Injection, upload file quá khổ, voucher quá hạn, vượt mức giảm tối đa, rate limiting).
 * **Tier 3 (Combinations - 24 tests):** Ma trận tương tác chéo giữa các tính năng (áp đồng thời 2 voucher + trừ xu 50% trần + giỏ hàng đa shop + SPX logistics + VAT invoice).
 * **Tier 4 (Real-world Scenarios - 12 tests):** Hành trình người dùng hoàn chỉnh từ đăng ký, mua sắm đa shop, xuất hóa đơn VAT, giao hàng SPX live GPS đến hậu mãi hoàn tiền và đánh giá 5 sao nhận thưởng xu.
 
 ```bash
 # Thực thi toàn bộ kiểm thử
-node tests/run-all.js
+npm test
 ```
-*Kết quả:* **`621/621 tests passed (100% Pass Rate)`**.
+*Kết quả thực thi:* **`3.055 / 3.055 tests passed (100% Pass Rate) trong 1.60 giây`**.
 
 ---
 

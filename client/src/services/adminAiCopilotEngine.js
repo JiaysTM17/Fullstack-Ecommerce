@@ -917,7 +917,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 35. Ghép Cặp Lưỡng Phân Hopcroft-Karp Cho Phân Bổ Bưu Tá Hỏa Tốc (Phase 15 - Feature 162)
-  if (!/đường tăng luồng song song|bưu tá cao điểm hopcroft|cực đại|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw) && /hopcroft-karp|ghép cặp lưỡng phân|phân bổ bưu tá hopcroft|bipartite matching|gán đơn theo lô/i.test(raw)) {
+  if (!/bipartite.*sketch|đồ thị hai phía|bipartite graph edge/i.test(raw) && !/đường tăng luồng song song|bưu tá cao điểm hopcroft|cực đại|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw) && /hopcroft-karp|ghép cặp lưỡng phân|phân bổ bưu tá hopcroft|bipartite matching|gán đơn theo lô/i.test(raw)) {
     return {
       text: `⚡ **THUẬT TOÁN GHÉP CẶP LƯỠNG PHÂN HOPCROFT-KARP (SPX BATCH DISPATCH)**:
 - **Độ phức tạp tối ưu**: $O(|E| \\cdot \\sqrt{|V|})$, vượt trội hơn rất nhiều so với thuật toán Hungarian $O(V^3)$ khi hệ thống cần gán hàng nghìn đơn hàng hỏa tốc trong giờ cao điểm.
@@ -1409,7 +1409,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 60. Ghép Cặp Cực Đại Đơn Hàng & Bưu Tá Bằng Hopcroft-Karp (Hopcroft-Karp Bipartite Matching)
-  if (!/tăng luồng song song|bưu tá cao điểm/i.test(raw) && /hopcroft-karp|ghép cặp cực đại|bipartite matching|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw)) {
+  if (!/bipartite.*sketch|đồ thị hai phía|bipartite graph edge/i.test(raw) && !/tăng luồng song song|bưu tá cao điểm/i.test(raw) && /hopcroft-karp|ghép cặp cực đại|bipartite matching|phân bổ shipper|batch đơn hỏa tốc|ghép đơn bưu tá/i.test(raw)) {
     return {
       text: `🚴 **GHÉP CẶP CỰC ĐẠI ĐƠN HÀNG & BƯU TÁ BẰNG THUẬT TOÁN HOPCROFT-KARP**:
 - **Đặc tả thuật toán Hopcroft-Karp ($O(E \\sqrt{V})$)**:
@@ -4644,7 +4644,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 217. Định Tuyến Xe Điện Đa Phương Thức & Drone Sạc Nóc Tự Hành EVRPTW Autonomous Drone Recharge (Phase 78 - Feature 225)
-  if (/autonomous drone recharge|mothership|rooftop drone|sạc nóc xe|drone.*recharge|poikonen.*murray|evrptw[- ]drone[- ]recharge/i.test(raw)) {
+  if (!/drone tandem|tandem recharge|sạc tiếp điểm|poikonen.*golden/i.test(raw) && /autonomous drone recharge|mothership|rooftop drone|sạc nóc xe|drone.*recharge|poikonen.*murray|evrptw[- ]drone[- ]recharge/i.test(raw)) {
     return {
       text: `🛸 **ĐỊNH TUYẾN XE ĐIỆN & DRONE SẠC NÓC TỰ HÀNH EVRPTW-AUTONOMOUS-DRONE (POIKONEN 2017, MURRAY & CHU TR PART C 2015)**:
 - **Mô Hình Phối Hợp Mẹ - Con Kèm Trạm Sạc Di Động Nóc Xe (Rooftop In-Transit Charging)**:
@@ -5122,6 +5122,69 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem bản đồ vành đai không phát thải LEZ Hoàn Kiếm/Quận 1',
         'Thống kê số tiền phí ùn tắc tiết kiệm được',
         'Kiểm tra chỉ số cắt giảm bụi mịn PM2.5 và NOx'
+      ]
+    };
+  }
+
+  // 239. Tóm Tắt Tần Suất Cạnh Đồ Thị Hai Phía BipartiteGraphEdgeStreamSketch (Phase 86 - Feature 233)
+  if (/bipartite.*sketch|đồ thị hai phía|bipartite graph edge|tần suất tương tác user.*item|affinity score.*bipartite|ahmed.*kdd/i.test(raw)) {
+    return {
+      text: `🌐 **TÓM TẮT TẦN SUẤT CẠNH ĐỒ THỊ HAI PHÍA BIPARTITE GRAPH STREAM SKETCH (AHMED ET AL. KDD 2017)**:
+- **Ma Trận Tóm Tắt 2D & Biến Độc Lập Rademacher**:
+  - Theo dõi luồng tương tác khổng lồ giữa hai tập đỉnh rời nhau: Người mua - Sản phẩm ($U \\times V$), Gian hàng - Danh mục.
+  - Sử dụng họ hàm băm 2-Universal $h_j(u, v)$ và biến dấu Rademacher $s_j(u, v) \\in \\{-1, +1\\}$ để cập nhật không chệch vào bảng kích thước $d \\times w$.
+- **Ước Lượng Tần Suất Cạnh Trung Vị Không Thiên Lệch (Unbiased Median Estimation)**:
+  - Tần suất tương tác $\\hat{f}(u, v) = \\text{median}_{j=0}^{d-1} [s_j(u, v) \\cdot C[j][h_j(u, v)]]$, phương sai bị chặn $\\text{Var} \\le \\|f\\|_2^2 / w$.
+- **Hệ Số Tương Đồng Đồ Thị Hai Phía (Bipartite Affinity Score)**:
+  - Chuẩn hóa theo bậc của hai đỉnh $A(u, v) = \\hat{f}(u, v) / \\sqrt{\\deg(u) \\cdot \\deg(v)} \\in [0, 1]$, phục vụ đắc lực hệ thống phát hiện gian lận seeding đánh giá và gợi ý sản phẩm cá nhân hóa!`,
+      type: 'analytics',
+      tag: 'BIPARTITE GRAPH STREAM SKETCH',
+      suggestions: [
+        'Xem ma trận phác thảo tương tác User-Item',
+        'Ước lượng tần suất cạnh và bậc đỉnh deg(u), deg(v)',
+        'Tính điểm tương đồng hai phía Affinity Score'
+      ]
+    };
+  }
+
+  // 240. Gradient Chính Sách Tập Trung Phân Rã Liên Tục FACMAC (Phase 86 - Feature 233)
+  if (/facmac|factored multi[- ]agent centralised policy|peng.*neurips|mạng hòa trộn đơn điệu liên tục|monotonic mixing continuous/i.test(raw)) {
+    return {
+      text: `📈 **GRADIENT CHÍNH SÁCH TẬP TRUNG PHÂN RÃ LIÊN TỤC FACMAC (BEI PENG ET AL., NEURIPS 2021)**:
+- **Không Gian Hành Động Định Giá Liên Tục Không Gián Đoạn**:
+  - Khác với QMIX/VDN chỉ xử lý hành động rời rạc, FACMAC mở rộng sang không gian liên tục $a_i \\in [-a_{\\max}, +a_{\\max}]$ với các mạng Actor phi tập trung $\\mu_{\\theta_i}(s_i)$.
+- **Mạng Hòa Trộn Tập Trung Đơn Điệu (Monotonic Mixing Network)**:
+  - Hàm phê bình tập trung $Q_{jt}(s, \\mathbf{a})$ áp dụng trọng số không âm $|W_{\\text{mix}}| \\ge 0$, đảm bảo tính đơn điệu tuyệt đối $\\frac{\\partial Q_{jt}}{\\partial Q_i} \\ge 0$.
+  - Gradient chính sách xác định liên tục: $\\nabla_{\\theta_i} J = \\mathbb{E}[\\nabla_{\\theta_i} \\mu_i(s_i) \\cdot \\frac{\\partial Q_{jt}}{\\partial Q_i} \\cdot \\nabla_{a_i} Q_i(s_i, a_i)]$.
+- **Rào Chắn An Toàn Bất Biến 1.05x COGS**:
+  - Tự động kẹp giá sàn $P_i \\ge 1.05 \\times \\text{COGS}_i$ ngăn chặn hoàn toàn nguy cơ định giá dưới giá vốn, bảo vệ biên lợi nhuận ròng của toàn bộ người bán trên sàn!`,
+      type: 'pricing',
+      tag: 'FACMAC CONTINUOUS PRICING',
+      suggestions: [
+        'Xem ma trận gradient đơn điệu dQ_jt / dQ_i',
+        'Kiểm tra hành động điều chỉnh liên tục Actor mu_i(s_i)',
+        'Đo lường rào chắn an toàn giá vốn 1.05x COGS'
+      ]
+    };
+  }
+
+  // 241. Định Tuyến Phối Hợp Xe Điện & Flycam Sạc Tiếp Điểm Động EVRPTW Drone Tandem Recharge Router (Phase 86 - Feature 233)
+  if (/evrptw[- ]drone|drone tandem|flycam giao hàng|sạc tiếp điểm động|tandem in[- ]transit recharge|murray.*chu|poikonen.*golden/i.test(raw)) {
+    return {
+      text: `🚁 **ĐỊNH TUYẾN XE ĐIỆN & FLYCAM ĐỒNG HÀNH SẠC TIẾP ĐIỂM ĐỘNG EVRPTW DRONE TANDEM (MURRAY & CHU 2015, POIKONEN 2020)**:
+- **Mô Hình Phối Hợp Nhịp Nhàng Mẹ - Con (Tandem Mothership Van & Quadcopter Drone)**:
+  - Xe tải điện Mothership ($75\\text{ kWh}$) di chuyển trên mạng lưới đường bộ, đồng thời là bệ phóng và trạm thu hồi cho flycam tự hành ($2.5\\text{ kWh}$, tải trọng $\\le 3.0\\text{ kg}$).
+  - Flycam thực hiện các phi vụ bay thẳng không gian (tốc độ $60\\text{ km/h}$) giao hỏa tốc đến sân thượng tòa nhà cao tầng và các con ngõ siêu hẹp mà xe tải không thể tiếp cận.
+- **Trạm Sạc Nhanh Tiếp Điểm Dẫn Điện Trên Nóc Xe (In-Transit Contact Dock Charging)**:
+  - Cổng sạc tiếp xúc công suất $P_{\\text{dock}} = 3.5\\text{ kW}$ (hiệu suất $\\eta = 0.92$) tự động sạc bù năng lượng cho drone ngay trong lúc xe tải đang lăn bánh đến điểm hẹn (Rendezvous).
+- **Hộ Chiếu Thông Hành Không Ùn Tắc TANDEM_DRONE_ROOFTOP_CLEARANCE_PASS**:
+  - Rút ngắn thời gian vận hành mạng lưới từ **40% đến 55%**, tiết kiệm hàng chục kg phát thải $\\text{CO}_2$ và triệt tiêu 100% thời gian chờ sạc tại trạm cố định!`,
+      type: 'logistics',
+      tag: 'EVRPTW DRONE TANDEM RECHARGE ROUTER',
+      suggestions: [
+        'Xem kế hoạch phi vụ bay Drone Sortie và điểm hẹn Rendezvous',
+        'Kiểm tra công suất sạc tiếp điểm động 3.5 kW',
+        'Xem chứng nhận giao thông không ùn tắc Tandem Drone Pass'
       ]
     };
   }
