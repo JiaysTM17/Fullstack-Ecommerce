@@ -437,6 +437,10 @@ import {
   BipartiteGraphEdgeStreamSketch,
   FACMACContinuousPricing,
   EVRPTWDroneTandemRechargeRouter,
+  // Phase 87 Enterprise Algorithms
+  HyperLogLogTailCutSketch,
+  COPACooperativePricing,
+  EVRPTWMobileChargingTruckRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -663,6 +667,9 @@ import { EVRPTWUrbanLowEmissionZoneRouter as ServerEVRPTWUrbanLowEmissionZoneRou
 import { BipartiteGraphEdgeStreamSketch as ServerBipartiteGraphEdgeStreamSketch } from "../../server/src/utils/bipartiteGraphEdgeStreamSketch.js";
 import { FACMACContinuousPricing as ServerFACMACContinuousPricing } from "../../server/src/utils/facmacContinuousPricing.js";
 import { EVRPTWDroneTandemRechargeRouter as ServerEVRPTWDroneTandemRechargeRouter } from "../../server/src/utils/evrptwDroneTandemRechargeRouter.js";
+import { HyperLogLogTailCutSketch as ServerHyperLogLogTailCutSketch } from "../../server/src/utils/hyperLogLogTailCutSketch.js";
+import { COPACooperativePricing as ServerCOPACooperativePricing } from "../../server/src/utils/copaCooperativePricing.js";
+import { EVRPTWMobileChargingTruckRouter as ServerEVRPTWMobileChargingTruckRouter } from "../../server/src/utils/evrptwMobileChargingTruckRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -36136,6 +36143,279 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sàn có hỗ trợ giao hàng bằng flycam evrptw-drone tandem sạc tiếp điểm hoặc đồ thị hai phía bipartite không?");
         expect.equal(buyerRes.intent, "BIPARTITE_FACMAC_DRONE_ASSIST");
         expect.ok(buyerRes.replyText.includes("BIPARTITE"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 234: HyperLogLog Tail-Cut Sketch, COPA Cooperative Pricing, & EVRPTW Mobile Charging Truck Router (Phase 87 - 24 Tests)
+    // =========================================================================
+    describe("Feature 234: HyperLogLog Tail-Cut Sketch, COPA Cooperative Pricing, & EVRPTW Mobile Charging Truck Router", () => {
+      test("F234-T01: HyperLogLogTailCutSketch initializes with valid precision, m registers, and alphaM constant", () => {
+        const sketch = new HyperLogLogTailCutSketch({ precision: 8, maxRegisterValue: 32 });
+        expect.equal(sketch.precision, 8);
+        expect.equal(sketch.m, 256);
+        expect.equal(sketch.maxRegisterValue, 32);
+        expect.equal(sketch.registers.length, 256);
+        expect.equal(sketch.totalInserts, 0);
+        expect.ok(sketch.alphaM > 0.7);
+      });
+
+      test("F234-T02: Hash generation and _rho trailing zero run counter works consistently", () => {
+        const sketch = new HyperLogLogTailCutSketch({ precision: 10 });
+        const h1 = sketch._hash64("item_test_1");
+        const h2 = sketch._hash64("item_test_1");
+        expect.equal(h1.high, h2.high);
+        expect.equal(h1.low, h2.low);
+        expect.equal(sketch._rho(1), 1);
+        expect.equal(sketch._rho(2), 2);
+        expect.equal(sketch._rho(4), 3);
+        expect.equal(sketch._rho(8), 4);
+      });
+
+      test("F234-T03: Single and multiple element insertions update registers within maxRegisterValue cap", () => {
+        const sketch = new HyperLogLogTailCutSketch({ precision: 6, maxRegisterValue: 20 });
+        for (let i = 0; i < 50; i++) {
+          sketch.add(`visitor_session_${i}`);
+        }
+        expect.equal(sketch.totalInserts, 50);
+        let nonZero = 0;
+        for (let j = 0; j < sketch.m; j++) {
+          if (sketch.registers[j] > 0) nonZero++;
+          expect.ok(sketch.registers[j] <= 20);
+        }
+        expect.ok(nonZero > 0);
+      });
+
+      test("F234-T04: Linear Counting small-range correction provides accurate low cardinality estimates", () => {
+        const sketch = new HyperLogLogTailCutSketch({ precision: 10 });
+        const distinctItems = 40;
+        for (let i = 0; i < distinctItems; i++) {
+          sketch.add(`sku_unique_${i}`);
+        }
+        const est = sketch.estimateCardinality();
+        expect.ok(est >= 30 && est <= 55, `Estimate ${est} should be close to 40`);
+      });
+
+      test("F234-T05: Merging two sketches takes elementwise max and maintains valid state", () => {
+        const s1 = new HyperLogLogTailCutSketch({ precision: 8 });
+        const s2 = new HyperLogLogTailCutSketch({ precision: 8 });
+        for (let i = 0; i < 30; i++) s1.add(`item_A_${i}`);
+        for (let i = 0; i < 30; i++) s2.add(`item_B_${i}`);
+        s1.merge(s2);
+        expect.equal(s1.totalInserts, 60);
+        const estMerged = s1.estimateCardinality();
+        expect.ok(estMerged >= 45 && estMerged <= 80);
+      });
+
+      test("F234-T06: getTelemetry returns precision, numRegisters, fillRatio, and estimatedCardinality", () => {
+        const sketch = new HyperLogLogTailCutSketch({ precision: 7 });
+        for (let i = 0; i < 25; i++) sketch.add(`session_${i}`);
+        const tel = sketch.getTelemetry();
+        expect.equal(tel.precision, 7);
+        expect.equal(tel.numRegisters, 128);
+        expect.equal(tel.totalInserts, 25);
+        expect.ok(tel.fillRatio > 0 && tel.fillRatio <= 1);
+        expect.equal(tel.memorySizeBytes, 128);
+      });
+
+      test("F234-T07: ServerHyperLogLogTailCutSketch maintains 100% parity with Client implementation", () => {
+        const serverSketch = new ServerHyperLogLogTailCutSketch({ precision: 8 });
+        const clientSketch = new HyperLogLogTailCutSketch({ precision: 8 });
+        for (let i = 0; i < 35; i++) {
+          serverSketch.add(`parity_item_${i}`);
+          clientSketch.add(`parity_item_${i}`);
+        }
+        expect.equal(serverSketch.estimateCardinality(), clientSketch.estimateCardinality());
+        expect.equal(serverSketch.totalInserts, clientSketch.totalInserts);
+        expect.deepEqual(serverSketch.getTelemetry(), clientSketch.getTelemetry());
+      });
+
+      test("F234-T08: Merge throws error when precision does not match or sketch is null", () => {
+        const s1 = new HyperLogLogTailCutSketch({ precision: 8 });
+        const s2 = new HyperLogLogTailCutSketch({ precision: 10 });
+        expect.throws(() => s1.merge(s2));
+        expect.throws(() => s1.merge(null));
+      });
+
+      test("F234-T09: COPACooperativePricing initializes with default and custom composite utility weights", () => {
+        const copa = new COPACooperativePricing({ gmvWeight: 0.5, marginWeight: 0.3, buyerSurplusWeight: 0.2 });
+        expect.equal(copa.w1, 0.5);
+        expect.equal(copa.w2, 0.3);
+        expect.equal(copa.w3, 0.2);
+        expect.equal(copa.maxAdjustment, 0.20);
+      });
+
+      test("F234-T10: actorPolicy maps vendor state to bounded continuous adjustment [-maxAdjustment, +maxAdjustment]", () => {
+        const copa = new COPACooperativePricing({ maxAdjustment: 0.15 });
+        const action = copa.actorPolicy({ currentPrice: 120000, stock: 40, cogs: 80000, marketDemand: 70 });
+        expect.ok(action >= -0.15 && action <= 0.15);
+      });
+
+      test("F234-T11: evaluateCompositeUtility balances GMV, merchant profit margin, and buyer surplus", () => {
+        const copa = new COPACooperativePricing();
+        const evalRes = copa.evaluateCompositeUtility(15000000, 4500000, 1200000);
+        expect.ok(evalRes.compositeUtility > 0);
+        expect.ok(evalRes.utilityGradientGmv > 0);
+        expect.ok(evalRes.utilityGradientMargin > 0);
+      });
+
+      test("F234-T12: optimizePricing strictly enforces safe floor P_i >= 1.05 * COGS_i for all vendors", () => {
+        const copa = new COPACooperativePricing();
+        const vendors = [
+          { id: "v1", currentPrice: 100000, cogs: 120000, stock: 50, marketDemand: 40 },
+          { id: "v2", currentPrice: 200000, cogs: 130000, stock: 80, marketDemand: 60 }
+        ];
+        const res = copa.optimizePricing(vendors);
+        expect.equal(res.recommendations.length, 2);
+        expect.ok(res.isFloorSafe);
+        expect.ok(res.recommendations[0].recommendedPrice >= res.recommendations[0].safeFloor);
+        expect.ok(res.recommendations[1].recommendedPrice >= res.recommendations[1].safeFloor);
+        expect.ok(res.recommendations[0].isFloorActive);
+      });
+
+      test("F234-T13: Expected units and profit calculate accurately based on price elasticity", () => {
+        const copa = new COPACooperativePricing();
+        const vendors = [
+          { id: "shop_alpha", currentPrice: 150000, cogs: 90000, stock: 60, marketDemand: 50, elasticity: -1.5 }
+        ];
+        const res = copa.optimizePricing(vendors);
+        const rec = res.recommendations[0];
+        expect.ok(rec.expectedUnits > 0);
+        expect.ok(rec.expectedGmv > 0);
+        expect.ok(rec.expectedProfit > 0);
+        expect.equal(rec.expectedProfit, (rec.recommendedPrice - rec.cogs) * rec.expectedUnits);
+      });
+
+      test("F234-T14: generateCOPAReport produces verified audit metrics and mathematical guarantees", () => {
+        const copa = new COPACooperativePricing();
+        const vendors = [
+          { id: "v1", currentPrice: 100000, cogs: 60000 },
+          { id: "v2", currentPrice: 150000, cogs: 90000 }
+        ];
+        const report = copa.generateCOPAReport(vendors);
+        expect.equal(report.success, true);
+        expect.equal(report.summary.totalVendors, 2);
+        expect.ok(report.summary.allVendorsSafe);
+        expect.equal(report.mathematicalGuarantees.length, 3);
+      });
+
+      test("F234-T15: ServerCOPACooperativePricing maintains 100% parity with Client implementation", () => {
+        const serverCopa = new ServerCOPACooperativePricing();
+        const clientCopa = new COPACooperativePricing();
+        const vendors = [
+          { id: "v1", currentPrice: 120000, cogs: 80000, stock: 50, marketDemand: 45 },
+          { id: "v2", currentPrice: 250000, cogs: 160000, stock: 30, marketDemand: 30 }
+        ];
+        const serverRes = serverCopa.optimizePricing(vendors);
+        const clientRes = clientCopa.optimizePricing(vendors);
+        expect.deepEqual(serverRes.recommendations, clientRes.recommendations);
+        expect.equal(serverRes.compositeUtility, clientRes.compositeUtility);
+        expect.equal(serverRes.totalGmv, clientRes.totalGmv);
+      });
+
+      test("F234-T16: Handling empty vendors gracefully returns safe fallback values without throwing", () => {
+        const copa = new COPACooperativePricing();
+        const res = copa.optimizePricing([]);
+        expect.equal(res.status, 'EMPTY_VENDORS');
+        expect.equal(res.recommendations.length, 0);
+        expect.equal(res.compositeUtility, 0);
+      });
+
+      test("F234-T17: EVRPTWMobileChargingTruckRouter initializes with battery and charging parameters", () => {
+        const router = new EVRPTWMobileChargingTruckRouter({
+          mctBatteryKWh: 160.0,
+          edvBatteryKWh: 30.0,
+          mctChargePowerKW: 60.0,
+          minSocThreshold: 0.25
+        });
+        expect.equal(router.mctBatteryKWh, 160.0);
+        expect.equal(router.edvBatteryKWh, 30.0);
+        expect.equal(router.mctChargePowerKW, 60.0);
+        expect.equal(router.minSocThreshold, 0.25);
+        expect.equal(router.transferEfficiency, 0.94);
+      });
+
+      test("F234-T18: planMobileChargingRoutes triggers MCT mobile rescue when EDV battery drops below minSocThreshold", () => {
+        const router = new EVRPTWMobileChargingTruckRouter({ edvBatteryKWh: 10.0, minSocThreshold: 0.30 });
+        const depot = { x: 0, y: 0 };
+        const customers = [
+          { id: "c1", x: 15, y: 15 },
+          { id: "c2", x: 30, y: 30 },
+          { id: "c3", x: 45, y: 45 }
+        ];
+        const plan = router.planMobileChargingRoutes(depot, customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.mctOperations.length > 0);
+        expect.ok(plan.metrics.totalDetourSavedKm > 0);
+      });
+
+      test("F234-T19: Rendezvous synchronization calculates EDV and MCT wait times correctly", () => {
+        const router = new EVRPTWMobileChargingTruckRouter({ edvBatteryKWh: 8.0, minSocThreshold: 0.40 });
+        const depot = { x: 0, y: 0 };
+        const customers = [{ id: "c1", x: 20, y: 20 }, { id: "c2", x: 40, y: 40 }];
+        const plan = router.planMobileChargingRoutes(depot, customers);
+        if (plan.mctOperations.length > 0) {
+          const op = plan.mctOperations[0];
+          expect.ok(op.edvWaitHours >= 0);
+          expect.ok(op.mctWaitHours >= 0);
+          expect.equal(op.detourSavedKm, 12.0);
+        }
+      });
+
+      test("F234-T20: Mobile recharge restores EDV battery, deducts from MCT with efficiency loss, and tracks saved detour", () => {
+        const router = new EVRPTWMobileChargingTruckRouter({ edvBatteryKWh: 12.0, mctBatteryKWh: 100.0, minSocThreshold: 0.50 });
+        const depot = { x: 0, y: 0 };
+        const customers = [{ id: "c1", x: 25, y: 0 }, { id: "c2", x: 50, y: 0 }];
+        const plan = router.planMobileChargingRoutes(depot, customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.metrics.totalEnergyConsumedKWh > 0);
+        expect.ok(plan.metrics.co2SavedKg > 0);
+      });
+
+      test("F234-T21: Issues verified MOBILE_RECHARGE_RESCUE_PASS certificate with timestamp", () => {
+        const router = new EVRPTWMobileChargingTruckRouter();
+        const depot = { x: 0, y: 0 };
+        const customers = [{ id: "c1", x: 10, y: 10 }];
+        const plan = router.planMobileChargingRoutes(depot, customers);
+        expect.equal(plan.certificate.status, 'VERIFIED_ON_ROUTE_RESCUE');
+        expect.ok(plan.certificate.passId.startsWith('MOBILE_RECHARGE_RESCUE_PASS_'));
+        expect.equal(plan.certificate.chargerPowerKW, 50.0);
+      });
+
+      test("F234-T22: ServerEVRPTWMobileChargingTruckRouter maintains 100% parity with Client implementation", () => {
+        const serverRouter = new ServerEVRPTWMobileChargingTruckRouter();
+        const clientRouter = new EVRPTWMobileChargingTruckRouter();
+        const depot = { x: 0, y: 0 };
+        const customers = [{ id: "c1", x: 12, y: 18 }, { id: "c2", x: 25, y: 30 }];
+        const sPlan = serverRouter.planMobileChargingRoutes(depot, customers);
+        const cPlan = clientRouter.planMobileChargingRoutes(depot, customers);
+        expect.equal(sPlan.metrics.totalEdvDistanceKm, cPlan.metrics.totalEdvDistanceKm);
+        expect.equal(sPlan.metrics.totalMctDistanceKm, cPlan.metrics.totalMctDistanceKm);
+        expect.equal(sPlan.mctOperations.length, cPlan.mctOperations.length);
+      });
+
+      test("F234-T23: Admin Sentinel Copilot Sections 242-244 handle Phase 87 queries", () => {
+        const resHLL = generateAdminCopilotResponse("Ước lượng phân bố tần suất đuôi HLL Tail-Cut Sketch Steffen Ertl Heule Flajolet");
+        expect.equal(resHLL.tag, "HLL TAIL-CUT COMPRESSED SKETCH");
+        expect.ok(resHLL.text.includes("HLL TAIL-CUT"));
+
+        const resCOPA = generateAdminCopilotResponse("Định giá đa mục tiêu tối ưu chính sách hợp tác COPA Wang NeurIPS ICML Foerster");
+        expect.equal(resCOPA.tag, "COPA COOPERATIVE PRICING");
+        expect.ok(resCOPA.text.includes("COPA"));
+
+        const resMCT = generateAdminCopilotResponse("Định tuyến xe điện hỗ trợ xe sạc di động EVRPTW-MCT mobile charging truck Huang Wang");
+        expect.equal(resMCT.tag, "EVRPTW MOBILE CHARGING TRUCK ROUTER");
+        expect.ok(resMCT.text.includes("EVRPTW-MCT"));
+      });
+
+      test("F234-T24: Seller ShopSmart Copilot Section 96 and Buyer Assistant Intent 89 handle Phase 87 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn tối ưu chính sách hợp tác copa và xe sạc di động mct cho shop");
+        expect.equal(sellerRes.tag, "HLL TAIL-CUT SKETCH, COPA PRICING & EVRPTW-MCT ROUTER");
+        expect.ok(sellerRes.text.includes("COPA"));
+
+        const buyerRes = generateAiChatResponse("Sàn có xe sạc di động cứu hộ evrptw-mct mobile charging truck hoặc hll tail-cut không?");
+        expect.equal(buyerRes.intent, "HLL_TAIL_CUT_COPA_MCT_ASSIST");
+        expect.ok(buyerRes.replyText.includes("TAIL-CUT"));
       });
     });
   });

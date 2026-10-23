@@ -415,7 +415,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 16. Ước Lượng Số Lượng Phần Tử Duy Nhất (HyperLogLog Cardinality Estimation)
-  if (!/hll\+\+|hyperloglog\+\+|sparse|jaccard|loglog[- ]beta|loglogbeta|martingale|hll martingale/i.test(raw) && /hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
+  if (!/hll\+\+|hyperloglog\+\+|sparse|jaccard|loglog[- ]beta|loglogbeta|martingale|hll martingale|tail[- ]cut|tail cut|ertl/i.test(raw) && /hyperloglog|hll|cardinality|unique viewers|dau|đếm người xem/i.test(raw)) {
     return {
       text: `🎯 **THUẬT TOÁN HYPERLOGLOG (MASSIVE CARDINALITY ESTIMATION)**:
 - **Mục đích thiết kế**: Đếm hàng chục triệu người xem Shopee Live độc nhất (Unique Viewers) hoặc người dùng hoạt động DAU với dung lượng bộ nhớ cố định **dưới 12 KB RAM** (thay vì hàng GB nếu dùng Hash Set).
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -5185,6 +5185,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem kế hoạch phi vụ bay Drone Sortie và điểm hẹn Rendezvous',
         'Kiểm tra công suất sạc tiếp điểm động 3.5 kW',
         'Xem chứng nhận giao thông không ùn tắc Tandem Drone Pass'
+      ]
+    };
+  }
+
+  // 242. Ước Lượng Lượng Phần Tử Duy Nhất HLL Tail-Cut Có Hiệu Chỉnh Độ Chệch (Phase 87 - Feature 234)
+  if (/hll[- ]tail[- ]cut|tail[- ]cut|ertl.*2017|hiệu chỉnh độ chệch hll|small range bias correction|dense register packing/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG SỐ LƯỢNG PHẦN TỬ DUY NHẤT HLL TAIL-CUT NÉN THANH GHI (STEFFEN ERTL 2017, HEULE GOOGLE)**:
+- **Nén Thanh Ghi Dày Đặc & Cắt Đuôi Tối Ưu (Dense Register Packing & Tail-Cut)**:
+  - Cắt ngắn giá trị thanh ghi tối đa tại ngưỡng $32$, nén toàn bộ $m = 2^p$ thanh ghi thành mảng byte dày đặc, tiết kiệm $50\\%$ bộ nhớ so với HLL truyền thống.
+- **Hiệu Chỉnh Độ Chệch Thực Nghiệm Dải Hẹp (Empirical Small-Range Bias Correction)**:
+  - Khi ước lượng $E \\le 2.5m$ và còn thanh ghi số 0 ($V > 0$), tự động chuyển sang giải thuật Linear Counting $E_{\\text{corr}} = m \\ln(m / V)$, kéo sai số tương đối xuống dưới $1.0\\%$.
+- **Giám Sát Người Dùng Duy Nhất Toàn Sàn Theo Thời Gian Thực**:
+  - Hỗ trợ theo dõi chính xác lượng khách ghé thăm (UV) cho từng shop nhỏ lẻ lẫn các gian hàng Shopee Mall triệu lượt xem mà không gây tốn RAM máy chủ!`,
+      type: 'analytics',
+      tag: 'HLL TAIL-CUT COMPRESSED SKETCH',
+      suggestions: [
+        'Xem độ đầy thanh ghi Fill Ratio',
+        'Ước lượng lượng người dùng duy nhất UV',
+        'Kiểm tra hiệu chỉnh độ chệch dải hẹp Linear Counting'
+      ]
+    };
+  }
+
+  // 243. Tối Ưu Hóa Chính Sách Định Giá Hợp Tác Đa Mục Tiêu COPA (Phase 87 - Feature 234)
+  if (/copa|cooperative policy optimization.*arbitrary|mục tiêu tổng hợp phi tuyến|wang.*neurips 2022|copa pricing/i.test(raw)) {
+    return {
+      text: `💰 **TỐI ƯU HÓA CHÍNH SÁCH ĐỊNH GIÁ HỢP TÁC ĐA MỤC TIÊU COPA (WANG ET AL., NEURIPS 2022)**:
+- **Tối Ưu Hóa Hàm Mục Tiêu Tổng Hợp Phi Tuyến Tính Arbitrary Utility**:
+  - Không chỉ tối đa hóa doanh thu đơn thuần, COPA tối ưu đồng thời hàm phi tuyến: $U = w_1 \\ln(1 + \\text{GMV}) + w_2 \\sqrt{\\text{Margin}} + w_3 \\text{Surplus}$, cân bằng lợi ích sàn, người bán và người mua.
+- **Phân Rã Gradient Chính Sách Bằng Trọng Số Lagrange Động**:
+  - Đạo hàm từng thành phần $\\nabla_{\\theta_i} J = \\sum_k \\frac{\\partial U}{\\partial J_k} \\nabla_{\\theta_i} J_k$ điều phối giá bán mượt mà giữa các shop.
+- **Rào Chắn An Toàn Bất Biến 1.05x COGS**:
+  - Tuyệt đối khóa giá bán $P_i \\ge 1.05 \\times \\text{COGS}_i$ để bảo vệ biên lãi gộp cho mọi đối tác bán hàng trên sàn!`,
+      type: 'pricing',
+      tag: 'COPA COOPERATIVE PRICING',
+      suggestions: [
+        'Xem điểm thỏa dụng tổng hợp Composite Utility',
+        'Phân tích trọng số gradient dU/dJ_k',
+        'Kiểm tra rào chắn an toàn giá vốn 1.05x COGS'
+      ]
+    };
+  }
+
+  // 244. Điều Phối Xe Bồn Sạc Pin Di Động Cứu Hộ Tuyến Đường EVRPTW-MCT (Phase 87 - Feature 234)
+  if (/evrptw[- ]mct|mobile charging truck|xe sạc di động|trạm sạc di động|mobile power bank|huang.*2021|sạc cứu hộ trên tuyến/i.test(raw)) {
+    return {
+      text: `🔋 **ĐIỀU PHỐI XE BỒN SẠC PIN DI ĐỘNG CỨU HỘ TUYẾN ĐƯỜNG EVRPTW-MCT (HUANG ET AL., TR PART C 2021)**:
+- **Trạm Sạc Di Động Lưu Động Trên Tuyến (Mobile Charging Truck - Power Bank)**:
+  - Xe bồn năng lượng $150\\text{ kWh}$ tích hợp trụ sạc nhanh DC $50\\text{ kW}$ chủ động di chuyển đến các điểm hẹn ven đường để tiếp pin cho xe giao hàng SPX.
+- **Triệt Tiêu Thời Gian Vòng Về Trạm Cố Định (Zero Detour Rescue)**:
+  - Xe giao hàng khi pin xuống dưới $20\\%$ không cần tốn $10 - 15\\text{ km}$ quay về trạm trung tâm; sạc nhanh $15$ phút ngay trên tuyến là tiếp tục hành trình giao hàng.
+- **Hộ Chiếu Cứu Hộ Năng Lượng MOBILE_RECHARGE_RESCUE_PASS**:
+  - Rút ngắn thời gian trễ đơn hàng, tăng tuổi thọ pin xe điện và cắt giảm triệt để phát thải $\\text{CO}_2$ do di chuyển rỗng!`,
+      type: 'logistics',
+      tag: 'EVRPTW MOBILE CHARGING TRUCK ROUTER',
+      suggestions: [
+        'Xem lộ trình điều phối xe sạc di động MCT',
+        'Kiểm tra số km đường vòng tiết kiệm được',
+        'Xem chứng nhận cứu hộ năng lượng Mobile Rescue Pass'
       ]
     };
   }
