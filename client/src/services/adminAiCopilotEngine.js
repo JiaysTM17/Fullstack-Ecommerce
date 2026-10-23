@@ -2782,7 +2782,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/autonomous pod|sidewalk delivery|robot giao hàng|solar microhub|microhub năng lượng mặt trời|evrptw.*pod|bjkst|mappo|two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/bus cargo|xe buýt|bus pudo|pudo|barge canal|sà lan điện|bimodal tram|autonomous pod|sidewalk delivery|robot giao hàng|solar microhub|microhub năng lượng mặt trời|evrptw.*pod|bjkst|mappo|two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3837,7 +3837,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 180. Định Giá Ràng Buộc An Toàn PPO-Lagrangian Safe Pricing (Phase 66 - Feature 213)
-  if (!/mappo|multi[- ]agent.*ppo|ppo[- ]clip|ppo[- ]entropy|ddpg[- ]lagrangian/i.test(raw) && /ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
+  if (!/reps|relative entropy|mappo|multi[- ]agent.*ppo|ppo[- ]clip|ppo[- ]entropy|ddpg[- ]lagrangian/i.test(raw) && /ppo[- ]lagrangian|lagrangian pricing|định giá ràng buộc|safe rl pricing|dual multiplier|nhân tử lagrange|học tăng cường an toàn ppo/i.test(raw)) {
     return {
       text: `🛡️ **ĐỊNH GIÁ RÀNG BUỘC AN TOÀN PPO-LAGRANGIAN SAFE PRICING (ACHIAM ET AL. ICML 2017 / RAY ET AL. 2019)**:
 - **Tối Đa Doanh Thu Dưới Đa Ràng Buộc Kinh Doanh Nghiêm Ngặt**:
@@ -5610,6 +5610,67 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình sà lan điện vận tải kênh rạch',
         'Theo dõi bốc dỡ hàng tại các bến cảng vi trạm',
         'Đo lường lượng khí thải CO2 cắt giảm qua đường thủy nội đô'
+      ]
+    };
+  }
+
+  // 263. Đo Lường Lượng Khách Luồng Siêu Tốc Bằng Recordinality Sketch (Phase 94 - Feature 241)
+  if (/recordinality|record[- ]breaking|order statistics sketch/i.test(raw)) {
+    return {
+      text: `📊 **ĐO LƯỜNG LƯỢNG KHÁCH HÀNG SIÊU TỐC BẰNG RECORDINALITY SKETCH (HELMI, MARTINEZ 2012)**:
+- **Thống Kê Thứ Tự & Đếm Kỷ Lục (Order-Statistics & Record-Breaking Events)**:
+  - Duy trì hồ chứa kích thước nhỏ $k$ phần tử. Chỉ đếm các sự kiện phần tử mới phá vỡ kỷ lục giá trị nhỏ nhất hiện tại.
+  - Công thức ước lượng giải tích đóng: $\\hat{N} = k(1 + 1/k)^{R - k + 1} - 1$ với $R = k + \\Delta_{record}$.
+- **Độ Chính Xác Tuyệt Đối Khi $N < k$**:
+  - Không tổn thất thông tin khi tập hợp nhỏ hơn $k$, và hội tụ phương sai cực nhỏ khi luồng truy cập đạt hàng triệu lượt.
+- **Hỗ Trợ Tính Jaccard Đa Chiều (Cohort Similarity)**:
+  - Đo lường chính xác mức độ trùng lặp tập khách hàng giữa các chiến dịch khuyến mãi mà không cần lưu trữ dữ liệu thô!`,
+      type: 'analytics',
+      tag: 'RECORDINALITY STREAM SKETCH',
+      suggestions: [
+        'Xem độ chính xác ước lượng Recordinality Sketch',
+        'So sánh độ trùng lặp giỏ hàng giữa các nhóm người dùng',
+        'Đo số lượng sự kiện phá vỡ kỷ lục trong luồng'
+      ]
+    };
+  }
+
+  // 264. Học Tăng Cường Định Giá Ràng Buộc Entropy Tương Đối REPS (Phase 94 - Feature 241)
+  if (/reps|relative entropy policy search|định giá reps|entropy tương đối|kl bounded pricing/i.test(raw)) {
+    return {
+      text: `⚖️ **ĐỊNH GIÁ ĐA ĐẠI LÝ RÀNG BUỘC ENTROPY TƯƠNG ĐỐI REPS (PETERS ET AL. AAAI 2010)**:
+- **Giới Hạn Suy Giảm Thông Tin Bằng Độ Đo KL (Bounded Policy Search)**:
+  - Bắt buộc khoảng cách Kullback-Leibler giữa chính sách mới và cũ thỏa mãn $D_{\\text{KL}}(\\pi \\parallel q) \\le \\epsilon$, loại bỏ hoàn toàn hiện tượng sụp đổ chính sách (policy collapse) trong thị trường biến động.
+- **Tối Ưu Nhiệt Độ Đối Ngẫu Lagrange $\\eta > 0$**:
+  - Tự động điều chỉnh nhiệt độ phân phối Softmax $\\pi(a) \\propto q(a) \\exp(R(a)/\\eta)$ giúp cân bằng hoàn hảo giữa thăm dò và khai thác.
+- **Cam Kết Sàn Giá Vốn Tuyệt Đối $P_i \\ge 1.05 \\times \\text{COGS}_i$**:
+  - Triệt tiêu hoàn toàn nguy cơ bán phá giá hoặc xung đột giá giữa các gian hàng, đạt chứng nhận REPS_RELATIVE_ENTROPY_PRICING_PASS!`,
+      type: 'pricing',
+      tag: 'REPS RELATIVE ENTROPY PRICING',
+      suggestions: [
+        'Kiểm tra ràng buộc phân kỳ KL epsilon trong định giá',
+        'Xem nhiệt độ đối ngẫu eta tối ưu hóa',
+        'Kiểm tra cam kết sàn giá vốn 1.05 x COGS của REPS'
+      ]
+    };
+  }
+
+  // 265. Điều Phối Hàng Hóa Xe Buýt Công Cộng & Điểm Nhận PUDO EVRPTW-UPBC (Phase 94 - Feature 241)
+  if (/bus cargo|xe buýt.*hàng|transit bus cargo|co-modal transit|pudo|micro-pudo|evrptw.*bus/i.test(raw)) {
+    return {
+      text: `🚌 **ĐIỀU PHỐI VẬN TẢI HÀNG HÓA BẰNG XE BUÝT ĐIỆN & ĐIỂM NHẬN MICRO-PUDO EVRPTW-UPBC (CLEOPHAS 2019, MASSON 2017)**:
+- **Tích Hợp Hàng Hóa Trên Xe Buýt Điện Đô Thị (Co-Modal Public Transit)**:
+  - Tận dụng khoang hành lý rảnh rỗi ($250\\text{kg}$ tải trọng) của các tuyến xe buýt công cộng theo lịch trình cố định $[t_{\\text{arr}}, t_{\\text{dep}}]$, $0\\%$ tạo thêm áp lực giao thông đường bộ.
+- **Mạng Lưới Điểm Nhận Micro-PUDO & Shipper Đi Bộ/Xe Đạp (Catchment Radius $\\le 2.2\\text{km}$)**:
+  - Giao bưu kiện nhanh vào tủ PUDO hoặc shipper xe đạp/đi bộ tiếp ứng từ trạm dừng xe buýt đến tận nhà người mua trong khung giờ hẹn.
+- **Giảm $> 95\\%$ Lượng Khí Thải CO2 (Radical Transit Decarbonization)**:
+  - Thay thế hoàn toàn xe tải diesel giao hàng cồng kềnh, đạt chuẩn chứng nhận BUS_CARGO_PUDO_TRANSIT_PASS!`,
+      type: 'logistics',
+      tag: 'EVRPTW URBAN BUS CARGO PUDO ROUTER',
+      suggestions: [
+        'Xem điều phối hàng hóa xe buýt điện đô thị',
+        'Kiểm tra mạng lưới điểm nhận bưu kiện PUDO',
+        'Đo lường lượng khí thải CO2 cắt giảm qua xe buýt công cộng'
       ]
     };
   }

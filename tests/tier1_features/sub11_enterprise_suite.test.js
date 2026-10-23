@@ -465,6 +465,10 @@ import {
   LinearCountingBitVectorSketch,
   WQMIXWeightedMonotonicPricing,
   EVRPTWUrbanBargeCanalElectricCargoRouter,
+  // Phase 94 Enterprise Algorithms
+  RecordinalityStreamSketch,
+  REPSRelativeEntropyPricing,
+  EVRPTWUrbanPassengerBusCargoPUDORouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -712,6 +716,9 @@ import { EVRPTWUrbanBimodalTramCargoTrailerRouter as ServerEVRPTWTramRouter } fr
 import { LinearCountingBitVectorSketch as ServerLCSketch } from "../../server/src/utils/linearCountingBitVectorSketch.js";
 import { WQMIXWeightedMonotonicPricing as ServerWQMIXPricing } from "../../server/src/utils/wqmixWeightedMonotonicPricing.js";
 import { EVRPTWUrbanBargeCanalElectricCargoRouter as ServerEVRPTWBargeRouter } from "../../server/src/utils/evrptwUrbanBargeCanalElectricCargoRouter.js";
+import { RecordinalityStreamSketch as ServerRecordinalitySketch } from "../../server/src/utils/recordinalityStreamSketch.js";
+import { REPSRelativeEntropyPricing as ServerREPSPricing } from "../../server/src/utils/repsRelativeEntropyPricing.js";
+import { EVRPTWUrbanPassengerBusCargoPUDORouter as ServerEVRPTWBusCargoRouter } from "../../server/src/utils/evrptwUrbanPassengerBusCargoPUDORouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -38185,6 +38192,315 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Khu vực của tôi có được giao hàng bằng sà lan điện kênh rạch đường thủy nội đô không?");
         expect.equal(buyerRes.intent, "LINEAR_COUNTING_WQMIX_BARGE_ASSIST");
         expect.ok(buyerRes.replyText.includes("SÀ LAN ĐIỆN XANH"));
+      });
+    });
+
+    describe("Feature 241: Recordinality Stream Sketch, REPS Relative Entropy Pricing & Urban Bus Cargo Logistics (Phase 94)", () => {
+      // --- Recordinality Stream Sketch Tests (T01 - T07) ---
+      test("F241-T01: RecordinalityStreamSketch initializes with reservoir k and zero record modifications", () => {
+        const sketch = new RecordinalityStreamSketch({ k: 32, seed: 1337 });
+        expect.equal(sketch.k, 32);
+        expect.equal(sketch.reservoir.length, 0);
+        expect.equal(sketch.recordModifications, 0);
+        expect.equal(sketch.totalItemsSeen, 0);
+      });
+
+      test("F241-T02: Initial items insert into unsaturated reservoir up to k elements", () => {
+        const sketch = new RecordinalityStreamSketch({ k: 16 });
+        for (let i = 0; i < 10; i++) {
+          const res = sketch.add(`event_${i}`);
+          expect.equal(res, true);
+        }
+        expect.equal(sketch.reservoir.length, 10);
+        expect.equal(sketch.recordModifications, 0);
+        expect.equal(sketch.estimateCardinality(), 10);
+      });
+
+      test("F241-T03: Computes closed-form cardinality estimate N_hat = k*(1+1/k)^(R-k+1) - 1 after saturation", () => {
+        const sketch = new RecordinalityStreamSketch({ k: 16, seed: 42 });
+        const trueCount = 150;
+        for (let i = 0; i < trueCount; i++) {
+          sketch.add(`flash_buyer_${i}`);
+        }
+        expect.equal(sketch.reservoir.length, 16);
+        expect.ok(sketch.recordModifications > 0);
+        const est = sketch.estimateCardinality();
+        expect.ok(est >= 50 && est <= 450);
+      });
+
+      test("F241-T04: Duplicate items do not trigger record modifications in Recordinality", () => {
+        const sketch = new RecordinalityStreamSketch({ k: 16 });
+        for (let i = 0; i < 16; i++) {
+          sketch.add(`base_item_${i}`);
+        }
+        const recordsBefore = sketch.recordModifications;
+        const res = sketch.add("base_item_0");
+        expect.equal(res, false);
+        expect.equal(sketch.recordModifications, recordsBefore);
+      });
+
+      test("F241-T05: Serialization and deserialization accurately preserve state and estimates", () => {
+        const original = new RecordinalityStreamSketch({ k: 24, seed: 99 });
+        for (let i = 0; i < 60; i++) {
+          original.add(`cart_item_${i}`);
+        }
+        const serialized = original.serialize();
+        const restored = RecordinalityStreamSketch.deserialize(serialized);
+
+        expect.equal(restored.k, original.k);
+        expect.equal(restored.recordModifications, original.recordModifications);
+        expect.equal(restored.estimateCardinality(), original.estimateCardinality());
+      });
+
+      test("F241-T06: Multi-tenant cart cohort overlap evaluates Jaccard and intersection", () => {
+        const cohortA = Array.from({ length: 40 }, (_, i) => `sku_deal_${i}`);
+        const cohortB = Array.from({ length: 40 }, (_, i) => `sku_deal_${i + 20}`);
+
+        const overlap = RecordinalityStreamSketch.assessMultiTenantCartOverlap(cohortA, cohortB, 32);
+        expect.equal(overlap.certification, "RECORDINALITY_STREAM_PASS");
+        expect.ok(overlap.estimatedJaccard > 0.05 && overlap.estimatedJaccard < 0.7);
+        expect.ok(overlap.estimatedIntersection > 0);
+      });
+
+      test("F241-T07: Client-Server dual parity for RecordinalityStreamSketch", () => {
+        const clientSketch = new RecordinalityStreamSketch({ k: 32, seed: 777 });
+        const serverSketch = new ServerRecordinalitySketch({ k: 32, seed: 777 });
+
+        for (let i = 0; i < 70; i++) {
+          const item = `dual_test_${i}`;
+          clientSketch.add(item);
+          serverSketch.add(item);
+        }
+
+        expect.equal(clientSketch.recordModifications, serverSketch.recordModifications);
+        expect.equal(clientSketch.estimateCardinality(), serverSketch.estimateCardinality());
+        expect.equal(clientSketch.reservoir.length, serverSketch.reservoir.length);
+      });
+
+      // --- REPS Dynamic Pricing Tests (T08 - T15) ---
+      test("F241-T08: REPSRelativeEntropyPricing initializes with safe floor multiplier 1.05 and KL epsilon", () => {
+        const reps = new REPSRelativeEntropyPricing({ klEpsilon: 0.15 });
+        expect.equal(reps.klEpsilon, 0.15);
+        expect.equal(reps.priceFloorMultiplier, 1.05);
+      });
+
+      test("F241-T09: enforceSafePriceFloor strictly clamps price below 1.05 * COGS", () => {
+        const reps = new REPSRelativeEntropyPricing();
+        const cogs = 100000;
+        const belowFloor = 90000;
+        const aboveFloor = 140000;
+
+        const clamped = reps.enforceSafePriceFloor(belowFloor, cogs);
+        expect.equal(clamped.wasClamped, true);
+        expect.equal(clamped.price, 105000);
+
+        const okPrice = reps.enforceSafePriceFloor(aboveFloor, cogs);
+        expect.equal(okPrice.wasClamped, false);
+        expect.equal(okPrice.price, 140000);
+      });
+
+      test("F241-T10: generatePriceCandidates strictly respects safe price floor and max price bounds", () => {
+        const reps = new REPSRelativeEntropyPricing();
+        const agent = { cogs: 80000, currentPrice: 110000, maxAllowedPrice: 180000 };
+        const candidates = reps.generatePriceCandidates(agent);
+
+        expect.ok(candidates.length > 0);
+        for (const p of candidates) {
+          expect.ok(p >= 84000); // 80000 * 1.05
+          expect.ok(p <= 180000);
+        }
+      });
+
+      test("F241-T11: Cross-price demand estimation decreases with own price and increases with competitor price", () => {
+        const reps = new REPSRelativeEntropyPricing();
+        const agent = { cogs: 50000, baseDemand: 100, elasticity: 1.5 };
+        const dLow = reps.calculateDemand(agent, 65000, [65000, 70000]);
+        const dHigh = reps.calculateDemand(agent, 95000, [95000, 70000]);
+
+        expect.ok(dLow > dHigh);
+      });
+
+      test("F241-T12: optimizeDualTemperature converges to valid positive temperature eta > 0", () => {
+        const reps = new REPSRelativeEntropyPricing();
+        const rewards = [1000, 1500, 2200, 1800, 1200];
+        const priors = [0.2, 0.2, 0.2, 0.2, 0.2];
+        const eta = reps._optimizeDualTemperature(rewards, priors, 0.15);
+
+        expect.ok(eta > 0.05);
+        expect.ok(Number.isFinite(eta));
+      });
+
+      test("F241-T13: optimizePrices returns compliant policy and REPS_RELATIVE_ENTROPY_PRICING_PASS certification", () => {
+        const reps = new REPSRelativeEntropyPricing({ klEpsilon: 0.2 });
+        const agents = [
+          { id: "shop_alpha", cogs: 100000, currentPrice: 130000 },
+          { id: "shop_beta", cogs: 150000, currentPrice: 195000 },
+          { id: "shop_gamma", cogs: 80000, currentPrice: 115000 }
+        ];
+
+        const result = reps.optimizePrices(agents);
+        expect.equal(result.certification, "REPS_RELATIVE_ENTROPY_PRICING_PASS");
+        expect.equal(result.summary.totalAgents, 3);
+        expect.equal(result.summary.allSafeFloorCompliant, true);
+        expect.ok(result.summary.totalRevenue > 0);
+        expect.ok(result.summary.totalProfit > 0);
+      });
+
+      test("F241-T14: Policy KL divergence strictly obeys bounded divergence criterion", () => {
+        const reps = new REPSRelativeEntropyPricing({ klEpsilon: 0.15 });
+        const agents = [
+          { id: "shop_1", cogs: 50000, currentPrice: 70000 }
+        ];
+        const result = reps.optimizePrices(agents);
+        const opt = result.agentOptimizations[0];
+
+        expect.ok(opt.klDivergence >= 0);
+        expect.equal(opt.klBounded, true);
+      });
+
+      test("F241-T15: Client-Server dual parity for REPS pricing optimization", () => {
+        const clientREPS = new REPSRelativeEntropyPricing({ klEpsilon: 0.18 });
+        const serverREPS = new ServerREPSPricing({ klEpsilon: 0.18 });
+        const agents = [
+          { id: "s1", cogs: 60000, currentPrice: 85000 },
+          { id: "s2", cogs: 120000, currentPrice: 160000 }
+        ];
+
+        const cRes = clientREPS.optimizePrices(agents);
+        const sRes = serverREPS.optimizePrices(agents);
+
+        expect.equal(cRes.certification, sRes.certification);
+        expect.equal(cRes.summary.totalRevenue, sRes.summary.totalRevenue);
+        expect.equal(cRes.summary.totalProfit, sRes.summary.totalProfit);
+        expect.equal(cRes.agentOptimizations[0].recommendedPrice, sRes.agentOptimizations[0].recommendedPrice);
+      });
+
+      // --- Transit Bus Cargo & PUDO Router Tests (T16 - T21) ---
+      test("F241-T16: EVRPTWUrbanPassengerBusCargoPUDORouter initializes with bus capacity and courier params", () => {
+        const router = new EVRPTWUrbanPassengerBusCargoPUDORouter({ busCargoCapacityKg: 200.0 });
+        expect.equal(router.busCargoCapacityKg, 200.0);
+        expect.equal(router.courierWalkingSpeedKmh, 4.5);
+        expect.equal(router.courierBikeSpeedKmh, 16.0);
+      });
+
+      test("F241-T17: Calculates precise Haversine distance between bus stop and customer location", () => {
+        const router = new EVRPTWUrbanPassengerBusCargoPUDORouter();
+        const stop = { lat: 10.7769, lng: 106.7009 }; // Ben Thanh
+        const clientLoc = { lat: 10.7828, lng: 106.6983 }; // Notre Dame
+        const d = router.calculateDistance(stop, clientLoc);
+
+        expect.ok(d > 0.5 && d < 1.5);
+      });
+
+      test("F241-T18: Clusters orders to closest accessible bus stop within catchment radius", () => {
+        const router = new EVRPTWUrbanPassengerBusCargoPUDORouter({ courierMaxRadiusKm: 2.5 });
+        const busLine = {
+          lineId: "BUS_01",
+          lineName: "Tuyến Xe Buýt Điện Bến Thành - Chợ Lớn",
+          schedule: [
+            { stopId: "S1", stopName: "Trạm Bến Thành", lat: 10.7725, lng: 106.6980, arrMin: 480, depMin: 485 },
+            { stopId: "S2", stopName: "Trạm Chợ Quán", lat: 10.7580, lng: 106.6820, arrMin: 500, depMin: 505 },
+            { stopId: "S3", stopName: "Trạm Chợ Lớn", lat: 10.7520, lng: 106.6540, arrMin: 525, depMin: 530 }
+          ]
+        };
+
+        const orders = [
+          { id: "ORD_B1", name: "Giao Phố Đi Bộ", lat: 10.7735, lng: 106.7010, weightKg: 3.5, dueMin: 550, preferPudo: true },
+          { id: "ORD_B2", name: "Giao Q5 Chợ Quán", lat: 10.7590, lng: 106.6815, weightKg: 5.0, dueMin: 560, preferPudo: false }
+        ];
+
+        const plan = router.planBusCargoRoutes(busLine, orders);
+        expect.equal(plan.certification, "BUS_CARGO_PUDO_TRANSIT_PASS");
+        expect.equal(plan.totalParcelsDelivered, 2);
+        expect.equal(plan.unassignedOrdersCount, 0);
+      });
+
+      test("F241-T19: Unassigned orders handled when distance exceeds catchment radius", () => {
+        const router = new EVRPTWUrbanPassengerBusCargoPUDORouter({ courierMaxRadiusKm: 1.0 });
+        const busLine = {
+          lineId: "BUS_02",
+          lineName: "Tuyến Xe Buýt Nội Đô",
+          schedule: [
+            { stopId: "S1", stopName: "Trạm Trung Tâm", lat: 10.7700, lng: 106.7000, arrMin: 400, depMin: 405 }
+          ]
+        };
+
+        const farOrder = [{ id: "FAR_1", name: "Khách ở xa ngoại ô", lat: 10.8500, lng: 106.7800, weightKg: 2.0 }];
+        const plan = router.planBusCargoRoutes(busLine, farOrder);
+
+        expect.equal(plan.unassignedOrdersCount, 1);
+        expect.equal(plan.unassignedOrders[0].reason, "BEYOND_PUDO_CATCHMENT_RADIUS");
+      });
+
+      test("F241-T20: Demonstrates >90% CO2 emissions abatement vs baseline diesel delivery vans", () => {
+        const router = new EVRPTWUrbanPassengerBusCargoPUDORouter();
+        const busLine = {
+          lineId: "BUS_GREEN",
+          lineName: "Tuyến Xe Buýt Điện Eco",
+          schedule: [
+            { stopId: "S1", stopName: "Bến A", lat: 10.7700, lng: 106.7000, arrMin: 500, depMin: 505 },
+            { stopId: "S2", stopName: "Bến B", lat: 10.7800, lng: 106.7100, arrMin: 520, depMin: 525 }
+          ]
+        };
+        const orders = [
+          { id: "O1", name: "Đơn gần Bến A", lat: 10.7710, lng: 106.7010, weightKg: 4.0, dueMin: 600, preferPudo: true }
+        ];
+
+        const plan = router.planBusCargoRoutes(busLine, orders);
+        expect.ok(plan.emissionsAnalysis.co2AbatementPercent >= 90.0);
+        expect.ok(plan.emissionsAnalysis.co2SavedKg > 0);
+      });
+
+      test("F241-T21: Client-Server dual parity for EVRPTWUrbanPassengerBusCargoPUDORouter", () => {
+        const clientRouter = new EVRPTWUrbanPassengerBusCargoPUDORouter();
+        const serverRouter = new ServerEVRPTWBusCargoRouter();
+
+        const busLine = {
+          lineId: "BUS_PARITY",
+          lineName: "Tuyến Đối Soát Parity",
+          schedule: [
+            { stopId: "ST1", stopName: "Trạm 1", lat: 10.7725, lng: 106.6980, arrMin: 480, depMin: 485 },
+            { stopId: "ST2", stopName: "Trạm 2", lat: 10.7580, lng: 106.6820, arrMin: 500, depMin: 505 }
+          ]
+        };
+        const orders = [
+          { id: "ORD_P1", name: "Đơn hàng Parity", lat: 10.7730, lng: 106.6990, weightKg: 2.5, dueMin: 550, preferPudo: true }
+        ];
+
+        const cPlan = clientRouter.planBusCargoRoutes(busLine, orders);
+        const sPlan = serverRouter.planBusCargoRoutes(busLine, orders);
+
+        expect.equal(cPlan.certification, sPlan.certification);
+        expect.equal(cPlan.totalParcelsDelivered, sPlan.totalParcelsDelivered);
+        expect.equal(cPlan.emissionsAnalysis.co2SavedKg, sPlan.emissionsAnalysis.co2SavedKg);
+      });
+
+      // --- Tri-Role AI Copilot Tests (T22 - T24) ---
+      test("F241-T22: Admin Sentinel Copilot Sections 263, 264, 265 handle Recordinality, REPS & Bus Cargo", () => {
+        const r263 = generateAdminCopilotResponse("Đo lường lượng khách luồng siêu tốc bằng Recordinality sketch");
+        expect.equal(r263.tag, "RECORDINALITY STREAM SKETCH");
+        expect.ok(r263.text.includes("RECORDINALITY SKETCH"));
+
+        const r264 = generateAdminCopilotResponse("Kiểm tra định giá REPS ràng buộc entropy tương đối và phân kỳ kl");
+        expect.equal(r264.tag, "REPS RELATIVE ENTROPY PRICING");
+        expect.ok(r264.text.includes("REPS"));
+
+        const r265 = generateAdminCopilotResponse("Điều phối vận tải hàng hóa bằng xe buýt điện công cộng và điểm nhận pudo evrptw");
+        expect.equal(r265.tag, "EVRPTW URBAN BUS CARGO PUDO ROUTER");
+        expect.ok(r265.text.includes("PUDO"));
+      });
+
+      test("F241-T23: Seller ShopSmart Copilot Section 103 handles Recordinality, REPS & Bus Cargo PUDO", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn đo khách recordinality và định giá reps kết hợp giao hàng xe buýt nội đô");
+        expect.equal(sellerRes.tag, "RECORDINALITY SKETCH, REPS PRICING & TRANSIT BUS ROUTER");
+        expect.ok(sellerRes.text.includes("RECORDINALITY"));
+        expect.ok(sellerRes.text.includes("REPS"));
+      });
+
+      test("F241-T24: Buyer Shopping Assistant Intent 96 handles RECORDINALITY_REPS_BUS_CARGO_ASSIST", () => {
+        const buyerRes = generateAiChatResponse("Khu vực của tôi có được giao hàng bằng xe buýt điện điểm nhận pudo không?");
+        expect.equal(buyerRes.intent, "RECORDINALITY_REPS_BUS_CARGO_ASSIST");
+        expect.ok(buyerRes.replyText.includes("XE BUÝT ĐIỆN PUDO"));
       });
     });
   });
