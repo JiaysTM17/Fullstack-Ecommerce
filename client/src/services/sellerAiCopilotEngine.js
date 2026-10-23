@@ -1252,7 +1252,8 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 62. Bộ Ba Thuật Toán AKMV Sketch, TD3+BC Pricing & EVRP-BSS Đổi Pin Động (Phase 53 - Feature 200)
-  if (/akmv|adaptive kmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(raw)) {
+  if (!/qplex|duplex dueling|định giá qplex|bimodal tram|tàu điện|đường sắt đô thị|luồng đột biến/i.test(raw) && /akmv|adaptive kmv|td3\\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút/i.test(raw)) {
+
     return {
       text: `🌟 **KỶ NIỆM FEATURE 200: BỘ BA THUẬT TOÁN ĐO LƯỜNG THÍCH ỨNG, ĐỊNH GIÁ NHÂN BẢN HÀNH VI & ĐỔI PIN ĐỘNG SIÊU TỐC (${currentShop.name})**:
 - **Đo lường dung lượng khách hàng thích ứng AKMV (Adaptive K-Minimum Values)**:
@@ -2014,7 +2015,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 100. Phân Tích Giỏ Hàng KMV, Định Giá Hợp Tác MA-ICQ & Xe Đạp Hàng Điện Rơ-Moóc Vi Trạm (Phase 91 - Feature 238)
-  if (/kmv|distinct stream sketch|ma[- ]?icq|individual[- ]conditioned|cooperative pricing|cargo bike|xe đạp hàng điện|swappable trailer|rơ[- ]?moóc|urban microdepot/i.test(raw)) {
+  if (!/akmv/i.test(raw) && /\\bkmv\\b|distinct stream sketch|ma[- ]?icq|individual[- ]conditioned|cooperative pricing|cargo bike|xe đạp hàng điện|swappable trailer|rơ[- ]?moóc|urban microdepot/i.test(raw)) {
     return {
       text: `🚀 **BỘ BA THUẬT TOÁN KMV MINHASH, ĐỊNH GIÁ HỢP TÁC MA-ICQ & XE ĐẠP HÀNG ĐIỆN RƠ-MOÓC VI TRẠM (PHASE 91 - FEATURE 238)**:
 - **Đo Lường Độ Trùng Khớp Khách Hàng Bằng KMV MinHash Sketch (Beyer et al.)**:
@@ -2029,6 +2030,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Đo độ trùng lặp giỏ hàng khách hàng KMV',
         'Tư vấn định giá hợp tác an toàn MA-ICQ',
         'Xem điều phối xe đạp hàng điện rơ-moóc vi trạm'
+      ]
+    };
+  }
+
+  // 101. Luồng Đột Biến AKMV, Định Giá QPLEX Duplex Dueling & Tàu Điện Chở Hàng Bimodal (Phase 92 - Feature 239)
+  if (/akmv|adaptive k[- ]minimum|qplex|duplex dueling|định giá qplex|bimodal tram|tàu điện|đường sắt đô thị/i.test(raw)) {
+    return {
+      text: `🚀 **BỘ BA THUẬT TOÁN AKMV SKETCH, ĐỊNH GIÁ QPLEX DUPLEX DUELING & TÀU ĐIỆN BIMODAL (PHASE 92 - FEATURE 239)**:
+- **Phân Tích Khách Hàng Luồng Đột Biến Bằng AKMV Sketch (Gibbons & Matias)**:
+  - Giúp Shop theo dõi chính xác lượng người mua truy cập trong các đợt Flash Sale cao điểm với cơ chế co giãn tỷ lệ thích nghi (Adaptive Threshold).
+- **Định Giá Bán Đa Đại Diện QPLEX Duplex Dueling (Wang et al. ICLR 2021)**:
+  - Tự động tìm điểm cân bằng doanh thu toàn diện (IGM Consistency), tối ưu hóa biên lợi nhuận và tuân thủ tuyệt đối sàn giá vốn $P_i \\ge 1.05 \\times \\text{COGS}_i$.
+- **Vận Chuyển Hàng Hoá Siêu Tốc Bằng Tàu Điện Đô Thị Bimodal EVRPTW-UBTC (Arvidsson 2021)**:
+  - Hàng của Shop được vận chuyển trên các toa hàng tàu điện metro trong giờ thấp điểm, trung chuyển qua xe đạp hàng điện giao tới tay khách hàng cực nhanh và không phát thải!`,
+      type: 'recommendation',
+      tag: 'AKMV SKETCH, QPLEX DUELING PRICING & BIMODAL TRAM ROUTER',
+      suggestions: [
+        'Phân tích lưu lượng khách hàng đột biến AKMV',
+        'Tư vấn định giá cạnh tranh thông minh QPLEX',
+        'Xem lộ trình vận chuyển bimodal tàu điện metro'
       ]
     };
   }

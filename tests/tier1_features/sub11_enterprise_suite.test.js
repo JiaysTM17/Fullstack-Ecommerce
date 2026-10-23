@@ -457,6 +457,10 @@ import {
   KMVMinHashDistinctStreamSketch,
   MAICQCooperativePricing,
   EVRPTWUrbanBicycleTrailerMicrodepotRouter,
+  // Phase 92 Enterprise Algorithms
+  AKMVAdaptiveKMinimumValuesSketch,
+  QPLEXDuplexDuelingPricing,
+  EVRPTWUrbanBimodalTramCargoTrailerRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -698,6 +702,9 @@ import { EVRPTWUrbanMicrohubAutonomousPodRouter as ServerEVRPTWPodRouter } from 
 import { KMVMinHashDistinctStreamSketch as ServerKMVMinHashSketch } from "../../server/src/utils/kmvMinHashDistinctStreamSketch.js";
 import { MAICQCooperativePricing as ServerMAICQPricing } from "../../server/src/utils/maicqCooperativePricing.js";
 import { EVRPTWUrbanBicycleTrailerMicrodepotRouter as ServerEVRPTWBicycleRouter } from "../../server/src/utils/evrptwUrbanBicycleTrailerMicrodepotRouter.js";
+import { AKMVAdaptiveKMinimumValuesSketch as ServerAKMVSketch } from "../../server/src/utils/akmvAdaptiveKMinimumValuesSketch.js";
+import { QPLEXDuplexDuelingPricing as ServerQPLEXPricing } from "../../server/src/utils/qplexDuplexDuelingPricing.js";
+import { EVRPTWUrbanBimodalTramCargoTrailerRouter as ServerEVRPTWTramRouter } from "../../server/src/utils/evrptwUrbanBimodalTramCargoTrailerRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -37567,6 +37574,309 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Khu phố đi bộ của tôi có giao hàng bằng xe đạp điện rơ-moóc thùng hàng xanh không?");
         expect.equal(buyerRes.intent, "KMV_MAICQ_CARGO_BIKE_ASSIST");
         expect.ok(buyerRes.replyText.includes("XE ĐẠP ĐIỆN RƠ-MOÓC XANH"));
+      });
+    });
+    describe("Feature 239: AKMV Adaptive Sketch, QPLEX Duplex Dueling Pricing & Urban Bimodal Tram Logistics (Phase 92)", () => {
+      // --- AKMV Adaptive K-Minimum Values Sketch Tests (T01 - T07) ---
+      test("F239-T01: AKMVAdaptiveKMinimumValuesSketch initializes with options and computes relative error bound", () => {
+        const sketch = new AKMVAdaptiveKMinimumValuesSketch({ k: 64, seed: 1337 });
+        expect.equal(sketch.k, 64);
+        expect.equal(sketch.values.length, 0);
+        expect.ok(sketch.getRelativeErrorBound() <= 0.21);
+
+        const added = sketch.add("surge_traffic_visitor_01");
+        expect.equal(added, true);
+        expect.equal(sketch.values.length, 1);
+        expect.equal(sketch.totalItemsSeen, 1);
+      });
+
+      test("F239-T02: Rejects duplicate items and does not inflate reservoir count", () => {
+        const sketch = new AKMVAdaptiveKMinimumValuesSketch({ k: 32 });
+        const res1 = sketch.add("flash_sale_sku_99");
+        const res2 = sketch.add("flash_sale_sku_99");
+        expect.equal(res1, true);
+        expect.equal(res2, false);
+        expect.equal(sketch.values.length, 1);
+        expect.equal(sketch.totalItemsSeen, 2);
+      });
+
+      test("F239-T03: Returns exact cardinality when distinct count is below reservoir capacity k", () => {
+        const sketch = new AKMVAdaptiveKMinimumValuesSketch({ k: 64 });
+        for (let i = 0; i < 30; i++) {
+          sketch.add(`item_stream_${i}`);
+        }
+        expect.equal(sketch.estimateCardinality(), 30);
+      });
+
+      test("F239-T04: Adapts scale factor and maintains reasonable estimate on large streams", () => {
+        const sketch = new AKMVAdaptiveKMinimumValuesSketch({ k: 64 });
+        for (let i = 0; i < 400; i++) {
+          sketch.add(`heavy_traffic_elem_${i}`);
+        }
+        expect.equal(sketch.values.length, 64);
+        expect.ok(sketch.scaleFactor < 1.0);
+        const est = sketch.estimateCardinality();
+        expect.ok(est >= 250 && est <= 600);
+      });
+
+      test("F239-T05: Computes Jaccard similarity between identical and disjoint sets correctly", () => {
+        const s1 = new AKMVAdaptiveKMinimumValuesSketch({ k: 32 });
+        const s2 = new AKMVAdaptiveKMinimumValuesSketch({ k: 32 });
+        const s3 = new AKMVAdaptiveKMinimumValuesSketch({ k: 32 });
+
+        for (let i = 0; i < 60; i++) {
+          s1.add(`session_${i}`);
+          s2.add(`session_${i}`);
+          s3.add(`unique_session_${i}`);
+        }
+
+        expect.equal(s1.estimateJaccard(s2), 1.0);
+        expect.equal(s1.estimateJaccard(s3), 0.0);
+      });
+
+      test("F239-T06: Assesses multi-tenant cart overlap and returns certification", () => {
+        const cohortA = ["sku10", "sku20", "sku30", "sku40", "sku50"];
+        const cohortB = ["sku30", "sku40", "sku50", "sku60", "sku70"];
+
+        const assessment = AKMVAdaptiveKMinimumValuesSketch.assessMultiTenantCartOverlap(cohortA, cohortB, 32);
+        expect.equal(assessment.certification, "AKMV_ADAPTIVE_STREAM_PASS");
+        expect.ok(assessment.estimatedJaccard > 0.2);
+        expect.ok(assessment.estimatedIntersection >= 2);
+      });
+
+      test("F239-T07: Serialization, deserialization, and commutative merge roundtrip", () => {
+        const sA = new AKMVAdaptiveKMinimumValuesSketch({ k: 16 });
+        const sB = new AKMVAdaptiveKMinimumValuesSketch({ k: 16 });
+
+        sA.addBatch(["alpha", "beta", "gamma"]);
+        sB.addBatch(["delta", "epsilon", "zeta"]);
+
+        const merged = sA.merge(sB);
+        expect.equal(merged.estimateCardinality(), 6);
+
+        const serialized = merged.serialize();
+        const restored = AKMVAdaptiveKMinimumValuesSketch.deserialize(serialized);
+        expect.equal(restored.k, 16);
+        expect.equal(restored.values.length, 6);
+        expect.equal(restored.estimateCardinality(), 6);
+      });
+
+      // --- QPLEX Duplex Dueling Pricing Tests (T08 - T14) ---
+      test("F239-T08: QPLEXDuplexDuelingPricing initializes with default learning rate and 1.05 floor multiplier", () => {
+        const pricing = new QPLEXDuplexDuelingPricing();
+        expect.equal(pricing.priceFloorMultiplier, 1.05);
+        expect.equal(pricing.learningRate, 0.03);
+        expect.equal(pricing.discountFactor, 0.96);
+      });
+
+      test("F239-T09: Strictly enforces safe price floor clamping P_i >= 1.05 * COGS", () => {
+        const pricing = new QPLEXDuplexDuelingPricing();
+        const cogs = 200000;
+        const belowFloor = 180000;
+        const clamped = pricing.enforceSafePriceFloor(belowFloor, cogs);
+        expect.equal(clamped.wasClamped, true);
+        expect.equal(clamped.price, 210000);
+
+        const aboveFloor = 250000;
+        const valid = pricing.enforceSafePriceFloor(aboveFloor, cogs);
+        expect.equal(valid.wasClamped, false);
+        expect.equal(valid.price, 250000);
+      });
+
+      test("F239-T10: Cross-price elasticity demand reflects market competition", () => {
+        const pricing = new QPLEXDuplexDuelingPricing();
+        const agent = { cogs: 100000, baseDemand: 120, elasticity: 1.2 };
+        const allPrices = [130000, 140000, 150000];
+
+        const dLow = pricing.calculateDemand(agent, 115000, allPrices);
+        const dHigh = pricing.calculateDemand(agent, 175000, allPrices);
+        expect.ok(dLow > dHigh);
+      });
+
+      test("F239-T11: Dueling components separate state value and positive advantage", () => {
+        const pricing = new QPLEXDuplexDuelingPricing();
+        const agent = { cogs: 100000, baseDemand: 100 };
+        const { vValue, advantage, qValue } = pricing._computeDuelingComponents(agent, 130000, 80);
+        expect.ok(vValue > 0);
+        expect.ok(qValue > 0);
+        expect.equal(typeof advantage, "number");
+      });
+
+      test("F239-T12: Multi-agent optimization converges and guarantees 100% safe floor compliance", () => {
+        const pricing = new QPLEXDuplexDuelingPricing({ iterations: 10 });
+        const agents = [
+          { shopId: "shop_mall_1", cogs: 150000, currentPrice: 140000, baseDemand: 100, elasticity: 1.1 },
+          { shopId: "shop_mall_2", cogs: 220000, currentPrice: 280000, baseDemand: 70, elasticity: 1.4 }
+        ];
+
+        const result = pricing.optimizePrices(agents, { demandScale: 1.0 });
+        expect.equal(result.certification, "QPLEX_DUPLEX_DUELING_PASS");
+        expect.equal(result.allSafeFloorsGuaranteed, true);
+        expect.ok(result.totalMarketProfit > 0);
+        expect.ok(result.optimizedAgents[0].optimizedPrice >= 150000 * 1.05);
+        expect.ok(result.optimizedAgents[1].optimizedPrice >= 220000 * 1.05);
+      });
+
+      test("F239-T13: Throws error when empty agents array is passed", () => {
+        const pricing = new QPLEXDuplexDuelingPricing();
+        let threw = false;
+        try {
+          pricing.optimizePrices([]);
+        } catch (e) {
+          threw = true;
+        }
+        expect.equal(threw, true);
+      });
+
+      test("F239-T14: Client and Server QPLEXDuplexDuelingPricing produce identical outputs", () => {
+        const clientQPLEX = new QPLEXDuplexDuelingPricing({ iterations: 5 });
+        const serverQPLEX = new ServerQPLEXPricing({ iterations: 5 });
+
+        const agents = [
+          { shopId: "shop_parity", cogs: 50000, currentPrice: 70000, baseDemand: 40, elasticity: 1.0 }
+        ];
+
+        const clientRes = clientQPLEX.optimizePrices(agents);
+        const serverRes = serverQPLEX.optimizePrices(agents);
+
+        expect.equal(clientRes.certification, serverRes.certification);
+        expect.equal(clientRes.allSafeFloorsGuaranteed, serverRes.allSafeFloorsGuaranteed);
+        expect.equal(clientRes.optimizedAgents[0].optimizedPrice, serverRes.optimizedAgents[0].optimizedPrice);
+      });
+
+      // --- EVRPTW Urban Bimodal Tram Cargo Trailer Router Tests (T15 - T21) ---
+      test("F239-T15: EVRPTWUrbanBimodalTramCargoTrailerRouter initializes with multimodal speed and payload configs", () => {
+        const router = new EVRPTWUrbanBimodalTramCargoTrailerRouter();
+        expect.equal(router.maxBikeSpeedKmh, 18.0);
+        expect.equal(router.tramSpeedKmh, 35.0);
+        expect.equal(router.bikeBatteryKwh, 1.44);
+        expect.equal(router.bikePayloadCapacityKg, 180.0);
+      });
+
+      test("F239-T16: Accurately computes Haversine distance between metro tram stations and stops", () => {
+        const router = new EVRPTWUrbanBimodalTramCargoTrailerRouter();
+        const catLinh = { lat: 21.0278, lng: 105.8272 };
+        const haDong = { lat: 20.9723, lng: 105.7770 };
+        const dist = router.calculateDistance(catLinh, haDong);
+        expect.ok(dist >= 8.0 && dist <= 12.0);
+      });
+
+      test("F239-T17: Clusters delivery orders to the nearest tram cross-dock station", () => {
+        const router = new EVRPTWUrbanBimodalTramCargoTrailerRouter();
+        const tramLine = {
+          id: "METRO-LINE-2A",
+          name: "Tuyến Cát Linh - Hà Đông",
+          stations: [
+            { id: "ST-CAT-LINH", name: "Ga Cát Linh", lat: 21.0278, lng: 105.8272, tramArrivalTime: 480, tramDepartureTime: 490 },
+            { id: "ST-THUONG-DINH", name: "Ga Thượng Đình", lat: 21.0000, lng: 105.8150, tramArrivalTime: 505, tramDepartureTime: 515 }
+          ]
+        };
+
+        const orders = [
+          { id: "ORD-1", name: "Giảng Võ", lat: 21.0280, lng: 105.8260, weightKg: 10, readyTime: 490, dueTime: 550 },
+          { id: "ORD-2", name: "Nguyễn Trãi", lat: 20.9990, lng: 105.8140, weightKg: 15, readyTime: 515, dueTime: 580 }
+        ];
+
+        const plan = router.planBimodalTramRoutes(tramLine, orders);
+        expect.equal(plan.certification, "BIMODAL_TRAM_CARGO_TRAILER_PASS");
+        expect.equal(plan.bimodalTransitSynchronized, true);
+        expect.equal(plan.ordersDispatched, 2);
+      });
+
+      test("F239-T18: Evaluates time window punctuality and tracks on-time delivery rate", () => {
+        const router = new EVRPTWUrbanBimodalTramCargoTrailerRouter();
+        const tramLine = {
+          id: "TRAM-1",
+          name: "Tram Line 1",
+          stations: [
+            { id: "ST-1", name: "Station 1", lat: 21.02, lng: 105.82, tramArrivalTime: 400, tramDepartureTime: 410 }
+          ]
+        };
+        const orders = [
+          { id: "O-1", name: "Near Stop", lat: 21.021, lng: 105.821, weightKg: 5, readyTime: 410, dueTime: 500 }
+        ];
+
+        const plan = router.planBimodalTramRoutes(tramLine, orders);
+        expect.equal(plan.onTimeDeliveryRatePercent, 100);
+      });
+
+      test("F239-T19: Calculates substantial CO2 emissions abatement vs street diesel vans", () => {
+        const router = new EVRPTWUrbanBimodalTramCargoTrailerRouter();
+        const tramLine = {
+          id: "TRAM-METRO",
+          name: "Metro Trunk",
+          stations: [
+            { id: "ST-A", name: "Station A", lat: 21.01, lng: 105.80, tramArrivalTime: 0, tramDepartureTime: 10 },
+            { id: "ST-B", name: "Station B", lat: 21.05, lng: 105.85, tramArrivalTime: 25, tramDepartureTime: 35 }
+          ]
+        };
+        const orders = [
+          { id: "O-A", name: "Dest A", lat: 21.052, lng: 105.852, weightKg: 25, readyTime: 35, dueTime: 120 }
+        ];
+
+        const plan = router.planBimodalTramRoutes(tramLine, orders);
+        expect.ok(plan.co2AbatedKg > 0);
+      });
+
+      test("F239-T20: Throws error on empty tram stations array", () => {
+        const router = new EVRPTWUrbanBimodalTramCargoTrailerRouter();
+        let err = false;
+        try {
+          router.planBimodalTramRoutes({ id: "EMPTY", stations: [] }, []);
+        } catch (e) {
+          err = true;
+        }
+        expect.equal(err, true);
+      });
+
+      test("F239-T21: Client and Server EVRPTWUrbanBimodalTramCargoTrailerRouter produce identical route metrics", () => {
+        const clientRouter = new EVRPTWUrbanBimodalTramCargoTrailerRouter();
+        const serverRouter = new ServerEVRPTWTramRouter();
+
+        const tramLine = {
+          id: "PARITY-LINE",
+          name: "Parity Metro",
+          stations: [
+            { id: "P-1", name: "P1", lat: 21.02, lng: 105.82, tramArrivalTime: 0, tramDepartureTime: 5 }
+          ]
+        };
+        const orders = [
+          { id: "P-ORD", name: "P-Order", lat: 21.022, lng: 105.822, weightKg: 8, readyTime: 5, dueTime: 60 }
+        ];
+
+        const cRes = clientRouter.planBimodalTramRoutes(tramLine, orders);
+        const sRes = serverRouter.planBimodalTramRoutes(tramLine, orders);
+
+        expect.equal(cRes.totalBikeDistanceKm, sRes.totalBikeDistanceKm);
+        expect.equal(cRes.totalSystemEnergyKwh, sRes.totalSystemEnergyKwh);
+        expect.equal(cRes.certification, sRes.certification);
+      });
+
+      // --- Tri-Role Copilot Tests (T22 - T24) ---
+      test("F239-T22: Admin Sentinel Copilot Sections 257 and 258 handle Phase 92 AKMV & QPLEX queries", () => {
+        const resAkmv = generateAdminCopilotResponse("Ước lượng lực lượng luồng đột biến akmv adaptive sketch cho phiên săn deal");
+        expect.equal(resAkmv.tag, "AKMV ADAPTIVE STREAM SKETCH");
+        expect.ok(resAkmv.text.includes("BEYER 2007"));
+
+        const resQplex = generateAdminCopilotResponse("Phân tích cân bằng định giá qplex duplex dueling và kiểm tra sàn giá vốn");
+        expect.equal(resQplex.tag, "QPLEX DUPLEX DUELING PRICING ENGINE");
+        expect.ok(resQplex.text.includes("QPLEX_DUPLEX_DUELING_PASS"));
+      });
+
+      test("F239-T23: Admin Sentinel Copilot Section 259 handles EVRPTW Urban Bimodal Tram Cargo Router", () => {
+        const resTram = generateAdminCopilotResponse("Điều phối vận tải hàng hoá đường sắt đô thị bimodal tram và xe đạp hàng metro line");
+        expect.equal(resTram.tag, "EVRPTW URBAN BIMODAL TRAM CARGO ROUTER");
+        expect.ok(resTram.text.includes("BIMODAL_TRAM_CARGO_TRAILER_PASS"));
+      });
+
+      test("F239-T24: Seller ShopSmart Copilot Section 101 and Buyer Assistant Intent 94 handle Phase 92 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn luồng đột biến akmv và định giá qplex duplex dueling kết hợp bimodal tram");
+        expect.equal(sellerRes.tag, "AKMV SKETCH, QPLEX DUELING PRICING & BIMODAL TRAM ROUTER");
+        expect.ok(sellerRes.text.includes("AKMV"));
+
+        const buyerRes = generateAiChatResponse("Đơn hàng của tôi có được giao bằng tàu điện metro đường sắt đô thị bimodal không?");
+        expect.equal(buyerRes.intent, "AKMV_QPLEX_BIMODAL_TRAM_ASSIST");
+        expect.ok(buyerRes.replyText.includes("TÀU ĐIỆN METRO BIMODAL"));
       });
     });
   });
