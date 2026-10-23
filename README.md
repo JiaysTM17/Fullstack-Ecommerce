@@ -8,7 +8,8 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![CI/CD](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/JiaysTM17/Fullstack-Ecommerce/actions)
 [![Tests Passing](https://img.shields.io/badge/Tests-3151%2F3151%20Passing%20(100%25)-brightgreen?style=for-the-badge&logo=checkmarx&logoColor=white)](tests/run-all.js)
-[![Phases](https://img.shields.io/badge/Enterprise_Algorithms-89_Phases-blue?style=for-the-badge&logo=probot&logoColor=white)](docs/BAO_CAO_NGHIEN_CUU_VA_PHAN_TICH_THUAT_TOAN_DOANH_NGHIEP.md)
+[![Phases](https://img.shields.io/badge/Enterprise_Algorithms-89_Phases%20(236%20Features)-blue?style=for-the-badge&logo=probot&logoColor=white)](docs/BAO_CAO_NGHIEN_CUU_VA_PHAN_TICH_THUAT_TOAN_DOANH_NGHIEP.md)
+[![Documentation](https://img.shields.io/badge/Enterprise_Docs-22_Dossiers-orange?style=for-the-badge&logo=googledocs&logoColor=white)](docs/DANH_MUC_HO_SO_BAN_GIAO_VA_TONG_QUAN_DU_AN.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
@@ -343,7 +344,7 @@ Hệ thống tích hợp sẵn tính năng **Đăng Nhập Nhanh 1-Click** tại
 
 ## 📦 BỘ HỒ SƠ TÀI LIỆU & BÁO CÁO BÀN GIAO PHẦN MỀM CHO KHÁCH HÀNG (ENTERPRISE DELIVERY PACKAGE)
 
-Nhằm đảm bảo sản phẩm phần mềm khi chuyển giao cho Khách hàng / Chủ đầu tư đạt chuẩn chuyên nghiệp cấp doanh nghiệp, toàn bộ hồ sơ phân tích, thiết kế, báo cáo kiểm định, tài chính, rủi ro và sổ tay vận hành đã được biên soạn trọn bộ **16 tài liệu chuyên môn chuẩn quốc tế**:
+Nhằm đảm bảo sản phẩm phần mềm khi chuyển giao cho Khách hàng / Chủ đầu tư đạt chuẩn chuyên nghiệp cấp doanh nghiệp, toàn bộ hồ sơ phân tích, thiết kế, báo cáo kiểm định, tài chính, rủi ro, pháp lý và sổ tay vận hành đã được biên soạn trọn bộ **22 tài liệu chuyên môn chuẩn quốc tế**:
 
 | STT | Hồ Sơ Tài Liệu & Báo Cáo Chuyên Sâu | Vị Trí Lưu Trữ | Nội Dung & Giá Trị Bàn Giao |
 | :---: | :--- | :--- | :--- |
@@ -362,7 +363,13 @@ Nhằm đảm bảo sản phẩm phần mềm khi chuyển giao cho Khách hàng
 | **13** | **Kế Hoạch Đào Tạo Nhân Sự & Chuyển Giao Công Nghệ Toàn Diện (TTTP)** | [docs/KE_HOACH_DAO_TAO_VA_CHUYEN_GIAO_CONG_NGHE.md](docs/KE_HOACH_DAO_TAO_VA_CHUYEN_GIAO_CONG_NGHE.md) | Khung đào tạo 6 ngày cho Ban Lãnh đạo, Kỹ thuật DevOps và Vận hành CSKH, bài sát hạch thực tế và mẫu biên bản hoàn tất chuyển giao công nghệ. |
 | **14** | **Báo Cáo Thiết Kế Cơ Sở Dữ Liệu & Từ Điển Dữ Liệu Toàn Diện (DDD)** | [docs/BAO_CAO_THIET_KE_CO_SO_DU_LIEU_VA_TU_DIEN_DU_LIEU.md](docs/BAO_CAO_THIET_KE_CO_SO_DU_LIEU_VA_TU_DIEN_DU_LIEU.md) | Sơ đồ quan hệ thực thể ERD chuẩn hóa 3NF, từ điển dữ liệu 100% các bảng/collections, chiến lược Compound & Text Index, chính sách sao lưu PITR. |
 | **15** | **Bản Cam Kết Chất Lượng Dịch Vụ (SLA) & Chứng Thư Bảo Hành Phần Mềm** | [docs/CAM_KET_CHAT_LUONG_DICH_VU_VA_CHUNG_CHI_BAO_HANH.md](docs/CAM_KET_CHAT_LUONG_DICH_VU_VA_CHUNG_CHI_BAO_HANH.md) | Chứng thư bảo hành 12 tháng không phát sinh chi phí, cam kết Uptime 99.95%, ma trận xử lý sự cố 4 cấp độ và chứng nhận Zero Malware, Zero Backdoors. |
-| **16** | **Danh Mục Tổng Thể Bộ Hồ Sơ Bàn Giao & Báo Cáo Tóm Tắt Điều Hành** | [docs/DANH_MUC_HO_SO_BAN_GIAO_VA_TONG_QUAN_DU_AN.md](docs/DANH_MUC_HO_SO_BAN_GIAO_VA_TONG_QUAN_DU_AN.md) | Báo cáo điều hành tổng quan (Executive Briefing), ma trận đóng gói 16 tài liệu, hướng dẫn tra cứu nhanh theo từng phòng ban nghiệp vụ tiếp nhận. |
+| **16** | **Danh Mục Tổng Thể Bộ Hồ Sơ Bàn Giao & Báo Cáo Tóm Tắt Điều Hành** | [docs/DANH_MUC_HO_SO_BAN_GIAO_VA_TONG_QUAN_DU_AN.md](docs/DANH_MUC_HO_SO_BAN_GIAO_VA_TONG_QUAN_DU_AN.md) | Báo cáo điều hành tổng quan (Executive Briefing), ma trận đóng gói 22 tài liệu, hướng dẫn tra cứu nhanh theo từng phòng ban nghiệp vụ tiếp nhận. |
+| **17** | **Kế Hoạch Quản Lý Dự Án & Bảng Phân Rã Công Việc (PMP & WBS)** | [docs/KE_HOACH_QUAN_LY_DU_AN_VA_TIEN_DO_PMP.md](docs/KE_HOACH_QUAN_LY_DU_AN_VA_TIEN_DO_PMP.md) | Phương pháp Agile/Scrum Hybrid, phân rã WBS 89 Phase, ma trận trách nhiệm RACI, quy trình quản lý thay đổi CR Form & thẩm định CCB. |
+| **18** | **Kế Hoạch Dự Phòng Thảm Họa & Duy Trì Hoạt Động (BCP & DRP)** | [docs/KE_HOACH_DU_PHONG_THAM_HOA_VA_KHOI_PHUC_BCP_DRP.md](docs/KE_HOACH_DU_PHONG_THAM_HOA_VA_KHOI_PHUC_BCP_DRP.md) | Tiêu chuẩn ISO 22301, cam kết RPO $\le 5$m, RTO $\le 15$m, kiến trúc Multi-Region Failover và 4 kịch bản ứng phó khẩn cấp (Sập DC, DDoS, Ransomware, Đứt cáp). |
+| **19** | **Quy Chuẩn Thiết Kế Giao Diện & Trải Nghiệm Người Dùng (UI/UX System)** | [docs/QUY_CHUAN_THIET_KE_GIAO_DIEN_VA_TRAI_NGHIEM_UI_UX.md](docs/QUY_CHUAN_THIET_KE_GIAO_DIEN_VA_TRAI_NGHIEM_UI_UX.md) | Design tokens bảng màu Shopee Orange `#EE4D2D`, lưới 8pt, thang chữ, đặc tả Product Card, SPX Live Stepper, WCAG 2.1 AA & âm thanh Chime. |
+| **20** | **Báo Cáo Đo Kiểm Hiệu Năng & Tải Trọng Tối Đa (Performance Benchmark)** | [docs/BAO_CAO_DO_KIEM_HIEU_NANG_VA_TAI_TRONG_PERFORMANCE.md](docs/BAO_CAO_DO_KIEM_HIEU_NANG_VA_TAI_TRONG_PERFORMANCE.md) | Đo kiểm thực nghiệm: 10,000 CCU, 12,000 RPS đỉnh tải Flash Sale, phân vị $P_{95} \le 54\text{ms}$, 48 giờ chạy liên tục 0 rò rỉ RAM (Zero Memory Leak). |
+| **21** | **Báo Cáo Tuân Thủ Pháp Lý, Thuế & Sở Hữu Trí Tuệ (Legal & IPR Audit)** | [docs/BAO_CAO_TUAN_THU_PHAP_LY_VA_SO_HUU_TRI_TUE_IPR.md](docs/BAO_CAO_TUAN_THU_PHAP_LY_VA_SO_HUU_TRI_TUE_IPR.md) | Tuân thủ Nghị định 52 & 85 về TMĐT, thuế TT40/2021, bảo vệ dữ liệu cá nhân PDPD, kiểm toán SBOM 100% giấy phép Permissive (Zero GPL). |
+| **22** | **Kịch Bản Kiểm Thử Nghiệm Thu Người Dùng Cuối (UAT Test Plan & Matrix)** | [docs/KICH_BAN_KIEM_THU_NGHIEM_THU_NGUOI_DUNG_UAT.md](docs/KICH_BAN_KIEM_THU_NGHIEM_THU_NGUOI_DUNG_UAT.md) | Bộ 55 kịch bản UAT chi tiết từng bước cho Buyer, Seller, Super Admin, hệ thống, kèm mẫu biên bản ghi nhận lỗi và phiếu ký nghiệm thu. |
 
 ---
 
@@ -381,9 +388,9 @@ Nhằm đảm bảo sản phẩm phần mềm khi chuyển giao cho Khách hàng
 
 ## 🧪 Kiểm Thử & Đảm Bảo Chất Lượng (Quality Assurance & Tests)
 
-Dự án áp dụng quy trình kiểm thử tự động nghiêm ngặt gồm **3.103 tests** được tổ chức theo 4 tầng tiêu chuẩn:
+Dự án áp dụng quy trình kiểm thử tự động nghiêm ngặt gồm **3.151 tests** được tổ chức theo 4 tầng tiêu chuẩn:
 
-* **Tier 1 (Core Features & 87 Phase Algorithms - 2.837 tests):** Kiểm thử toàn diện 234+ tính năng độc lập thuộc các phân hệ chính (Phân quyền RBAC, Hệ thống Voucher kép, Trợ lý ảo AI Tri-Role, Két ký quỹ Escrow, Hậu mãi & Đổi trả, Toàn bộ 87 Phase thuật toán doanh nghiệp).
+* **Tier 1 (Core Features & 89 Phase Algorithms - 2.885 tests):** Kiểm thử toàn diện 236 tính năng độc lập thuộc các phân hệ chính (Phân quyền RBAC, Hệ thống Voucher kép, Trợ lý ảo AI Tri-Role, Két ký quỹ Escrow, Hậu mãi & Đổi trả, Toàn bộ 89 Phase thuật toán doanh nghiệp).
 * **Tier 2 (Boundary & Validation - 230 tests):** Kiểm tra giá trị biên và bảo mật khắt khe (tồn kho âm, tấn công XSS/SQL Injection, upload file quá khổ, voucher quá hạn, vượt mức giảm tối đa, rate limiting).
 * **Tier 3 (Combinations - 24 tests):** Ma trận tương tác chéo giữa các tính năng (áp đồng thời 2 voucher + trừ xu 50% trần + giỏ hàng đa shop + SPX logistics + VAT invoice).
 * **Tier 4 (Real-world Scenarios - 12 tests):** Hành trình người dùng hoàn chỉnh từ đăng ký, mua sắm đa shop, xuất hóa đơn VAT, giao hàng SPX live GPS đến hậu mãi hoàn tiền và đánh giá 5 sao nhận thưởng xu.
@@ -392,7 +399,7 @@ Dự án áp dụng quy trình kiểm thử tự động nghiêm ngặt gồm **
 # Thực thi toàn bộ kiểm thử
 npm test
 ```
-*Kết quả thực thi:* **`3.103 / 3.103 tests passed (100% Pass Rate) trong 1.38 giây`**.
+*Kết quả thực thi:* **`3.151 / 3.151 tests passed (100% Pass Rate) trong 1.29 giây`**.
 
 ---
 
