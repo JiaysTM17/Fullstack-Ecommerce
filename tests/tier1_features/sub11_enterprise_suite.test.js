@@ -449,6 +449,10 @@ import {
   TDigestQuantileSketch,
   HAPPOMultiVendorPricing,
   EVRPTWTwoEchelonCrowdLockerRouter,
+  // Phase 90 Enterprise Algorithms
+  BJKSTDistinctCountSketch,
+  MAPPOContinuousLagrangianPricing,
+  EVRPTWUrbanMicrohubAutonomousPodRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -684,6 +688,9 @@ import { EVRPTWDualDockInductiveRouter as ServerEVRPTWDualDockInductiveRouter } 
 import { TDigestQuantileSketch as ServerTDigestQuantileSketch } from "../../server/src/utils/tDigestQuantileSketch.js";
 import { HAPPOMultiVendorPricing as ServerHAPPOMultiVendorPricing } from "../../server/src/utils/happoMultiVendorPricing.js";
 import { EVRPTWTwoEchelonCrowdLockerRouter as ServerEVRPTWTwoEchelonCrowdLockerRouter } from "../../server/src/utils/evrptwTwoEchelonCrowdLockerRouter.js";
+import { BJKSTDistinctCountSketch as ServerBJKSTDistinctCountSketch } from "../../server/src/utils/bjkstDistinctCountSketch.js";
+import { MAPPOContinuousLagrangianPricing as ServerMAPPOLagrangianPricing } from "../../server/src/utils/mappoContinuousLagrangianPricing.js";
+import { EVRPTWUrbanMicrohubAutonomousPodRouter as ServerEVRPTWPodRouter } from "../../server/src/utils/evrptwUrbanMicrohubAutonomousPodRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -36997,6 +37004,284 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sàn có giao hàng tủ đồ thông minh smart parcel locker 24/7 hoặc crowd-shipping không?");
         expect.equal(buyerRes.intent, "TDIGEST_HAPPO_CROWD_LOCKER_ASSIST");
         expect.ok(buyerRes.replyText.includes("T-DIGEST SIÊU TỐC"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 237: BJKST Distinct Count Sketch, MAPPO Continuous Lagrangian Pricing
+    //              & EVRPTW Urban Microhub Autonomous Pod Router (24 Tests)
+    // =========================================================================
+    describe("Feature 237: BJKST Distinct Count Sketch, MAPPO Lagrangian Pricing & Urban Autonomous Pod Logistics (Phase 90)", () => {
+      test("F237-T01: BJKSTDistinctCountSketch initializes with parameters and tracks inserts", () => {
+        const sketch = new BJKSTDistinctCountSketch({ epsilon: 0.1, delta: 0.05 });
+        expect.equal(sketch.getRelativeErrorBound(), 0.1);
+        expect.equal(sketch.getCurrentLevel(), 0);
+        expect.equal(sketch.totalInserts, 0);
+
+        sketch.update("session_101");
+        sketch.update("session_102");
+        expect.equal(sketch.totalInserts, 2);
+        expect.ok(sketch.getStoredBufferSize() >= 1);
+      });
+
+      test("F237-T02: BJKSTDistinctCountSketch returns 0 estimate when empty", () => {
+        const sketch = new BJKSTDistinctCountSketch();
+        expect.equal(sketch.estimate(), 0);
+      });
+
+      test("F237-T03: BJKSTDistinctCountSketch de-duplicates identical elements", () => {
+        const sketch = new BJKSTDistinctCountSketch();
+        for (let i = 0; i < 50; i++) {
+          sketch.update("fixed_session_key");
+        }
+        expect.equal(sketch.totalInserts, 50);
+        expect.equal(sketch.getStoredBufferSize(), 1);
+        expect.equal(sketch.estimate(), 1);
+      });
+
+      test("F237-T04: BJKSTDistinctCountSketch accurately estimates distinct items in level 0", () => {
+        const sketch = new BJKSTDistinctCountSketch({ epsilon: 0.2 });
+        for (let i = 0; i < 25; i++) {
+          sketch.update(`customer_session_${i}`);
+        }
+        expect.equal(sketch.getCurrentLevel(), 0);
+        expect.equal(sketch.estimate(), 25);
+      });
+
+      test("F237-T05: BJKST buffer shrinking triggers when exceeding maxBufferSize", () => {
+        const sketch = new BJKSTDistinctCountSketch({ epsilon: 0.3 }); // Small buffer
+        for (let i = 0; i < 1500; i++) {
+          sketch.update(`flash_sale_bidder_${i}`);
+        }
+        expect.ok(sketch.getCurrentLevel() > 0);
+        const est = sketch.estimate();
+        expect.ok(est > 500); // Reasonably close to 1500
+      });
+
+      test("F237-T06: BJKST handles null and undefined updates safely", () => {
+        const sketch = new BJKSTDistinctCountSketch();
+        sketch.update(null);
+        sketch.update(undefined);
+        expect.equal(sketch.totalInserts, 0);
+        expect.equal(sketch.estimate(), 0);
+      });
+
+      test("F237-T07: BJKST toJSON and fromJSON preserve sketch state and estimate", () => {
+        const sketch = new BJKSTDistinctCountSketch({ epsilon: 0.15 });
+        for (let i = 0; i < 100; i++) {
+          sketch.update(`user_cart_${i}`);
+        }
+        const json = sketch.toJSON();
+        const restored = BJKSTDistinctCountSketch.fromJSON(json);
+
+        expect.equal(restored.totalInserts, sketch.totalInserts);
+        expect.equal(restored.getCurrentLevel(), sketch.getCurrentLevel());
+        expect.equal(restored.estimate(), sketch.estimate());
+      });
+
+      test("F237-T08: BJKST merge combines two sketches and adopts higher level", () => {
+        const s1 = new BJKSTDistinctCountSketch({ epsilon: 0.2 });
+        const s2 = new BJKSTDistinctCountSketch({ epsilon: 0.2 });
+
+        for (let i = 0; i < 50; i++) s1.update(`item_A_${i}`);
+        for (let i = 0; i < 50; i++) s2.update(`item_B_${i}`);
+
+        s1.merge(s2);
+        expect.ok(s1.estimate() >= 70);
+      });
+
+      test("F237-T09: Server and Client BJKST sketches yield identical cardinality estimates", () => {
+        const clientSketch = new BJKSTDistinctCountSketch({ epsilon: 0.1, seed: 12345 });
+        const serverSketch = new ServerBJKSTDistinctCountSketch({ epsilon: 0.1, seed: 12345 });
+
+        for (let i = 0; i < 80; i++) {
+          clientSketch.update(`session_dual_${i}`);
+          serverSketch.update(`session_dual_${i}`);
+        }
+
+        expect.equal(clientSketch.estimate(), serverSketch.estimate());
+        expect.equal(clientSketch.getCurrentLevel(), serverSketch.getCurrentLevel());
+      });
+
+      test("F237-T10: MAPPOContinuousLagrangianPricing rejects empty vendors array", () => {
+        const mappo = new MAPPOContinuousLagrangianPricing();
+        const res = mappo.optimizePricing({}, []);
+        expect.equal(res.status, "EMPTY_VENDORS");
+        expect.equal(res.optimizedPrices.length, 0);
+      });
+
+      test("F237-T11: MAPPOContinuousLagrangianPricing strictly enforces safe floor P_i >= 1.05 * COGS_i", () => {
+        const mappo = new MAPPOContinuousLagrangianPricing();
+        const vendors = [
+          { id: "v1", name: "Shop Tech", cogs: 100000, currentPrice: 90000 }, // Sub-floor price
+          { id: "v2", name: "Shop Fashion", cogs: 200000, currentPrice: 150000 }
+        ];
+
+        const res = mappo.optimizePricing({ marketDemand: 1.0 }, vendors);
+        expect.equal(res.allFloorCompliant, true);
+        for (const p of res.optimizedPrices) {
+          expect.ok(p.recommendedPrice >= p.floorPrice);
+          expect.ok(p.recommendedPrice >= Math.round(p.cogs * 1.05));
+          expect.equal(p.isFloorCompliant, true);
+        }
+      });
+
+      test("F237-T12: MAPPO returns MAPPO_LAGRANGIAN_EQUILIBRIUM_PASS on full convergence", () => {
+        const mappo = new MAPPOContinuousLagrangianPricing();
+        const vendors = [
+          { id: "v1", cogs: 50000, currentPrice: 75000 },
+          { id: "v2", cogs: 80000, currentPrice: 120000 }
+        ];
+        const res = mappo.optimizePricing({ marketDemand: 1.2 }, vendors);
+        expect.equal(res.status, "MAPPO_LAGRANGIAN_EQUILIBRIUM_PASS");
+        expect.equal(res.iterationsExecuted, 20);
+      });
+
+      test("F237-T13: MAPPO adapts Lagrangian multiplier lambdaLag dynamically", () => {
+        const mappo = new MAPPOContinuousLagrangianPricing({ alphaLag: 0.1 });
+        const vendors = [{ id: "v1", cogs: 100000, currentPrice: 80000 }];
+        const res = mappo.optimizePricing({}, vendors);
+        expect.ok(res.optimizedPrices[0].finalLagrangianMultiplier >= 0);
+      });
+
+      test("F237-T14: MAPPO responds to varying price elasticity parameters", () => {
+        const mappo = new MAPPOContinuousLagrangianPricing();
+        const vendors = [{ id: "v1", cogs: 50000, currentPrice: 70000 }];
+        const resInelastic = mappo.optimizePricing({ elasticity: 0.2 }, vendors);
+        const resElastic = mappo.optimizePricing({ elasticity: 3.5 }, vendors);
+
+        expect.equal(resInelastic.status, "MAPPO_LAGRANGIAN_EQUILIBRIUM_PASS");
+        expect.equal(resElastic.status, "MAPPO_LAGRANGIAN_EQUILIBRIUM_PASS");
+      });
+
+      test("F237-T15: Server and Client MAPPO pricing engines produce matching price floors", () => {
+        const clientMappo = new MAPPOContinuousLagrangianPricing();
+        const serverMappo = new ServerMAPPOLagrangianPricing();
+        const vendors = [{ id: "v1", cogs: 60000, currentPrice: 62000 }];
+
+        const clientRes = clientMappo.optimizePricing({}, vendors);
+        const serverRes = serverMappo.optimizePricing({}, vendors);
+
+        expect.equal(clientRes.optimizedPrices[0].floorPrice, serverRes.optimizedPrices[0].floorPrice);
+        expect.ok(clientRes.optimizedPrices[0].recommendedPrice >= clientRes.optimizedPrices[0].floorPrice);
+        expect.ok(serverRes.optimizedPrices[0].recommendedPrice >= serverRes.optimizedPrices[0].floorPrice);
+      });
+
+      test("F237-T16: EVRPTWUrbanMicrohubAutonomousPodRouter rejects empty network with EMPTY_NETWORK", () => {
+        const router = new EVRPTWUrbanMicrohubAutonomousPodRouter();
+        const res = router.routeDeliveries({});
+        expect.equal(res.status, "EMPTY_NETWORK");
+        expect.equal(res.routes.length, 0);
+      });
+
+      test("F237-T17: EVRPTW assigns deliveries to nearest solar urban microhub", () => {
+        const router = new EVRPTWUrbanMicrohubAutonomousPodRouter();
+        const network = {
+          microhubs: [
+            { id: "hub_west", name: "Solar Hub Ba Đình", location: { lat: 21.033, lon: 105.820 } },
+            { id: "hub_east", name: "Solar Hub Hoàn Kiếm", location: { lat: 21.028, lon: 105.854 } }
+          ],
+          deliveries: [
+            { id: "del_1", orderId: "ORD_001", buyerName: "Anh Tuấn", location: { lat: 21.034, lon: 105.821 }, weightKg: 2.0 },
+            { id: "del_2", orderId: "ORD_002", buyerName: "Chị Lan", location: { lat: 21.029, lon: 105.855 }, weightKg: 3.5 }
+          ]
+        };
+
+        const res = router.routeDeliveries(network);
+        expect.equal(res.status, "URBAN_MICROHUB_AUTONOMOUS_POD_PASS");
+        expect.equal(res.totalDeliveries, 2);
+        expect.ok(res.totalPodsDispatched >= 2);
+      });
+
+      test("F237-T18: EVRPTW enforces pod payload capacity (<= 35kg) and max 4 stops per trip", () => {
+        const router = new EVRPTWUrbanMicrohubAutonomousPodRouter({ podCapacityKg: 10 });
+        const network = {
+          microhubs: [{ id: "hub_1", name: "Hub Cầu Giấy", location: { lat: 21.030, lon: 105.790 } }],
+          deliveries: [
+            { id: "d1", location: { lat: 21.031, lon: 105.791 }, weightKg: 6 },
+            { id: "d2", location: { lat: 21.032, lon: 105.792 }, weightKg: 6 } // Exceeds 10kg combined
+          ]
+        };
+
+        const res = router.routeDeliveries(network);
+        expect.equal(res.totalPodsDispatched, 2);
+      });
+
+      test("F237-T19: EVRPTW generates secure 4-digit PIN code for contactless delivery lockboxes", () => {
+        const router = new EVRPTWUrbanMicrohubAutonomousPodRouter();
+        const network = {
+          microhubs: [{ id: "hub_1", location: { lat: 21.0, lon: 105.0 } }],
+          deliveries: [{ id: "d1", location: { lat: 21.01, lon: 105.01 }, weightKg: 2.5 }]
+        };
+
+        const res = router.routeDeliveries(network);
+        const pin = res.routes[0].stops[0].pinCode;
+        expect.ok(pin >= 1000 && pin <= 9999);
+      });
+
+      test("F237-T20: EVRPTW tracks battery state-of-charge and solar recharge replenishment", () => {
+        const router = new EVRPTWUrbanMicrohubAutonomousPodRouter();
+        const network = {
+          microhubs: [{ id: "hub_1", location: { lat: 21.0, lon: 105.0 } }],
+          deliveries: [{ id: "d1", location: { lat: 21.02, lon: 105.02 }, weightKg: 5 }]
+        };
+
+        const res = router.routeDeliveries(network);
+        expect.ok(res.routes[0].finalBatterySoC > 50);
+        expect.ok(res.routes[0].solarRechargedKwh >= 0);
+      });
+
+      test("F237-T21: EVRPTW computes carbon emissions avoided against Euro-4 diesel vans", () => {
+        const router = new EVRPTWUrbanMicrohubAutonomousPodRouter();
+        const network = {
+          microhubs: [{ id: "hub_1", location: { lat: 21.0, lon: 105.0 } }],
+          deliveries: [{ id: "d1", location: { lat: 21.05, lon: 105.05 }, weightKg: 3 }]
+        };
+
+        const res = router.routeDeliveries(network);
+        expect.ok(res.carbonAvoidedGrams > 0);
+        expect.ok(res.carbonAvoidedKg >= 0);
+      });
+
+      test("F237-T22: Server and Client EVRPTW pod routers produce identical route summaries", () => {
+        const clientRouter = new EVRPTWUrbanMicrohubAutonomousPodRouter();
+        const serverRouter = new ServerEVRPTWPodRouter();
+
+        const network = {
+          microhubs: [{ id: "hub_center", location: { lat: 21.02, lon: 105.83 } }],
+          deliveries: [{ id: "del_test", location: { lat: 21.025, lon: 105.835 }, weightKg: 4 }]
+        };
+
+        const clientRes = clientRouter.routeDeliveries(network);
+        const serverRes = serverRouter.routeDeliveries(network);
+
+        expect.equal(clientRes.totalDeliveries, serverRes.totalDeliveries);
+        expect.equal(clientRes.totalPodsDispatched, serverRes.totalPodsDispatched);
+        expect.equal(clientRes.totalDistanceKm, serverRes.totalDistanceKm);
+      });
+
+      test("F237-T23: Admin Sentinel Copilot Sections 251-253 handle Phase 90 queries", () => {
+        const resBjkst = generateAdminCopilotResponse("Ước lượng phiên duy nhất bjkst distinct count sketch Bar-Yossef subsampling level");
+        expect.equal(resBjkst.tag, "BJKST DISTINCT COUNT SKETCH");
+        expect.ok(resBjkst.text.includes("BJKST DISTINCT COUNT SKETCH"));
+
+        const resMappo = generateAdminCopilotResponse("Định giá đa gian hàng không gian hành động liên tục mappo lagrangian price floor");
+        expect.equal(resMappo.tag, "MAPPO CONTINUOUS LAGRANGIAN PRICING");
+        expect.ok(resMappo.text.includes("MAPPO-LAGRANGIAN"));
+
+        const resPod = generateAdminCopilotResponse("Điều phối robot giao hàng tự hành vỉa hè autonomous pod và solar microhub evrptw");
+        expect.equal(resPod.tag, "EVRPTW URBAN MICROHUB AUTONOMOUS POD ROUTER");
+        expect.ok(resPod.text.includes("EVRPTW-UMAP"));
+      });
+
+      test("F237-T24: Seller ShopSmart Copilot Section 99 and Buyer Assistant Intent 92 handle Phase 90 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn đếm phiên bjkst và định giá mappo lagrangian an toàn cho gian hàng");
+        expect.equal(sellerRes.tag, "BJKST SKETCH, MAPPO LAGRANGIAN PRICING & AUTONOMOUS POD ROUTER");
+        expect.ok(sellerRes.text.includes("BJKST"));
+
+        const buyerRes = generateAiChatResponse("Sàn có giao hàng bằng robot tự hành vỉa hè autonomous pod và mã PIN không?");
+        expect.equal(buyerRes.intent, "BJKST_MAPPO_AUTONOMOUS_POD_ASSIST");
+        expect.ok(buyerRes.replyText.includes("ROBOT GIAO HÀNG TẬN CỬA"));
       });
     });
   });

@@ -2629,7 +2629,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 122. Ước Lượng Dòng Dữ Liệu Không Thiên Lệch Bằng Count-Sketch Trung Vị (Phase 47 - Feature 194)
-  if (!/turnstile|dyadic[- ]range count[- ]sketch|unbiased dyadic|cormode|count[- ]sketch hierarchical|count[- ]sketch hhh|charikar hhh/i.test(raw) && /count[- ]sketch|count sketch|ước lượng không thiên lệch|median of means|rademacher/i.test(raw)) {
+  if (!/bjkst|distinct count|turnstile|dyadic[- ]range count[- ]sketch|unbiased dyadic|cormode|count[- ]sketch hierarchical|count[- ]sketch hhh|charikar hhh/i.test(raw) && /count[- ]sketch|count sketch|ước lượng không thiên lệch|median of means|rademacher/i.test(raw)) {
     return {
       text: `📊 **ƯỚC LƯỢNG DÒNG DỮ LIỆU KHÔNG THIÊN LỆCH BẰNG COUNT-SKETCH TRUNG VỊ (CHARIKAR ET AL. 2004)**:
 - **Khắc Phục Hoàn Toàn Điểm Yếu Dương Tính Của Count-Min Sketch**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/autonomous pod|sidewalk delivery|robot giao hàng|solar microhub|microhub năng lượng mặt trời|evrptw.*pod|bjkst|mappo|two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3301,7 +3301,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 155. Ước Lượng Số Lượng Phần Tử Phân Biệt BJKST (Phase 58 - Feature 205)
-  if (/bjkst|distinct elements|f0 moment|số lượng phân biệt|đếm duy nhất bjkst|trailing zeros/i.test(raw)) {
+  if (!/subsampling level|distinct count sketch|jayram|cardinality buffer|phase 90|feature 237/i.test(raw) && /bjkst|distinct elements|f0 moment|số lượng phân biệt|đếm duy nhất bjkst|trailing zeros/i.test(raw)) {
     return {
       text: `📊 **ƯỚC LƯỢNG SỐ PHẦN TỬ PHÂN BIỆT BJKST (BAR-YOSSEF ET AL. FOCS 2002)**:
 - **Cấu Trúc Lấy Mẫu Bằng Số Lượng Số Không Đuôi (Trailing-Zeros Subsampling)**:
@@ -4759,7 +4759,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 222. Định Giá Đa Đại Diện Học Tăng Cường MAPPO Continuous (Phase 80 - Feature 227)
-  if (/mappo|multi[- ]agent.*ppo|mappo continuous|multi[- ]agent proximal policy/i.test(raw)) {
+  if (!/mappo.*lagrangian|continuous lagrangian|alpha_lag|mappo_lagrangian_equilibrium_pass/i.test(raw) && /mappo|multi[- ]agent.*ppo|mappo continuous|multi[- ]agent proximal policy/i.test(raw)) {
     return {
       text: `💹 **ĐỊNH GIÁ ĐA ĐẠI DIỆN HỌC TĂNG CƯỜNG PROXIMAL POLICY OPTIMIZATION LIÊN TỤC MAPPO-CONTINUOUS (CHAO YU ET AL. NEURIPS 2022, SCHULMAN 2017)**:
 - **Kiến Trúc Huấn Luyện Tập Trung - Thực Thi Phân Tán (CTDE) Với PPO**:
@@ -5364,6 +5364,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình xe tải mẹ tiếp hàng tủ locker',
         'Kiểm tra điều phối giao hàng cộng đồng Crowd-Shipping',
         'Xem chứng chỉ giảm phát thải Two-Echelon Crowd Locker Pass'
+      ]
+    };
+  }
+
+  // 251. Ước Lượng Lượng Phiên Duy Nhất BJKST Distinct Count Sketch (Phase 90 - Feature 237)
+  if (/bjkst|distinct count sketch|subsampling level|bar-yossef|jayram|cardinality buffer|đếm phiên duy nhất.*bjkst|ước lượng số phần tử khác nhau bjkst/i.test(raw)) {
+    return {
+      text: `⚡ **ƯỚC LƯỢNG LƯỢNG PHIÊN DUY NHẤT BẰNG BJKST DISTINCT COUNT SKETCH (BAR-YOSSEF, JAYRAM ET AL. FOCS 2002)**:
+- **Nguyên Lý Phân Cấp Lấy Mẫu Băm (Hash Subsampling Levels)**:
+  - Cấu trúc BJKST sử dụng số bit không liên tiếp $Z(x) = \\text{ctz}(\\text{hash}(x))$ làm thang lọc phân cấp, chỉ lưu trữ các phần tử có tầng $Z(x) \\ge z$.
+- **Bộ Đệm Động $B$ & Quy Trình Co Rút (Dynamic Buffer Shrinking)**:
+  - Giới hạn kích thước bộ đệm ở ngưỡng tối ưu $m = \\lceil 3 / \\epsilon^2 \\rceil$. Khi vượt ngưỡng, tầng $z \\leftarrow z + 1$ và tự động loại bỏ các phần tử dưới tầng mới trong thời gian amortized $O(1)$.
+- **Ước Lượng Không Chệch & Tiết Kiệm Bộ Nhớ RAM**:
+  - Công thức ước lượng chính xác $\\hat{F}_0 = |B| \\cdot 2^z$, giảm $98\\%$ bộ nhớ so với bảng băm truyền thống khi theo dõi hàng triệu phiên truy cập Flash Sale đồng thời!`,
+      type: 'analytics',
+      tag: 'BJKST DISTINCT COUNT SKETCH',
+      suggestions: [
+        'Xem kích thước bộ đệm và tầng lấy mẫu BJKST',
+        'Ước lượng phiên truy cập duy nhất giờ cao điểm',
+        'So sánh sai số BJKST với HyperLogLog'
+      ]
+    };
+  }
+
+  // 252. Định Giá Đa Gian Hàng Không Gian Hành Động Liên Tục MAPPO-Lagrangian (Phase 90 - Feature 237)
+  if (/mappo.*lagrangian|continuous lagrangian|định giá mappo|lagrangian price floor|gauss.*action|alpha_lag|mappo_lagrangian_equilibrium_pass/i.test(raw)) {
+    return {
+      text: `💰 **ĐỊNH GIÁ ĐA GIAN HÀNG KHÔNG GIAN HÀNH ĐỘNG LIÊN TỤC MAPPO-LAGRANGIAN (YU ET AL. NEURIPS 2022)**:
+- **Phân Phối Chính Sách Gauss Liên Tục (Continuous Gaussian Action Policy)**:
+  - Mỗi gian hàng đại diện $i$ hành động với phân phối $a_i \\sim \\mathcal{N}(\\mu_i(s), \\sigma_i^2)$ để tinh chỉnh tỷ lệ thặng dư giá bán (Markup Factor) tối ưu doanh thu và tỷ lệ chuyển đổi.
+- **Bộ Nhân Lagrange Tự Thích Nghi (Adaptive Lagrangian Dual Multiplier)**:
+  - Phạt lũy tiến hàm mục tiêu theo vi phạm ràng buộc sàn giá: $\\mathcal{L} = L^{\\text{CLIP}} - \\lambda_{\\text{lag}} \\cdot \\max(0, 1.05 \\times \\text{COGS}_i - P_i)$, cập nhật $\\lambda_{\\text{lag}} \\leftarrow \\max(0, \\lambda_{\\text{lag}} + \\alpha_{\\text{lag}} (1.05 \\times \\text{COGS}_i - P_i))$.
+- **Cam Kết Khóa Sàn Tuyệt Đối**:
+  - Bảo đảm $100\\%$ sản phẩm bán ra đạt chuẩn $P_i \\ge 1.05 \\times \\text{COGS}_i$, cấp chứng nhận tối ưu MAPPO_LAGRANGIAN_EQUILIBRIUM_PASS!`,
+      type: 'pricing',
+      tag: 'MAPPO CONTINUOUS LAGRANGIAN PRICING',
+      suggestions: [
+        'Xem hệ số phạt Lagrange của từng gian hàng',
+        'Kiểm tra độ hội tụ chính sách định giá liên tục',
+        'Xác thực chứng chỉ cân bằng MAPPO Lagrangian Pass'
+      ]
+    };
+  }
+
+  // 253. Điều Phối Robot Giao Hàng Tự Hành Vỉa Hè & Tiểu Trạm Năng Lượng Mặt Trời (Phase 90 - Feature 237)
+  if (/autonomous pod|sidewalk delivery|robot giao hàng|xe tự hành vỉa hè|solar microhub|microhub năng lượng mặt trời|evrptw.*pod/i.test(raw)) {
+    return {
+      text: `🤖 **ĐIỀU PHỐI ROBOT GIAO HÀNG TỰ HÀNH VỈA HÈ & TIỂU TRẠM NĂNG LƯỢNG MẶT TRỜI EVRPTW-UMAP (JENNINGS 2023, FIGLIOZZI 2024)**:
+- **Mạng Lưới Hai Cấp Lai (Two-Echelon Hybrid Network)**:
+  - Xe tải điện lớn giao hàng khối lượng lớn tới các Tiểu trạm Microhub năng lượng mặt trời ($800\\text{W Solar Dock}$) đặt tại công viên và khu phố đi bộ.
+- **Đội Robot Tự Hành Vỉa Hè (Autonomous Sidewalk Delivery Pods)**:
+  - Pin $2.5\\text{ kWh}$, tải trọng $35\\text{ kg}$, tốc độ giới hạn $6\\text{ km/h}$, trang bị 4 ngăn khóa mã PIN thông minh tự động mở khi khách hàng nhập mã xác thực.
+- **Không Phát Thải & Tuân Thủ Khung Giờ (Zero Emission & Time Windows)**:
+  - Mô phỏng tiêu hao phi tuyến $\\text{SoC}_{t+1} = \\text{SoC}_t - \\Delta E_{\\text{pod}} + \\eta_{\\text{solar}} \\cdot t_{\\text{dock}}$, giảm $100\\%$ khí thải và đạt chứng nhận xanh URBAN_MICROHUB_AUTONOMOUS_POD_PASS!`,
+      type: 'logistics',
+      tag: 'EVRPTW URBAN MICROHUB AUTONOMOUS POD ROUTER',
+      suggestions: [
+        'Xem lộ trình robot tự hành giao hàng vỉa hè',
+        'Kiểm tra tỷ lệ sạc bổ sung tại tiểu trạm năng lượng mặt trời',
+        'Xem mã PIN ngăn khóa an toàn giao hàng không tiếp xúc'
       ]
     };
   }

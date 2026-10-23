@@ -1352,7 +1352,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 67. Bộ Ba Thuật Toán BJKST Distinct Count, AWAC Pricing & Gom Hàng Cross-Dock VRPTW-CC (Phase 58 - Feature 205)
-  if (/bjkst|distinct count|awac|advantage-weighted|vrptw-cc|cross[- ]dock|trung chuyển gom hàng/i.test(raw)) {
+  if (!/mappo.*lagrangian|continuous lagrangian|autonomous pod|sidewalk delivery|robot giao hàng|solar microhub/i.test(raw) && /bjkst|distinct count|awac|advantage-weighted|vrptw-cc|cross[- ]dock|trung chuyển gom hàng/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN BJKST, AWAC PRICING & CROSS-DOCKING VRPTW-CC (${currentShop.name})**:
 - **Đếm chính xác khách hàng độc nhất BJKST**:
@@ -1512,7 +1512,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 75. Bộ Ba Thuật Toán Frequent Directions, PPO-Lagrangian Safe Pricing & EVRPTW Queue Router (Phase 66 - Feature 213)
-  if (!/ppo[- ]clip|ppo[- ]entropy/i.test(raw) && /frequent[- ]directions|matrix sketch|phác thảo ma trận|ppo[- ]lagrangian|lagrangian pricing|evrptw[- ]queue|hàng đợi trạm sạc/i.test(raw)) {
+  if (!/mappo|ppo[- ]clip|ppo[- ]entropy/i.test(raw) && /frequent[- ]directions|matrix sketch|phác thảo ma trận|\bppo[- ]lagrangian|lagrangian pricing|evrptw[- ]queue|hàng đợi trạm sạc/i.test(raw)) {
     return {
       text: `🌟 **BỘ BA THUẬT TOÁN FREQUENT DIRECTIONS, PPO-LAGRANGIAN & EVRPTW-QUEUE (${currentShop.name})**:
 - **Nén luồng tương tác khách hàng Frequent Directions Matrix Sketching**:
@@ -1792,7 +1792,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 89. Bộ Ba Thuật Toán Time-Decayed CMS, MAPPO Continuous Pricing & TOU Partial Charging EVRPTW (Phase 80 - Feature 227)
-  if (/time[- ]decayed|decayed count[- ]min|mappo|multi[- ]agent.*ppo|evrptw[- ]tou|tou tariff|partial charging|biểu giá điện theo giờ|sạc từng phần tou/i.test(raw)) {
+  if (!/mappo.*lagrangian|continuous lagrangian|autonomous pod|sidewalk delivery|robot giao hàng|solar microhub/i.test(raw) && /time[- ]decayed|decayed count[- ]min|mappo|multi[- ]agent.*ppo|evrptw[- ]tou|tou tariff|partial charging|biểu giá điện theo giờ|sạc từng phần tou/i.test(raw)) {
     return {
       text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 80 (${currentShop.name})**:
 - **Bắt xu hướng thời gian suy giảm Time-Decayed Count-Min Sketch (Cormode 2008, Chen & Zhang 2006)**:
@@ -1989,6 +1989,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Xem phân vị P99 và P99.9 độ trễ gian hàng',
         'Tư vấn định giá tuần tự HAPPO an toàn 1.05x COGS',
         'Tối ưu hóa chi phí gửi hàng tủ thông minh Smart Locker'
+      ]
+    };
+  }
+
+  // 99. Đếm Phiên BJKST, Định Giá Liên Tục MAPPO-Lagrangian & Robot Giao Hàng Tự Hành Vỉa Hè (Phase 90 - Feature 237)
+  if (/bjkst|distinct count sketch|mappo.*lagrangian|continuous lagrangian|định giá mappo|lagrangian price floor|autonomous pod|sidewalk delivery|robot giao hàng|xe tự hành vỉa hè|solar microhub/i.test(raw)) {
+    return {
+      text: `🚀 **BỘ BA THUẬT TOÁN ĐẾM BJKST, ĐỊNH GIÁ LIÊN TỤC MAPPO-LAGRANGIAN & ROBOT GIAO HÀNG TỰ HÀNH VỈA HÈ (PHASE 90 - FEATURE 237)**:
+- **Ước Lượng Lượng Khách Truy Cập Duy Nhất BJKST Distinct Count Sketch (Bar-Yossef et al.)**:
+  - Giúp Shop theo dõi chính xác số lượng tài khoản độc nhất (Distinct Sessions) và giỏ hàng đang chờ xử lý mà chỉ tốn vài chục KB bộ nhớ RAM, chống bot ảo săn deal.
+- **Tối Ưu Hóa Giá Bán Đa Gian Hàng MAPPO Continuous Lagrangian (Yu et al. NeurIPS 2022)**:
+  - Tự động điều chỉnh hệ số markup giá liên tục theo phân phối Gaussian; bộ nhân phạt Lagrange $\\lambda_{\\text{lag}}$ siết chặt rào chắn an toàn, cam kết tuyệt đối $P_i \\ge 1.05 \\times \\text{COGS}_i$.
+- **Giao Hàng Bằng Robot Tự Hành Vỉa Hè & Tiểu Trạm Năng Lượng Mặt Trời EVRPTW-UMAP (Jennings 2023)**:
+  - Hàng hóa của Shop được tiếp ứng tới các Tiểu trạm Microhub sạc pin năng lượng mặt trời; robot tự hành vỉa hè (Autonomous Pod) 4 ngăn khóa mã PIN giao thẳng tới tay người mua không phát thải CO2!`,
+      type: 'recommendation',
+      tag: 'BJKST SKETCH, MAPPO LAGRANGIAN PRICING & AUTONOMOUS POD ROUTER',
+      suggestions: [
+        'Ước lượng phiên người mua duy nhất BJKST',
+        'Tư vấn định giá liên tục MAPPO Lagrangian',
+        'Cấu hình mã PIN giao hàng robot tự hành vỉa hè'
       ]
     };
   }

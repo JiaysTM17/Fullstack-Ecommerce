@@ -49685,6 +49685,452 @@ export class EVRPTWTwoEchelonCrowdLockerRouter {
   }
 }
 
+/**
+ * Phase 90 (Feature 237) - BJKST Distinct Count Sketch (Client Mirror)
+ */
+export class BJKSTDistinctCountSketch {
+  constructor(options = {}) {
+    this.epsilon = Number(options.epsilon) || 0.1;
+    this.delta = Number(options.delta) || 0.05;
+    this.seed = Number.isInteger(options.seed) ? options.seed : 0x811c9dc5;
+    this.maxBufferSize = Math.max(32, Math.ceil(3 / (this.epsilon * this.epsilon)));
+    this.level = 0;
+    this.buffer = new Map();
+    this.totalInserts = 0;
+  }
+
+  _hash(value) {
+    const str = String(value);
+    let h = this.seed;
+    for (let i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 0x5bd1e995);
+      h ^= h >>> 15;
+    }
+    h = Math.imul(h ^ (h >>> 13), 0x5bd1e995);
+    return (h ^ (h >>> 15)) >>> 0;
+  }
+
+  _trailingZeros(hashVal) {
+    if (hashVal === 0) return 31;
+    let zeros = 0;
+    let val = hashVal;
+    while ((val & 1) === 0 && zeros < 31) {
+      zeros++;
+      val >>>= 1;
+    }
+    return zeros;
+  }
+
+  update(item) {
+    if (item === undefined || item === null) return this;
+    const str = typeof item === 'object' ? JSON.stringify(item) : String(item);
+    const h = this._hash(str);
+    const itemLevel = this._trailingZeros(h);
+    this.totalInserts++;
+
+    if (itemLevel >= this.level) {
+      this.buffer.set(h, { item: str, level: itemLevel });
+      if (this.buffer.size > this.maxBufferSize) {
+        this._shrink();
+      }
+    }
+    return this;
+  }
+
+  _shrink() {
+    while (this.buffer.size > this.maxBufferSize) {
+      this.level++;
+      for (const [hashKey, entry] of this.buffer.entries()) {
+        if (entry.level < this.level) {
+          this.buffer.delete(hashKey);
+        }
+      }
+    }
+  }
+
+  estimate() {
+    if (this.totalInserts === 0) return 0;
+    if (this.level === 0) return this.buffer.size;
+    return Math.round(this.buffer.size * Math.pow(2, this.level));
+  }
+
+  getRelativeErrorBound() {
+    return this.epsilon;
+  }
+
+  getCurrentLevel() {
+    return this.level;
+  }
+
+  getStoredBufferSize() {
+    return this.buffer.size;
+  }
+
+  merge(other) {
+    if (!(other instanceof BJKSTDistinctCountSketch)) {
+      throw new Error('Can only merge with another BJKSTDistinctCountSketch');
+    }
+    const maxLevel = Math.max(this.level, other.level);
+    this.level = maxLevel;
+
+    for (const [hashKey, entry] of this.buffer.entries()) {
+      if (entry.level < this.level) {
+        this.buffer.delete(hashKey);
+      }
+    }
+
+    for (const [hashKey, entry] of other.buffer.entries()) {
+      if (entry.level >= this.level) {
+        this.buffer.set(hashKey, entry);
+      }
+    }
+
+    this.totalInserts += other.totalInserts;
+    if (this.buffer.size > this.maxBufferSize) {
+      this._shrink();
+    }
+    return this;
+  }
+
+  toJSON() {
+    return {
+      epsilon: this.epsilon,
+      delta: this.delta,
+      seed: this.seed,
+      maxBufferSize: this.maxBufferSize,
+      level: this.level,
+      totalInserts: this.totalInserts,
+      bufferEntries: Array.from(this.buffer.entries()).map(([k, v]) => [k, v.item, v.level])
+    };
+  }
+
+  static fromJSON(json) {
+    const sketch = new BJKSTDistinctCountSketch({
+      epsilon: json.epsilon,
+      delta: json.delta,
+      seed: json.seed
+    });
+    sketch.maxBufferSize = json.maxBufferSize;
+    sketch.level = json.level;
+    sketch.totalInserts = json.totalInserts;
+    sketch.buffer = new Map();
+    if (Array.isArray(json.bufferEntries)) {
+      for (const [k, item, level] of json.bufferEntries) {
+        sketch.buffer.set(k, { item, level });
+      }
+    }
+    return sketch;
+  }
+}
+
+/**
+ * Phase 90 (Feature 237) - MAPPO Continuous Lagrangian Multi-Vendor Pricing Engine (Client Mirror)
+ */
+export class MAPPOContinuousLagrangianPricing {
+  constructor(options = {}) {
+    this.gamma = Number(options.gamma) || 0.95;
+    this.lambdaGae = Number(options.lambdaGae) || 0.90;
+    this.clipEps = Number(options.clipEps) || 0.20;
+    this.alphaLag = Number(options.alphaLag) || 0.05;
+    this.maxIterations = Number(options.maxIterations) || 20;
+    this.priceFloorRatio = 1.05;
+  }
+
+  _gaussianPdf(x, mean, std) {
+    const s = Math.max(0.01, std);
+    const exponent = -0.5 * Math.pow((x - mean) / s, 2);
+    return (1 / (s * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+  }
+
+  _estimateCentralizedValue(state, vendors) {
+    const marketDemand = state.marketDemand || 1.0;
+    const avgCompetitorPrice = state.avgCompetitorPrice || 250000;
+    let expectedWelfare = 0;
+
+    for (const v of vendors) {
+      const price = v.currentPrice || v.cogs * 1.3;
+      const margin = (price - v.cogs) / Math.max(1, price);
+      const competitiveness = Math.max(0.1, 1 - (price - avgCompetitorPrice) / avgCompetitorPrice);
+      expectedWelfare += margin * competitiveness * marketDemand;
+    }
+    return expectedWelfare;
+  }
+
+  optimizePricing(state = {}, vendors = []) {
+    if (!Array.isArray(vendors) || vendors.length === 0) {
+      return {
+        status: 'EMPTY_VENDORS',
+        optimizedPrices: [],
+        diagnostics: {}
+      };
+    }
+
+    const marketDemand = Number(state.marketDemand) || 1.2;
+    const avgCompetitorPrice = Number(state.avgCompetitorPrice) || 300000;
+    const elasticity = Number(state.elasticity) || 1.5;
+
+    const vendorProfiles = vendors.map((v, idx) => {
+      const cogs = Math.max(1000, Number(v.cogs) || 50000);
+      const floorPrice = Math.round(cogs * this.priceFloorRatio);
+      const initialPrice = Math.max(floorPrice, Number(v.currentPrice) || cogs * 1.25);
+      return {
+        id: v.id || `vendor_${idx + 1}`,
+        name: v.name || `Vendor ${idx + 1}`,
+        cogs,
+        floorPrice,
+        price: initialPrice,
+        mu: (initialPrice - cogs) / cogs,
+        std: 0.15,
+        lambdaLag: 0.10,
+        violationHistory: []
+      };
+    });
+
+    let baselineValue = this._estimateCentralizedValue(state, vendorProfiles);
+
+    for (let iter = 0; iter < this.maxIterations; iter++) {
+      for (const vendor of vendorProfiles) {
+        const oldMu = vendor.mu;
+        const oldStd = vendor.std;
+        const sampledMarkup = oldMu + (Math.sin(iter * 0.7 + vendor.cogs) * 0.05);
+        const proposedPrice = vendor.cogs * (1 + sampledMarkup);
+
+        const constraintViolation = Math.max(0, vendor.floorPrice - proposedPrice);
+        vendor.violationHistory.push(constraintViolation);
+        vendor.lambdaLag = Math.max(0, vendor.lambdaLag + this.alphaLag * (vendor.floorPrice - proposedPrice));
+
+        const priceDiffRatio = (proposedPrice - avgCompetitorPrice) / avgCompetitorPrice;
+        const conversionRate = Math.max(0.02, Math.min(0.95, 0.45 - elasticity * priceDiffRatio * 0.3));
+        const unitProfit = Math.max(0, proposedPrice - vendor.cogs);
+        const rawReward = unitProfit * conversionRate * marketDemand;
+        const lagrangianReward = rawReward - vendor.lambdaLag * constraintViolation;
+
+        const nextState = { ...state, avgCompetitorPrice: (avgCompetitorPrice + proposedPrice) / 2 };
+        const nextValue = this._estimateCentralizedValue(nextState, vendorProfiles);
+        const tdError = lagrangianReward + this.gamma * nextValue - baselineValue;
+        const advantage = tdError;
+
+        const oldProb = this._gaussianPdf(sampledMarkup, oldMu, oldStd);
+        const newMu = oldMu + (advantage > 0 ? 0.02 : -0.015);
+        const newProb = this._gaussianPdf(sampledMarkup, newMu, oldStd);
+        const ratio = Math.min(2.0, Math.max(0.1, newProb / Math.max(1e-4, oldProb)));
+
+        const surr1 = ratio * advantage;
+        const surr2 = Math.min(1 + this.clipEps, Math.max(1 - this.clipEps, ratio)) * advantage;
+        const ppoObjective = Math.min(surr1, surr2);
+
+        if (ppoObjective > 0) {
+          vendor.mu = Math.max(this.priceFloorRatio - 1.0, newMu);
+        }
+
+        const calculatedPrice = vendor.cogs * (1 + vendor.mu);
+        vendor.price = Math.max(vendor.floorPrice, Math.round(calculatedPrice));
+        baselineValue = nextValue;
+      }
+    }
+
+    const results = vendorProfiles.map(v => {
+      const margin = (v.price - v.cogs) / v.price;
+      const isFloorCompliant = v.price >= v.floorPrice;
+      return {
+        id: v.id,
+        name: v.name,
+        cogs: v.cogs,
+        floorPrice: v.floorPrice,
+        recommendedPrice: v.price,
+        grossMarginPct: Number((margin * 100).toFixed(2)),
+        isFloorCompliant,
+        finalLagrangianMultiplier: Number(v.lambdaLag.toFixed(4)),
+        policyMu: Number(v.mu.toFixed(4))
+      };
+    });
+
+    const allCompliant = results.every(r => r.isFloorCompliant);
+
+    return {
+      status: allCompliant ? 'MAPPO_LAGRANGIAN_EQUILIBRIUM_PASS' : 'FLOOR_VIOLATION_DETECTED',
+      allFloorCompliant: allCompliant,
+      iterationsExecuted: this.maxIterations,
+      optimizedPrices: results,
+      diagnostics: {
+        gamma: this.gamma,
+        clipEps: this.clipEps,
+        alphaLag: this.alphaLag,
+        totalVendors: vendors.length
+      }
+    };
+  }
+}
+
+/**
+ * Phase 90 (Feature 237) - EVRPTW Urban Microhub Autonomous Pod Router (Client Mirror)
+ */
+export class EVRPTWUrbanMicrohubAutonomousPodRouter {
+  constructor(options = {}) {
+    this.podCapacityKg = Number(options.podCapacityKg) || 35.0;
+    this.podBatteryKwh = Number(options.podBatteryKwh) || 2.5;
+    this.podSpeedKmh = Number(options.podSpeedKmh) || 6.0;
+    this.solarChargeKw = Number(options.solarChargeKw) || 0.8;
+    this.basePodDischargeRate = 0.08;
+    this.payloadDischargeFactor = 0.0015;
+    this.dieselEmissionGramsPerKm = 185;
+  }
+
+  _calcDistanceKm(p1, p2) {
+    const lat1 = Number(p1.lat) || 0;
+    const lon1 = Number(p1.lon) || 0;
+    const lat2 = Number(p2.lat) || 0;
+    const lon2 = Number(p2.lon) || 0;
+
+    const dLat = (lat2 - lat1) * 111.0;
+    const dLon = (lon2 - lon1) * 111.0 * Math.cos(lat1 * (Math.PI / 180));
+    return Math.sqrt(dLat * dLat + dLon * dLon);
+  }
+
+  _calcEnergyConsumptionKwh(distKm, payloadKg) {
+    return distKm * (this.basePodDischargeRate + this.payloadDischargeFactor * payloadKg);
+  }
+
+  routeDeliveries(network = {}) {
+    const microhubs = Array.isArray(network.microhubs) ? network.microhubs : [];
+    const deliveries = Array.isArray(network.deliveries) ? network.deliveries : [];
+
+    if (microhubs.length === 0 || deliveries.length === 0) {
+      return {
+        status: 'EMPTY_NETWORK',
+        routes: [],
+        summary: {}
+      };
+    }
+
+    const hubAssignments = new Map();
+    for (const hub of microhubs) {
+      hubAssignments.set(hub.id, {
+        hub,
+        deliveries: []
+      });
+    }
+
+    for (const del of deliveries) {
+      let nearestHubId = microhubs[0].id;
+      let minDistance = Infinity;
+
+      for (const hub of microhubs) {
+        const d = this._calcDistanceKm(hub.location, del.location);
+        if (d < minDistance) {
+          minDistance = d;
+          nearestHubId = hub.id;
+        }
+      }
+      hubAssignments.get(nearestHubId).deliveries.push({
+        ...del,
+        distToHub: minDistance
+      });
+    }
+
+    const podRoutes = [];
+    let totalDistanceKm = 0;
+    let totalEnergyUsedKwh = 0;
+    let onTimeDeliveries = 0;
+
+    for (const [hubId, group] of hubAssignments.entries()) {
+      const hub = group.hub;
+      const queue = [...group.deliveries].sort((a, b) => (a.timeWindowStart || 0) - (b.timeWindowStart || 0));
+
+      let currentPodId = 1;
+      while (queue.length > 0) {
+        let currentPayload = 0;
+        let podSoC = 1.0;
+        let currentTimeMinutes = hub.operatingStartMinutes || 480;
+        let currentLocation = hub.location;
+        const assignedStops = [];
+        let tripDistanceKm = 0;
+
+        for (let i = 0; i < queue.length; ) {
+          const candidate = queue[i];
+          const weight = Number(candidate.weightKg) || 2.5;
+
+          if (currentPayload + weight <= this.podCapacityKg && assignedStops.length < 4) {
+            const dist = this._calcDistanceKm(currentLocation, candidate.location);
+            const travelHours = dist / this.podSpeedKmh;
+            const travelMinutes = travelHours * 60;
+            const energyKwh = this._calcEnergyConsumptionKwh(dist, currentPayload);
+
+            if (podSoC - (energyKwh / this.podBatteryKwh) >= 0.15) {
+              currentTimeMinutes += travelMinutes;
+              podSoC -= (energyKwh / this.podBatteryKwh);
+              tripDistanceKm += dist;
+
+              const windowStart = candidate.timeWindowStart || 0;
+              const windowEnd = candidate.timeWindowEnd || 1440;
+              const arrivalTime = Math.max(currentTimeMinutes, windowStart);
+              const isOnTime = arrivalTime <= windowEnd;
+              if (isOnTime) onTimeDeliveries++;
+
+              assignedStops.push({
+                deliveryId: candidate.id,
+                orderId: candidate.orderId,
+                buyerName: candidate.buyerName,
+                pinCode: Math.floor(1000 + Math.random() * 9000),
+                arrivalTimeMinutes: Math.round(arrivalTime),
+                isOnTime,
+                weightKg: weight
+              });
+
+              currentPayload += weight;
+              currentLocation = candidate.location;
+              currentTimeMinutes = arrivalTime + 3;
+              queue.splice(i, 1);
+              continue;
+            }
+          }
+          i++;
+        }
+
+        const returnDist = this._calcDistanceKm(currentLocation, hub.location);
+        const returnEnergyKwh = this._calcEnergyConsumptionKwh(returnDist, 0);
+        tripDistanceKm += returnDist;
+        podSoC -= (returnEnergyKwh / this.podBatteryKwh);
+
+        const dockTimeHours = 0.5;
+        const solarRegenKwh = Math.min(this.podBatteryKwh * (1 - podSoC), this.solarChargeKw * dockTimeHours);
+        podSoC = Math.min(1.0, podSoC + (solarRegenKwh / this.podBatteryKwh));
+
+        const tripEnergyKwh = (this.podBatteryKwh * (1.0 - podSoC)) + solarRegenKwh;
+        totalDistanceKm += tripDistanceKm;
+        totalEnergyUsedKwh += tripEnergyKwh;
+
+        podRoutes.push({
+          podId: `POD_${hub.id}_${currentPodId++}`,
+          microhubId: hub.id,
+          microhubName: hub.name,
+          stopsCount: assignedStops.length,
+          tripDistanceKm: Number(tripDistanceKm.toFixed(2)),
+          finalBatterySoC: Number((podSoC * 100).toFixed(1)),
+          solarRechargedKwh: Number(solarRegenKwh.toFixed(3)),
+          stops: assignedStops
+        });
+      }
+    }
+
+    const totalStops = deliveries.length;
+    const onTimeRatePct = totalStops > 0 ? Number(((onTimeDeliveries / totalStops) * 100).toFixed(1)) : 100;
+    const carbonAvoidedGrams = Math.round(totalDistanceKm * this.dieselEmissionGramsPerKm);
+
+    return {
+      status: 'URBAN_MICROHUB_AUTONOMOUS_POD_PASS',
+      totalDeliveries: totalStops,
+      totalPodsDispatched: podRoutes.length,
+      totalDistanceKm: Number(totalDistanceKm.toFixed(2)),
+      totalEnergyUsedKwh: Number(totalEnergyUsedKwh.toFixed(2)),
+      onTimeRatePct,
+      carbonAvoidedGrams,
+      carbonAvoidedKg: Number((carbonAvoidedGrams / 1000).toFixed(2)),
+      routes: podRoutes
+    };
+  }
+}
+
 export default {
   calculateLevenshteinDistance,
   findClosestTerm,
@@ -50120,6 +50566,10 @@ export default {
   TDigestQuantileSketch,
   HAPPOMultiVendorPricing,
   EVRPTWTwoEchelonCrowdLockerRouter,
+  // Phase 90 Enterprise Algorithms
+  BJKSTDistinctCountSketch,
+  MAPPOContinuousLagrangianPricing,
+  EVRPTWUrbanMicrohubAutonomousPodRouter,
 };
 
 

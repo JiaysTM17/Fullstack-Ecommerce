@@ -153,6 +153,10 @@ graph TD
 - **Tầng 1 (First Echelon) - Xe tải mẹ $85\text{ kWh}$ chuyển phát khối lượng lớn:** Trung chuyển bưu kiện từ CDC Sóc Sơn tới hệ thống tủ đồ thông minh (Smart Parcel Lockers / Micro-Hubs) tại các chung cư và cao ốc văn phòng.
 - **Tầng 2 (Second Echelon) - Mạng lưới giao hàng cộng đồng xanh:** Người đi bộ và shipper xe đạp điện nhận hàng từ tủ locker trong khung giờ hẹn, giao tận cửa căn hộ trong bán kính $1\text{ km}$ với thù lao $\text{Comp} = B_{\text{base}} + c_{\text{dist}} \cdot d$. Cấp chứng nhận `TWO_ECHELON_CROWD_LOCKER_PASS`.
 
+### 4.7. Điều phối vi trạm trung chuyển & robot tự hành giao vỉa hè EVRPTW-Urban-Microhub-Autonomous-Pod (Serrano-Hernandez 2021, Bakach 2022)
+- **Tầng 1 - Xe van điện mẹ tiếp vận vi trạm (Van-to-Microhub Feeder):** Xe van điện $60\text{ kWh}$ trung chuyển các khay bưu kiện chuẩn hóa từ kho tổng tới các vi trạm đô thị (Solar Micro-Hubs) bố trí rải rác trong khu dân cư cao tầng.
+- **Tầng 2 - Robot tự hành giao hàng vỉa hè (Sidewalk Autonomous Pods):** Đội robot mini 6 bánh chạy vỉa hè ($6\text{ km/h}$, pin $1.2\text{ kWh}$) tự động nhận khay hàng, di chuyển tới sảnh chung cư hoặc cổng nhà dân trong bán kính $800\text{ m}$, mở khóa bưu kiện bằng mã OTP PIN 4 chữ số an toàn và tự quay về đế sạc năng lượng mặt trời. Cấp chứng nhận `URBAN_MICROHUB_AUTONOMOUS_POD_PASS`.
+
 ---
 
 ## 5. NHÓM 4: BỘ BA TRỢ LÝ AI COPILOT PHÂN VAI CHUYÊN BIỆT (TRI-ROLE AI COPILOTS ENGINE)
@@ -164,26 +168,26 @@ Hệ thống được trang bị 3 Trợ lý AI độc lập, hoạt động d�
 | **Phân Vùng Hoạt Động** | Cổng Quản trị sàn (Admin Portal) | Kênh Người Bán (Seller Center) | Cửa hàng & Mua sắm (Storefront/PDP) |
 | **Vai Trò & Sứ Mệnh** | Giám sát tuân thủ, kiểm toán tài chính & an ninh | Tối ưu hóa P&L, tồn kho, giá bán & Shopee Ads | Hỗ trợ mua hàng, tư vấn combo, khiếu nại |
 | **Tập Tri Thức Chuyên Sâu** | - Dòng tiền ký quỹ Escrow Vault<br>- Thuế TMĐT Nghị định 52/2018<br>- Điểm uy tín Trust Score & Radar Sybil<br>- Giám sát SLA & Điểm phạt Sao Quả Tạ | - Phân tích chi tiết giá vốn COGS & P&L<br>- Tốc độ bán hàng ngày & DIR<br>- Tư vấn khung giờ Flash Sale an toàn<br>- Chiến lược đấu thầu từ khóa ROAS $\ge 3.5\times$ | - Giải mã từ lóng TMĐT tiếng Việt<br>- Gợi ý combo sản phẩm bán kèm<br>- Hướng dẫn theo dõi SPX Live GPS<br>- Tối ưu hóa xếp chồng Voucher & Xu |
-| **Số Lượng Kịch Bản Xử Lý** | 250 quy tắc suy luận chuyên sâu | 98 phân tích kinh doanh đa biến | 91 ý định mua sắm phức hợp |
+| **Số Lượng Kịch Bản Xử Lý** | 253 quy tắc suy luận chuyên sâu | 99 phân tích kinh doanh đa biến | 92 ý định mua sắm phức hợp |
 
 ---
 
-## 6. BẢNG TỔNG HỢP 89 PHASE & MA TRẬN ĐỘ PHỨC TẠP THUẬT TOÁN
+## 6. BẢNG TỔNG HỢP 90 PHASE & MA TRẬN ĐỘ PHỨC TẠP THUẬT TOÁN
 
 | Nhóm Thuật Toán | Giai Đoạn (Phases) | Thuật Toán Tiêu Biểu | Độ Phức Tạp Thời Gian | Độ Phức Tạp Bộ Nhớ |
 | :--- | :---: | :--- | :--- :---: | :---: |
 | **Core Distributed Patterns** | Phase 1 - 8 | Token Bucket, Circuit Breaker, OCC CAS, LRU Cache | $O(1)$ | $O(N)$ |
 | **Advanced Data Structures** | Phase 9 - 14 | Merkle Tree, Skiplist, MinHash LSH, CRDT Cart | $O(\log N) \text{ / } O(1)$ | $O(N)$ |
-| **Probabilistic Sketches** | Phase 15 - 45 | HyperLogLog, Count-Min Sketch, DDSketch, Bloom Filter | $O(1)$ | $O(\text{poly}(1/\epsilon))$ |
-| **Reinforcement Learning** | Phase 46 - 65 | Thompson Sampling, SAC-Lagrangian, PPO-Clip, TRPO | $O(K) \text{ / } O(|S||A|)$ | $O(|S|)$ |
-| **Multi-Agent Coordination** | Phase 66 - 89 | QMIX, COMA, QTRAN, TarMAC, BiCNet, FACMAC, COPA, R-COMA, HAPPO | $O(N \cdot |A|)$ | $O(N)$ |
-| **Green Logistics & Drone** | Phase 67 - 89 | EVRPTW-BSS, Urban LEZ, Drone Tandem, MCT, Dual-Dock DWPT, EVRPTW-2E | $O(V^2) \text{ Heuristic}$ | $O(V)$ |
+| **Probabilistic Sketches** | Phase 15 - 45, 90 | HyperLogLog, Count-Min Sketch, DDSketch, BJKST | $O(1)$ | $O(\text{poly}(1/\epsilon))$ |
+| **Reinforcement Learning** | Phase 46 - 65, 90 | Thompson Sampling, SAC-Lagrangian, PPO-Clip, MAPPO-Lagrangian | $O(K) \text{ / } O(|S||A|)$ | $O(|S|)$ |
+| **Multi-Agent Coordination** | Phase 66 - 90 | QMIX, COMA, QTRAN, TarMAC, BiCNet, FACMAC, COPA, R-COMA, HAPPO, MAPPO | $O(N \cdot |A|)$ | $O(N)$ |
+| **Green Logistics & Drone** | Phase 67 - 90 | EVRPTW-BSS, Urban LEZ, Drone Tandem, MCT, Dual-Dock DWPT, EVRPTW-2E, Autonomous Pods | $O(V^2) \text{ Heuristic}$ | $O(V)$ |
 
 ---
 
 ## 7. HIỆU QUẢ KINH TẾ & GIÁ TRỊ THỰC TIỄN BÀN GIAO
 
-Việc đưa vào vận hành trọn bộ 89 Phase thuật toán doanh nghiệp mang lại giá trị kinh tế trực tiếp cho đơn vị chủ quản:
+Việc đưa vào vận hành trọn bộ 90 Phase thuật toán doanh nghiệp mang lại giá trị kinh tế trực tiếp cho đơn vị chủ quản:
 1. **Tiết kiệm chi phí hạ tầng máy chủ:** Nhờ cấu trúc dữ liệu xác suất Sub-linear space, hệ thống có thể theo dõi và giám sát hàng triệu phiên truy cập với mức tiêu thụ RAM dưới $100\text{ MB}$, giảm hơn $80\%$ chi phí lưu trữ cụm máy chủ Redis/ElastiCache.
 2. **Triệt tiêu thất thoát tài chính do bán vượt kho:** Thuật toán OCC kết hợp Atomic CAS đảm bảo $0\%$ đơn hàng bị hủy do âm kho trong các ngày hội mua sắm Mega Sale.
 3. **Bảo vệ biên lợi nhuận cho người bán:** Khóa sàn giá vốn an toàn $1.05 \times \text{COGS}$ ngăn ngừa các quyết định hạ giá cạnh tranh tiêu cực, duy trì môi trường kinh doanh lành mạnh.
