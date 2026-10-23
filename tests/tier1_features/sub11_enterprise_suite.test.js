@@ -453,6 +453,10 @@ import {
   BJKSTDistinctCountSketch,
   MAPPOContinuousLagrangianPricing,
   EVRPTWUrbanMicrohubAutonomousPodRouter,
+  // Phase 91 Enterprise Algorithms
+  KMVMinHashDistinctStreamSketch,
+  MAICQCooperativePricing,
+  EVRPTWUrbanBicycleTrailerMicrodepotRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -691,6 +695,9 @@ import { EVRPTWTwoEchelonCrowdLockerRouter as ServerEVRPTWTwoEchelonCrowdLockerR
 import { BJKSTDistinctCountSketch as ServerBJKSTDistinctCountSketch } from "../../server/src/utils/bjkstDistinctCountSketch.js";
 import { MAPPOContinuousLagrangianPricing as ServerMAPPOLagrangianPricing } from "../../server/src/utils/mappoContinuousLagrangianPricing.js";
 import { EVRPTWUrbanMicrohubAutonomousPodRouter as ServerEVRPTWPodRouter } from "../../server/src/utils/evrptwUrbanMicrohubAutonomousPodRouter.js";
+import { KMVMinHashDistinctStreamSketch as ServerKMVMinHashSketch } from "../../server/src/utils/kmvMinHashDistinctStreamSketch.js";
+import { MAICQCooperativePricing as ServerMAICQPricing } from "../../server/src/utils/maicqCooperativePricing.js";
+import { EVRPTWUrbanBicycleTrailerMicrodepotRouter as ServerEVRPTWBicycleRouter } from "../../server/src/utils/evrptwUrbanBicycleTrailerMicrodepotRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -37282,6 +37289,284 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sàn có giao hàng bằng robot tự hành vỉa hè autonomous pod và mã PIN không?");
         expect.equal(buyerRes.intent, "BJKST_MAPPO_AUTONOMOUS_POD_ASSIST");
         expect.ok(buyerRes.replyText.includes("ROBOT GIAO HÀNG TẬN CỬA"));
+      });
+    });
+    describe("Feature 238: KMV MinHash Distinct Stream Sketch, MA-ICQ Cooperative Pricing & Urban Cargo Bike Microdepots (Phase 91)", () => {
+      // --- KMV MinHash Distinct Stream Sketch Tests (T01 - T07) ---
+      test("F238-T01: KMVMinHashDistinctStreamSketch initializes with reservoir capacity and tracks items", () => {
+        const sketch = new KMVMinHashDistinctStreamSketch(32, 1337);
+        expect.equal(sketch.k, 32);
+        expect.equal(sketch.values.length, 0);
+        expect.equal(sketch.totalItemsSeen, 0);
+
+        const inserted = sketch.add("user_cart_session_101");
+        expect.equal(inserted, true);
+        expect.equal(sketch.values.length, 1);
+        expect.equal(sketch.totalItemsSeen, 1);
+      });
+
+      test("F238-T02: Duplicate items do not duplicate in reservoir and return false", () => {
+        const sketch = new KMVMinHashDistinctStreamSketch(16);
+        const first = sketch.add("sku_iphone_15_pro");
+        const second = sketch.add("sku_iphone_15_pro");
+        expect.equal(first, true);
+        expect.equal(second, false);
+        expect.equal(sketch.values.length, 1);
+        expect.equal(sketch.totalItemsSeen, 2);
+      });
+
+      test("F238-T03: Exact cardinality is returned when total unique items is less than k", () => {
+        const sketch = new KMVMinHashDistinctStreamSketch(64);
+        for (let i = 0; i < 25; i++) {
+          sketch.add(`cart_item_${i}`);
+        }
+        expect.equal(sketch.estimateCardinality(), 25);
+      });
+
+      test("F238-T04: Accurate cardinality estimation for streams exceeding k items", () => {
+        const sketch = new KMVMinHashDistinctStreamSketch(64);
+        const trueCount = 300;
+        for (let i = 0; i < trueCount; i++) {
+          sketch.add(`stream_distinct_elem_${i}`);
+        }
+        const estimate = sketch.estimateCardinality();
+        expect.equal(sketch.values.length, 64);
+        // Estimate should be reasonably close to 300 (within 35%)
+        expect.ok(estimate >= 180 && estimate <= 450);
+      });
+
+      test("F238-T05: Jaccard similarity between identical sets is 1.0 and disjoint sets is 0.0", () => {
+        const sketchA = new KMVMinHashDistinctStreamSketch(32);
+        const sketchB = new KMVMinHashDistinctStreamSketch(32);
+        const sketchC = new KMVMinHashDistinctStreamSketch(32);
+
+        for (let i = 0; i < 50; i++) {
+          sketchA.add(`common_sku_${i}`);
+          sketchB.add(`common_sku_${i}`);
+          sketchC.add(`disjoint_sku_${i}`);
+        }
+
+        const jaccardIdentical = sketchA.estimateJaccard(sketchB);
+        expect.equal(jaccardIdentical, 1.0);
+
+        const jaccardDisjoint = sketchA.estimateJaccard(sketchC);
+        expect.equal(jaccardDisjoint, 0.0);
+      });
+
+      test("F238-T06: Inclusion-exclusion intersection estimation and multi-tenant cart overlap assessment", () => {
+        const cohortA = ["sku1", "sku2", "sku3", "sku4", "sku5", "sku6"];
+        const cohortB = ["sku4", "sku5", "sku6", "sku7", "sku8", "sku9"];
+
+        const assessment = KMVMinHashDistinctStreamSketch.assessMultiTenantCartOverlap(cohortA, cohortB, 16);
+        expect.equal(assessment.certification, "KMV_DISTINCT_STREAM_PASS");
+        expect.ok(assessment.estimatedJaccard > 0.2 && assessment.estimatedJaccard < 0.6);
+        expect.ok(assessment.estimatedIntersection >= 2 && assessment.estimatedIntersection <= 5);
+      });
+
+      test("F238-T07: Commutative merge, serialization and deserialization roundtrip", () => {
+        const sketch1 = new KMVMinHashDistinctStreamSketch(16);
+        const sketch2 = new KMVMinHashDistinctStreamSketch(16);
+
+        sketch1.addBatch(["apple", "banana", "cherry"]);
+        sketch2.addBatch(["date", "elderberry", "fig"]);
+
+        const merged = sketch1.merge(sketch2);
+        expect.equal(merged.estimateCardinality(), 6);
+
+        const serialized = merged.serialize();
+        const restored = KMVMinHashDistinctStreamSketch.deserialize(serialized);
+        expect.equal(restored.k, 16);
+        expect.equal(restored.values.length, 6);
+        expect.equal(restored.estimateCardinality(), 6);
+      });
+
+      // --- MA-ICQ Cooperative Pricing Tests (T08 - T14) ---
+      test("F238-T08: MAICQCooperativePricing initializes with safe price floor multiplier 1.05", () => {
+        const pricing = new MAICQCooperativePricing();
+        expect.equal(pricing.priceFloorMultiplier, 1.05);
+        expect.equal(pricing.discountFactor, 0.95);
+        expect.equal(pricing.learningRate, 0.05);
+      });
+
+      test("F238-T09: Strictly clamps any proposed price below 1.05 * COGS", () => {
+        const pricing = new MAICQCooperativePricing();
+        const cogs = 100000;
+        const belowFloor = 95000;
+        const clamped = pricing.enforceSafePriceFloor(belowFloor, cogs);
+        expect.equal(clamped.wasClamped, true);
+        expect.equal(clamped.price, 105000);
+
+        const aboveFloor = 120000;
+        const valid = pricing.enforceSafePriceFloor(aboveFloor, cogs);
+        expect.equal(valid.wasClamped, false);
+        expect.equal(valid.price, 120000);
+      });
+
+      test("F238-T10: Cross-price demand model calculates positive demand sensitive to price", () => {
+        const pricing = new MAICQCooperativePricing();
+        const agent = { cogs: 100000, baseDemand: 100, elasticity: 1.2 };
+        const allPrices = [120000, 130000, 140000];
+
+        const demandCheap = pricing.calculateDemand(agent, 110000, allPrices);
+        const demandExpensive = pricing.calculateDemand(agent, 160000, allPrices);
+        expect.ok(demandCheap > demandExpensive);
+      });
+
+      test("F238-T11: Dynamic conditioning weight w_i dampens unsafe prices", () => {
+        const pricing = new MAICQCooperativePricing();
+        const cogs = 100000;
+        const unsafeWeight = pricing._computeConditioningWeight(90000, cogs, 120000);
+        const safeWeight = pricing._computeConditioningWeight(130000, cogs, 120000);
+        expect.equal(unsafeWeight, 0.01);
+        expect.ok(safeWeight > 0.4);
+      });
+
+      test("F238-T12: Multi-agent optimization converges and guarantees 100% safe floor compliance", () => {
+        const pricing = new MAICQCooperativePricing({ iterations: 10 });
+        const agents = [
+          { shopId: "shop_alpha", cogs: 50000, currentPrice: 40000, baseDemand: 80, elasticity: 1.1 },
+          { shopId: "shop_beta", cogs: 80000, currentPrice: 110000, baseDemand: 60, elasticity: 1.3 }
+        ];
+
+        const result = pricing.optimizePrices(agents, { demandScale: 1.0 });
+        expect.equal(result.certification, "MAICQ_COOPERATIVE_PRICING_PASS");
+        expect.equal(result.allSafeFloorsGuaranteed, true);
+        expect.ok(result.totalMarketProfit > 0);
+        expect.ok(result.optimizedAgents[0].optimizedPrice >= 50000 * 1.05);
+        expect.ok(result.optimizedAgents[1].optimizedPrice >= 80000 * 1.05);
+      });
+
+      test("F238-T13: Throws error on empty agents array in optimizePrices", () => {
+        const pricing = new MAICQCooperativePricing();
+        let errorCaught = false;
+        try {
+          pricing.optimizePrices([]);
+        } catch (e) {
+          errorCaught = true;
+        }
+        expect.equal(errorCaught, true);
+      });
+
+      test("F238-T14: Client and Server MAICQCooperativePricing produce identical outputs", () => {
+        const clientPricing = new MAICQCooperativePricing({ iterations: 5 });
+        const serverPricing = new ServerMAICQPricing({ iterations: 5 });
+
+        const agents = [
+          { shopId: "shop_test", cogs: 100000, currentPrice: 130000, baseDemand: 50, elasticity: 1.0 }
+        ];
+
+        const clientRes = clientPricing.optimizePrices(agents);
+        const serverRes = serverPricing.optimizePrices(agents);
+
+        expect.equal(clientRes.certification, serverRes.certification);
+        expect.equal(clientRes.allSafeFloorsGuaranteed, serverRes.allSafeFloorsGuaranteed);
+        expect.equal(clientRes.optimizedAgents[0].optimizedPrice, serverRes.optimizedAgents[0].optimizedPrice);
+      });
+
+      // --- EVRPTW Urban Cargo Bike Trailer Microdepot Router Tests (T15 - T21) ---
+      test("F238-T15: EVRPTWUrbanBicycleTrailerMicrodepotRouter initializes with safety and payload bounds", () => {
+        const router = new EVRPTWUrbanBicycleTrailerMicrodepotRouter();
+        expect.equal(router.maxBikeSpeedKmh, 18.0);
+        expect.equal(router.batteryCapacityKwh, 1.44);
+        expect.equal(router.trailerCapacityKg, 200.0);
+      });
+
+      test("F238-T16: Haversine distance calculation is accurate between microdepot and stops", () => {
+        const router = new EVRPTWUrbanBicycleTrailerMicrodepotRouter();
+        const microdepot = { lat: 21.0285, lng: 105.8542 }; // Hoan Kiem
+        const stop1 = { lat: 21.0333, lng: 105.8500 }; // Dong Xuan
+        const dist = router.calculateDistance(microdepot, stop1);
+        expect.ok(dist > 0.4 && dist < 1.0);
+      });
+
+      test("F238-T17: Energy consumption scales with distance and payload weight", () => {
+        const router = new EVRPTWUrbanBicycleTrailerMicrodepotRouter();
+        const energyEmpty = router.calculateLegEnergy(5.0, 0);
+        const energyLoaded = router.calculateLegEnergy(5.0, 150.0);
+        expect.ok(energyLoaded > energyEmpty);
+      });
+
+      test("F238-T18: Microdepot routing enforces trailer capacity and dispatches e-cargo bikes", () => {
+        const router = new EVRPTWUrbanBicycleTrailerMicrodepotRouter();
+        const microdepot = { id: "MD-HOAN-KIEM", name: "Vi Trạm Phố Cổ", lat: 21.0285, lng: 105.8542, openingTime: 480 };
+        const stops = [
+          { id: "S1", name: "Hàng Buồm", lat: 21.035, lng: 105.852, weightKg: 15, readyTime: 490, dueTime: 540 },
+          { id: "S2", name: "Hàng Đào", lat: 21.032, lng: 105.851, weightKg: 20, readyTime: 500, dueTime: 560 },
+          { id: "S3", name: "Cầu Gỗ", lat: 21.030, lng: 105.853, weightKg: 10, readyTime: 510, dueTime: 570 }
+        ];
+
+        const plan = router.planMicrodepotBicycleRoutes(microdepot, stops, { numBikes: 2 });
+        expect.equal(plan.certification, "URBAN_BICYCLE_TRAILER_MICRODEPOT_PASS");
+        expect.equal(plan.pedestrianZoneCompliant, true);
+        expect.ok(plan.totalRoutes >= 1);
+        expect.ok(plan.totalDistanceKm > 0);
+        expect.ok(plan.totalEnergyConsumedKwh > 0);
+      });
+
+      test("F238-T19: Evaluates on-time delivery rate against customer time windows", () => {
+        const router = new EVRPTWUrbanBicycleTrailerMicrodepotRouter();
+        const microdepot = { id: "MD-HOAN-KIEM", name: "Vi Trạm Phố Cổ", lat: 21.0285, lng: 105.8542, openingTime: 480 };
+        const stops = [
+          { id: "S1", name: "Đinh Tiên Hoàng", lat: 21.029, lng: 105.854, weightKg: 5, readyTime: 485, dueTime: 600 }
+        ];
+
+        const plan = router.planMicrodepotBicycleRoutes(microdepot, stops);
+        expect.equal(plan.onTimeDeliveryRatePercent, 100);
+      });
+
+      test("F238-T20: Calculates lifecycle CO2 abatement vs benchmark diesel delivery vans", () => {
+        const router = new EVRPTWUrbanBicycleTrailerMicrodepotRouter();
+        const microdepot = { id: "MD-01", name: "Microdepot Central", lat: 21.02, lng: 105.85, openingTime: 0 };
+        const stops = [
+          { id: "S1", name: "Stop 1", lat: 21.04, lng: 105.87, weightKg: 30, readyTime: 10, dueTime: 120 }
+        ];
+
+        const plan = router.planMicrodepotBicycleRoutes(microdepot, stops);
+        expect.ok(plan.co2AbatedKg >= 0);
+      });
+
+      test("F238-T21: Client and Server EVRPTWBicycleTrailerRouter produce identical route metrics", () => {
+        const clientRouter = new EVRPTWUrbanBicycleTrailerMicrodepotRouter();
+        const serverRouter = new ServerEVRPTWBicycleRouter();
+
+        const microdepot = { id: "MD-COMP", name: "Microdepot Parity", lat: 21.03, lng: 105.85, openingTime: 0 };
+        const stops = [
+          { id: "S1", name: "Stop A", lat: 21.035, lng: 105.855, weightKg: 10, readyTime: 0, dueTime: 100 }
+        ];
+
+        const clientRes = clientRouter.planMicrodepotBicycleRoutes(microdepot, stops);
+        const serverRes = serverRouter.planMicrodepotBicycleRoutes(microdepot, stops);
+
+        expect.equal(clientRes.totalDistanceKm, serverRes.totalDistanceKm);
+        expect.equal(clientRes.totalEnergyConsumedKwh, serverRes.totalEnergyConsumedKwh);
+        expect.equal(clientRes.certification, serverRes.certification);
+      });
+
+      // --- Tri-Role Copilot Tests (T22 - T24) ---
+      test("F238-T22: Admin Sentinel Copilot Sections 254 and 255 handle Phase 91 KMV & MA-ICQ queries", () => {
+        const resKmv = generateAdminCopilotResponse("Ước tính tương đồng giỏ hàng kmv minhash sketch giữa các phân vùng khách hàng");
+        expect.equal(resKmv.tag, "KMV MINHASH DISTINCT STREAM SKETCH");
+        expect.ok(resKmv.text.includes("BEYER 2007"));
+
+        const resMaicq = generateAdminCopilotResponse("Phân tích cân bằng định giá ma-icq và kiểm tra sàn giá vốn 1.05 x COGS");
+        expect.equal(resMaicq.tag, "MA-ICQ COOPERATIVE PRICING ENGINE");
+        expect.ok(resMaicq.text.includes("MAICQ_COOPERATIVE_PRICING_PASS"));
+      });
+
+      test("F238-T23: Admin Sentinel Copilot Section 256 handles EVRPTW Urban Cargo Bike Trailer Microdepot", () => {
+        const resBike = generateAdminCopilotResponse("Điều phối xe đạp hàng điện cargo bike gắn rơ-moóc thùng hàng vi trạm khu phố cổ");
+        expect.equal(resBike.tag, "EVRPTW URBAN BICYCLE TRAILER MICRODEPOT ROUTER");
+        expect.ok(resBike.text.includes("URBAN_BICYCLE_TRAILER_MICRODEPOT_PASS"));
+      });
+
+      test("F238-T24: Seller ShopSmart Copilot Section 100 and Buyer Assistant Intent 93 handle Phase 91 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn đo trùng khách kmv và định giá hợp tác ma-icq giao bằng xe đạp hàng điện");
+        expect.equal(sellerRes.tag, "KMV SKETCH, MA-ICQ COOPERATIVE PRICING & CARGO BIKE ROUTER");
+        expect.ok(sellerRes.text.includes("KMV"));
+
+        const buyerRes = generateAiChatResponse("Khu phố đi bộ của tôi có giao hàng bằng xe đạp điện rơ-moóc thùng hàng xanh không?");
+        expect.equal(buyerRes.intent, "KMV_MAICQ_CARGO_BIKE_ASSIST");
+        expect.ok(buyerRes.replyText.includes("XE ĐẠP ĐIỆN RƠ-MOÓC XANH"));
       });
     });
   });

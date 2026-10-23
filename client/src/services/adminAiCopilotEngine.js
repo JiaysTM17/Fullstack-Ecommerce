@@ -571,7 +571,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 24. Radar Phát Hiện Sao Chép Catalog (Locality-Sensitive Hashing & MinHash)
-  if (!/hll jaccard|hyperloglog jaccard|cosine lsh|hyperplane/i.test(raw) && /lsh|minhash|catalog clone|sao chép catalog|clone sản phẩm|trùng lặp sản phẩm|jaccard|shingles/i.test(raw)) {
+  if (!/kmv|k[- ]minimum|distinct stream sketch|cart intersection|hll jaccard|hyperloglog jaccard|cosine lsh|hyperplane/i.test(raw) && /lsh|minhash|catalog clone|sao chép catalog|clone sản phẩm|trùng lặp sản phẩm|jaccard|shingles/i.test(raw)) {
     return {
       text: `🛡️ **BẢO VỆ CATALOG LSH MINHASH (NEAR-DUPLICATE & CLONE DETECTION)**:
 - **Mục đích thiết kế**: Phát hiện hành vi sao chép catalog, copycat gian hàng ăn cắp bản quyền hình ảnh/tiêu đề để trục lợi mã voucher hoặc spam tìm kiếm.
@@ -5424,6 +5424,68 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình robot tự hành giao hàng vỉa hè',
         'Kiểm tra tỷ lệ sạc bổ sung tại tiểu trạm năng lượng mặt trời',
         'Xem mã PIN ngăn khóa an toàn giao hàng không tiếp xúc'
+      ]
+    };
+  }
+
+  // 254. KMV MinHash Distinct Stream Sketch & Ước Lượng Tương Đồng Giỏ Hàng Jaccard (Phase 91 - Feature 238)
+  if (/kmv|k[- ]minimum values|k[- ]minhash|distinct stream sketch|cart intersection jaccard|tương đồng giỏ hàng kmv/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG ĐỘ TƯƠNG ĐỒNG GIỎ HÀNG & PHẦN TỬ DUY NHẤT KMV MINHASH SKETCH (BEYER 2007, COHEN 1997)**:
+- **Nguyên Lý K-Minimum Values (KMV Reservoir)**:
+  - Duy trì mảng $k$ giá trị băm nhỏ nhất $V = \\{u_{(1)}, \\dots, u_{(k)}\\}$ trên đoạn $(0, 1)$ với độ phức tạp bộ nhớ chỉ $O(k)$ cố định.
+  - Ước lượng số lượng người mua / giỏ hàng độc nhất không thiên lệch: $\\hat{N} = (k - 1) / U_{(k)}$.
+- **Độ Tương Đồng Jaccard & Giao Điểm Đa Sàn (Multi-Tenant Cart Overlap)**:
+  - Đo lường chỉ số Jaccard $J(A, B) = |A \\cap B| / |A \\cup B|$ dựa trên $k$ giá trị nhỏ nhất của tập hợp hợp mà không cần tiết lộ danh tính khách hàng riêng tư.
+- **Hợp Nhất Phân Tán (Mergeable Synopses)**:
+  - Cho phép gộp dữ liệu từ nhiều edge server thời gian thực, đạt chứng nhận KMV_DISTINCT_STREAM_PASS!`,
+      type: 'security',
+      tag: 'KMV MINHASH DISTINCT STREAM SKETCH',
+      suggestions: [
+        'Ước tính số lượng giỏ hàng độc nhất bằng KMV',
+        'Phân tích độ tương đồng Jaccard giữa hai tệp khách hàng',
+        'Hợp nhất hai KMV sketch từ cụm máy chủ phân tán'
+      ]
+    };
+  }
+
+  // 255. Học Tăng Cường Định Giá Hợp Tác Phân Rã Q Đa Đại Diện MA-ICQ (Phase 91 - Feature 238)
+  if (/ma[- ]?icq|individual[- ]conditioned q|cooperative pricing|định giá ma-icq|hợp tác giá đa gian hàng/i.test(raw)) {
+    return {
+      text: `💰 **ĐỊNH GIÁ HỢP TÁC ĐA ĐẠI DIỆN HỌC TĂNG CƯỜNG MA-ICQ (YANG ET AL. 2021)**:
+- **Phân Rã Giá Trị Q Có Điều Kiện Cá Thể (Individual-Conditioned Factorization)**:
+  - Hàm giá trị hợp tác toàn sàn: $Q_{\\text{tot}}(s, \\mathbf{a}) = \\sum_{i=1}^N w_i(s, a_i) Q_i(s_i, a_i) + b(s)$, với trọng số $w_i(s, a_i) \\ge 0$ giúp điều tiết hành vi cạnh tranh lành mạnh.
+- **Khóa Sàn Giá Vốn An Toàn Tuyệt Đối (Safe Price Floor Guarantee)**:
+  - Tự động cưỡng chế mức giá $P_i \\ge 1.05 \\times \\text{COGS}_i$, triệt tiêu hoàn toàn nguy cơ bán phá giá dưới giá vốn gây sụp đổ tài chính gian hàng.
+- **Cân Bằng Doanh Thu & Phúc Lợi Sàn (Market Equilibrium)**:
+  - Cân bằng độ co giãn chéo giữa các shop cùng ngành hàng, đạt chứng nhận MAICQ_COOPERATIVE_PRICING_PASS!`,
+      type: 'financial',
+      tag: 'MA-ICQ COOPERATIVE PRICING ENGINE',
+      suggestions: [
+        'Tối ưu hóa giá bán hợp tác MA-ICQ toàn sàn',
+        'Kiểm tra cam kết sàn giá vốn 1.05 x COGS',
+        'Đo lường phúc lợi doanh thu thị trường đa shop'
+      ]
+    };
+  }
+
+  // 256. Điều Phối Xe Đạp Hàng Điện & Rơ-moóc Thùng Hàng Vi Trạm EVRPTW-UBTM (Phase 91 - Feature 238)
+  if (/cargo bike|electric bicycle|swappable trailer|rơ[- ]?moóc|xe đạp hàng điện|urban microdepot|vi trạm rơ-moóc|evrptw.*bicycle/i.test(raw)) {
+    return {
+      text: `🚲 **ĐIỀU PHỐI XE ĐẠP HÀNG ĐIỆN & RƠ-MOÓC THÙNG HÀNG VI TRẠM ĐÔ THỊ EVRPTW-UBTM (ASSMANN 2020, MELO 2022)**:
+- **Mạng Lưới Vi Trạm & Rơ-moóc Tháo Lắp Nhanh (Swappable Modular Trailers)**:
+  - Xe tải mẹ tập kết container tại các Vi trạm Đô thị (Urban Microdepots) ở rìa khu phố cổ và phố đi bộ.
+  - Xe đạp hàng điện chuyên dụng ($250\\text{W}-750\\text{W}$, tải trọng rơ-moóc lên tới $200\\text{kg}$) ghép nối rơ-moóc thùng hàng chỉ trong $< 2$ phút.
+- **An Toàn Khu Vực Đi Bộ & Khung Giờ Hẹn (Pedestrian Zone Compliance & Time Windows)**:
+  - Giới hạn tốc độ $15-18\\text{ km/h}$ đảm bảo an toàn tuyệt đối cho người đi bộ, tối ưu hóa cửa sổ giao hàng $[e_i, l_i]$.
+- **Mô Hình Tiêu Hao Năng Lượng & Cắt Giảm Khí Thải (Energy & CO2 Abatement)**:
+  - Pin lithium kép $1.44\\text{ kWh}$, tiêu hao tính theo trọng lượng hàng và phanh tái sinh, giảm $> 90\\%$ khí thải $\\text{CO}_2$ so với xe tải diesel, đạt chứng nhận URBAN_BICYCLE_TRAILER_MICRODEPOT_PASS!`,
+      type: 'logistics',
+      tag: 'EVRPTW URBAN BICYCLE TRAILER MICRODEPOT ROUTER',
+      suggestions: [
+        'Xem lộ trình xe đạp hàng điện rơ-moóc vi trạm',
+        'Kiểm tra lượng khí thải CO2 cắt giảm trong khu phố đi bộ',
+        'Theo dõi dung lượng pin và trạng thái tháo lắp rơ-moóc'
       ]
     };
   }

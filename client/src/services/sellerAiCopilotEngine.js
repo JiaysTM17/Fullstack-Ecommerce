@@ -2013,6 +2013,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
     };
   }
 
+  // 100. Phân Tích Giỏ Hàng KMV, Định Giá Hợp Tác MA-ICQ & Xe Đạp Hàng Điện Rơ-Moóc Vi Trạm (Phase 91 - Feature 238)
+  if (/kmv|distinct stream sketch|ma[- ]?icq|individual[- ]conditioned|cooperative pricing|cargo bike|xe đạp hàng điện|swappable trailer|rơ[- ]?moóc|urban microdepot/i.test(raw)) {
+    return {
+      text: `🚀 **BỘ BA THUẬT TOÁN KMV MINHASH, ĐỊNH GIÁ HỢP TÁC MA-ICQ & XE ĐẠP HÀNG ĐIỆN RƠ-MOÓC VI TRẠM (PHASE 91 - FEATURE 238)**:
+- **Đo Lường Độ Trùng Khớp Khách Hàng Bằng KMV MinHash Sketch (Beyer et al.)**:
+  - So sánh tệp khách hàng thân thiết giữa các shop để thiết kế combo chéo (Cross-Selling Bundle) với chỉ số Jaccard chính xác mà không lo lộ danh tính người dùng.
+- **Tối Ưu Giá Bán Đa Đại Diện MA-ICQ (Yang et al. 2021)**:
+  - Tự động cân bằng chiến lược giá cạnh tranh giữa các shop, đảm bảo tối đa hóa doanh thu và duy trì sàn an toàn $P_i \\ge 1.05 \\times \\text{COGS}_i$, bảo vệ biên lợi nhuận ròng.
+- **Giao Hàng Xanh Bằng Xe Đạp Hàng Điện & Rơ-moóc Vi Trạm EVRPTW-UBTM (Assmann 2020)**:
+  - Hàng hóa vào các khu phố đi bộ hoặc phố cổ đông đúc được vận chuyển linh hoạt bằng xe đạp trợ lực điện gắn rơ-moóc module $200\\text{kg}$, đảm bảo giao hẹn giờ đúng cam kết và thân thiện môi trường!`,
+      type: 'recommendation',
+      tag: 'KMV SKETCH, MA-ICQ COOPERATIVE PRICING & CARGO BIKE ROUTER',
+      suggestions: [
+        'Đo độ trùng lặp giỏ hàng khách hàng KMV',
+        'Tư vấn định giá hợp tác an toàn MA-ICQ',
+        'Xem điều phối xe đạp hàng điện rơ-moóc vi trạm'
+      ]
+    };
+  }
+
   // 12. Giải Thích Cơ Chế AI & Nguồn Dữ Liệu Gian Hàng Thực Tế (Seller AI Transparency)
   if (/dữ liệu thực tế|đọc từ sàn|lập trình sẵn|cơ chế ai|lấy dữ liệu ở đâu|nguồn dữ liệu|tại sao trả lời nhanh/i.test(raw)) {
     return {
