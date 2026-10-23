@@ -2019,7 +2019,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 91. Tối Ưu Định Giá Động Flash Sale Bằng Double Q-Learning (Phase 36 - Feature 183)
-  if (!/cql|conservative/i.test(raw) && /double q|q-learning|học tăng cường kép|triệt tiêu maximization bias|double q-learning pricing/i.test(raw)) {
+  if (!/hysteretic|cql|conservative/i.test(raw) && /double q|q-learning|học tăng cường kép|triệt tiêu maximization bias|double q-learning pricing/i.test(raw)) {
     return {
       text: `💰 **ĐỊNH GIÁ ĐỘNG FLASH SALE BẰNG DOUBLE Q-LEARNING VỚI EXPERIENCE REPLAY**:
 - **Triệt tiêu Thiên lệch Cực đại hóa (Maximization Bias Elimination - Hasselt 2010)**:
@@ -2782,7 +2782,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/bus cargo|xe buýt|bus pudo|pudo|barge canal|sà lan điện|bimodal tram|autonomous pod|sidewalk delivery|robot giao hàng|solar microhub|microhub năng lượng mặt trời|evrptw.*pod|bjkst|mappo|two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/shared taxi|taxi điện|tiện chuyến taxi|bus cargo|xe buýt|bus pudo|pudo|barge canal|sà lan điện|bimodal tram|autonomous pod|sidewalk delivery|robot giao hàng|solar microhub|microhub năng lượng mặt trời|evrptw.*pod|bjkst|mappo|two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3302,7 +3302,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 155. Ước Lượng Số Lượng Phần Tử Phân Biệt BJKST (Phase 58 - Feature 205)
-  if (!/subsampling level|distinct count sketch|jayram|cardinality buffer|phase 90|feature 237/i.test(raw) && /bjkst|distinct elements|f0 moment|số lượng phân biệt|đếm duy nhất bjkst|trailing zeros/i.test(raw)) {
+  if (!/\bcvm\b|chakraborty|subsampling level|distinct count sketch|jayram|cardinality buffer|phase 90|feature 237/i.test(raw) && /bjkst|distinct elements|f0 moment|số lượng phân biệt|đếm duy nhất bjkst|trailing zeros/i.test(raw)) {
     return {
       text: `📊 **ƯỚC LƯỢNG SỐ PHẦN TỬ PHÂN BIỆT BJKST (BAR-YOSSEF ET AL. FOCS 2002)**:
 - **Cấu Trúc Lấy Mẫu Bằng Số Lượng Số Không Đuôi (Trailing-Zeros Subsampling)**:
@@ -5671,6 +5671,71 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem điều phối hàng hóa xe buýt điện đô thị',
         'Kiểm tra mạng lưới điểm nhận bưu kiện PUDO',
         'Đo lường lượng khí thải CO2 cắt giảm qua xe buýt công cộng'
+      ]
+    };
+  }
+
+  // 266. Đo Lường Lượng Khách Hàng Bằng Thuật Toán CVM (Phase 95 - Feature 242)
+  if (/\bcvm\b|cvm distinct|chakraborty.*meel|probabilistic thinning|thuật toán cvm/i.test(raw)) {
+    return {
+      text: `📊 **ĐO LƯỜNG LƯỢNG KHÁCH HÀNG SIÊU TỐC BẰNG THUẬT TOÁN CVM (CHAKRABORTY, VINODCHANDRAN, MEEL 2022 - DON KNUTH 2023)**:
+- **Nguyên Lý Lọc Bỏ Xác Suất Năng Động (Dynamic Probabilistic Thinning)**:
+  - Khởi tạo hồ chứa kích thước nhỏ $s$ và xác suất lưu giữ $p = 1.0$.
+  - Khi hồ chứa đầy, tung đồng xu xác suất $0.5$ cho mỗi phần tử để giải phóng $50\%$ bộ nhớ và cập nhật $p \leftarrow p / 2$.
+- **Ước Lượng Không Chệch Đóng Tuyệt Đối**:
+  - Công thức ước lượng giải tích đóng không chệch: $\\hat{N} = |B| / p$.
+  - Đạt chặn sai số $(\\epsilon, \\delta)$ chặt chẽ với bộ nhớ $O(\\frac{1}{\\epsilon^2} \\log \\frac{1}{\\delta})$ mà không phụ thuộc vào độ dài luồng dữ liệu.
+- **Hỗ Trợ Tính Jaccard Đa Nhóm Khách Hàng (Multi-Tenant Cohort Overlap)**:
+  - Đạt chứng nhận CVM_DISTINCT_ELEMENTS_PASS bảo vệ toàn vẹn thống kê thời gian thực!`,
+      type: 'analytics',
+      tag: 'CVM DISTINCT ELEMENTS SKETCH',
+      suggestions: [
+        'Xem độ chính xác ước lượng thuật toán CVM',
+        'Đo lường xác suất lưu giữ p và số vòng thinning',
+        'So sánh độ trùng lặp giỏ hàng các nhóm khách hàng'
+      ]
+    };
+  }
+
+  // 267. Học Tăng Cường Định Giá Đa Đại Lý Hysteretic Q-Learning (Phase 95 - Feature 242)
+  if (/hysteretic|hysteretic q|định giá hysteretic|alter-exploration|hai tốc độ học/i.test(raw)) {
+    return {
+      text: `⚖️ **ĐỊNH GIÁ ĐA ĐẠI LÝ BẤT ĐỐI XỨNG HYSTERETIC Q-LEARNING (MATIGNON ET AL. 2007)**:
+- **Khắc Phục Suy Giảm Do Khám Phá Của Đối Thủ (Alter-Exploration Robustness)**:
+  - Trong thị trường đa người bán, việc giảm doanh thu tức thời có thể do đối thủ đang thử nghiệm giá xấu chứ không phải do giá của mình.
+  - Hysteretic Q sử dụng 2 tốc độ học bất đối xứng:
+    • **Lạc quan** $\\alpha = 0.25$ khi sai số TD dương ($\\delta \\ge 0$).
+    • **Khoan dung** $\\beta = 0.05 < \\alpha$ khi sai số TD âm ($\\delta < 0$).
+- **Hội Tụ Về Trạng Thái Cân Bằng Nash-Pareto Tối Ưu**:
+  - Không trừng phạt quá mức các mức giá tối ưu đã tìm được, duy trì lợi nhuận cao và ổn định.
+- **Khóa Sàn Giá Vốn An Toàn Tuyệt Đối $P_i \\ge 1.05 \\times \\text{COGS}_i$**:
+  - Triệt tiêu hoàn toàn rủi ro bán lỗ, đạt chứng nhận HYSTERETIC_Q_PRICING_PASS!`,
+      type: 'pricing',
+      tag: 'HYSTERETIC Q MULTI-AGENT PRICING',
+      suggestions: [
+        'Kiểm tra tốc độ học bất đối xứng alpha và beta',
+        'Xem bảng Q-values cho từng mức giá ứng viên',
+        'Kiểm tra cam kết sàn giá vốn 1.05 x COGS'
+      ]
+    };
+  }
+
+  // 268. Điều Phối Giao Hàng Ghép Taxi Điện / Xe Công Nghệ EVRPTW-STCP (Phase 95 - Feature 242)
+  if (/shared taxi|taxi điện|ghép xe taxi|rideshare parcel|crowd parcel|tiện chuyến taxi|evrptw.*taxi/i.test(raw)) {
+    return {
+      text: `🚕 **ĐIỀU PHỐI GIAO HÀNG GHÉP TAXI ĐIỆN & XE CÔNG NGHỆ EVRPTW-STCP (CHEN 2017, LI 2020)**:
+- **Tận Dụng Khoang Cốp Xe Điện Tiện Chuyến (Co-Modal Rideshare Integration)**:
+  - Tận dụng khoang hành lý ($40\\text{kg}$ tải trọng / 4 bưu kiện) của các chuyến taxi điện (như Xanh SM, VinFast VF e34) đang chở khách trên cùng hành lang di chuyển.
+- **Ràng Buộc Giới Hạn Quãng Đường Lệch (Detour Constraint $\\Delta_d \\le 1.8\\text{km}$)**:
+  - Chỉ ghép các đơn hàng có điểm lấy và giao nằm sát hành trình di chuyển của khách đi xe, bảo đảm thời gian di chuyển của khách không bị trễ quá mức.
+- **Triệt Tiêu Hoàn Toàn Chuyến Xe Chạy Rỗng & Cắt Giảm $> 92\\%$ Khí Thải CO2**:
+  - Thay thế xe tải diesel giao hàng độc lập, tối ưu hóa $100\\%$ hiệu suất chuyến đi, đạt chuẩn EVRPTW_SHARED_TAXI_CROWD_PARCEL_PASS!`,
+      type: 'logistics',
+      tag: 'EVRPTW URBAN SHARED TAXI CROWD PARCEL ROUTER',
+      suggestions: [
+        'Xem lộ trình điều phối bưu kiện ghép taxi điện',
+        'Kiểm tra giới hạn quãng đường lệch của hành khách',
+        'Đo lường lượng khí thải CO2 cắt giảm nhờ tiện chuyến'
       ]
     };
   }

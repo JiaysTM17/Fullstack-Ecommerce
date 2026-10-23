@@ -21,9 +21,9 @@ Bộ hồ sơ này được xây dựng bám sát các tiêu chuẩn kỹ thuậ
 ```mermaid
 graph TD
     System["Mini Shopee Multi-Vendor Enterprise V2.0"]
-    System --> Stat1["3.271 / 3.271 Tests Tự Động (100% Pass)"]
-    System --> Stat2["94 Phases & 241 Thuật Toán Doanh Nghiệp"]
-    System --> Stat3["Tri-Role AI Copilots (464 Quy Tắc Nghiệp Vụ)"]
+    System --> Stat1["3.295 / 3.295 Tests Tự Động (100% Pass)"]
+    System --> Stat2["95 Phases & 242 Thuật Toán Doanh Nghiệp"]
+    System --> Stat3["Tri-Role AI Copilots (469 Quy Tắc Nghiệp Vụ)"]
     System --> Stat4["0 Lỗi Build Production (Vite v5.4.21)"]
     System --> Stat5["22 Bộ Tài Liệu Kỹ Thuật Đạt Chuẩn Quốc Tế"]
 ```
@@ -31,11 +31,11 @@ graph TD
 | Chỉ Số Đánh Giá (Metric) | Kết Quả Đạt Được | Ý Nghĩa Nghiệp Vụ & Đảm Bảo Kỹ Thuật |
 | :--- | :---: | :--- |
 | **Tính Sẵn Sàng Vận Hành (Readiness)** | **100% Sẵn Sàng Go-Live** | Đã hoàn tất toàn bộ chu trình phát triển, kiểm thử và đóng gói Docker |
-| **Số Lượng Tính Năng Hoàn Chỉnh** | **241 Tính Năng (Features 1 - 241)** | Đầy đủ chu trình từ người mua, người bán, bưu tá SPX đến quản trị sàn |
-| **Số Lượng Bài Kiểm Thử Tự Động** | **3.271 / 3.271 Tests (100% Pass)** | Bộ kiểm thử E2E Opaque-Box 4 tầng kiểm tra tự động trong 1.36s |
+| **Số Lượng Tính Năng Hoàn Chỉnh** | **242 Tính Năng (Features 1 - 242)** | Đầy đủ chu trình từ người mua, người bán, bưu tá SPX đến quản trị sàn |
+| **Số Lượng Bài Kiểm Thử Tự Động** | **3.295 / 3.295 Tests (100% Pass)** | Bộ kiểm thử E2E Opaque-Box 4 tầng kiểm tra tự động trong 1.36s |
 | **Trạng Thái Build Production** | **0 Lỗi / 0 Cảnh Báo Chặn** | Vite v5.4.21 build sạch mã nguồn đóng gói sẵn sàng triển khai CDN |
-| **Quy Mô Thuật Toán Tích Hợp** | **94 Phases (241 Thuật Toán)** | Xử lý phân tán, tối ưu hóa giá dynamic, Recordinality, REPS Pricing, Transit Bus PUDO |
-| **Bộ Ba Trợ Lý AI Độc Quyền** | **464 Kịch Bản Xử Lý In-Memory** | Admin Sentinel (265), Seller ShopSmart (103), Buyer Assistant (96) |
+| **Quy Mô Thuật Toán Tích Hợp** | **95 Phases (242 Thuật Toán)** | Xử lý phân tán, tối ưu hóa giá dynamic, CVM Distinct Elements, Hysteretic Q Pricing, Shared Taxi Crowd-Parcel |
+| **Bộ Ba Trợ Lý AI Độc Quyền** | **469 Kịch Bản Xử Lý In-Memory** | Admin Sentinel (268), Seller ShopSmart (104), Buyer Assistant (97) |
 | **Khóa An Toàn Sàn Giá Vốn** | **$P_i \ge 1.05 \times \text{COGS}_i$** | $100\%$ thuật toán định giá không bao giờ bán dưới giá vốn gian hàng |
 | **Khả Năng Chịu Tải Đồng Thời** | **10,000 CCU / 12,000 RPS** | Vượt qua bài kiểm thử bùng nổ Flash Sale với 0 hiện tượng quá tải |
 | **Hiệu Quả Kinh Tế Dự Án (ROI)** | **$150.1\%$ / Năm 1** | Hoàn vốn đầu tư trong vòng 8 tháng, NPV dương $+6.28$ Tỷ VNĐ |

@@ -469,6 +469,10 @@ import {
   RecordinalityStreamSketch,
   REPSRelativeEntropyPricing,
   EVRPTWUrbanPassengerBusCargoPUDORouter,
+  // Phase 95 Enterprise Algorithms
+  CVMDistinctElementsSketch,
+  HystereticQMultiAgentPricing,
+  EVRPTWUrbanSharedTaxiCrowdParcelRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -719,6 +723,9 @@ import { EVRPTWUrbanBargeCanalElectricCargoRouter as ServerEVRPTWBargeRouter } f
 import { RecordinalityStreamSketch as ServerRecordinalitySketch } from "../../server/src/utils/recordinalityStreamSketch.js";
 import { REPSRelativeEntropyPricing as ServerREPSPricing } from "../../server/src/utils/repsRelativeEntropyPricing.js";
 import { EVRPTWUrbanPassengerBusCargoPUDORouter as ServerEVRPTWBusCargoRouter } from "../../server/src/utils/evrptwUrbanPassengerBusCargoPUDORouter.js";
+import { CVMDistinctElementsSketch as ServerCVMSketch } from "../../server/src/utils/cvmDistinctElementsSketch.js";
+import { HystereticQMultiAgentPricing as ServerHystereticQPricing } from "../../server/src/utils/hystereticQMultiAgentPricing.js";
+import { EVRPTWUrbanSharedTaxiCrowdParcelRouter as ServerEVRPTWSharedTaxiRouter } from "../../server/src/utils/evrptwUrbanSharedTaxiCrowdParcelRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -38501,6 +38508,343 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Khu vực của tôi có được giao hàng bằng xe buýt điện điểm nhận pudo không?");
         expect.equal(buyerRes.intent, "RECORDINALITY_REPS_BUS_CARGO_ASSIST");
         expect.ok(buyerRes.replyText.includes("XE BUÝT ĐIỆN PUDO"));
+      });
+    });
+
+    describe("Feature 242: CVM Distinct Elements Sketch, Hysteretic Q Multi-Agent Pricing & Urban Shared Taxi Logistics (Phase 95)", () => {
+      // --- CVM Distinct Elements Sketch Tests (T01 - T07) ---
+      test("F242-T01: CVMDistinctElementsSketch initializes with capacity and probability 1.0", () => {
+        const sketch = new CVMDistinctElementsSketch({ capacity: 32, seed: 1337 });
+        expect.equal(sketch.capacity, 32);
+        expect.equal(sketch.reservoir.size, 0);
+        expect.equal(sketch.samplingProbability, 1.0);
+        expect.equal(sketch.rounds, 0);
+        expect.equal(sketch.totalItemsSeen, 0);
+      });
+
+      test("F242-T02: Elements added below capacity remain in reservoir without thinning", () => {
+        const sketch = new CVMDistinctElementsSketch({ capacity: 20 });
+        for (let i = 0; i < 15; i++) {
+          sketch.add(`item_${i}`);
+        }
+        expect.equal(sketch.reservoir.size, 15);
+        expect.equal(sketch.rounds, 0);
+        expect.equal(sketch.samplingProbability, 1.0);
+        expect.equal(sketch.estimateCardinality(), 15);
+      });
+
+      test("F242-T03: Thinning triggers when capacity reached, halving sampling probability", () => {
+        const sketch = new CVMDistinctElementsSketch({ capacity: 16 });
+        for (let i = 0; i < 30; i++) {
+          sketch.add(`session_${i}`);
+        }
+        expect.ok(sketch.rounds > 0);
+        expect.ok(sketch.samplingProbability <= 0.5);
+        expect.ok(sketch.reservoir.size < 16);
+      });
+
+      test("F242-T04: Duplicate items replace old entry and adhere to CVM sampling protocol", () => {
+        const sketch = new CVMDistinctElementsSketch({ capacity: 16 });
+        sketch.add("duplicate_sku");
+        expect.equal(sketch.reservoir.has("duplicate_sku"), true);
+        sketch.add("duplicate_sku");
+        expect.equal(sketch.totalItemsSeen, 2);
+      });
+
+      test("F242-T05: Computes accurate unbiased cardinality estimate N_hat = |B| / p", () => {
+        const sketch = new CVMDistinctElementsSketch({ capacity: 32, seed: 42 });
+        const trueCount = 200;
+        for (let i = 0; i < trueCount; i++) {
+          sketch.add(`user_cvm_${i}`);
+        }
+        const est = sketch.estimateCardinality();
+        expect.ok(est >= 80 && est <= 400);
+      });
+
+      test("F242-T06: Serialization and deserialization preserve reservoir state and probability", () => {
+        const sketch = new CVMDistinctElementsSketch({ capacity: 24, seed: 99 });
+        for (let i = 0; i < 50; i++) {
+          sketch.add(`cart_id_${i}`);
+        }
+        const state = sketch.serialize();
+        const restored = CVMDistinctElementsSketch.deserialize(state);
+
+        expect.equal(restored.capacity, sketch.capacity);
+        expect.equal(restored.rounds, sketch.rounds);
+        expect.equal(restored.samplingProbability, sketch.samplingProbability);
+        expect.equal(restored.estimateCardinality(), sketch.estimateCardinality());
+      });
+
+      test("F242-T07: Client-Server dual parity for CVMDistinctElementsSketch", () => {
+        const clientSketch = new CVMDistinctElementsSketch({ capacity: 32, seed: 888 });
+        const serverSketch = new ServerCVMSketch({ capacity: 32, seed: 888 });
+
+        for (let i = 0; i < 60; i++) {
+          const item = `dual_cvm_${i}`;
+          clientSketch.add(item);
+          serverSketch.add(item);
+        }
+
+        expect.equal(clientSketch.rounds, serverSketch.rounds);
+        expect.equal(clientSketch.samplingProbability, serverSketch.samplingProbability);
+        expect.equal(clientSketch.estimateCardinality(), serverSketch.estimateCardinality());
+      });
+
+      // --- Hysteretic Q Multi-Agent Pricing Tests (T08 - T15) ---
+      test("F242-T08: HystereticQMultiAgentPricing initializes with alpha, beta, and safe price floor", () => {
+        const engine = new HystereticQMultiAgentPricing({ alpha: 0.25, beta: 0.05 });
+        expect.equal(engine.alpha, 0.25);
+        expect.equal(engine.beta, 0.05);
+        expect.equal(engine.priceFloorMultiplier, 1.05);
+      });
+
+      test("F242-T09: enforceSafePriceFloor strictly clamps price below 1.05 * COGS", () => {
+        const engine = new HystereticQMultiAgentPricing();
+        const cogs = 200000;
+        const lowPrice = 180000;
+        const goodPrice = 250000;
+
+        const clamped = engine.enforceSafePriceFloor(lowPrice, cogs);
+        expect.equal(clamped.wasClamped, true);
+        expect.equal(clamped.price, 210000);
+
+        const okPrice = engine.enforceSafePriceFloor(goodPrice, cogs);
+        expect.equal(okPrice.wasClamped, false);
+        expect.equal(okPrice.price, 250000);
+      });
+
+      test("F242-T10: generatePriceCandidates strictly respects safe price floor bounds", () => {
+        const engine = new HystereticQMultiAgentPricing();
+        const agent = { cogs: 120000, currentPrice: 150000, maxAllowedPrice: 240000 };
+        const candidates = engine.generatePriceCandidates(agent);
+
+        expect.ok(candidates.length > 0);
+        for (const p of candidates) {
+          expect.ok(p >= 126000); // 120000 * 1.05
+          expect.ok(p <= 240000);
+        }
+      });
+
+      test("F242-T11: Cross-price demand estimation decreases with own price and increases with competitor price", () => {
+        const engine = new HystereticQMultiAgentPricing();
+        const agent = { cogs: 100000, baseDemand: 120, elasticity: 1.4 };
+        const dLow = engine.calculateDemand(agent, 120000, [120000, 140000]);
+        const dHigh = engine.calculateDemand(agent, 160000, [160000, 140000]);
+
+        expect.ok(dLow > dHigh);
+      });
+
+      test("F242-T12: Payoff computation yields positive revenue and margin", () => {
+        const engine = new HystereticQMultiAgentPricing();
+        const agent = { cogs: 50000 };
+        const payoff = engine._computePayoff(agent, 75000, 80);
+        expect.ok(payoff > 0);
+      });
+
+      test("F242-T13: optimizePrices executes decentralized updates and returns HYSTERETIC_Q_PRICING_PASS", () => {
+        const engine = new HystereticQMultiAgentPricing({ iterations: 15 });
+        const agents = [
+          { id: "vendor_1", cogs: 80000, currentPrice: 110000 },
+          { id: "vendor_2", cogs: 150000, currentPrice: 195000 }
+        ];
+
+        const result = engine.optimizePrices(agents);
+        expect.equal(result.certification, "HYSTERETIC_Q_PRICING_PASS");
+        expect.equal(result.summary.totalAgents, 2);
+        expect.equal(result.summary.allSafeFloorCompliant, true);
+        expect.ok(result.summary.totalRevenue > 0);
+        expect.ok(result.summary.totalProfit > 0);
+      });
+
+      test("F242-T14: All recommended prices strictly adhere to safe floor P_i >= 1.05 * COGS_i", () => {
+        const engine = new HystereticQMultiAgentPricing({ iterations: 10 });
+        const agents = [
+          { id: "v_cheap", cogs: 50000, currentPrice: 40000 } // Under-priced
+        ];
+        const result = engine.optimizePrices(agents);
+        expect.ok(result.agentOptimizations[0].recommendedPrice >= 52500);
+        expect.equal(result.agentOptimizations[0].safeFloorCompliant, true);
+      });
+
+      test("F242-T15: Client-Server dual parity for HystereticQMultiAgentPricing", () => {
+        const clientEngine = new HystereticQMultiAgentPricing({ iterations: 10 });
+        const serverEngine = new ServerHystereticQPricing({ iterations: 10 });
+        const agents = [
+          { id: "dual_v1", cogs: 70000, currentPrice: 95000 },
+          { id: "dual_v2", cogs: 130000, currentPrice: 175000 }
+        ];
+
+        const cRes = clientEngine.optimizePrices(agents);
+        const sRes = serverEngine.optimizePrices(agents);
+
+        expect.equal(cRes.certification, sRes.certification);
+        expect.equal(cRes.summary.totalRevenue, sRes.summary.totalRevenue);
+        expect.equal(cRes.agentOptimizations[0].recommendedPrice, sRes.agentOptimizations[0].recommendedPrice);
+      });
+
+      // --- Urban Shared Taxi Parcel Logistics Tests (T16 - T21) ---
+      test("F242-T16: EVRPTWUrbanSharedTaxiCrowdParcelRouter initializes with detour limits and capacity", () => {
+        const router = new EVRPTWUrbanSharedTaxiCrowdParcelRouter({ maxDetourKm: 2.0 });
+        expect.equal(router.maxDetourKm, 2.0);
+        expect.equal(router.taxiTrunkCapacityKg, 40.0);
+        expect.equal(router.maxParcelsPerTaxi, 4);
+      });
+
+      test("F242-T17: Calculates precise detour added to taxi passenger route", () => {
+        const router = new EVRPTWUrbanSharedTaxiCrowdParcelRouter();
+        const origin = { lat: 10.7769, lng: 106.7009 }; // Ben Thanh
+        const dest = { lat: 10.7520, lng: 106.6540 }; // Cho Lon
+        const pPickup = { lat: 10.7720, lng: 106.6950 };
+        const pDropoff = { lat: 10.7580, lng: 106.6700 };
+
+        const detour = router._computeDetour(origin, dest, pPickup, pDropoff);
+        expect.ok(detour >= 0);
+        expect.ok(detour < 3.0);
+      });
+
+      test("F242-T18: Dispatches parcels to electric taxis within allowable detour limit", () => {
+        const router = new EVRPTWUrbanSharedTaxiCrowdParcelRouter({ maxDetourKm: 2.5 });
+        const taxis = [
+          {
+            taxiId: "TAXI_01",
+            driverName: "Bác tài Xanh SM",
+            origin: { lat: 10.7725, lng: 106.6980 },
+            dest: { lat: 10.7520, lng: 106.6540 },
+            departMin: 480,
+            arriveMin: 510
+          }
+        ];
+        const parcels = [
+          {
+            id: "PARCEL_1",
+            name: "Kiện hàng thời trang",
+            pickup: { lat: 10.7710, lng: 106.6960 },
+            dropoff: { lat: 10.7550, lng: 106.6600 },
+            weightKg: 4.5,
+            dueMin: 540
+          }
+        ];
+
+        const plan = router.planSharedTaxiParcelRoutes(taxis, parcels);
+        expect.equal(plan.certification, "EVRPTW_SHARED_TAXI_CROWD_PARCEL_PASS");
+        expect.equal(plan.totalParcelsDelivered, 1);
+        expect.equal(plan.unassignedParcelsCount, 0);
+      });
+
+      test("F242-T19: Unassigned parcels flagged when detour exceeds maximum limit", () => {
+        const router = new EVRPTWUrbanSharedTaxiCrowdParcelRouter({ maxDetourKm: 0.2 });
+        const taxis = [
+          {
+            taxiId: "TAXI_02",
+            driverName: "Tài xế 2",
+            origin: { lat: 10.7700, lng: 106.7000 },
+            dest: { lat: 10.7800, lng: 106.7100 },
+            departMin: 400,
+            arriveMin: 420
+          }
+        ];
+        const farParcel = [
+          {
+            id: "FAR_P",
+            name: "Hàng ở rất xa lộ trình taxi",
+            pickup: { lat: 10.8200, lng: 106.7500 },
+            dropoff: { lat: 10.8400, lng: 106.7800 },
+            weightKg: 2.0
+          }
+        ];
+
+        const plan = router.planSharedTaxiParcelRoutes(taxis, farParcel);
+        expect.equal(plan.unassignedParcelsCount, 1);
+        expect.equal(plan.unassignedParcels[0].reason, "NO_TAXI_WITHIN_DETOUR_OR_CAPACITY_LIMIT");
+      });
+
+      test("F242-T20: Demonstrates >90% CO2 emissions reduction vs baseline diesel van", () => {
+        const router = new EVRPTWUrbanSharedTaxiCrowdParcelRouter({ maxDetourKm: 2.0 });
+        const taxis = [
+          {
+            taxiId: "TAXI_GREEN",
+            driverName: "Xanh SM Eco",
+            origin: { lat: 10.7700, lng: 106.7000 },
+            dest: { lat: 10.7500, lng: 106.6600 },
+            departMin: 500,
+            arriveMin: 530
+          }
+        ];
+        const parcels = [
+          {
+            id: "P_GREEN",
+            name: "Bưu kiện xanh",
+            pickup: { lat: 10.7680, lng: 106.6950 },
+            dropoff: { lat: 10.7520, lng: 106.6650 },
+            weightKg: 5.0,
+            dueMin: 600
+          }
+        ];
+
+        const plan = router.planSharedTaxiParcelRoutes(taxis, parcels);
+        expect.ok(plan.emissionsAnalysis.co2AbatementPercent >= 90.0);
+        expect.ok(plan.emissionsAnalysis.co2SavedKg > 0);
+      });
+
+      test("F242-T21: Client-Server dual parity for EVRPTWUrbanSharedTaxiCrowdParcelRouter", () => {
+        const clientRouter = new EVRPTWUrbanSharedTaxiCrowdParcelRouter();
+        const serverRouter = new ServerEVRPTWSharedTaxiRouter();
+
+        const taxis = [
+          {
+            taxiId: "T_PARITY",
+            driverName: "Tài xế Parity",
+            origin: { lat: 10.7725, lng: 106.6980 },
+            dest: { lat: 10.7520, lng: 106.6540 },
+            departMin: 480,
+            arriveMin: 510
+          }
+        ];
+        const parcels = [
+          {
+            id: "P_PARITY",
+            name: "Hàng Parity",
+            pickup: { lat: 10.7710, lng: 106.6960 },
+            dropoff: { lat: 10.7550, lng: 106.6600 },
+            weightKg: 3.0,
+            dueMin: 550
+          }
+        ];
+
+        const cPlan = clientRouter.planSharedTaxiParcelRoutes(taxis, parcels);
+        const sPlan = serverRouter.planSharedTaxiParcelRoutes(taxis, parcels);
+
+        expect.equal(cPlan.certification, sPlan.certification);
+        expect.equal(cPlan.totalParcelsDelivered, sPlan.totalParcelsDelivered);
+        expect.equal(cPlan.emissionsAnalysis.co2SavedKg, sPlan.emissionsAnalysis.co2SavedKg);
+      });
+
+      // --- Tri-Role AI Copilot Tests (T22 - T24) ---
+      test("F242-T22: Admin Sentinel Copilot Sections 266, 267, 268 handle CVM, Hysteretic Q & Shared Taxi", () => {
+        const r266 = generateAdminCopilotResponse("Đo lường lượng khách hàng bằng thuật toán CVM distinct elements");
+        expect.equal(r266.tag, "CVM DISTINCT ELEMENTS SKETCH");
+        expect.ok(r266.text.includes("THUẬT TOÁN CVM"));
+
+        const r267 = generateAdminCopilotResponse("Kiểm tra định giá hysteretic Q-learning hai tốc độ học");
+        expect.equal(r267.tag, "HYSTERETIC Q MULTI-AGENT PRICING");
+        expect.ok(r267.text.includes("HYSTERETIC Q"));
+
+        const r268 = generateAdminCopilotResponse("Điều phối giao hàng ghép xe taxi điện tiện chuyến evrptw");
+        expect.equal(r268.tag, "EVRPTW URBAN SHARED TAXI CROWD PARCEL ROUTER");
+        expect.ok(r268.text.includes("TAXI ĐIỆN"));
+      });
+
+      test("F242-T23: Seller ShopSmart Copilot Section 104 handles CVM, Hysteretic Q & Taxi Parcel", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn đo khách bằng CVM và định giá hysteretic kết hợp taxi điện tiện chuyến");
+        expect.equal(sellerRes.tag, "CVM SKETCH, HYSTERETIC Q PRICING & SHARED TAXI ROUTER");
+        expect.ok(sellerRes.text.includes("CVM"));
+        expect.ok(sellerRes.text.includes("HYSTERETIC"));
+      });
+
+      test("F242-T24: Buyer Shopping Assistant Intent 97 handles CVM_HYSTERETIC_TAXI_PARCEL_ASSIST", () => {
+        const buyerRes = generateAiChatResponse("Khu vực của tôi có được giao hàng bằng taxi điện tiện chuyến không?");
+        expect.equal(buyerRes.intent, "CVM_HYSTERETIC_TAXI_PARCEL_ASSIST");
+        expect.ok(buyerRes.replyText.includes("TAXI ĐIỆN TIỆN CHUYẾN"));
       });
     });
   });
