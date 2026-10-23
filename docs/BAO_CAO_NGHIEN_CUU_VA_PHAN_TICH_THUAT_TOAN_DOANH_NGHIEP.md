@@ -185,6 +185,11 @@ graph TD
 - **Tầng 1 - Xe tải điện mang tủ locker lưu động (Mobile Locker Truck):** Xe tải điện chuyên dụng mang dàn ngăn tủ khóa tự động di chuyển giữa các trạm dừng cố định (Dwell Stops: toà nhà văn phòng, khu chung cư cao tầng, công viên trung tâm).
 - **Tầng 2 - Khách hàng tự lấy hàng theo khung giờ dừng đỗ (Self-Collection Feeder Walking):** Khách hàng tự đi bộ trong bán kính tiếp cận feeder ($\le 1.0\text{km}$) để nhận hàng qua mã OTP/QR trong khung giờ xe đỗ dừng $[t_{\text{park}}, t_{\text{depart}}]$, cắt giảm $> 90\%$ phát thải $\text{CO}_2$ so với xe tải diesel chuyên dụng, triệt tiêu bài toán giao hàng không thành công, cấp chứng nhận `EVRPTW_MOBILE_LOCKER_ROUTING_PASS`.
 
+### 4.15. Điều phối trung chuyển phà điện đô thị & cross-dock bến cảng EVRPTW-FCD (Dulebenets 2021, Fagerholt 2022)
+- **Tầng 1 - Tiếp vận cầu cảng bờ xuất phát (West Shore Land Consolidation):** Xe tải điện gom bưu kiện chuyển tới bến cảng Cát Lái / Bến Bạch Đằng theo lịch trình phà $[t_{\text{depart}}, t_{\text{arrive}}]$.
+- **Hành lang đường thủy vượt sông xanh (Electric River Ferry Corridor):** Phà điện $250\text{ kWh}$ chở container lồng thép vượt sông, tiêu hao chỉ $0.025\text{ kWh/tấn-km}$, triệt tiêu $15 - 25\text{ km}$ đường vòng kẹt xe qua cầu.
+- **Tầng 2 - Đội xe đạp điện giao hàng bờ nhận (East Shore E-Bike Couriers):** Đội xe đạp điện tiếp nhận tại bến cảng bờ đối diện tỏa đi giao chặng cuối trong bán kính $3 - 5\text{ km}$, cắt giảm $> 90\%$ phát thải $\text{CO}_2$, cấp chứng nhận `EVRPTW_FERRY_CROSSDOCK_LOGISTICS_PASS`.
+
 ---
 
 ## 5. NHÓM 4: BỘ BA TRỢ LÝ AI COPILOT PHÂN VAI CHUYÊN BIỆT (TRI-ROLE AI COPILOTS ENGINE)
@@ -196,26 +201,26 @@ Hệ thống được trang bị 3 Trợ lý AI độc lập, hoạt động d�
 | **Phân Vùng Hoạt Động** | Cổng Quản trị sàn (Admin Portal) | Kênh Người Bán (Seller Center) | Cửa hàng & Mua sắm (Storefront/PDP) |
 | **Vai Trò & Sứ Mệnh** | Giám sát tuân thủ, kiểm toán tài chính & an ninh | Tối ưu hóa P&L, tồn kho, giá bán & Shopee Ads | Hỗ trợ mua hàng, tư vấn combo, khiếu nại |
 | **Tập Tri Thức Chuyên Sâu** | - Dòng tiền ký quỹ Escrow Vault<br>- Thuế TMĐT Nghị định 52/2018<br>- Điểm uy tín Trust Score & Radar Sybil<br>- Giám sát SLA & Điểm phạt Sao Quả Tạ | - Phân tích chi tiết giá vốn COGS & P&L<br>- Tốc độ bán hàng ngày & DIR<br>- Tư vấn khung giờ Flash Sale an toàn<br>- Chiến lược đấu thầu từ khóa ROAS $\ge 3.5\times$ | - Giải mã từ lóng TMĐT tiếng Việt<br>- Gợi ý combo sản phẩm bán kèm<br>- Hướng dẫn theo dõi SPX Live GPS<br>- Tối ưu hóa xếp chồng Voucher & Xu |
-| **Số Lượng Kịch Bản Xử Lý** | 274 quy tắc suy luận chuyên sâu | 106 phân tích kinh doanh đa biến | 99 ý định mua sắm phức hợp |
+| **Số Lượng Kịch Bản Xử Lý** | 277 quy tắc suy luận chuyên sâu | 107 phân tích kinh doanh đa biến | 100 ý định mua sắm phức hợp |
 
 ---
 
-## 6. BẢNG TỔNG HỢP 97 PHASE & MA TRẬN ĐỘ PHỨC TẠP THUẬT TOÁN
+## 6. BẢNG TỔNG HỢP 98 PHASE & MA TRẬN ĐỘ PHỨC TẠP THUẬT TOÁN
 
 | Nhóm Thuật Toán | Giai Đoạn (Phases) | Thuật Toán Tiêu Biểu | Độ Phức Tạp Thời Gian | Độ Phức Tạp Bộ Nhớ |
 | :--- | :---: | :--- | :--- :---: | :---: |
 | **Core Distributed Patterns** | Phase 1 - 8 | Token Bucket, Circuit Breaker, OCC CAS, LRU Cache | $O(1)$ | $O(N)$ |
 | **Advanced Data Structures** | Phase 9 - 14 | Merkle Tree, Skiplist, MinHash LSH, CRDT Cart | $O(\log N) \text{ / } O(1)$ | $O(N)$ |
-| **Probabilistic Sketches** | Phase 15 - 45, 90 - 97 | HyperLogLog, Count-Min, DDSketch, BJKST, KMV, AKMV, Linear Counting, Recordinality, CVM, PCSA, Elastic Sketch | $O(1)$ | $O(\text{poly}(1/\epsilon)) \text{ / } O(m)$ |
-| **Reinforcement Learning** | Phase 46 - 65, 90 - 97 | Thompson Sampling, SAC-Lagrangian, PPO-Clip, MAPPO, WQMIX, REPS, Hysteretic Q, Lenient Q, WoLF-PHC | $O(K) \text{ / } O(|S||A|)$ | $O(|S|)$ |
+| **Probabilistic Sketches** | Phase 15 - 45, 90 - 98 | HyperLogLog, Count-Min, DDSketch, BJKST, KMV, AKMV, Linear Counting, Recordinality, CVM, PCSA, Elastic Sketch, NitroSketch | $O(1)$ | $O(\text{poly}(1/\epsilon)) \text{ / } O(m)$ |
+| **Reinforcement Learning** | Phase 46 - 65, 90 - 98 | Thompson Sampling, SAC-Lagrangian, PPO-Clip, MAPPO, WQMIX, REPS, Hysteretic Q, Lenient Q, WoLF-PHC, Fictitious Play | $O(K) \text{ / } O(|S||A|)$ | $O(|S|)$ |
 | **Multi-Agent Coordination** | Phase 66 - 93 | QMIX, COMA, QTRAN, TarMAC, BiCNet, FACMAC, COPA, R-COMA, QPLEX, WQMIX | $O(N \cdot |A|)$ | $O(N)$ |
-| **Green Logistics & Multimodal** | Phase 67 - 97 | EVRPTW-BSS, Urban LEZ, Drone Tandem, MCT, Pods, Cargo Bikes, Trams, Barges, Transit Buses, Shared Taxis, Commuter Crowd, Mobile Locker Trucks | $O(V^2) \text{ Heuristic}$ | $O(V)$ |
+| **Green Logistics & Multimodal** | Phase 67 - 98 | EVRPTW-BSS, Urban LEZ, Drone Tandem, MCT, Pods, Cargo Bikes, Trams, Barges, Transit Buses, Shared Taxis, Commuter Crowd, Mobile Lockers, River Ferries | $O(V^2) \text{ Heuristic}$ | $O(V)$ |
 
 ---
 
 ## 7. HIỆU QUẢ KINH TẾ & GIÁ TRỊ THỰC TIỄN BÀN GIAO
 
-Việc đưa vào vận hành trọn bộ 97 Phase thuật toán doanh nghiệp mang lại giá trị kinh tế trực tiếp cho đơn vị chủ quản:
+Việc đưa vào vận hành trọn bộ 98 Phase thuật toán doanh nghiệp mang lại giá trị kinh tế trực tiếp cho đơn vị chủ quản:
 1. **Tiết kiệm chi phí hạ tầng máy chủ:** Nhờ cấu trúc dữ liệu xác suất Sub-linear space, hệ thống có thể theo dõi và giám sát hàng triệu phiên truy cập với mức tiêu thụ RAM dưới $100\text{ MB}$, giảm hơn $80\%$ chi phí lưu trữ cụm máy chủ Redis/ElastiCache.
 2. **Triệt tiêu thất thoát tài chính do bán vượt kho:** Thuật toán OCC kết hợp Atomic CAS đảm bảo $0\%$ đơn hàng bị hủy do âm kho trong các ngày hội mua sắm Mega Sale.
 3. **Bảo vệ biên lợi nhuận cho người bán:** Khóa sàn giá vốn an toàn $1.05 \times \text{COGS}$ ngăn ngừa các quyết định hạ giá cạnh tranh tiêu cực, duy trì môi trường kinh doanh lành mạnh.

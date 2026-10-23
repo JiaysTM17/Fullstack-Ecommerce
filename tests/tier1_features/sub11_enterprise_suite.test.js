@@ -481,6 +481,10 @@ import {
   ElasticSketchHeavyHitters,
   WoLFPHCMultiAgentPricing,
   EVRPTWUrbanMobileLockerTruckFeederRouter,
+  // Phase 98 Enterprise Algorithms
+  NitroSketchStreamingTelemetry,
+  FPContinuousFictitiousPlayPricing,
+  EVRPTWUrbanRiverFerryCargoCrossDockRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -740,6 +744,9 @@ import { EVRPTWUrbanCrowdShippingCommuterRouter as ServerEVRPTWCommuterRouter } 
 import { ElasticSketchHeavyHitters as ServerElasticSketch } from "../../server/src/utils/elasticSketchHeavyHitters.js";
 import { WoLFPHCMultiAgentPricing as ServerWoLFPricing } from "../../server/src/utils/wolfPhcMultiAgentPricing.js";
 import { EVRPTWUrbanMobileLockerTruckFeederRouter as ServerEVRPTWMobileLockerRouter } from "../../server/src/utils/evrptwUrbanMobileLockerTruckFeederRouter.js";
+import { NitroSketchStreamingTelemetry as ServerNitroSketch } from "../../server/src/utils/nitroSketchStreamingTelemetry.js";
+import { FPContinuousFictitiousPlayPricing as ServerFPPricing } from "../../server/src/utils/fpContinuousFictitiousPlayPricing.js";
+import { EVRPTWUrbanRiverFerryCargoCrossDockRouter as ServerEVRPTWFerryRouter } from "../../server/src/utils/evrptwUrbanRiverFerryCargoCrossDockRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -39501,6 +39508,290 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.ok(buyerRes.replyText.includes("TỦ ĐỒ LƯU ĐỘNG"));
       });
     });
+
+    // =========================================================================
+    // FEATURE 245: NitroSketch Streaming Telemetry, Continuous Fictitious Play Pricing & River Ferry Cross-Dock Routing (Phase 98)
+    // =========================================================================
+    describe("Feature 245: NitroSketch Streaming Telemetry, Continuous Fictitious Play Pricing & River Ferry Cross-Dock (Phase 98)", () => {
+      // 1. NitroSketch Streaming Telemetry
+      test("F245-T01: NitroSketchStreamingTelemetry initializes with width, depth, samplingRate and zero counters", () => {
+        const sketch = new NitroSketchStreamingTelemetry({ width: 256, depth: 3, samplingRate: 0.1 });
+        expect.equal(sketch.width, 256);
+        expect.equal(sketch.depth, 3);
+        expect.equal(sketch.samplingRate, 0.1);
+        expect.equal(sketch.totalItems, 0);
+        expect.equal(sketch.sampledEvents, 0);
+      });
+
+      test("F245-T02: Geometric jump mechanism samples selectively rather than updating every event", () => {
+        const sketch = new NitroSketchStreamingTelemetry({ width: 128, depth: 3, samplingRate: 0.2 });
+        for (let i = 0; i < 50; i++) {
+          sketch.update("flow_test");
+        }
+        expect.equal(sketch.totalItems, 50);
+        expect.ok(sketch.sampledEvents < 50);
+      });
+
+      test("F245-T03: Scaled counter weight preserves unbiased expected frequency", () => {
+        const sketch = new NitroSketchStreamingTelemetry({ width: 256, depth: 4, samplingRate: 1.0 });
+        for (let i = 0; i < 25; i++) {
+          sketch.update("SKU_UNBIASED", 2);
+        }
+        expect.equal(sketch.totalItems, 50);
+        const est = sketch.estimate("SKU_UNBIASED");
+        expect.ok(est >= 45 && est <= 55);
+      });
+
+      test("F245-T04: findHeavyHitters detects elephant flows exceeding threshold", () => {
+        const sketch = new NitroSketchStreamingTelemetry({ width: 512, depth: 4, samplingRate: 0.5 });
+        for (let i = 0; i < 40; i++) sketch.update("ELEPHANT_FLOW", 5);
+        for (let i = 0; i < 5; i++) sketch.update("MOUSE_FLOW", 1);
+
+        const heavy = sketch.findHeavyHitters(50);
+        expect.ok(heavy.length >= 1);
+        expect.equal(heavy[0].key, "ELEPHANT_FLOW");
+      });
+
+      test("F245-T05: setSamplingRate adaptively changes rate and regenerates jump countdown", () => {
+        const sketch = new NitroSketchStreamingTelemetry({ samplingRate: 0.1 });
+        sketch.setSamplingRate(0.5);
+        expect.equal(sketch.samplingRate, 0.5);
+      });
+
+      test("F245-T06: Serialization and merge functionality preserve sketch state", () => {
+        const sk1 = new NitroSketchStreamingTelemetry({ width: 128, depth: 2, samplingRate: 0.5 });
+        const sk2 = new NitroSketchStreamingTelemetry({ width: 128, depth: 2, samplingRate: 0.5 });
+        for (let i = 0; i < 10; i++) {
+          sk1.update("FLOW_A", 2);
+          sk2.update("FLOW_B", 3);
+        }
+        sk1.merge(sk2);
+        expect.equal(sk1.totalItems, 50);
+
+        const json = sk1.toJSON();
+        expect.equal(json.status, "NITRO_SKETCH_TELEMETRY_PASS");
+        const restored = NitroSketchStreamingTelemetry.fromJSON(json);
+        expect.equal(restored.totalItems, 50);
+      });
+
+      test("F245-T07: Client-Server dual parity for NitroSketchStreamingTelemetry", () => {
+        const clientSketch = new NitroSketchStreamingTelemetry({ width: 128, depth: 3, samplingRate: 1.0 });
+        const serverSketch = new ServerNitroSketch({ width: 128, depth: 3, samplingRate: 1.0 });
+
+        for (let i = 0; i < 20; i++) {
+          clientSketch.update("PARITY_KEY", 2);
+          serverSketch.update("PARITY_KEY", 2);
+        }
+
+        expect.equal(clientSketch.totalItems, serverSketch.totalItems);
+        expect.equal(clientSketch.estimate("PARITY_KEY"), serverSketch.estimate("PARITY_KEY"));
+        expect.equal(clientSketch.toJSON().status, serverSketch.toJSON().status);
+      });
+
+      // 2. Continuous Fictitious Play Pricing
+      test("F245-T08: FPContinuousFictitiousPlayPricing initializes with temperature, learningRate and safe price floor", () => {
+        const fp = new FPContinuousFictitiousPlayPricing({ temperature: 20000, learningRate: 0.1, floorMargin: 1.05 });
+        expect.equal(fp.temperature, 20000);
+        expect.equal(fp.learningRate, 0.1);
+        expect.equal(fp.floorMargin, 1.05);
+      });
+
+      test("F245-T09: enforceSafePriceFloor strictly clamps price below 1.05 * COGS", () => {
+        const fp = new FPContinuousFictitiousPlayPricing();
+        const cogs = 200000;
+        const lowPrice = 150000;
+        const safePrice = fp.enforceSafePriceFloor(lowPrice, cogs);
+        expect.ok(safePrice >= Math.round(cogs * 1.05));
+        expect.equal(safePrice, 210000);
+      });
+
+      test("F245-T10: generatePriceCandidates strictly respects safe price floor bounds", () => {
+        const fp = new FPContinuousFictitiousPlayPricing();
+        const cogs = 100000;
+        const candidates = fp.generatePriceCandidates(cogs, 150000);
+        expect.ok(candidates.length >= 5);
+        for (const p of candidates) {
+          expect.ok(p >= Math.round(cogs * 1.05));
+        }
+      });
+
+      test("F245-T11: Cross-price demand estimation decreases with own price and increases with competitor price", () => {
+        const fp = new FPContinuousFictitiousPlayPricing();
+        const d1 = fp.estimateDemand(120000, 150000);
+        const d2 = fp.estimateDemand(140000, 150000);
+        const d3 = fp.estimateDemand(120000, 170000);
+        expect.ok(d1 > d2);
+        expect.ok(d3 >= d1);
+      });
+
+      test("F245-T12: updateBeliefs tracks historical competitor pricing empirical distribution", () => {
+        const fp = new FPContinuousFictitiousPlayPricing();
+        const cogs = 100000;
+        const candidates = fp.generatePriceCandidates(cogs, 150000);
+        fp.updateBeliefs("SKU_BELIEF", 140000, candidates);
+        const beliefs = fp.beliefs.get("SKU_BELIEF");
+        expect.ok(beliefs.length === candidates.length);
+        const sumWeights = beliefs.reduce((sum, b) => sum + b.weight, 0);
+        expect.ok(Math.abs(sumWeights - 1.0) < 1e-4);
+      });
+
+      test("F245-T13: computeBestResponse computes softmax smoothed probabilities and optimal price", () => {
+        const fp = new FPContinuousFictitiousPlayPricing();
+        const cogs = 100000;
+        const candidates = fp.generatePriceCandidates(cogs, 150000);
+        const uniformBeliefs = candidates.map(p => ({ price: p, weight: 1.0 / candidates.length }));
+        const resp = fp.computeBestResponse(cogs, uniformBeliefs, candidates);
+        expect.ok(resp.optimalPrice >= Math.round(cogs * 1.05));
+        expect.ok(resp.expectedProfit > 0);
+        expect.ok(resp.priceProbabilities.length === candidates.length);
+      });
+
+      test("F245-T14: optimizePrices returns CONTINUOUS_FICTITIOUS_PLAY_PASS and guarantees all floor prices", () => {
+        const fp = new FPContinuousFictitiousPlayPricing();
+        const products = [
+          { skuId: "SKU_FP_1", name: "Áo Thun Polo", cogs: 100000, currentPrice: 160000, competitorPrice: 155000 },
+          { skuId: "SKU_FP_2", name: "Quần Kaki", cogs: 200000, currentPrice: 280000, competitorPrice: 270000 }
+        ];
+        const res = fp.optimizePrices(products);
+        expect.equal(res.status, "CONTINUOUS_FICTITIOUS_PLAY_PASS");
+        expect.equal(res.totalOptimized, 2);
+        expect.ok(res.allFloorsGuaranteed);
+        for (const r of res.recommendations) {
+          expect.ok(r.recommendedPrice >= r.safePriceFloor);
+        }
+      });
+
+      test("F245-T15: Client-Server dual parity for FPContinuousFictitiousPlayPricing", () => {
+        const clientFP = new FPContinuousFictitiousPlayPricing();
+        const serverFP = new ServerFPPricing();
+        const products = [
+          { skuId: "SKU_PARITY", name: "Giày Sneaker", cogs: 300000, currentPrice: 450000, competitorPrice: 420000 }
+        ];
+
+        const clientRes = clientFP.optimizePrices(products);
+        const serverRes = serverFP.optimizePrices(products);
+        expect.equal(clientRes.status, serverRes.status);
+        expect.equal(clientRes.recommendations[0].recommendedPrice, serverRes.recommendations[0].recommendedPrice);
+        expect.equal(clientRes.recommendations[0].safePriceFloor, serverRes.recommendations[0].safePriceFloor);
+      });
+
+      // 3. EVRPTW Urban River Ferry Cargo Cross-Dock Router
+      test("F245-T16: EVRPTWUrbanRiverFerryCargoCrossDockRouter initializes with battery and ferry capacity", () => {
+        const router = new EVRPTWUrbanRiverFerryCargoCrossDockRouter({ ferryBatteryKwh: 250 });
+        expect.equal(router.ferryBatteryKwh, 250);
+        expect.ok(router.ferryEnergyPerKm > 0);
+      });
+
+      test("F245-T17: calculateDistance computes Haversine distance accurately", () => {
+        const router = new EVRPTWUrbanRiverFerryCargoCrossDockRouter();
+        const d = router.calculateDistance({ lat: 10.7600, lng: 106.7400 }, { lat: 10.7700, lng: 106.7600 });
+        expect.ok(d > 1.0 && d < 4.0);
+      });
+
+      test("F245-T18: planFerryCrossDockRoutes dispatches orders to electric ferry and shore e-couriers", () => {
+        const router = new EVRPTWUrbanRiverFerryCargoCrossDockRouter();
+        const ferryTrip = {
+          ferryId: "FERRY_CAT_LAI_1",
+          ferryName: "Phà Điện Cát Lái Eco",
+          quayA: { name: "Bến Cát Lái Q2", lat: 10.7600, lng: 106.7400, departMin: 480 },
+          quayB: { name: "Bến Nhơn Trạch", lat: 10.7700, lng: 106.7600, arriveMin: 500 },
+          capacityKg: 5000
+        };
+        const orders = [
+          { id: "ORD_1", name: "Kiện Hàng 1", lat: 10.7720, lng: 106.7620, weightKg: 10 },
+          { id: "ORD_2", name: "Kiện Hàng 2", lat: 10.7750, lng: 106.7650, weightKg: 15 }
+        ];
+
+        const plan = router.planFerryCrossDockRoutes(ferryTrip, orders);
+        expect.equal(plan.status, "EVRPTW_FERRY_CROSSDOCK_LOGISTICS_PASS");
+        expect.equal(plan.dispatchSummary.assignedCount, 2);
+        expect.equal(plan.dispatchSummary.unassignedCount, 0);
+      });
+
+      test("F245-T19: Unassigned orders handled when exceeding ferry capacity", () => {
+        const router = new EVRPTWUrbanRiverFerryCargoCrossDockRouter();
+        const ferryTrip = {
+          ferryId: "FERRY_SMALL",
+          ferryName: "Phà Điện Nhỏ",
+          quayA: { name: "Bến A", lat: 10.7600, lng: 106.7400, departMin: 480 },
+          quayB: { name: "Bến B", lat: 10.7700, lng: 106.7600, arriveMin: 500 },
+          capacityKg: 20
+        };
+        const orders = [
+          { id: "ORD_HEAVY", name: "Kiện Quá Tải", lat: 10.7710, lng: 106.7610, weightKg: 50 }
+        ];
+
+        const plan = router.planFerryCrossDockRoutes(ferryTrip, orders);
+        expect.equal(plan.dispatchSummary.unassignedCount, 1);
+      });
+
+      test("F245-T20: Demonstrates >90% CO2 emissions reduction vs baseline diesel truck ring bridge detour", () => {
+        const router = new EVRPTWUrbanRiverFerryCargoCrossDockRouter();
+        const ferryTrip = {
+          ferryId: "FERRY_ECO",
+          ferryName: "Phà Điện Xanh",
+          quayA: { name: "Bến Bờ Tây", lat: 10.7600, lng: 106.7400, departMin: 480 },
+          quayB: { name: "Bến Bờ Đông", lat: 10.7700, lng: 106.7600, arriveMin: 500 }
+        };
+        const orders = [
+          { id: "ORD_A", name: "Bưu kiện A", lat: 10.7710, lng: 106.7620, weightKg: 5 }
+        ];
+
+        const plan = router.planFerryCrossDockRoutes(ferryTrip, orders);
+        expect.ok(plan.emissionsAnalysis.co2AbatementPercent >= 90.0);
+        expect.ok(plan.emissionsAnalysis.co2SavedKg > 0);
+      });
+
+      test("F245-T21: Client-Server dual parity for EVRPTWUrbanRiverFerryCargoCrossDockRouter", () => {
+        const clientRouter = new EVRPTWUrbanRiverFerryCargoCrossDockRouter();
+        const serverRouter = new ServerEVRPTWFerryRouter();
+
+        const ferryTrip = {
+          ferryId: "FERRY_PARITY",
+          ferryName: "Phà Parity",
+          quayA: { name: "Bến A", lat: 10.7600, lng: 106.7400, departMin: 480 },
+          quayB: { name: "Bến B", lat: 10.7700, lng: 106.7600, arriveMin: 500 }
+        };
+        const orders = [
+          { id: "ORD_P1", name: "Kiện P1", lat: 10.7720, lng: 106.7620, weightKg: 8 }
+        ];
+
+        const clientPlan = clientRouter.planFerryCrossDockRoutes(ferryTrip, orders);
+        const serverPlan = serverRouter.planFerryCrossDockRoutes(ferryTrip, orders);
+        expect.equal(clientPlan.status, serverPlan.status);
+        expect.equal(clientPlan.dispatchSummary.assignedCount, serverPlan.dispatchSummary.assignedCount);
+        expect.equal(clientPlan.emissionsAnalysis.co2AbatementPercent, serverPlan.emissionsAnalysis.co2AbatementPercent);
+      });
+
+      // 4. Tri-Role Copilots
+      test("F245-T22: Admin Sentinel Copilot Sections 275, 276, 277 handle NitroSketch, Fictitious Play & River Ferry Cross-Dock", () => {
+        const r275 = generateAdminCopilotResponse("Hệ thống đo lường luồng NitroSketch adaptive geometric sampling hoạt động thế nào?");
+        expect.equal(r275.type, "security");
+        expect.ok(r275.text.includes("NITROSKETCH"));
+
+        const r276 = generateAdminCopilotResponse("Cơ chế định giá continuous fictitious play đa đại lý bảo đảm sàn an toàn thế nào?");
+        expect.equal(r276.type, "financial");
+        expect.ok(r276.text.includes("CONTINUOUS FICTITIOUS PLAY"));
+
+        const r277 = generateAdminCopilotResponse("Quy trình điều phối phà điện đô thị cross-dock bến cảng EVRPTW sông Sài Gòn ra sao?");
+        expect.equal(r277.type, "logistics");
+        expect.ok(r277.text.includes("PHÀ ĐIỆN VƯỢT SÔNG"));
+      });
+
+      test("F245-T23: Seller ShopSmart Copilot Section 107 handles NitroSketch, Fictitious Play & River Ferry Cross-Dock", () => {
+        const sellerRes = generateSellerCopilotResponse("Shop tôi muốn tìm hiểu định giá continuous fictitious play và theo dõi truy cập bằng NitroSketch");
+        expect.equal(sellerRes.type, "recommendation");
+        expect.ok(sellerRes.text.includes("NITROSKETCH"));
+        expect.ok(sellerRes.text.includes("FICTITIOUS PLAY"));
+      });
+
+      test("F245-T24: Buyer Shopping Assistant Intent 100 handles NITRO_SKETCH_FICTITIOUS_FERRY_ASSIST", () => {
+        const buyerRes = generateAiChatResponse("Đơn hàng của tôi có được giao qua phà điện vượt sông không?");
+        expect.equal(buyerRes.intent, "NITRO_SKETCH_FICTITIOUS_FERRY_ASSIST");
+        expect.ok(buyerRes.replyText.includes("PHÀ ĐIỆN"));
+      });
+    });
+
   });
 });
 
