@@ -1,4 +1,4 @@
-# BÁO CÁO NGHIÊN CỨU & PHÂN TÍCH CHUYÊN SÂU 86 PHASE THUẬT TOÁN TMĐT DOANH NGHIỆP
+# BÁO CÁO NGHIÊN CỨU & PHÂN TÍCH CHUYÊN SÂU 87 PHASE THUẬT TOÁN TMĐT DOANH NGHIỆP
 ## DỰ ÁN: NỀN TẢNG THƯƠNG MẠI ĐIỆN TỬ MINI SHOPEE MULTI-VENDOR
 **Mã tài liệu:** `ALGO-MINISHOPEE-V2.0` | **Phiên bản:** `2.0.0 Enterprise` | **Ngày ban hành:** `2026-10-23`
 
@@ -8,16 +8,16 @@
 1. [Tổng Quan Bộ Thuật Toán Doanh Nghiệp (Executive Overview)](#1-tổng-quan-bộ-thuật-toán-doanh-nghiệp-executive-overview)
 2. [Nhóm 1: Cấu Trúc Dữ Liệu Xác Suất & Xử Lý Luồng Dữ Liệu Lớn (Streaming Sketches)](#2-nhóm-1-cấu-trúc-dữ-liệu-xác-suất--xử-lý-luồng-dữ-liệu-lớn-streaming-sketches)
 3. [Nhóm 2: Học Tăng Cường Đa Đại Diện & Định Giá Động Hợp Tác (Multi-Agent RL & Dynamic Pricing)](#3-nhóm-2-học-tăng-cường-đa-đại-diện--định-giá-động-hợp-tác-multi-agent-rl--dynamic-pricing)
-4. [Nhóm 3: Logistics Xanh, Tối Ưu Hóa Tuyến Đường Xe Điện & Drone (EVRPTW & Green Logistics)](#4-nhóm-3-logistics-xanh-tối-ưu-hóa-tuyến-đường-xe-điện--drone-evrptw--green-logistics)
+4. [Nhóm 3: Logistics Xanh, Tối Ưu Hóa Tuyến Đường Xe Điện, Drone & Xe Sạc Di Động](#4-nhóm-3-logistics-xanh-tối-ưu-hóa-tuyến-đường-xe-điện-drone--xe-sạc-di-động)
 5. [Nhóm 4: Bộ Ba Trợ Lý AI Copilot Phân Vai Chuyên Biệt (Tri-Role AI Copilots Engine)](#5-nhóm-4-bộ-ba-trợ-lý-ai-copilot-phân-vai-chuyên-biệt-tri-role-ai-copilots-engine)
-6. [Bảng Tổng Hợp 86 Phase & Ma Trận Độ Phức Tạp Thuật Toán](#6-bảng-tổng-hợp-86-phase--ma-trận-độ-phức-tạp-thuật-toán)
+6. [Bảng Tổng Hợp 87 Phase & Ma Trận Độ Phức Tạp Thuật Toán](#6-bảng-tổng-hợp-87-phase--ma-trận-độ-phức-tạp-thuật-toán)
 7. [Hiệu Quả Kinh Tế & Giá Trị Thực Tiễn Bàn Giao](#7-hiệu-quả-kinh-tế--giá-trị-thực-tiễn-bàn-giao)
 
 ---
 
 ## 1. TỔNG QUAN BỘ THUẬT TOÁN DOANH NGHIỆP (EXECUTIVE OVERVIEW)
 
-Một trong những giá trị kỹ thuật cốt lõi và khác biệt nhất của nền tảng **Mini Shopee Multi-Vendor** chính là việc tích hợp thành công **86 Phase thuật toán doanh nghiệp** (bao gồm hơn **233 tính năng toán học và AI/ML chuyên sâu**).
+Một trong những giá trị kỹ thuật cốt lõi và khác biệt nhất của nền tảng **Mini Shopee Multi-Vendor** chính là việc tích hợp thành công **87 Phase thuật toán doanh nghiệp** (bao gồm hơn **234 tính năng toán học và AI/ML chuyên sâu**).
 
 Toàn bộ các thuật toán đều tuân thủ các nguyên tắc thiết kế khắt khe:
 - **Nguyên tắc đối xứng Client-Server (Dual-Parity):** Thuật toán được cài đặt đồng bộ cả phía Backend Express (`server/src/utils/`) và Frontend Client (`client/src/services/aiAlgorithms.js`).
@@ -56,6 +56,10 @@ graph LR
 - **Công thức:** Ma trận 2D kết hợp biến dấu Rademacher $s_j(u, v) \in \{-1, +1\}$. Tần suất ước lượng trung vị không thiên lệch và tính toán điểm tương đồng hai phía:
   $$A(u, v) = \frac{\hat{f}(u, v)}{\sqrt{\deg(u) \cdot \deg(v)}} \in [0, 1]$$
 
+### 2.5. Cắt đuôi nén thanh ghi HyperLogLog Tail-Cut (Steffen Ertl 2017 / Google)
+- **Cải tiến:** Khắc phục nhược điểm lãng phí bộ nhớ của HLL chuẩn bằng cách cắt đuôi thanh ghi tại ngưỡng $\text{maxRegisterValue} = 32$ và kết hợp đếm tuyến tính Linear Counting khi ước lượng thô $E \le 2.5m$.
+- **Hiệu quả:** Giảm kích thước bảng lưu trữ $50\%$, duy trì sai số dưới $1.0\%$ và cho phép gộp các bản tóm tắt phân tán một cách hoàn hảo.
+
 ---
 
 ## 3. NHÓM 2: HỌC TĂNG CƯỜNG ĐA ĐẠI DIỆN & ĐỊNH GIÁ ĐỘNG HỢP TÁC (MULTI-AGENT RL & DYNAMIC PRICING)
@@ -84,6 +88,10 @@ graph TD
 - Cập nhật gradient chính sách xác định:
   $$\nabla_{\theta_i} J = \mathbb{E} \left[ \nabla_{\theta_i} \mu_i(s_i) \cdot \frac{\partial Q_{jt}}{\partial Q_i} \cdot \nabla_{a_i} Q_i(s_i, a_i) \right]$$
 - Đảm bảo tính toán liên tục, phản ứng mượt mà với biến động thị trường và luôn được bảo vệ bởi khóa sàn giá vốn an toàn $P_i \ge 1.05 \times \text{COGS}_i$.
+
+### 3.4. Tối ưu hóa chính sách hợp tác đa mục tiêu phi tuyến COPA (Wang et al., NeurIPS 2022)
+- Giải bài toán cân bằng đồng thời ba mục tiêu phi tuyến: Doanh số sàn (GMV), Lợi nhuận gian hàng và Thặng dư người tiêu dùng.
+- Sử dụng khai triển đạo hàm riêng $\nabla_{\theta_i} J = \sum_{k=1}^K \left(\frac{\partial U}{\partial J_k}\right) \nabla_{\theta_i} J_k(\pi)$ để tự thích ứng trọng số ưu tiên trong từng giai đoạn chiến dịch Flash Sale mà không bao giờ vi phạm sàn giá vốn $P_i \ge 1.05 \times \text{COGS}_i$.
 
 ---
 
@@ -114,6 +122,10 @@ graph TD
 - **Phi vụ bay song song (Sortie):** Flycam xuất phát từ nóc xe, bay thẳng với vận tốc $60\text{ km/h}$ để giao hàng lên sân thượng chung cư cao tầng hoặc các ngõ hẹp mà ô tô không thể vào, sau đó tái hội tụ (Rendezvous) với xe tải tại điểm downstream.
 - **Sạc tiếp điểm động trên nóc xe (In-Transit Contact Dock Charging):** Cổng sạc DC $3.5\text{ kW}$ trên nóc xe tự động sạc bù pin cho flycam trong suốt thời gian xe tải di chuyển, triệt tiêu 100% thời gian chết tại trạm sạc cố định và rút ngắn thời gian giao hàng từ $40\%$ đến $55\%$.
 
+### 4.4. Điều phối xe bồn sạc pin di động cứu hộ hành trình EVRPTW-MCT (Huang et al., 2021)
+- **Cơ chế tiếp năng lượng lưu động:** Đội xe sạc bồn di động Mobile Charging Truck ($150\text{ kWh}$, trụ DC $50\text{ kW}$) chủ động di chuyển đến các điểm hẹn ven đường để sạc nhanh 15 phút cho xe giao hàng sắp cạn pin ($B_t \le 20\%$).
+- **Lợi ích thực tế:** Tiết kiệm trung bình $12\text{ km}$ vòng qua trạm sạc trung tâm cố định cho mỗi lần cứu hộ, bảo toàn tiến độ giao hàng hỏa tốc trong khung giờ cao điểm.
+
 ---
 
 ## 5. NHÓM 4: BỘ BA TRỢ LÝ AI COPILOT PHÂN VAI CHUYÊN BIỆT (TRI-ROLE AI COPILOTS ENGINE)
@@ -125,20 +137,20 @@ Hệ thống được trang bị 3 Trợ lý AI độc lập, hoạt động d�
 | **Phân Vùng Hoạt Động** | Cổng Quản trị sàn (Admin Portal) | Kênh Người Bán (Seller Center) | Cửa hàng & Mua sắm (Storefront/PDP) |
 | **Vai Trò & Sứ Mệnh** | Giám sát tuân thủ, kiểm toán tài chính & an ninh | Tối ưu hóa P&L, tồn kho, giá bán & Shopee Ads | Hỗ trợ mua hàng, tư vấn combo, khiếu nại |
 | **Tập Tri Thức Chuyên Sâu** | - Dòng tiền ký quỹ Escrow Vault<br>- Thuế TMĐT Nghị định 52/2018<br>- Điểm uy tín Trust Score & Radar Sybil<br>- Giám sát SLA & Điểm phạt Sao Quả Tạ | - Phân tích chi tiết giá vốn COGS & P&L<br>- Tốc độ bán hàng ngày & DIR<br>- Tư vấn khung giờ Flash Sale an toàn<br>- Chiến lược đấu thầu từ khóa ROAS $\ge 3.5\times$ | - Giải mã từ lóng TMĐT tiếng Việt<br>- Gợi ý combo sản phẩm bán kèm<br>- Hướng dẫn theo dõi SPX Live GPS<br>- Tối ưu hóa xếp chồng Voucher & Xu |
-| **Số Lượng Kịch Bản Xử Lý** | 241 quy tắc suy luận chuyên sâu | 95 phân tích kinh doanh đa biến | 88 ý định mua sắm phức hợp |
+| **Số Lượng Kịch Bản Xử Lý** | 244 quy tắc suy luận chuyên sâu | 96 phân tích kinh doanh đa biến | 89 ý định mua sắm phức hợp |
 
 ---
 
-## 6. BẢNG TỔNG HỢP 86 PHASE & MA TRẬN ĐỘ PHỨC TẠP THUẬT TOÁN
+## 6. BẢNG TỔNG HỢP 87 PHASE & MA TRẬN ĐỘ PHỨC TẠP THUẬT TOÁN
 
 | Nhóm Thuật Toán | Giai Đoạn (Phases) | Thuật Toán Tiêu Biểu | Độ Phức Tạp Thời Gian | Độ Phức Tạp Bộ Nhớ |
-| :--- | :---: | :--- | :---: | :---: |
+| :--- | :---: | :--- | :--- :---: | :---: |
 | **Core Distributed Patterns** | Phase 1 - 8 | Token Bucket, Circuit Breaker, OCC CAS, LRU Cache | $O(1)$ | $O(N)$ |
 | **Advanced Data Structures** | Phase 9 - 14 | Merkle Tree, Skiplist, MinHash LSH, CRDT Cart | $O(\log N) \text{ / } O(1)$ | $O(N)$ |
 | **Probabilistic Sketches** | Phase 15 - 45 | HyperLogLog, Count-Min Sketch, DDSketch, Bloom Filter | $O(1)$ | $O(\text{poly}(1/\epsilon))$ |
 | **Reinforcement Learning** | Phase 46 - 65 | Thompson Sampling, SAC-Lagrangian, PPO-Clip, TRPO | $O(K) \text{ / } O(|S||A|)$ | $O(|S|)$ |
-| **Multi-Agent Coordination** | Phase 66 - 86 | QMIX, COMA, QTRAN, TarMAC, BiCNet, FACMAC | $O(N \cdot |A|)$ | $O(N)$ |
-| **Green Logistics & Drone** | Phase 67 - 86 | EVRPTW-BSS, Urban LEZ, Drone Tandem Dock Recharge | $O(V^2) \text{ Heuristic}$ | $O(V)$ |
+| **Multi-Agent Coordination** | Phase 66 - 87 | QMIX, COMA, QTRAN, TarMAC, BiCNet, FACMAC, COPA | $O(N \cdot |A|)$ | $O(N)$ |
+| **Green Logistics & Drone** | Phase 67 - 87 | EVRPTW-BSS, Urban LEZ, Drone Tandem, EVRPTW-MCT | $O(V^2) \text{ Heuristic}$ | $O(V)$ |
 
 ---
 
