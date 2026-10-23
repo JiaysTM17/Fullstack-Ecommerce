@@ -485,6 +485,10 @@ import {
   NitroSketchStreamingTelemetry,
   FPContinuousFictitiousPlayPricing,
   EVRPTWUrbanRiverFerryCargoCrossDockRouter,
+  // Phase 99 Enterprise Algorithms
+  UnivMonUniversalStreamingSketch,
+  CFRRegretMatchingPlusPricing,
+  EVRPTWUrbanUndergroundPneumaticCapsuleRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -747,6 +751,9 @@ import { EVRPTWUrbanMobileLockerTruckFeederRouter as ServerEVRPTWMobileLockerRou
 import { NitroSketchStreamingTelemetry as ServerNitroSketch } from "../../server/src/utils/nitroSketchStreamingTelemetry.js";
 import { FPContinuousFictitiousPlayPricing as ServerFPPricing } from "../../server/src/utils/fpContinuousFictitiousPlayPricing.js";
 import { EVRPTWUrbanRiverFerryCargoCrossDockRouter as ServerEVRPTWFerryRouter } from "../../server/src/utils/evrptwUrbanRiverFerryCargoCrossDockRouter.js";
+import { UnivMonUniversalStreamingSketch as ServerUnivMonSketch } from "../../server/src/utils/univMonUniversalStreamingSketch.js";
+import { CFRRegretMatchingPlusPricing as ServerCFRPricing } from "../../server/src/utils/cfrRegretMatchingPlusPricing.js";
+import { EVRPTWUrbanUndergroundPneumaticCapsuleRouter as ServerEVRPTWCapsuleRouter } from "../../server/src/utils/evrptwUrbanUndergroundPneumaticCapsuleRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -39791,6 +39798,291 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         expect.ok(buyerRes.replyText.includes("PHÀ ĐIỆN"));
       });
     });
+
+    // =========================================================================
+    // FEATURE 246: UnivMon Universal Streaming Telemetry, CFR+ Regret Matching+ Pricing & Underground Pneumatic Capsule Router (Phase 99)
+    // =========================================================================
+    describe("Feature 246: UnivMon Universal Streaming Telemetry, CFR+ Regret Matching+ Pricing & Underground Pneumatic Capsule Router (Phase 99)", () => {
+      // 1. UnivMon Universal Streaming Telemetry
+      test("F246-T01: UnivMonUniversalStreamingSketch initializes with layers, width, depth, and pyramid hierarchy", () => {
+        const sketch = new UnivMonUniversalStreamingSketch({ layers: 4, width: 128, depth: 3 });
+        expect.equal(sketch.layers, 4);
+        expect.equal(sketch.width, 128);
+        expect.equal(sketch.depth, 3);
+        expect.equal(sketch.totalItems, 0);
+        expect.equal(sketch.pyramid.length, 4);
+      });
+
+      test("F246-T02: Exponential subsampling hierarchy maintains decaying sampling probabilities 2^-l", () => {
+        const sketch = new UnivMonUniversalStreamingSketch({ layers: 4 });
+        expect.equal(sketch.pyramid[0].probability, 1.0);
+        expect.equal(sketch.pyramid[1].probability, 0.5);
+        expect.equal(sketch.pyramid[2].probability, 0.25);
+        expect.equal(sketch.pyramid[3].probability, 0.125);
+      });
+
+      test("F246-T03: Updates propagate to level 0 and conditionally to deeper subsampled levels", () => {
+        const sketch = new UnivMonUniversalStreamingSketch({ layers: 4, width: 128, depth: 3 });
+        for (let i = 0; i < 60; i++) {
+          sketch.update("SKU_UNIVMON_" + (i % 5), 2);
+        }
+        expect.equal(sketch.totalItems, 120);
+        expect.ok(sketch.estimate("SKU_UNIVMON_0") > 0);
+      });
+
+      test("F246-T04: findL2HeavyHitters accurately detects dominant items via bottom-up traversal", () => {
+        const sketch = new UnivMonUniversalStreamingSketch({ layers: 4, width: 256, depth: 3 });
+        for (let i = 0; i < 40; i++) sketch.update("DOMINANT_SKU", 5);
+        for (let i = 0; i < 10; i++) sketch.update("RARE_SKU_" + i, 1);
+
+        const heavy = sketch.findL2HeavyHitters(50);
+        expect.ok(heavy.length >= 1);
+        expect.equal(heavy[0].key, "DOMINANT_SKU");
+        expect.ok(heavy[0].isL2Heavy);
+      });
+
+      test("F246-T05: estimateShannonEntropy computes positive information entropy over streaming traffic", () => {
+        const sketch = new UnivMonUniversalStreamingSketch({ layers: 3, width: 128, depth: 3 });
+        for (let i = 0; i < 20; i++) {
+          sketch.update("ITEM_A", 2);
+          sketch.update("ITEM_B", 2);
+        }
+        const entropy = sketch.estimateShannonEntropy();
+        expect.ok(entropy >= 0);
+      });
+
+      test("F246-T06: Serialization toJSON and fromJSON preserve sketch state", () => {
+        const sketch = new UnivMonUniversalStreamingSketch({ layers: 3, width: 128, depth: 2 });
+        sketch.update("SERIAL_ITEM", 10);
+        const json = sketch.toJSON();
+        expect.equal(json.status, "UNIVMON_UNIVERSAL_STREAMING_PASS");
+        const restored = UnivMonUniversalStreamingSketch.fromJSON(json);
+        expect.equal(restored.totalItems, 10);
+      });
+
+      test("F246-T07: Client-Server dual parity for UnivMonUniversalStreamingSketch", () => {
+        const clientSketch = new UnivMonUniversalStreamingSketch({ layers: 3, width: 128, depth: 3 });
+        const serverSketch = new ServerUnivMonSketch({ layers: 3, width: 128, depth: 3 });
+
+        for (let i = 0; i < 30; i++) {
+          clientSketch.update("PARITY_KEY", 2);
+          serverSketch.update("PARITY_KEY", 2);
+        }
+
+        expect.equal(clientSketch.totalItems, serverSketch.totalItems);
+        expect.equal(clientSketch.estimate("PARITY_KEY"), serverSketch.estimate("PARITY_KEY"));
+        expect.equal(clientSketch.toJSON().status, serverSketch.toJSON().status);
+      });
+
+      // 2. CFR+ Regret Matching+ Pricing
+      test("F246-T08: CFRRegretMatchingPlusPricing initializes with iterations, priceSteps and floorMargin", () => {
+        const cfr = new CFRRegretMatchingPlusPricing({ iterations: 50, priceSteps: 8, floorMargin: 1.05 });
+        expect.equal(cfr.iterations, 50);
+        expect.equal(cfr.priceSteps, 8);
+        expect.equal(cfr.floorMargin, 1.05);
+      });
+
+      test("F246-T09: enforceSafePriceFloor strictly clamps price below 1.05 * COGS", () => {
+        const cfr = new CFRRegretMatchingPlusPricing();
+        const cogs = 250000;
+        const lowPrice = 200000;
+        const safePrice = cfr.enforceSafePriceFloor(lowPrice, cogs);
+        expect.ok(safePrice >= Math.round(cogs * 1.05));
+        expect.equal(safePrice, 262500);
+      });
+
+      test("F246-T10: generatePriceCandidates strictly respects safe price floor bounds", () => {
+        const cfr = new CFRRegretMatchingPlusPricing();
+        const cogs = 120000;
+        const candidates = cfr.generatePriceCandidates(cogs, 180000);
+        expect.ok(candidates.length >= 4);
+        for (const p of candidates) {
+          expect.ok(p >= Math.round(cogs * 1.05));
+        }
+      });
+
+      test("F246-T11: computeCurrentStrategy normalizes positive regrets and falls back to uniform", () => {
+        const cfr = new CFRRegretMatchingPlusPricing();
+        const zeroRegrets = new Float64Array([0, 0, 0, 0]);
+        const uniformStrat = cfr.computeCurrentStrategy(zeroRegrets);
+        expect.equal(uniformStrat[0], 0.25);
+
+        const posRegrets = new Float64Array([10, 30, 0, 0]);
+        const rmStrat = cfr.computeCurrentStrategy(posRegrets);
+        expect.equal(rmStrat[0], 0.25);
+        expect.equal(rmStrat[1], 0.75);
+        expect.equal(rmStrat[2], 0);
+      });
+
+      test("F246-T12: trainCFRPlus converges to valid strategy and optimal price above floor", () => {
+        const cfr = new CFRRegretMatchingPlusPricing({ iterations: 30 });
+        const cogs = 150000;
+        const candidates = cfr.generatePriceCandidates(cogs, 220000);
+        const res = cfr.trainCFRPlus("SKU_CFR_TEST", cogs, 210000, candidates);
+
+        expect.ok(res.optimalPrice >= Math.round(cogs * 1.05));
+        expect.ok(res.expectedProfit > 0);
+        expect.equal(res.averageStrategy.length, candidates.length);
+      });
+
+      test("F246-T13: optimizePrices returns CFR_REGRET_MATCHING_PLUS_PASS and enforces all floor prices", () => {
+        const cfr = new CFRRegretMatchingPlusPricing({ iterations: 40 });
+        const products = [
+          { skuId: "SKU_CFR_1", name: "Áo Khoác Bomber", cogs: 180000, currentPrice: 260000, competitorPrice: 250000 },
+          { skuId: "SKU_CFR_2", name: "Quần Jeans Slim", cogs: 220000, currentPrice: 310000, competitorPrice: 295000 }
+        ];
+
+        const res = cfr.optimizePrices(products);
+        expect.equal(res.status, "CFR_REGRET_MATCHING_PLUS_PASS");
+        expect.equal(res.totalOptimized, 2);
+        expect.ok(res.allFloorsGuaranteed);
+        for (const r of res.recommendations) {
+          expect.ok(r.recommendedPrice >= r.safePriceFloor);
+        }
+      });
+
+      test("F246-T14: Cumulative regrets under RM+ rule never stay negative (thresholded to zero)", () => {
+        const cfr = new CFRRegretMatchingPlusPricing({ iterations: 20 });
+        const cogs = 100000;
+        const candidates = cfr.generatePriceCandidates(cogs, 150000);
+        cfr.trainCFRPlus("SKU_REGRET_TEST", cogs, 140000, candidates);
+        const state = cfr.agentStates.get("SKU_REGRET_TEST");
+        expect.ok(state);
+        for (let i = 0; i < state.cumulativeRegrets.length; i++) {
+          expect.ok(state.cumulativeRegrets[i] >= 0);
+        }
+      });
+
+      test("F246-T15: Client-Server dual parity for CFRRegretMatchingPlusPricing", () => {
+        const clientCFR = new CFRRegretMatchingPlusPricing({ iterations: 25 });
+        const serverCFR = new ServerCFRPricing({ iterations: 25 });
+        const products = [
+          { skuId: "SKU_PARITY_CFR", name: "Tai Nghe TWS", cogs: 200000, currentPrice: 320000, competitorPrice: 300000 }
+        ];
+
+        const clientRes = clientCFR.optimizePrices(products);
+        const serverRes = serverCFR.optimizePrices(products);
+        expect.equal(clientRes.status, serverRes.status);
+        expect.equal(clientRes.recommendations[0].recommendedPrice, serverRes.recommendations[0].recommendedPrice);
+        expect.equal(clientRes.recommendations[0].safePriceFloor, serverRes.recommendations[0].safePriceFloor);
+      });
+
+      // 3. EVRPTW Urban Underground Pneumatic Freight Capsule Router
+      test("F246-T16: EVRPTWUrbanUndergroundPneumaticCapsuleRouter initializes with speed and energy rates", () => {
+        const router = new EVRPTWUrbanUndergroundPneumaticCapsuleRouter({ capsuleSpeedKmh: 50 });
+        expect.equal(router.capsuleSpeedKmh, 50);
+        expect.ok(router.capsuleEnergyPerKm > 0);
+      });
+
+      test("F246-T17: calculateDistance computes Haversine distance accurately", () => {
+        const router = new EVRPTWUrbanUndergroundPneumaticCapsuleRouter();
+        const d = router.calculateDistance({ lat: 10.7720, lng: 106.6980 }, { lat: 10.7800, lng: 106.6850 });
+        expect.ok(d > 1.0 && d < 3.0);
+      });
+
+      test("F246-T18: planCapsuleDeliveryRoutes dispatches orders to nearest underground station", () => {
+        const router = new EVRPTWUrbanUndergroundPneumaticCapsuleRouter();
+        const pipelineNetwork = {
+          centralDepot: { id: "HUB_CDC", name: "Kho Tổng Củ Chi", lat: 10.8200, lng: 106.6800 },
+          capsuleStations: [
+            { stationId: "ST_BEN_THANH", name: "Trạm Ngầm Bến Thành", lat: 10.7720, lng: 106.6980, capacityKg: 1000 },
+            { stationId: "ST_CONG_HOA", name: "Trạm Ngầm Cộng Hòa", lat: 10.8000, lng: 106.6500, capacityKg: 1000 }
+          ]
+        };
+        const orders = [
+          { id: "ORD_BT1", name: "Đơn Bến Thành", lat: 10.7730, lng: 106.6990, weightKg: 3.0 },
+          { id: "ORD_CH1", name: "Đơn Cộng Hòa", lat: 10.8010, lng: 106.6510, weightKg: 4.0 }
+        ];
+
+        const plan = router.planCapsuleDeliveryRoutes(pipelineNetwork, orders);
+        expect.equal(plan.status, "EVRPTW_PNEUMATIC_CAPSULE_LOGISTICS_PASS");
+        expect.equal(plan.pipelineSummary.assignedCount, 2);
+        expect.equal(plan.pipelineSummary.unassignedCount, 0);
+      });
+
+      test("F246-T19: Unassigned orders handled when distance exceeds last-mile walking radius (3km)", () => {
+        const router = new EVRPTWUrbanUndergroundPneumaticCapsuleRouter();
+        const pipelineNetwork = {
+          centralDepot: { id: "HUB_CDC", name: "Kho Tổng", lat: 10.8200, lng: 106.6800 },
+          capsuleStations: [
+            { stationId: "ST_Q1", name: "Trạm Q1", lat: 10.7720, lng: 106.6980, capacityKg: 500 }
+          ]
+        };
+        const orders = [
+          { id: "ORD_FAR", name: "Đơn Quá Xa", lat: 10.8500, lng: 106.8000, weightKg: 2.0 }
+        ];
+
+        const plan = router.planCapsuleDeliveryRoutes(pipelineNetwork, orders);
+        expect.equal(plan.pipelineSummary.unassignedCount, 1);
+      });
+
+      test("F246-T20: Demonstrates >90% CO2 emissions reduction vs baseline diesel surface delivery van", () => {
+        const router = new EVRPTWUrbanUndergroundPneumaticCapsuleRouter();
+        const pipelineNetwork = {
+          centralDepot: { id: "HUB_ECO", name: "Kho Tổng", lat: 10.8200, lng: 106.6800 },
+          capsuleStations: [
+            { stationId: "ST_ECO", name: "Trạm Ngầm Eco", lat: 10.7720, lng: 106.6980, capacityKg: 1000 }
+          ]
+        };
+        const orders = [
+          { id: "ORD_ECO", name: "Bưu kiện Xanh", lat: 10.7730, lng: 106.6990, weightKg: 2.5 }
+        ];
+
+        const plan = router.planCapsuleDeliveryRoutes(pipelineNetwork, orders);
+        expect.ok(plan.emissionsAnalysis.co2AbatementPercent >= 90.0);
+        expect.ok(plan.emissionsAnalysis.co2SavedKg > 0);
+      });
+
+      test("F246-T21: Client-Server dual parity for EVRPTWUrbanUndergroundPneumaticCapsuleRouter", () => {
+        const clientRouter = new EVRPTWUrbanUndergroundPneumaticCapsuleRouter();
+        const serverRouter = new ServerEVRPTWCapsuleRouter();
+
+        const pipelineNetwork = {
+          centralDepot: { id: "HUB_PARITY", name: "Kho Parity", lat: 10.8200, lng: 106.6800 },
+          capsuleStations: [
+            { stationId: "ST_P1", name: "Trạm P1", lat: 10.7720, lng: 106.6980, capacityKg: 1000 }
+          ]
+        };
+        const orders = [
+          { id: "ORD_P", name: "Kiện Parity", lat: 10.7740, lng: 106.7000, weightKg: 3.0 }
+        ];
+
+        const clientPlan = clientRouter.planCapsuleDeliveryRoutes(pipelineNetwork, orders);
+        const serverPlan = serverRouter.planCapsuleDeliveryRoutes(pipelineNetwork, orders);
+        expect.equal(clientPlan.status, serverPlan.status);
+        expect.equal(clientPlan.pipelineSummary.assignedCount, serverPlan.pipelineSummary.assignedCount);
+        expect.equal(clientPlan.emissionsAnalysis.co2AbatementPercent, serverPlan.emissionsAnalysis.co2AbatementPercent);
+      });
+
+      // 4. Tri-Role Copilots
+      test("F246-T22: Admin Sentinel Copilot Sections 278, 279, 280 handle UnivMon, CFR+ & Pneumatic Capsule", () => {
+        const r278 = generateAdminCopilotResponse("Hệ thống giám sát vạn năng UnivMon universal streaming telemetry kim tự tháp đa tầng ra sao?");
+        expect.equal(r278.type, "security");
+        expect.ok(r278.text.includes("UNIVMON"));
+
+        const r279 = generateAdminCopilotResponse("Cơ chế định giá đa đại lý CFR+ counterfactual regret matching plus hội tụ Nash thế nào?");
+        expect.equal(r279.type, "financial");
+        expect.ok(r279.text.includes("CFR+"));
+
+        const r280 = generateAdminCopilotResponse("Quy trình điều phối đường ống nang ngầm đô thị EVRPTW pneumatic capsule freight hoạt động thế nào?");
+        expect.equal(r280.type, "logistics");
+        expect.ok(r280.text.includes("NANG NGẦM"));
+      });
+
+      test("F246-T23: Seller ShopSmart Copilot Section 108 handles UnivMon, CFR+ & Pneumatic Capsule", () => {
+        const sellerRes = generateSellerCopilotResponse("Shop tôi muốn dùng thuật toán định giá CFR+ và tối ưu luồng UnivMon kết hợp giao hàng nang ngầm");
+        expect.equal(sellerRes.type, "recommendation");
+        expect.ok(sellerRes.text.includes("UNIVMON"));
+        expect.ok(sellerRes.text.includes("CFR+"));
+      });
+
+      test("F246-T24: Buyer Shopping Assistant Intent 101 handles UNIVMON_CFR_CAPSULE_ASSIST", () => {
+        const buyerRes = generateAiChatResponse("Đơn hàng của tôi có được chuyển hỏa tốc qua đường ống nang ngầm không?");
+        expect.equal(buyerRes.intent, "UNIVMON_CFR_CAPSULE_ASSIST");
+        expect.ok(buyerRes.replyText.includes("NANG NGẦM"));
+      });
+    });
+
 
   });
 });

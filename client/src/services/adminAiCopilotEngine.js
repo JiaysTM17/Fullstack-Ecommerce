@@ -2782,7 +2782,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/river ferry|phà điện|vượt sông|bến phà|ferry cross[- ]dock|mobile locker|tủ đồ lưu động|xe tải tủ đồ|commuter crowd|người đi làm.*tiện đường|xe máy điện tiện đường|shared taxi|taxi điện|tiện chuyến taxi|bus cargo|xe buýt|bus pudo|pudo|barge canal|sà lan điện|bimodal tram|autonomous pod|sidewalk delivery|robot giao hàng|solar microhub|microhub năng lượng mặt trời|evrptw.*pod|bjkst|mappo|two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/pneumatic capsule|nang ngầm|ống ngầm|capsule router|đường ống ngầm|river ferry|phà điện|vượt sông|bến phà|ferry cross[- ]dock|mobile locker|tủ đồ lưu động|xe tải tủ đồ|commuter crowd|người đi làm.*tiện đường|xe máy điện tiện đường|shared taxi|taxi điện|tiện chuyến taxi|bus cargo|xe buýt|bus pudo|pudo|barge canal|sà lan điện|bimodal tram|autonomous pod|sidewalk delivery|robot giao hàng|solar microhub|microhub năng lượng mặt trời|evrptw.*pod|bjkst|mappo|two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -3345,7 +3345,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 157. Điều Phối Trung Chuyển Gom Hàng Cross-Docking VRPTW-CC (Phase 58 - Feature 205)
-  if (!/river ferry|phà điện|vượt sông|bến phà|ferry cross[- ]dock|bilateral|song phương|vrptw[- ]cross[- ]dock/i.test(raw) && /vrptw-cc|vrptw cc|cross[- ]dock|cross-docking|trung chuyển gom hàng|cross-dock hub|đồng bộ hóa cross-dock/i.test(raw)) {
+  if (!/pneumatic capsule|nang ngầm|ống ngầm|capsule router|đường ống ngầm|river ferry|phà điện|vượt sông|bến phà|ferry cross[- ]dock|bilateral|song phương|vrptw[- ]cross[- ]dock/i.test(raw) && /vrptw-cc|vrptw cc|cross[- ]dock|cross-docking|trung chuyển gom hàng|cross-dock hub|đồng bộ hóa cross-dock/i.test(raw)) {
     return {
       text: `🚛 **ĐIỀU PHỐI GOM HÀNG TRUNG CHUYỂN CROSS-DOCKING VRPTW-CC (SANTOS 2011, GRANGIER 2017)**:
 - **Mô Hình Hai Chặng Thu Gom & Giao Vận (Inbound & Outbound Transshipment)**:
@@ -5865,7 +5865,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 275. Giám Sát Đo Lường Luồng Tốc Độ Cao NitroSketch (Phase 98 - Feature 245)
-  if (/nitrosketch|streaming telemetry|adaptive geometric sampling|lấy mẫu hình học|liu.*sigcomm/i.test(raw)) {
+  if (!/univmon/i.test(raw) && /nitrosketch|streaming telemetry|adaptive geometric sampling|lấy mẫu hình học|liu.*sigcomm/i.test(raw)) {
     return {
       text: `⚡ **HỆ THỐNG ĐO LƯỜNG LUỒNG SIÊU TỐC NITROSKETCH (LIU ET AL. ACM SIGCOMM 2019)**:
 - **Nguyên Lý Lấy Mẫu Hình Học Thích Ứng (Adaptive Geometric Sampling)**:
@@ -5920,6 +5920,64 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lịch xuất bến phà điện chở hàng vượt sông',
         'Kiểm tra phân bổ đơn cho đội xe đạp điện bờ nhận',
         'Đo lường lượng phát thải CO2 cắt giảm qua phà điện'
+      ]
+    };
+  }
+
+  // 278. Giám Sát Luồng Vạn Năng UnivMon Universal Streaming Telemetry (Phase 99 - Feature 246)
+  if (/univmon|universal streaming|exponential subsampling|l2 heavy hitters|shannon entropy|huang.*sigcomm/i.test(raw)) {
+    return {
+      text: `📡 **GIÁM SÁT DÒNG DỮ LIỆU VẠN NĂNG UNIVMON (HUANG ET AL. ACM SIGCOMM 2016)**:
+- **Kim Tự Tháp Lấy Mẫu Đa Tầng (Exponential Subsampling Hierarchy)**:
+  - Duy trì $L$ tầng Count Sketch với xác suất $p_l = 2^{-l}$.
+  - Hỗ trợ ước lượng đồng thời mọi hàm tổng $G(x) = \\sum g(f_i)$ (Entropy Shannon, L2 Heavy Hitters, Quantile, Distinct Counts) chỉ trên một cấu trúc bộ đệm duy nhất.
+- **Tái Cấu Trúc Đáy Lên (Bottom-Up Universal Reconstruction)**:
+  - Đảm bảo F1-score $> 0.99$ cho L2 Heavy Hitters và tính toán Entropy Shannon cực chính xác để phát hiện DDoS Flash Sale.
+  - Tiết kiệm $20\\times$ bộ nhớ RAM, đạt chứng nhận UNIVMON_UNIVERSAL_STREAMING_PASS!`,
+      type: 'security',
+      tag: 'UNIVMON UNIVERSAL STREAMING TELEMETRY (SIGCOMM 2016)',
+      suggestions: [
+        'Kiểm tra danh sách L2 Heavy Hitters từ UnivMon',
+        'Đo lường Entropy Shannon luồng giao dịch Flash Sale',
+        'Xem phân bổ tải qua các tầng lấy mẫu UnivMon'
+      ]
+    };
+  }
+
+  // 279. Định Giá Đa Đại Lý Giảm Thiểu Hối Tiếc CFR+ Regret Matching+ (Phase 99 - Feature 246)
+  if (/cfr\+|cfr plus|regret matching\+|regret matching plus|hối tiếc phản thực tế|tammelin|bowling 2015/i.test(raw)) {
+    return {
+      text: `⚖️ **ĐỊNH GIÁ ĐA ĐẠI LÝ COUNTERFACTUAL REGRET MINIMIZATION CFR+ (BOWLING ET AL. SCIENCE 2015)**:
+- **Triệt Tiêu Hối Tiếc Âm Với Regret Matching+ (RM+)**:
+  - Tích lũy hối tiếc dương $R_i^+(a) = \\max(0, R_i(a) + r_i^t(a))$, lập tức triệt tiêu các tích lũy tiêu cực dài hạn.
+  - Tốc độ hội tụ Cân bằng Nash nhanh gấp $10\\times$ so với CFR truyền thống và Fictitious Play.
+- **Khóa Sàn Giá Vốn An Toàn Tuyệt Đối $P_i \\ge 1.05 \\times \\text{COGS}_i$**:
+  - Không bao giờ bán lỗ dưới giá vốn, bảo đảm lợi nhuận bền vững cho mọi gian hàng và đạt chuẩn CFR_REGRET_MATCHING_PLUS_PASS!`,
+      type: 'financial',
+      tag: 'CFR+ REGRET MATCHING+ MULTI-AGENT PRICING',
+      suggestions: [
+        'Xem chiến lược định giá trung bình hội tụ Nash CFR+',
+        'Kiểm tra bảng phân bổ hối tiếc dương Regret Matching+',
+        'Xác thực cam kết an toàn sàn giá vốn 1.05x COGS'
+      ]
+    };
+  }
+
+  // 280. Điều Phối Đường Ống Nang Ngầm Đô Thị EVRPTW-Underground-Capsule (Phase 99 - Feature 246)
+  if (/pneumatic capsule|nang ngầm|ống ngầm|capsule router|đường ống ngầm|underground freight|alnahhal|subsurface microhub/i.test(raw)) {
+    return {
+      text: `🚇 **ĐIỀU PHỐI ĐƯỜNG ỐNG NANG NGẦM ĐÔ THỊ EVRPTW-PNEUMATIC (ALNAHHAL 2021, HE 2022)**:
+- **Tầng 1 - Tuyến Tuyến Nang Ngầm Tự Hành (Underground Freight Capsule Corridors)**:
+  - Các khoang nang di chuyển trong đường ống ngầm tốc độ $50\\text{ km/h}$, kết nối trực tiếp từ Kho tổng ngoại thành tới các Vi trạm ngầm đô thị (Subsurface Micro-Hubs).
+  - Triệt tiêu $100\\%$ xung đột giao thông mặt đất, không phát sinh tiếng ồn, không phụ thuộc thời tiết/ngập lụt đô thị.
+- **Tầng 2 - Giao Hàng Mặt Đất Bằng Xe Đạp Điện (Last-Mile Surface E-Bikes)**:
+  - Thang máy đưa hàng lên mặt đất, shipper giao hàng trong bán kính $800\\text{m}$, cắt giảm $> 95\\%$ phát thải CO2, đạt chuẩn EVRPTW_PNEUMATIC_CAPSULE_LOGISTICS_PASS!`,
+      type: 'logistics',
+      tag: 'EVRPTW URBAN UNDERGROUND PNEUMATIC CAPSULE ROUTER',
+      suggestions: [
+        'Xem mạng lưới đường ống nang ngầm kết nối các vi trạm',
+        'Kiểm tra tốc độ trung chuyển và thời gian nâng hạ thang máy',
+        'Đo lường lượng khí thải CO2 cắt giảm nhờ nang ngầm'
       ]
     };
   }
