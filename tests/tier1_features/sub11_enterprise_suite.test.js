@@ -441,6 +441,10 @@ import {
   HyperLogLogTailCutSketch,
   COPACooperativePricing,
   EVRPTWMobileChargingTruckRouter,
+  // Phase 88 Enterprise Algorithms
+  BipartiteSpectralSparsifierSketch,
+  RCOMARescaledPricing,
+  EVRPTWDualDockInductiveRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -670,6 +674,9 @@ import { EVRPTWDroneTandemRechargeRouter as ServerEVRPTWDroneTandemRechargeRoute
 import { HyperLogLogTailCutSketch as ServerHyperLogLogTailCutSketch } from "../../server/src/utils/hyperLogLogTailCutSketch.js";
 import { COPACooperativePricing as ServerCOPACooperativePricing } from "../../server/src/utils/copaCooperativePricing.js";
 import { EVRPTWMobileChargingTruckRouter as ServerEVRPTWMobileChargingTruckRouter } from "../../server/src/utils/evrptwMobileChargingTruckRouter.js";
+import { BipartiteSpectralSparsifierSketch as ServerBipartiteSpectralSparsifierSketch } from "../../server/src/utils/bipartiteSpectralSparsifierSketch.js";
+import { RCOMARescaledPricing as ServerRCOMARescaledPricing } from "../../server/src/utils/rcomaRescaledPricing.js";
+import { EVRPTWDualDockInductiveRouter as ServerEVRPTWDualDockInductiveRouter } from "../../server/src/utils/evrptwDualDockInductiveRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -36416,6 +36423,269 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sàn có xe sạc di động cứu hộ evrptw-mct mobile charging truck hoặc hll tail-cut không?");
         expect.equal(buyerRes.intent, "HLL_TAIL_CUT_COPA_MCT_ASSIST");
         expect.ok(buyerRes.replyText.includes("TAIL-CUT"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 235: Bipartite Spectral Sparsifier Sketch, R-COMA Rescaled Pricing, & EVRPTW Dual-Dock Inductive Router (Phase 88 - 24 Tests)
+    // =========================================================================
+    describe("Feature 235: Bipartite Spectral Sparsifier Sketch, R-COMA Rescaled Pricing, & EVRPTW Dual-Dock Inductive Router", () => {
+      test("F235-T01: BipartiteSpectralSparsifierSketch initializes with projectionDim, epsilon, and maxSparsifiedEdges", () => {
+        const sketch = new BipartiteSpectralSparsifierSketch({ projectionDim: 16, epsilon: 0.20, maxSparsifiedEdges: 300 });
+        expect.equal(sketch.projectionDim, 16);
+        expect.equal(sketch.epsilon, 0.20);
+        expect.equal(sketch.maxSparsifiedEdges, 300);
+        expect.equal(sketch.totalStreamEdges, 0);
+        expect.equal(sketch.sparsifiedEdges.size, 0);
+      });
+
+      test("F235-T02: Random projection embeddings maintain deterministic JL dimension and variance", () => {
+        const sketch = new BipartiteSpectralSparsifierSketch({ projectionDim: 24 });
+        const emb1 = sketch._getOrInitEmbedding("user_alice");
+        const emb2 = sketch._getOrInitEmbedding("user_alice");
+        expect.equal(emb1.length, 24);
+        expect.equal(emb2.length, 24);
+        expect.deepEqual(emb1, emb2);
+        let sumSq = 0;
+        for (let i = 0; i < emb1.length; i++) sumSq += emb1[i] * emb1[i];
+        expect.ok(sumSq > 0);
+      });
+
+      test("F235-T03: estimateEffectiveResistance calculates bounded resistance in [0.01, 2.0]", () => {
+        const sketch = new BipartiteSpectralSparsifierSketch({ projectionDim: 16 });
+        const reff = sketch.estimateEffectiveResistance("buyer_1", "product_101");
+        expect.ok(reff >= 0.01 && reff <= 2.0);
+      });
+
+      test("F235-T04: addEdge samples edges based on effective resistance and updates degrees", () => {
+        const sketch = new BipartiteSpectralSparsifierSketch();
+        const res = sketch.addEdge("buyer_2", "product_202", 5.0);
+        expect.ok(res.samplingProb > 0 && res.samplingProb <= 1.0);
+        expect.equal(sketch.nodeDegrees.get("buyer_2"), 5.0);
+        expect.equal(sketch.nodeDegrees.get("product_202"), 5.0);
+        expect.equal(sketch.totalStreamEdges, 1);
+        expect.equal(sketch.totalOriginalWeight, 5.0);
+      });
+
+      test("F235-T05: getSpectralAffinity computes exponential Gaussian similarity in [0, 1]", () => {
+        const sketch = new BipartiteSpectralSparsifierSketch();
+        sketch.addEdge("u_alpha", "p_beta", 3.0);
+        const affinity = sketch.getSpectralAffinity("u_alpha", "p_beta");
+        expect.ok(affinity >= 0.0 && affinity <= 1.0);
+      });
+
+      test("F235-T06: getTelemetry reports totalStreamEdges, sparsifiedEdgesCount, and uniqueNodesCount", () => {
+        const sketch = new BipartiteSpectralSparsifierSketch({ maxSparsifiedEdges: 50 });
+        for (let i = 0; i < 30; i++) {
+          sketch.addEdge(`buyer_${i}`, `sku_${i % 5}`, 2.0);
+        }
+        const tel = sketch.getTelemetry();
+        expect.equal(tel.totalStreamEdges, 30);
+        expect.ok(tel.sparsifiedEdgesCount > 0 && tel.sparsifiedEdgesCount <= 50);
+        expect.equal(tel.totalOriginalWeight, 60.0);
+        expect.ok(tel.sparsificationRatio <= 1.0);
+        expect.ok(tel.uniqueNodesCount > 0);
+      });
+
+      test("F235-T07: ServerBipartiteSpectralSparsifierSketch maintains 100% parity with Client implementation", () => {
+        const serverSketch = new ServerBipartiteSpectralSparsifierSketch({ projectionDim: 16 });
+        const clientSketch = new BipartiteSpectralSparsifierSketch({ projectionDim: 16 });
+        for (let i = 0; i < 20; i++) {
+          serverSketch.addEdge(`user_${i}`, `shop_${i % 3}`, 1.5);
+          clientSketch.addEdge(`user_${i}`, `shop_${i % 3}`, 1.5);
+        }
+        expect.equal(serverSketch.totalStreamEdges, clientSketch.totalStreamEdges);
+        expect.equal(serverSketch.totalOriginalWeight, clientSketch.totalOriginalWeight);
+        expect.deepEqual(serverSketch.getTelemetry(), clientSketch.getTelemetry());
+      });
+
+      test("F235-T08: Edge eviction maintains capacity bounded at maxSparsifiedEdges", () => {
+        const sketch = new BipartiteSpectralSparsifierSketch({ maxSparsifiedEdges: 15 });
+        for (let i = 0; i < 60; i++) {
+          sketch.addEdge(`cust_${i}`, `item_${i}`, 1.0);
+        }
+        expect.ok(sketch.sparsifiedEdges.size <= 15);
+      });
+
+      test("F235-T09: RCOMARescaledPricing initializes with maxPriceDelta, profitWeight, and rescalingEpsilon", () => {
+        const rcoma = new RCOMARescaledPricing({ maxPriceDelta: 0.25, profitWeight: 0.5, rescalingEpsilon: 0.1 });
+        expect.equal(rcoma.maxPriceDelta, 0.25);
+        expect.equal(rcoma.profitWeight, 0.5);
+        expect.equal(rcoma.rescalingEpsilon, 0.1);
+        expect.equal(rcoma.actionCandidates.length, 7);
+      });
+
+      test("F235-T10: getPolicyDistribution generates valid probability distribution summing to 1.0", () => {
+        const rcoma = new RCOMARescaledPricing();
+        const dist = rcoma.getPolicyDistribution({ currentPrice: 120000, cogs: 70000, stock: 80, marketDemand: 65 });
+        expect.equal(dist.length, 7);
+        const sumProb = dist.reduce((a, b) => a + b, 0);
+        expect.ok(Math.abs(sumProb - 1.0) < 1e-4);
+      });
+
+      test("F235-T11: evaluateJointQ calculates collective campaign value based on GMV and profit", () => {
+        const rcoma = new RCOMARescaledPricing();
+        const vendors = [
+          { currentPrice: 100000, cogs: 60000, stock: 50, marketDemand: 40 },
+          { currentPrice: 200000, cogs: 120000, stock: 30, marketDemand: 25 }
+        ];
+        const qVal = rcoma.evaluateJointQ(vendors, [-0.05, 0.05]);
+        expect.ok(qVal > 0);
+      });
+
+      test("F235-T12: Counterfactual baseline computes marginal contributions across candidate actions", () => {
+        const rcoma = new RCOMARescaledPricing();
+        const vendors = [
+          { id: "shop1", currentPrice: 100000, cogs: 60000, stock: 70, marketDemand: 50 },
+          { id: "shop2", currentPrice: 150000, cogs: 90000, stock: 40, marketDemand: 30 }
+        ];
+        const res = rcoma.optimizePricing(vendors);
+        expect.equal(res.success, true);
+        expect.equal(res.recommendations.length, 2);
+        expect.ok(typeof res.recommendations[0].counterfactualAdvantage === "number");
+        expect.ok(typeof res.recommendations[0].rescaledAdvantage === "number");
+      });
+
+      test("F235-T13: optimizePricing strictly enforces safe price floor P_i >= 1.05 * COGS_i for all vendors", () => {
+        const rcoma = new RCOMARescaledPricing();
+        const vendors = [
+          { id: "v1", currentPrice: 100000, cogs: 120000, stock: 80, marketDemand: 60 },
+          { id: "v2", currentPrice: 250000, cogs: 150000, stock: 40, marketDemand: 40 }
+        ];
+        const res = rcoma.optimizePricing(vendors);
+        expect.ok(res.isFloorSafe);
+        expect.ok(res.recommendations[0].recommendedPrice >= res.recommendations[0].safeFloor);
+        expect.ok(res.recommendations[1].recommendedPrice >= res.recommendations[1].safeFloor);
+        expect.ok(res.recommendations[0].isFloorActive);
+      });
+
+      test("F235-T14: Elasticity multiplier accurately models demand changes and unit sales", () => {
+        const rcoma = new RCOMARescaledPricing();
+        const vendors = [
+          { id: "shop_elastic", currentPrice: 200000, cogs: 110000, stock: 60, marketDemand: 50, elasticity: -1.4 }
+        ];
+        const res = rcoma.optimizePricing(vendors);
+        const rec = res.recommendations[0];
+        expect.ok(rec.expectedUnits > 0);
+        expect.ok(rec.expectedGmv > 0);
+        expect.equal(rec.expectedProfit, (rec.recommendedPrice - rec.cogs) * rec.expectedUnits);
+      });
+
+      test("F235-T15: ServerRCOMARescaledPricing maintains 100% parity with Client implementation", () => {
+        const serverRcoma = new ServerRCOMARescaledPricing();
+        const clientRcoma = new RCOMARescaledPricing();
+        const vendors = [
+          { id: "v1", currentPrice: 120000, cogs: 80000, stock: 50, marketDemand: 40 },
+          { id: "v2", currentPrice: 180000, cogs: 110000, stock: 60, marketDemand: 50 }
+        ];
+        const sRes = serverRcoma.optimizePricing(vendors);
+        const cRes = clientRcoma.optimizePricing(vendors);
+        expect.deepEqual(sRes.recommendations, cRes.recommendations);
+        expect.equal(sRes.jointQValue, cRes.jointQValue);
+        expect.equal(sRes.totalGmv, cRes.totalGmv);
+      });
+
+      test("F235-T16: Empty vendors handled gracefully returning safe fallbacks", () => {
+        const rcoma = new RCOMARescaledPricing();
+        const res = rcoma.optimizePricing([]);
+        expect.equal(res.status, 'EMPTY_VENDORS');
+        expect.equal(res.recommendations.length, 0);
+      });
+
+      test("F235-T17: EVRPTWDualDockInductiveRouter initializes with battery, inductive power, and dual docks", () => {
+        const router = new EVRPTWDualDockInductiveRouter({
+          vanBatteryKWh: 85.0,
+          droneBatteryKWh: 3.5,
+          inductiveChargeKW: 30.0,
+          dockChargeKW: 5.0
+        });
+        expect.equal(router.vanBatteryKWh, 85.0);
+        expect.equal(router.droneBatteryKWh, 3.5);
+        expect.equal(router.inductiveChargeKW, 30.0);
+        expect.equal(router.dockChargeKW, 5.0);
+        expect.equal(router.vanSpeedKmH, 35.0);
+        expect.equal(router.droneSpeedKmH, 60.0);
+      });
+
+      test("F235-T18: isInductiveCorridor accurately identifies arterial induction charging corridors", () => {
+        const router = new EVRPTWDualDockInductiveRouter();
+        expect.equal(router.isInductiveCorridor({ x: 5, y: 5 }, { x: 10, y: 10 }), true);
+        expect.equal(router.isInductiveCorridor({ x: 30, y: 30 }, { x: 40, y: 40 }), false);
+      });
+
+      test("F235-T19: planHybridRoutes segments high-rise orders to dual drones and ground stops to van", () => {
+        const router = new EVRPTWDualDockInductiveRouter();
+        const depot = { x: 0, y: 0 };
+        const customers = [
+          { id: "c1", x: 5, y: 5, isHighRiseBalcony: true, demandKg: 2.0 },
+          { id: "c2", x: 8, y: 8, demandKg: 20.0 },
+          { id: "c3", x: 12, y: 12, isHighRiseBalcony: true, demandKg: 1.5 }
+        ];
+        const plan = router.planHybridRoutes(depot, customers);
+        expect.equal(plan.success, true);
+        expect.equal(plan.droneSorties.length, 2);
+        expect.ok(plan.vanRoute.length >= 3);
+      });
+
+      test("F235-T20: Dynamic inductive lane charging increases/preserves van battery during in-transit travel", () => {
+        const router = new EVRPTWDualDockInductiveRouter({ inductiveChargeKW: 40.0 });
+        const depot = { x: 0, y: 0 };
+        const customers = [
+          { id: "c1", x: 5, y: 5, demandKg: 15.0 },
+          { id: "c2", x: 10, y: 10, demandKg: 25.0 }
+        ];
+        const plan = router.planHybridRoutes(depot, customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.metrics.totalInductiveEnergyChargedKWh > 0);
+      });
+
+      test("F235-T21: Dual rooftop docks recharge drones in-transit and track flight time", () => {
+        const router = new EVRPTWDualDockInductiveRouter({ droneBatteryKWh: 4.0, dockChargeKW: 4.5 });
+        const depot = { x: 0, y: 0 };
+        const customers = [
+          { id: "c_air_1", x: 6, y: 6, isHighRiseBalcony: true, demandKg: 1.0 },
+          { id: "c_air_2", x: 10, y: 10, isHighRiseBalcony: true, demandKg: 1.2 }
+        ];
+        const plan = router.planHybridRoutes(depot, customers);
+        expect.equal(plan.success, true);
+        plan.droneSorties.forEach(s => {
+          expect.ok(s.dockRechargedKWh > 0);
+          expect.ok(s.flightDistanceKm > 0);
+          expect.ok(s.completionTime >= s.launchTime);
+        });
+      });
+
+      test("F235-T22: Issues verified DUAL_DOCK_INDUCTIVE_HYBRID_PASS certificate with timestamp", () => {
+        const router = new EVRPTWDualDockInductiveRouter();
+        const depot = { x: 0, y: 0 };
+        const customers = [{ id: "c1", x: 10, y: 10 }];
+        const plan = router.planHybridRoutes(depot, customers);
+        expect.equal(plan.certificate.status, 'VERIFIED_HYBRID_MULTIMODAL');
+        expect.ok(plan.certificate.passId.startsWith('DUAL_DOCK_INDUCTIVE_HYBRID_PASS_'));
+      });
+
+      test("F235-T23: Admin Sentinel Copilot Sections 245-247 handle Phase 88 queries", () => {
+        const resSpectral = generateAdminCopilotResponse("Làm thưa đồ thị phổ hai phía BipartiteSpectralSparsifierSketch Spielman Teng Batson");
+        expect.equal(resSpectral.tag, "BIPARTITE SPECTRAL SPARSIFIER SKETCH");
+        expect.ok(resSpectral.text.includes("BIPARTITE SPECTRAL"));
+
+        const resRcoma = generateAdminCopilotResponse("Định giá đối thực tế tái tỷ lệ r-coma rescaled Foerster Du NeurIPS");
+        expect.equal(resRcoma.tag, "R-COMA RESCALED PRICING");
+        expect.ok(resRcoma.text.includes("R-COMA"));
+
+        const resDualDock = generateAdminCopilotResponse("Định tuyến xe điện hai flycam dual-dock làn sạc cảm ứng động evrptw-dd-idc Murray Wang");
+        expect.equal(resDualDock.tag, "EVRPTW DUAL-DOCK INDUCTIVE ROUTER");
+        expect.ok(resDualDock.text.includes("EVRPTW-DD-IDC"));
+      });
+
+      test("F235-T24: Seller ShopSmart Copilot Section 97 and Buyer Assistant Intent 90 handle Phase 88 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn làm thưa đồ thị phổ bipartite và định giá r-coma cho gian hàng");
+        expect.equal(sellerRes.tag, "SPECTRAL SPARSIFIER, R-COMA PRICING & DUAL-DOCK INDUCTIVE ROUTER");
+        expect.ok(sellerRes.text.includes("R-COMA"));
+
+        const buyerRes = generateAiChatResponse("Sàn có giao hàng flycam hai cổng sạc dual-dock làn sạc cảm ứng hoặc đồ thị phổ spectral không?");
+        expect.equal(buyerRes.intent, "SPECTRAL_SPARSIFIER_RCOMA_DUALDOCK_ASSIST");
+        expect.ok(buyerRes.replyText.includes("SPECTRAL SPARSIFIER"));
       });
     });
   });

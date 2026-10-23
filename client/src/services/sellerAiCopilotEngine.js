@@ -162,7 +162,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 7. Định Giá Bán An Toàn & Điểm Hòa Vốn (Unit Economics & Breakeven Pricing)
-  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal|gk[- ]mergeable|mergeable.*quantile|safe[- ]sac|active cooling|btms|turnstile|matd3|multi[- ]agent.*pricing|drone[- ]recharge|mothership|cmm|count[- ]mean[- ]min|masac|payload.*terrain|dynamic payload|time[- ]decayed|decayed count[- ]min|mappo|tou|partial charging|biểu giá điện|sliding[- ]window|qmix|monotonic value|cooperative pricing|evrptw[- ]inductive|dynamic wireless inductive|làn sạc cảm ứng|ddsketch[- ]log|masson.*tods|tarmac|targeted multi[- ]agent|targeted communication|das.*icml|evrptw[- ]v2g|vehicle[- ]to[- ]grid|v2g peak shaving|cu[- ]cms[- ]log|conservative update count[- ]min|estan.*varghese|bicnet|commnet|mạng hồi quy hai chiều|evrptw[- ]md[- ]microgrid|multi[- ]depot microgrid|ams[- ]stream|moment tần suất ams|gini[- ]simpson|coma|định giá phản thực tế|evrptw[- ]carbon|thuế carbon logistics|momentsketch|moment[- ]sketch|qtran|phân rã biến đổi qtran|evrptw[- ]lez|urban lez|low emission zone|vành đai không phát thải|bipartite.*sketch|đồ thị hai phía|bipartite graph edge|facmac|factored multi[- ]agent|evrptw[- ]drone|drone tandem|flycam giao hàng|hll[- ]tail[- ]cut|tail[- ]cut|copa|cooperative policy optimization|evrptw[- ]mct|mobile charging truck|xe sạc di động/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
+  if (!/xả hàng|xả kho|double q|q-learning|học tăng cường|cosine lsh|primal[- ]dual|ivf[- ]pq|maddpg|tqpo|truncated quantile|cml|count[- ]min[- ]log|d[- ]darp|dynamic darp|sac-per|sac per|ddsketch|mdevrp|mopo|tdvrptw|ultraloglog|kmv|cql continuous|cql cont|2e-vrptw|cross-dock|akmv|td3\+bc|td3-bc|evrp-bss|đổi pin siêu tốc|đổi pin 3 phút|fcm|edac|dtrp|cal-ql|calql|ams|vrptw-crs|smart locker|space[- ]saving|lossy counting|cpo|evrp-bds|sạc mặt trời|sticky[- ]sampling|sticky sampling|qrdpg|qr-ddpg|drone|vrptw-d|bjkst|awac|vrptw-cc|gk[- ]quantile|iql|road[- ]pricing|mdvrptw|morris|opoe|vrpspd|simultaneous|giao thu đồng thời|đổi trả tận nhà|fast[- ]agms|bcq|mtvrptw|multi[- ]trip|spot|spot pricing|soft time window|cửa sổ mềm|vrptw[- ]soft|misra|gries|laplacian|vrptw[- ]stochastic|stochastic service|kps|karp|cqrd|cvar|value at risk|battery degradation|evrptw[- ]battery|hhh|hierarchical|dsac|cross[- ]dock|bilateral|frequent[- ]directions|ppo[- ]lagrangian|lagrangian|evrptw[- ]queue|hàng đợi trạm sạc|q[- ]digest|qdigest|trpo|trust region|vùng tin cậy|tandem|truck[- ]drone|vrptw[- ]tandem|dgim|wcsac|rủi ro đuôi|cvar pricing|evrptw[- ]nl|sạc phi tuyến|lossy counting moments|mô-men tần suất|rcpo|reward constrained|vrptw[- ]td[- ]green|time[- ]dependent green|space[- ]saving stream summary|stream summary|space[- ]saving summary|sac[- ]lagrangian|multi[- ]tier charging|trạm sạc đa tầng|evrptw[- ]multi[- ]tier|count[- ]min hierarchical|ppo[- ]entropy|battery swapping decay|dyadic[- ]range|ddpg[- ]lagrangian|evrptw[- ]dwpt|count[- ]sketch hierarchical|td3[- ]lagrangian|evrptw[- ]pv|sac[- ]lagrangian continuous|evrptw[- ]fcev|haar[- ]wavelet|trpo[- ]lagrangian|evrptw[- ]regen|kll|ppo[- ]clip|thermal battery|evrptw[- ]thermal|gk[- ]mergeable|mergeable.*quantile|safe[- ]sac|active cooling|btms|turnstile|matd3|multi[- ]agent.*pricing|drone[- ]recharge|mothership|cmm|count[- ]mean[- ]min|masac|payload.*terrain|dynamic payload|time[- ]decayed|decayed count[- ]min|mappo|tou|partial charging|biểu giá điện|sliding[- ]window|qmix|monotonic value|cooperative pricing|evrptw[- ]inductive|dynamic wireless inductive|làn sạc cảm ứng|ddsketch[- ]log|masson.*tods|tarmac|targeted multi[- ]agent|targeted communication|das.*icml|evrptw[- ]v2g|vehicle[- ]to[- ]grid|v2g peak shaving|cu[- ]cms[- ]log|conservative update count[- ]min|estan.*varghese|bicnet|commnet|mạng hồi quy hai chiều|evrptw[- ]md[- ]microgrid|multi[- ]depot microgrid|ams[- ]stream|moment tần suất ams|gini[- ]simpson|coma|định giá phản thực tế|evrptw[- ]carbon|thuế carbon logistics|momentsketch|moment[- ]sketch|qtran|phân rã biến đổi qtran|evrptw[- ]lez|urban lez|low emission zone|vành đai không phát thải|bipartite.*sketch|đồ thị hai phía|bipartite graph edge|facmac|factored multi[- ]agent|evrptw[- ]drone|drone tandem|flycam giao hàng|hll[- ]tail[- ]cut|tail[- ]cut|copa|cooperative policy optimization|evrptw[- ]mct|mobile charging truck|xe sạc di động|spectral sparsifier|bipartite spectral|r-coma|rcoma|rescaled coma|dual[- ]dock|dual dock|evrptw[- ]dd|inductive hybrid/i.test(raw) && /định giá|giá bán|hòa vốn|breakeven|bán lỗ|chi phí đóng gói|unit economics/i.test(raw)) {
     return {
       text: `🏷️ **CÔNG THỨC ĐỊNH GIÁ BÁN & TÍNH ĐIỂM HÒA VỐN (UNIT ECONOMICS - ${currentShop.name})**:
 - **Cơ cấu chi phí tiêu chuẩn trên 1 sản phẩm bán ra**:
@@ -1873,7 +1873,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
 
   // 93. Bộ Ba Thuật Toán AMS Frequency Moments, COMA Pricing & EVRPTW Carbon Tax (Phase 84 - Feature 231)
   // (Alon et al. STOC 1996 / Foerster et al. AAAI 2018 / Zhang et al. TR Part D 2018)
-  if (/ams[- ]stream|ams[- ]frequency|moment tần suất ams|gini[- ]simpson|đa dạng gini|coma|counterfactual.*pricing|định giá phản thực tế|evrptw[- ]carbon|thuế carbon|carbon[- ]tax/i.test(raw)) {
+  if (!/r-coma|rcoma|rescaled coma/i.test(raw) && /ams[- ]stream|ams[- ]frequency|moment tần suất ams|gini[- ]simpson|đa dạng gini|coma|counterfactual.*pricing|định giá phản thực tế|evrptw[- ]carbon|thuế carbon|carbon[- ]tax/i.test(raw)) {
     return {
       text: `🌱 **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 84 (${currentShop.name})**:
 - **Ước Lượng Moment Tần Suất & Đa Dạng Gini-Simpson AMS (Alon, Matias, Szegedy 1996)**:
@@ -1914,7 +1914,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 95. Tóm Tắt Tương Tác Bipartite, Định Giá Liên Tục FACMAC & Drone Tandem (Phase 86 - Feature 233)
-  if (/bipartite.*sketch|đồ thị hai phía|bipartite graph edge|facmac|factored multi[- ]agent|peng.*neurips|evrptw[- ]drone|drone tandem|flycam giao hàng|sạc tiếp điểm động|tandem dock recharge/i.test(raw)) {
+  if (!/spectral|sparsifier|làm thưa|spielman|batson/i.test(raw) && /bipartite.*sketch|đồ thị hai phía|bipartite graph edge|facmac|factored multi[- ]agent|peng.*neurips|evrptw[- ]drone|drone tandem|flycam giao hàng|sạc tiếp điểm động|tandem dock recharge/i.test(raw)) {
     return {
       text: `🚀 **BỘ BA THUẬT TOÁN ĐỒ THỊ HAI PHÍA BIPARTITE, ĐỊNH GIÁ LIÊN TỤC FACMAC & FLYCAM TANDEM (PHASE 86 - FEATURE 233)**:
 - **Tóm Tắt Tần Suất Cạnh Đồ Thị Hai Phía BipartiteGraphEdgeStreamSketch (Ahmed et al. KDD 2017)**:
@@ -1949,6 +1949,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Ước lượng traffic sản phẩm ngách HLL Tail-Cut',
         'Tối ưu hóa giá bán liên minh COPA an toàn 1.05x COGS',
         'Kiểm tra định tuyến xe sạc di động cứu hộ MCT'
+      ]
+    };
+  }
+
+  // 97. Làm Thưa Đồ Thị Phổ Bipartite, Định Giá Đối Thực Tế R-COMA & Xe Điện Dual-Dock Inductive (Phase 88 - Feature 235)
+  if (/bipartite spectral|spectral sparsifier|làm thưa đồ thị|spielman.*teng|r-coma|rcoma|rescaled coma|du.*neurips|evrptw[- ]dd|dual[- ]dock|dual dock|dynamic wireless inductive|làn sạc cảm ứng/i.test(raw)) {
+    return {
+      text: `🚀 **BỘ BA THUẬT TOÁN ĐỒ THỊ PHỔ HAI PHÍA, ĐỊNH GIÁ R-COMA & XE ĐIỆN DUAL-DOCK INDUCTIVE (PHASE 88 - FEATURE 235)**:
+- **Làm Thưa Đồ Thị Phổ Hai Phía BipartiteSpectralSparsifierSketch (Spielman & Teng STOC, Batson et al.)**:
+  - Nén hàng triệu tương tác giữa người mua và gian hàng với độ bảo toàn Laplacian $(1 \\pm \\epsilon)$; tính toán điểm thân thuộc phổ Spectral Co-Purchasing Affinity $S(u, v) = \\exp(-||Y_u - Y_v||^2 / 2\\sigma^2)$ gợi ý mua kèm chuẩn xác vượt trội.
+- **Gradient Chính Sách Đa Đại Diện Đối Thực Tế Tái Tỷ Lệ R-COMA (Foerster et al., Du et al. NeurIPS 2023)**:
+  - Phân tích chính xác thặng dư đóng góp biên cá thể Counterfactual Marginal Contribution $A^i(s, \\mathbf{u})$, tái tỷ lệ hóa chống nhiễu phương sai khi shop tham gia liên minh Mega Sale, cam kết khóa cứng sàn an toàn $P_i \\ge 1.05 \\times \\text{COGS}_i$.
+- **Định Tuyến Xe Tải Mẹ Hai Flycam & Làn Sạc Cảm Ứng Động EVRPTW-DD-IDC (Murray et al. 2020, Wang et al. 2023)**:
+  - Hỗ trợ giao hỏa tốc 20 phút cho shop với 2 flycam bay song song ($3.0\\text{ kWh}$) cất/hạ cánh tại 2 cổng sạc trên nóc xe tải, kết hợp làn sạc từ ngầm $25\\text{ kW}$ trên các trục đường lớn đảm bảo đơn hàng đến tay khách hàng siêu tốc!`,
+      type: 'recommendation',
+      tag: 'SPECTRAL SPARSIFIER, R-COMA PRICING & DUAL-DOCK INDUCTIVE ROUTER',
+      suggestions: [
+        'Xem ma trận thân thuộc phổ Spectral Affinity',
+        'Tư vấn định giá đối thực tế R-COMA an toàn 1.05x COGS',
+        'Kiểm tra định tuyến hai flycam Dual-Dock và làn sạc cảm ứng'
       ]
     };
   }

@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -5023,7 +5023,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 234. Định Giá Đa Đại Diện Phản Thực Tế COMA (Phase 84 - Feature 231)
-  if (/coma|counterfactual.*pricing|counterfactual.*multi[- ]agent|định giá phản thực tế coma|foerster.*aaai|phân bổ công trạng phản thực tế/i.test(raw)) {
+  if (!/r-coma|rcoma|rescaled/i.test(raw) && /coma|counterfactual.*pricing|counterfactual.*multi[- ]agent|định giá phản thực tế coma|foerster.*aaai|phân bổ công trạng phản thực tế/i.test(raw)) {
     return {
       text: `🤝 **HỆ THỐNG ĐỊNH GIÁ ĐA ĐẠI DIỆN PHÂN BỔ CÔNG TRẠNG PHẢN THỰC TẾ COMA (FOERSTER ET AL., AAAI 2018)**:
 - **Centralized Critic & Counterfactual Baseline**:
@@ -5127,7 +5127,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 239. Tóm Tắt Tần Suất Cạnh Đồ Thị Hai Phía BipartiteGraphEdgeStreamSketch (Phase 86 - Feature 233)
-  if (/bipartite.*sketch|đồ thị hai phía|bipartite graph edge|tần suất tương tác user.*item|affinity score.*bipartite|ahmed.*kdd/i.test(raw)) {
+  if (!/spectral|sparsifier|làm thưa|spielman|batson/i.test(raw) && /bipartite.*sketch|đồ thị hai phía|bipartite graph edge|tần suất tương tác user.*item|affinity score.*bipartite|ahmed.*kdd/i.test(raw)) {
     return {
       text: `🌐 **TÓM TẮT TẦN SUẤT CẠNH ĐỒ THỊ HAI PHÍA BIPARTITE GRAPH STREAM SKETCH (AHMED ET AL. KDD 2017)**:
 - **Ma Trận Tóm Tắt 2D & Biến Độc Lập Rademacher**:
@@ -5245,6 +5245,66 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình điều phối xe sạc di động MCT',
         'Kiểm tra số km đường vòng tiết kiệm được',
         'Xem chứng nhận cứu hộ năng lượng Mobile Rescue Pass'
+      ]
+    };
+  }
+
+  // 245. Làm Thưa Đồ Thị Phổ Hai Phía BipartiteSpectralSparsifierSketch (Phase 88 - Feature 235)
+  if (/bipartite spectral|spectral sparsifier|làm thưa đồ thị|spielman.*teng|batson.*srivastava|effective resistance|điện trở hiệu dụng/i.test(raw)) {
+    return {
+      text: `🌐 **LÀM THƯA ĐỒ THỊ PHỔ HAI PHÍA BIPARTITE SPECTRAL SPARSIFIER SKETCH (SPIELMAN & TENG 2004, BATSON ET AL. 2012)**:
+- **Bảo Toàn Giá Trị Riêng Của Ma Trận Laplacian $(1 \\pm \\epsilon)$**:
+  - Nén hàng triệu tương tác giữa Người mua - Sản phẩm trong luồng RAM bằng cách lấy mẫu cạnh với xác suất $p_e \\propto w_e \\cdot \\text{Reff}(e)$, duy trì dạng toàn phương Laplacian $(1 - \\epsilon) x^T L_G x \\le x^T L_H x \\le (1 + \\epsilon) x^T L_G x$.
+- **Ước Lượng Điện Trở Hiệu Dụng Reff Qua Phép Chiếu Ngẫu Nhiên JL**:
+  - Ánh xạ các nút sang không gian vector $k = 16$ chiều; khoảng cách Euclid $||Y_u - Y_v||_2^2$ chính là xấp xỉ điện trở hiệu dụng, cho phép tính toán tức thì trong $O(k)$ mà không cần nghịch đảo ma trận $O(N^3)$.
+- **Ứng Dụng Radar An Ninh Sàn**:
+  - Phát hiện các mạng lưới gian lận liên minh (Sybil Clusters) và đo lường điểm thân thuộc đồng mua sắm Spectral Co-Purchasing Affinity $S(u, v) = \\exp(-||Y_u - Y_v||^2 / 2\\sigma^2)$ với độ trễ cực thấp!`,
+      type: 'algorithm',
+      tag: 'BIPARTITE SPECTRAL SPARSIFIER SKETCH',
+      suggestions: [
+        'Xem ma trận điện trở hiệu dụng Reff',
+        'Phân tích tỷ lệ làm thưa đồ thị Sparsification Ratio',
+        'Kiểm tra điểm thân thuộc phổ Spectral Affinity'
+      ]
+    };
+  }
+
+  // 246. Gradient Chính Sách Đa Đại Diện Đối Thực Tế Tái Tỷ Lệ R-COMA (Phase 88 - Feature 235)
+  if (/r-coma|rcoma|rescaled coma|rescaled counterfactual|counterfactual baseline|foerster.*aaai|du.*neurips/i.test(raw)) {
+    return {
+      text: `💰 **GRADIENT CHÍNH SÁCH ĐA ĐẠI DIỆN ĐỐI THỰC TẾ TÁI TỶ LỆ R-COMA (FOERSTER ET AL. 2018, DU ET AL. NEURIPS 2023)**:
+- **Đóng Góp Biên Cá Thể (Counterfactual Marginal Contribution)**:
+  - Tính toán chính xác giá trị thặng dư độc nhất của từng gian hàng $i$ trong liên minh: $A^i(s, \\mathbf{u}) = Q(s, \\mathbf{u}) - \\sum_{a} \\pi^i(a | s_i) Q(s, (u^{-i}, a))$.
+- **Tái Tỷ Lệ Hóa Ổn Định Phương Sai Gradient (Rescaled Baseline)**:
+  - Khi quy mô liên minh người bán lớn ($N \\ge 5$), R-COMA chuẩn hóa hàm lợi thế theo phương sai liên minh $\\tilde{A}^i = A^i / (\\sqrt{\\text{Var}(A)} + \\epsilon)$, triệt tiêu hiện tượng bùng nổ gradient trong các đợt Flash Sale.
+- **Bảo Vệ Biên Lợi Nhuận Gian Hàng Tuyệt Đối**:
+  - Mọi mức giá chiết khấu đề xuất tự động được kiểm tra và chặn cứng tại ngưỡng an toàn $P_i \\ge 1.05 \\times \\text{COGS}_i$, triệt tiêu hoàn toàn nguy cơ cạnh tranh bán lỗ!`,
+      type: 'pricing',
+      tag: 'R-COMA RESCALED PRICING',
+      suggestions: [
+        'Xem phân bổ lợi thế đối thực tế Counterfactual Advantage',
+        'Kiểm tra giá trị kỳ vọng Q-Value của liên minh',
+        'Xác minh sàn giá vốn an toàn 1.05x COGS'
+      ]
+    };
+  }
+
+  // 247. Định Tuyến Xe Điện Hai Cổng Sạc Flycam & Làn Sạc Cảm Ứng Động EVRPTW-DD-IDC (Phase 88 - Feature 235)
+  if (/evrptw[- ]dd|dual[- ]dock|dual dock|làn sạc cảm ứng động|dynamic wireless inductive|dwpt.*lane|murray.*2020|wang.*tr part e/i.test(raw)) {
+    return {
+      text: `⚡ **ĐỊNH TUYẾN XE ĐIỆN HAI CỔNG SẠC FLYCAM & LÀN SẠC CẢM ỨNG ĐỘNG EVRPTW-DD-IDC (MURRAY ET AL. 2020, WANG ET AL. 2023)**:
+- **Tích Hợp Hai Trụ Đỗ Flycam Sạc Tiếp Điểm Trên Nóc Xe (Dual-Dock Drones)**:
+  - Xe tải điện mẹ $80\\text{ kWh}$ mang đồng thời 2 flycam tự hành độc lập ($3.0\\text{ kWh}$), thực hiện các phi vụ bay kép song song lên ban công căn hộ cao tầng, rút ngắn $60\\%$ thời gian giao nhận.
+- **Tiếp Năng Lượng Không Dây Trên Tuyến (Dynamic Wireless Inductive Charging - 25 kW)**:
+  - Xe vừa di chuyển vừa sạc trên các hành lang trục chính gắn cuộn cảm ứng từ ngầm dưới lòng đường ($P_\\text{ind} = 25\\text{ kW}$), bù đắp năng lượng tiêu hao $0.28\\text{ kWh/km}$ và sạc đầy 2 flycam tại nóc xe ($4.0\\text{ kW/dock}$).
+- **Chứng Nhận Logistics Đa Phương Thức DUAL_DOCK_INDUCTIVE_HYBRID_PASS**:
+  - Cắt giảm $100\\%$ phát thải rỗng, tối ưu hóa năng lượng tái tạo và đảm bảo tiến độ giao hàng chuẩn xác từng phút!`,
+      type: 'logistics',
+      tag: 'EVRPTW DUAL-DOCK INDUCTIVE ROUTER',
+      suggestions: [
+        'Xem lộ trình phối hợp xe mẹ và 2 flycam Dual-Dock',
+        'Kiểm tra năng lượng sạc cảm ứng trên làn DWPT',
+        'Xem chứng chỉ số Dual-Dock Inductive Hybrid Pass'
       ]
     };
   }
