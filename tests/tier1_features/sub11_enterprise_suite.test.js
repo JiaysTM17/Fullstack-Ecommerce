@@ -445,6 +445,10 @@ import {
   BipartiteSpectralSparsifierSketch,
   RCOMARescaledPricing,
   EVRPTWDualDockInductiveRouter,
+  // Phase 89 Enterprise Algorithms
+  TDigestQuantileSketch,
+  HAPPOMultiVendorPricing,
+  EVRPTWTwoEchelonCrowdLockerRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -677,6 +681,9 @@ import { EVRPTWMobileChargingTruckRouter as ServerEVRPTWMobileChargingTruckRoute
 import { BipartiteSpectralSparsifierSketch as ServerBipartiteSpectralSparsifierSketch } from "../../server/src/utils/bipartiteSpectralSparsifierSketch.js";
 import { RCOMARescaledPricing as ServerRCOMARescaledPricing } from "../../server/src/utils/rcomaRescaledPricing.js";
 import { EVRPTWDualDockInductiveRouter as ServerEVRPTWDualDockInductiveRouter } from "../../server/src/utils/evrptwDualDockInductiveRouter.js";
+import { TDigestQuantileSketch as ServerTDigestQuantileSketch } from "../../server/src/utils/tDigestQuantileSketch.js";
+import { HAPPOMultiVendorPricing as ServerHAPPOMultiVendorPricing } from "../../server/src/utils/happoMultiVendorPricing.js";
+import { EVRPTWTwoEchelonCrowdLockerRouter as ServerEVRPTWTwoEchelonCrowdLockerRouter } from "../../server/src/utils/evrptwTwoEchelonCrowdLockerRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -36686,6 +36693,310 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Sàn có giao hàng flycam hai cổng sạc dual-dock làn sạc cảm ứng hoặc đồ thị phổ spectral không?");
         expect.equal(buyerRes.intent, "SPECTRAL_SPARSIFIER_RCOMA_DUALDOCK_ASSIST");
         expect.ok(buyerRes.replyText.includes("SPECTRAL SPARSIFIER"));
+      });
+    });
+
+    // =========================================================================
+    // FEATURE 236: T-Digest Streaming Quantile Sketch, HAPPO Multi-Vendor Pricing
+    //              & EVRPTW Two-Echelon Crowd-Sourced Micro-Hub Router (24 Tests)
+    // =========================================================================
+    describe("Feature 236: T-Digest Quantile Sketch, HAPPO Pricing & Two-Echelon Crowd Locker Logistics (Phase 89)", () => {
+      test("F236-T01: TDigestQuantileSketch adds values and tracks totalWeight, min, max accurately", () => {
+        const sketch = new TDigestQuantileSketch({ delta: 50 });
+        sketch.add(10);
+        sketch.add(20, 2);
+        sketch.add(5);
+        expect.equal(sketch.totalWeight, 4);
+        expect.equal(sketch.min, 5);
+        expect.equal(sketch.max, 20);
+      });
+
+      test("F236-T02: TDigestQuantileSketch compresses centroids maintaining scale function bound", () => {
+        const sketch = new TDigestQuantileSketch({ delta: 50, maxBufferSize: 20 });
+        for (let i = 1; i <= 100; i++) {
+          sketch.add(i);
+        }
+        sketch.compress();
+        expect.ok(sketch.centroids.length > 0);
+        expect.ok(sketch.centroids.length < 100);
+        expect.equal(sketch.totalWeight, 100);
+      });
+
+      test("F236-T03: TDigest estimates median and extreme quantiles accurately on linear stream", () => {
+        const sketch = new TDigestQuantileSketch({ delta: 100 });
+        for (let i = 1; i <= 1000; i++) {
+          sketch.add(i);
+        }
+        sketch.compress();
+        const median = sketch.quantile(0.5);
+        const p90 = sketch.quantile(0.9);
+        const p99 = sketch.quantile(0.99);
+
+        expect.ok(Math.abs(median - 500) < 30);
+        expect.ok(Math.abs(p90 - 900) < 30);
+        expect.ok(Math.abs(p99 - 990) < 30);
+      });
+
+      test("F236-T04: TDigest calculates cumulative distribution function cdf(value) accurately", () => {
+        const sketch = new TDigestQuantileSketch({ delta: 100 });
+        for (let i = 1; i <= 200; i++) {
+          sketch.add(i);
+        }
+        sketch.compress();
+        expect.equal(sketch.cdf(0), 0);
+        expect.equal(sketch.cdf(250), 1);
+        const cdf100 = sketch.cdf(100);
+        expect.ok(Math.abs(cdf100 - 0.5) < 0.1);
+      });
+
+      test("F236-T05: TDigest calculates trimmedMean(0.05, 0.95) robustly ignoring outliers", () => {
+        const sketch = new TDigestQuantileSketch({ delta: 100 });
+        // Main distribution centered at 100
+        for (let i = 0; i < 100; i++) {
+          sketch.add(100);
+        }
+        // Extreme outliers
+        sketch.add(-9999);
+        sketch.add(9999);
+
+        const tm = sketch.trimmedMean(0.05, 0.95);
+        expect.ok(Math.abs(tm - 100) < 5);
+      });
+
+      test("F236-T06: TDigest serialization toJSON and fromJSON roundtrips correctly", () => {
+        const sketch = new TDigestQuantileSketch({ delta: 60 });
+        sketch.addBatch([10, 20, 30, 40, 50]);
+        sketch.compress();
+
+        const json = sketch.toJSON();
+        const restored = TDigestQuantileSketch.fromJSON(json);
+        expect.equal(restored.totalWeight, sketch.totalWeight);
+        expect.equal(restored.min, sketch.min);
+        expect.equal(restored.max, sketch.max);
+        expect.equal(restored.centroids.length, sketch.centroids.length);
+      });
+
+      test("F236-T07: Server and client TDigest implementations exhibit strict parity on identical streams", () => {
+        const clientSketch = new TDigestQuantileSketch({ delta: 80 });
+        const serverSketch = new ServerTDigestQuantileSketch({ delta: 80 });
+
+        const stream = [45, 12, 89, 23, 76, 34, 91, 10, 55, 67, 33, 19, 88];
+        clientSketch.addBatch(stream);
+        serverSketch.addBatch(stream);
+
+        clientSketch.compress();
+        serverSketch.compress();
+
+        expect.equal(clientSketch.totalWeight, serverSketch.totalWeight);
+        expect.equal(clientSketch.min, serverSketch.min);
+        expect.equal(clientSketch.max, serverSketch.max);
+        expect.equal(clientSketch.quantile(0.5), serverSketch.quantile(0.5));
+        expect.equal(clientSketch.quantile(0.9), serverSketch.quantile(0.9));
+      });
+
+      test("F236-T08: TDigest edge cases handle gracefully without NaN or throws", () => {
+        const emptySketch = new TDigestQuantileSketch();
+        expect.equal(emptySketch.quantile(0.5), 0);
+        expect.equal(emptySketch.cdf(50), 0);
+        expect.equal(emptySketch.trimmedMean(), 0);
+
+        const singleSketch = new TDigestQuantileSketch();
+        singleSketch.add(42);
+        expect.equal(singleSketch.quantile(0.5), 42);
+        expect.equal(singleSketch.cdf(42), 1);
+      });
+
+      test("F236-T09: HAPPOMultiVendorPricing rejects empty vendor list gracefully", () => {
+        const happo = new HAPPOMultiVendorPricing();
+        const res = happo.optimizePricing([]);
+        expect.equal(res.success, false);
+        expect.equal(res.error, "NO_VENDORS_PROVIDED");
+      });
+
+      test("F236-T10: HAPPOMultiVendorPricing performs sequential update ordering prioritizing Mall vendors", () => {
+        const happo = new HAPPOMultiVendorPricing();
+        const vendors = [
+          { id: "v_regular", cogs: 50000, currentPrice: 70000, isMall: false, inventory: 50 },
+          { id: "v_mall", cogs: 80000, currentPrice: 120000, isMall: true, inventory: 100 }
+        ];
+        const plan = happo.optimizePricing(vendors);
+        expect.equal(plan.success, true);
+        expect.equal(plan.recommendations.length, 2);
+        expect.equal(plan.recommendations[0].vendorId, "v_mall");
+      });
+
+      test("F236-T11: HAPPO strictly enforces safe floor rule P_i >= 1.05 * COGS_i for all recommended prices", () => {
+        const happo = new HAPPOMultiVendorPricing();
+        const vendors = [
+          { id: "v1", cogs: 100000, currentPrice: 106000, elasticity: 3.0, demandBase: 10 },
+          { id: "v2", cogs: 200000, currentPrice: 202000, elasticity: 2.5, demandBase: 10 }
+        ];
+        const plan = happo.optimizePricing(vendors);
+        expect.equal(plan.success, true);
+        plan.recommendations.forEach(r => {
+          expect.ok(r.recommendedPrice >= Math.round(r.cogs * 1.05));
+          expect.ok(r.grossMarginPercent >= 4.7);
+        });
+      });
+
+      test("F236-T12: HAPPO calculates surrogate policy ratios and detects PPO clipping", () => {
+        const happo = new HAPPOMultiVendorPricing({ clipEpsilon: 0.04 });
+        const vendors = [
+          { id: "v1", cogs: 50000, currentPrice: 80000, elasticity: 1.5, demandBase: 100 }
+        ];
+        const plan = happo.optimizePricing(vendors);
+        expect.equal(plan.success, true);
+        const r = plan.recommendations[0];
+        expect.ok(typeof r.policyRatio === 'number');
+        expect.ok(typeof r.isClipped === 'boolean');
+      });
+
+      test("F236-T13: HAPPO decomposes multi-agent advantages and accumulates coalition advantage", () => {
+        const happo = new HAPPOMultiVendorPricing();
+        const vendors = [
+          { id: "v1", cogs: 40000, currentPrice: 60000, demandBase: 50 },
+          { id: "v2", cogs: 70000, currentPrice: 100000, demandBase: 80 }
+        ];
+        const plan = happo.optimizePricing(vendors);
+        expect.equal(plan.success, true);
+        expect.ok(typeof plan.totalAccumulatedAdvantage === 'number');
+      });
+
+      test("F236-T14: HAPPO issues valid HAPPO_HETEROGENEOUS_EQUILIBRIUM_PASS certificate", () => {
+        const happo = new HAPPOMultiVendorPricing();
+        const vendors = [{ id: "v1", cogs: 50000, currentPrice: 75000 }];
+        const plan = happo.optimizePricing(vendors);
+        expect.equal(plan.certificate.status, "VERIFIED_EQUILIBRIUM_STABLE");
+        expect.ok(plan.certificate.passId.startsWith("HAPPO_HETEROGENEOUS_EQUILIBRIUM_PASS_"));
+      });
+
+      test("F236-T15: Server and client HAPPO pricing engines exhibit identical recommendations", () => {
+        const clientHappo = new HAPPOMultiVendorPricing();
+        const serverHappo = new ServerHAPPOMultiVendorPricing();
+
+        const vendors = [
+          { id: "v1", cogs: 50000, currentPrice: 75000, isMall: true, elasticity: 1.2 },
+          { id: "v2", cogs: 30000, currentPrice: 42000, isMall: false, elasticity: 1.5 }
+        ];
+
+        const clientPlan = clientHappo.optimizePricing(vendors);
+        const serverPlan = serverHappo.optimizePricing(vendors);
+
+        expect.equal(clientPlan.recommendations.length, serverPlan.recommendations.length);
+        expect.equal(clientPlan.recommendations[0].recommendedPrice, serverPlan.recommendations[0].recommendedPrice);
+        expect.equal(clientPlan.recommendations[1].recommendedPrice, serverPlan.recommendations[1].recommendedPrice);
+      });
+
+      test("F236-T16: HAPPO handles high elasticity vs low elasticity vendors properly in price adjustments", () => {
+        const happo = new HAPPOMultiVendorPricing();
+        const vendors = [
+          { id: "v_inelastic", cogs: 50000, currentPrice: 70000, elasticity: 0.5, demandBase: 100 },
+          { id: "v_elastic", cogs: 50000, currentPrice: 70000, elasticity: 3.5, demandBase: 100 }
+        ];
+        const plan = happo.optimizePricing(vendors);
+        expect.equal(plan.success, true);
+        expect.equal(plan.recommendations.length, 2);
+      });
+
+      test("F236-T17: EVRPTWTwoEchelonCrowdLockerRouter rejects empty lockers list gracefully", () => {
+        const router = new EVRPTWTwoEchelonCrowdLockerRouter();
+        const plan = router.planTwoEchelonDelivery({ x: 0, y: 0 }, [], [{ id: "c1", x: 1, y: 1 }]);
+        expect.equal(plan.success, false);
+        expect.equal(plan.error, "NO_SMART_LOCKERS_DEFINED");
+      });
+
+      test("F236-T18: EVRPTW 2E assigns customers to nearest smart parcel lockers and clusters packages", () => {
+        const router = new EVRPTWTwoEchelonCrowdLockerRouter();
+        const primaryHub = { x: 0, y: 0, name: "CDC Sóc Sơn" };
+        const lockers = [
+          { id: "locker_west", x: 5, y: 0, capacity: 50 },
+          { id: "locker_east", x: -5, y: 0, capacity: 50 }
+        ];
+        const customers = [
+          { id: "c1", x: 6, y: 1, weightKg: 2.0 },
+          { id: "c2", x: -6, y: 1, weightKg: 1.5 }
+        ];
+
+        const plan = router.planTwoEchelonDelivery(primaryHub, lockers, customers);
+        expect.equal(plan.success, true);
+        expect.equal(plan.echelon1.visitedLockersCount, 2);
+        expect.equal(plan.echelon2.totalParcelsDispatched, 2);
+      });
+
+      test("F236-T19: EVRPTW 2E computes first-echelon electric van transit route and verifies battery feasibility", () => {
+        const router = new EVRPTWTwoEchelonCrowdLockerRouter({ vanBatteryKWh: 85.0 });
+        const primaryHub = { x: 0, y: 0 };
+        const lockers = [{ id: "l1", x: 10, y: 0 }];
+        const customers = [{ id: "c1", x: 11, y: 1 }];
+
+        const plan = router.planTwoEchelonDelivery(primaryHub, lockers, customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.echelon1.vanTotalDistanceKm > 0);
+        expect.ok(plan.echelon1.vanRemainingBatteryKWh > 0);
+        expect.equal(plan.echelon1.isBatteryFeasible, true);
+      });
+
+      test("F236-T20: EVRPTW 2E plans second-echelon crowd-shipping last-mile assignments with fair compensation", () => {
+        const router = new EVRPTWTwoEchelonCrowdLockerRouter({ crowdBaseComp: 15000, crowdPerKmComp: 8000 });
+        const primaryHub = { x: 0, y: 0 };
+        const lockers = [{ id: "l1", x: 5, y: 5 }];
+        const customers = [{ id: "c1", x: 5.5, y: 5.5 }]; // ~0.7 km away -> pedestrian
+
+        const plan = router.planTwoEchelonDelivery(primaryHub, lockers, customers);
+        expect.equal(plan.success, true);
+        const assign = plan.echelon2.assignments[0];
+        expect.equal(assign.courierType, "PEDESTRIAN_CROWD");
+        expect.ok(assign.compensationVND >= 15000);
+      });
+
+      test("F236-T21: EVRPTW 2E calculates carbon emissions avoided vs conventional diesel van", () => {
+        const router = new EVRPTWTwoEchelonCrowdLockerRouter();
+        const primaryHub = { x: 0, y: 0 };
+        const lockers = [{ id: "l1", x: 10, y: 10 }];
+        const customers = [
+          { id: "c1", x: 12, y: 12 },
+          { id: "c2", x: 13, y: 13 }
+        ];
+
+        const plan = router.planTwoEchelonDelivery(primaryHub, lockers, customers);
+        expect.equal(plan.success, true);
+        expect.ok(plan.environmentalImpact.co2SavedKg > 0);
+        expect.ok(plan.environmentalImpact.conventionalDistanceKm > plan.echelon1.vanTotalDistanceKm);
+      });
+
+      test("F236-T22: EVRPTW 2E issues verified TWO_ECHELON_CROWD_LOCKER_PASS certificate", () => {
+        const router = new EVRPTWTwoEchelonCrowdLockerRouter();
+        const primaryHub = { x: 0, y: 0 };
+        const lockers = [{ id: "l1", x: 5, y: 0 }];
+        const customers = [{ id: "c1", x: 6, y: 0 }];
+
+        const plan = router.planTwoEchelonDelivery(primaryHub, lockers, customers);
+        expect.equal(plan.certificate.status, "VERIFIED_2E_ZERO_EMISSION_LAST_MILE");
+        expect.ok(plan.certificate.passId.startsWith("TWO_ECHELON_CROWD_LOCKER_PASS_"));
+      });
+
+      test("F236-T23: Admin Sentinel Copilot Sections 248-250 handle Phase 89 queries", () => {
+        const resTDigest = generateAdminCopilotResponse("Ước lượng phân vị cực trị dòng dữ liệu TDigestQuantileSketch Ted Dunning 2021");
+        expect.equal(resTDigest.tag, "TDIGEST QUANTILE SKETCH");
+        expect.ok(resTDigest.text.includes("T-DIGEST QUANTILE SKETCH"));
+
+        const resHappo = generateAdminCopilotResponse("Định giá đa gian hàng dị biến happo heterogeneous sequential update rule Kuba");
+        expect.equal(resHappo.tag, "HAPPO HETEROGENEOUS PRICING");
+        expect.ok(resHappo.text.includes("HAPPO"));
+
+        const resLocker = generateAdminCopilotResponse("Điều phối giao hàng hai tầng tủ đồ thông minh smart parcel locker crowd-shipping evrptw-2e-csl");
+        expect.equal(resLocker.tag, "EVRPTW TWO-ECHELON CROWD LOCKER ROUTER");
+        expect.ok(resLocker.text.includes("EVRPTW-2E-CSL"));
+      });
+
+      test("F236-T24: Seller ShopSmart Copilot Section 98 and Buyer Assistant Intent 91 handle Phase 89 features", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn phân vị cực trị t-digest và định giá dị biến happo cho gian hàng");
+        expect.equal(sellerRes.tag, "TDIGEST SKETCH, HAPPO PRICING & 2E-CROWD LOCKER ROUTER");
+        expect.ok(sellerRes.text.includes("HAPPO"));
+
+        const buyerRes = generateAiChatResponse("Sàn có giao hàng tủ đồ thông minh smart parcel locker 24/7 hoặc crowd-shipping không?");
+        expect.equal(buyerRes.intent, "TDIGEST_HAPPO_CROWD_LOCKER_ASSIST");
+        expect.ok(buyerRes.replyText.includes("T-DIGEST SIÊU TỐC"));
       });
     });
   });

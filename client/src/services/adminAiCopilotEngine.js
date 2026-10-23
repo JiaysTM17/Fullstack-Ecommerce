@@ -1878,7 +1878,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 84. Giám Sát Độ Trễ P99 Thời Gian Thực Bằng Ted Dunning t-Digest (Phase 34 - Feature 181)
-  if (!/momentsketch|moment[- ]sketch|gan.*bailis|kll|qdigest|gk[- ]mergeable|ddsketch/i.test(raw) && /tdigest|t-digest|độ trễ p99|p99\.9|streaming quantile|ước lượng phân vị|dunning/i.test(raw)) {
+  if (!/adaptive centroid|scale function k_1|t-digest quantile sketch|tdigestquantilesketch|phase 89|feature 236|momentsketch|moment[- ]sketch|gan.*bailis|kll|qdigest|gk[- ]mergeable|ddsketch/i.test(raw) && /tdigest|t-digest|độ trễ p99|p99\.9|streaming quantile|ước lượng phân vị|dunning/i.test(raw)) {
     return {
       text: `⏱️ **GIÁM SÁT ĐỘ TRỄ P99 & PHÂN VỊ DÒNG DỮ LIỆU BẰNG TED DUNNING T-DIGEST**:
 - **Cấu trúc Dữ liệu Phân vị Dòng (Streaming Quantiles via Centroids)**:
@@ -2781,7 +2781,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -2969,7 +2969,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 139. Điều Phối Giao Vận Đô Thị Hai Tầng 2E-VRPTW-CD (Phase 52 - Feature 199)
-  if (/2e-vrptw|two-echelon|giao hàng hai tầng|trạm trung chuyển vệ tinh|cross-docking vệ tinh|mobile electric hub/i.test(raw)) {
+  if (!/crowd[- ]shipping|smart parcel locker|tủ đồ thông minh|evrptw[- ]2e[- ]csl|micro[- ]hub/i.test(raw) && /2e-vrptw|two-echelon|giao hàng hai tầng|trạm trung chuyển vệ tinh|cross-docking vệ tinh|mobile electric hub/i.test(raw)) {
     return {
       text: `🚚 **MÔ HÌNH GIAO VẬN ĐÔ THỊ HAI TẦNG VỚI TRẠM CROSS-DOCKING VỆ TINH 2E-VRPTW-CD (PERBOLI 2011, HEMMELMAYR 2012)**:
 - **Tầng 1 (First Echelon) - Xe Tải Điện Trung Chuyển (Electric Feeder Vans)**:
@@ -5305,6 +5305,65 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình phối hợp xe mẹ và 2 flycam Dual-Dock',
         'Kiểm tra năng lượng sạc cảm ứng trên làn DWPT',
         'Xem chứng chỉ số Dual-Dock Inductive Hybrid Pass'
+      ]
+    };
+  }
+
+  // 248. Ước Lượng Phân Vị Cực Trị Dòng Dữ Liệu TDigestQuantileSketch (Phase 89 - Feature 236)
+  if (/adaptive centroid|scale function k_1|t-digest quantile sketch|tdigestquantilesketch|dunning 2021|t-digest.*centroid merging|phân vị cực trị t-digest/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG PHÂN VỊ CỰC TRỊ DÒNG DỮ LIỆU T-DIGEST QUANTILE SKETCH (TED DUNNING 2021)**:
+- **Tập Trung Độ Chính Xác Cao Vào Hai Đuôi Phân Phối (Scale Function $k_1$)**:
+  - T-Digest sử dụng hàm co giãn $q = \\frac{1}{\\pi} \\arcsin(2u - 1) + \\frac{1}{2}$, giới hạn kích thước cụm tại hai cực trị: $w_i \\le 4 N \\frac{q_i(1 - q_i)}{\\delta}$.
+  - Đảm bảo sai số tương đối cực nhỏ tại các ngưỡng nhạy cảm nhất của sàn: P99, P99.9, P99.99 cho độ trễ thanh toán VietQR và xử lý giỏ hàng Flash Sale.
+- **Hợp Nhất Centroid Thích Ứng Trong Không Gian Bộ Nhớ Giới Hạn**:
+  - Nén động hàng triệu số đo độ trễ vào tập hợp centroids tối ưu trong RAM, hỗ trợ tính toán tức thì hàm phân phối tích lũy CDF $P(X \\le x)$ và trung bình cắt tỉa Trimmed Mean mà không cần lưu mảng thô!`,
+      type: 'analytics',
+      tag: 'TDIGEST QUANTILE SKETCH',
+      suggestions: [
+        'Xem phân vị P99 và P99.9 độ trễ sàn',
+        'Kiểm tra hàm phân phối tích lũy CDF',
+        'Phân tích trung bình cắt tỉa Trimmed Mean'
+      ]
+    };
+  }
+
+  // 249. Định Giá Đa Gian Hàng Dị Biến HAPPO (Phase 89 - Feature 236)
+  if (/happo|heterogeneous-agent|sequential update rule|advantage decomposition|kuba.*neurips|zhong.*2021|định giá dị biến happo/i.test(raw)) {
+    return {
+      text: `💰 **ĐỊNH GIÁ ĐA GIAN HÀNG DỊ BIẾN HAPPO (KUBA ET AL., NEURIPS 2021 / ICLR 2022)**:
+- **Nguyên Lý Phân Rã Lợi Thế Đa Đại Diện (Multi-Agent Advantage Decomposition Lemma)**:
+  - Phân rã lợi thế tập thể $A_{1:m}(s, \\mathbf{a}) = \\sum_{i=1}^m A_i(s, \\mathbf{a}_{1:i-1}, a_i)$ cho nhóm người bán có quy mô kho, giá vốn và phân hạng gian hàng không đồng nhất (Mall vs Shop Thường).
+- **Quy Tắc Cập Nhật Tuần Tự (Sequential Update Rule & PPO Clipping)**:
+  - Tối ưu hóa hàm mục tiêu Surrogate $\\min(r_i M_i, \\text{clip}(r_i, 1 - \\epsilon, 1 + \\epsilon) M_i)$ bảo đảm cải thiện đơn điệu (Monotonic Improvement) mà không làm nổ không gian hành động.
+- **Bảo Đảm Tuyệt Đối Sàn Giá Vốn 1.05x COGS**:
+  - Bất kể bước khám phá chính sách, mọi quyết định giá đều bị khóa cứng tại ngưỡng sàn $P_i \\ge 1.05 \\times \\text{COGS}_i$, cấp chứng nhận HAPPO_HETEROGENEOUS_EQUILIBRIUM_PASS!`,
+      type: 'pricing',
+      tag: 'HAPPO HETEROGENEOUS PRICING',
+      suggestions: [
+        'Xem khuyến nghị giá thích ứng HAPPO',
+        'Kiểm tra tỷ lệ cắt PPO Clipping Ratio',
+        'Xác minh chứng chỉ cân bằng Heterogeneous Equilibrium Pass'
+      ]
+    };
+  }
+
+  // 250. Điều Phối Giao Hàng Hai Tầng Tủ Đồ Thông Minh & Cộng Đồng EVRPTW-2E-CSL (Phase 89 - Feature 236)
+  if (/two[- ]echelon.*crowd|evrptw[- ]2e|crowd[- ]shipping|smart parcel locker|tủ đồ thông minh|micro[- ]hub|savelsbergh|giao hàng tủ locker/i.test(raw)) {
+    return {
+      text: `📦 **ĐIỀU PHỐI GIAO HÀNG HAI TẦNG TỦ ĐỒ THÔNG MINH & CỘNG ĐỒNG EVRPTW-2E-CSL (SAVELSBERGH 2016, HUANG 2022)**:
+- **Tầng 1 (First Echelon) - Xe Tải Điện Mẹ $85\\text{ kWh}$ Chuyên Chở Khối Lượng Lớn**:
+  - Xe tải van điện xuất phát từ Hub Logistics trung tâm, phân phối các kiện hàng lớn tới các tủ đồ thông minh (Smart Parcel Lockers / Micro-Hubs) bố trí tại các khu chung cư và tòa nhà văn phòng.
+- **Tầng 2 (Second Echelon) - Đội Ngũ Giao Hàng Cộng Đồng (Crowd-Shippers & E-Bikes)**:
+  - Người dân, người đi bộ hoặc shipper xe đạp điện xanh nhận đơn hàng từ tủ đồ trong khung giờ linh hoạt để giao tận cửa căn hộ trong bán kính 1km với thù lao hấp dẫn $\\text{Comp} = B_0 + c_{\\text{dist}} \\cdot d$.
+- **Cắt Giảm Triệt Để Khí Thải Đô Thị**:
+  - Triệt tiêu $95\\%$ quãng đường xe tải diesel phải đi vào ngõ nhỏ tắc nghẽn, cấp chứng nhận xanh chuẩn quốc tế TWO_ECHELON_CROWD_LOCKER_PASS!`,
+      type: 'logistics',
+      tag: 'EVRPTW TWO-ECHELON CROWD LOCKER ROUTER',
+      suggestions: [
+        'Xem lộ trình xe tải mẹ tiếp hàng tủ locker',
+        'Kiểm tra điều phối giao hàng cộng đồng Crowd-Shipping',
+        'Xem chứng chỉ giảm phát thải Two-Echelon Crowd Locker Pass'
       ]
     };
   }
