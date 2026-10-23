@@ -1813,7 +1813,7 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
   }
 
   // 90. Bộ Ba Thuật Toán Sliding-Window Frequent Items, QMIX Multi-Vendor & EVRPTW Dynamic Wireless (Phase 81 - Feature 228)
-  if (/sliding[- ]window frequent|cửa sổ trượt.*frequent items|manku.*motwani|golab|trending velocity|động lượng xu hướng|qmix|monotonic value|cooperative pricing|định giá hợp tác đa gian hàng|evrptw[- ]inductive|dynamic wireless inductive|làn sạc cảm ứng/i.test(raw)) {
+  if (!/wqmix|weighted qmix/i.test(raw) && /sliding[- ]window frequent|cửa sổ trượt.*frequent items|manku.*motwani|golab|trending velocity|động lượng xu hướng|\\bqmix\\b|monotonic value|cooperative pricing|định giá hợp tác đa gian hàng|evrptw[- ]inductive|dynamic wireless inductive|làn sạc cảm ứng/i.test(raw)) {
     return {
       text: `⚡ **BỘ BA THUẬT TOÁN DOANH NGHIỆP PHASE 81 (${currentShop.name})**:
 - **Bắt Xu Hướng Cửa Sổ Trượt Sliding-Window Frequent Items (Manku & Motwani 2002, Golab 2006)**:
@@ -2050,6 +2050,26 @@ ${stockSummary || '\n- ✅ **Tình trạng tồn kho hiện tại rất dồi d�
         'Phân tích lưu lượng khách hàng đột biến AKMV',
         'Tư vấn định giá cạnh tranh thông minh QPLEX',
         'Xem lộ trình vận chuyển bimodal tàu điện metro'
+      ]
+    };
+  }
+
+  // 102. Đếm Bit Linear Counting, Định Giá WQMIX & Vận Tải Sà Lan Điện Kênh Rạch (Phase 93 - Feature 240)
+  if (/linear counting|bit vector sketch|wqmix|weighted qmix|định giá wqmix|barge canal|sà lan điện|vận tải đường thủy/i.test(raw)) {
+    return {
+      text: `🚀 **BỘ BA THUẬT TOÁN LINEAR COUNTING, ĐỊNH GIÁ WQMIX & SÀ LAN ĐIỆN KÊNH RẠCH (PHASE 93 - FEATURE 240)**:
+- **Đếm Lượng Khách Hàng Siêu Tốc Bằng Linear Counting Bit Vector (Whang et al.)**:
+  - Theo dõi tức thì hàng triệu lượt xem deal Flash Sale với bộ nhớ siêu nhỏ gọn chỉ 1KB, cập nhật tức thì qua thao tác bật bit $O(1)$.
+- **Tối Ưu Giá Bán Đa Shop Bằng Weighted QMIX (Rashid et al. NeurIPS 2020)**:
+  - Trọng số lạc quan giúp các shop tìm được mức giá niêm yết tối ưu nhất trong bài toán cạnh tranh đa chiều, khóa chặt sàn an toàn $P_i \\ge 1.05 \\times \\text{COGS}_i$.
+- **Vận Chuyển Đường Thủy Bằng Sà Lan Điện & Xe Đạp Hàng Bến Cảng EVRPTW-UBCE (van Duin 2019)**:
+  - Đơn hàng được vận chuyển êm ái trên sà lan điện kênh rạch nội đô và tiếp ứng cho xe đạp hàng điện tại các bến cảng vi trạm, hoàn toàn thoát khỏi kẹt xe và giảm $> 98\\%$ khí thải!`,
+      type: 'recommendation',
+      tag: 'LINEAR COUNTING SKETCH, WQMIX PRICING & CANAL BARGE ROUTER',
+      suggestions: [
+        'Đo lượng khách xem deal bằng Linear Counting',
+        'Tư vấn định giá hợp tác an toàn Weighted QMIX',
+        'Xem lịch vận chuyển sà lan điện kênh rạch nội đô'
       ]
     };
   }

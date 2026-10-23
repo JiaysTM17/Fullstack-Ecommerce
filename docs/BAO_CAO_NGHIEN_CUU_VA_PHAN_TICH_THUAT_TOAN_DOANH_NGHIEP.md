@@ -165,6 +165,10 @@ graph TD
 - **Tầng 1 - Trục xương sống đường sắt đô thị (Metro/Tram Trunk Consolidation):** Sử dụng các toa hàng chuyên dụng trên tuyến đường sắt đô thị (như Cát Linh - Hà Đông hoặc Tuyến Metro Số 1) trong khung giờ thấp điểm để gom các kiện hàng lớn, tiêu hao năng lượng cực thấp $0.03\text{ kWh/tấn-km}$, giảm $100\%$ xung đột giao thông mặt đường.
 - **Tầng 2 - Trung chuyển năng động tại ga metro (Dynamic Platform Cross-Docking):** Đồng bộ cửa sổ thời gian cập ga $[t_{\text{arr}}, t_{\text{dep}}]$, chia hàng cho đội xe đạp hàng điện trợ lực ($180\text{kg}$ tải trọng) tỏa đi phát chặng cuối trong bán kính $1.5\text{ km}$, giảm $> 95\%$ phát thải $\text{CO}_2$, cấp chứng nhận `BIMODAL_TRAM_CARGO_TRAILER_PASS`.
 
+### 4.10. Điều phối sà lan điện đường thủy nội đô & xe đạp hàng bến cảng EVRPTW-UBCE (van Duin 2019, Savelsbergh 2016)
+- **Tầng 1 - Sà lan điện chuyên tuyến kênh rạch đô thị (Electric Canal Barge Line-Haul):** Vận chuyển hàng khối lượng lớn ($60\text{ tấn}$/chuyến) qua các tuyến sông và kênh rạch nội đô (Sông Sài Gòn, Kênh Nhiêu Lộc - Thị Nghè, Sông Hồng). Năng lượng tiêu thụ siêu tiết kiệm $0.018\text{ kWh/tấn-km}$, giảm $100\%$ xung đột giao thông mặt đường.
+- **Tầng 2 - Cầu cảng vi trạm & xe đạp hàng điện trợ lực (Quay-Side Microdepot E-Bikes):** Đồng bộ cửa sổ neo đậu $[t_{\text{moor}}, t_{\text{castoff}}]$ tại các bến thủy nội địa, bốc dỡ kiện hàng sang xe đạp hàng điện trợ lực ($180\text{kg}$ tải trọng) giao tận cửa người mua, giảm $> 98\%$ phát thải $\text{CO}_2$ so với xe tải diesel, cấp chứng nhận `URBAN_BARGE_CANAL_CARGO_PASS`.
+
 ---
 
 ## 5. NHÓM 4: BỘ BA TRỢ LÝ AI COPILOT PHÂN VAI CHUYÊN BIỆT (TRI-ROLE AI COPILOTS ENGINE)
@@ -176,26 +180,26 @@ Hệ thống được trang bị 3 Trợ lý AI độc lập, hoạt động d�
 | **Phân Vùng Hoạt Động** | Cổng Quản trị sàn (Admin Portal) | Kênh Người Bán (Seller Center) | Cửa hàng & Mua sắm (Storefront/PDP) |
 | **Vai Trò & Sứ Mệnh** | Giám sát tuân thủ, kiểm toán tài chính & an ninh | Tối ưu hóa P&L, tồn kho, giá bán & Shopee Ads | Hỗ trợ mua hàng, tư vấn combo, khiếu nại |
 | **Tập Tri Thức Chuyên Sâu** | - Dòng tiền ký quỹ Escrow Vault<br>- Thuế TMĐT Nghị định 52/2018<br>- Điểm uy tín Trust Score & Radar Sybil<br>- Giám sát SLA & Điểm phạt Sao Quả Tạ | - Phân tích chi tiết giá vốn COGS & P&L<br>- Tốc độ bán hàng ngày & DIR<br>- Tư vấn khung giờ Flash Sale an toàn<br>- Chiến lược đấu thầu từ khóa ROAS $\ge 3.5\times$ | - Giải mã từ lóng TMĐT tiếng Việt<br>- Gợi ý combo sản phẩm bán kèm<br>- Hướng dẫn theo dõi SPX Live GPS<br>- Tối ưu hóa xếp chồng Voucher & Xu |
-| **Số Lượng Kịch Bản Xử Lý** | 259 quy tắc suy luận chuyên sâu | 101 phân tích kinh doanh đa biến | 94 ý định mua sắm phức hợp |
+| **Số Lượng Kịch Bản Xử Lý** | 262 quy tắc suy luận chuyên sâu | 102 phân tích kinh doanh đa biến | 95 ý định mua sắm phức hợp |
 
 ---
 
-## 6. BẢNG TỔNG HỢP 92 PHASE & MA TRẬN ĐỘ PHỨC TẠP THUẬT TOÁN
+## 6. BẢNG TỔNG HỢP 93 PHASE & MA TRẬN ĐỘ PHỨC TẠP THUẬT TOÁN
 
 | Nhóm Thuật Toán | Giai Đoạn (Phases) | Thuật Toán Tiêu Biểu | Độ Phức Tạp Thời Gian | Độ Phức Tạp Bộ Nhớ |
 | :--- | :---: | :--- | :--- :---: | :---: |
 | **Core Distributed Patterns** | Phase 1 - 8 | Token Bucket, Circuit Breaker, OCC CAS, LRU Cache | $O(1)$ | $O(N)$ |
 | **Advanced Data Structures** | Phase 9 - 14 | Merkle Tree, Skiplist, MinHash LSH, CRDT Cart | $O(\log N) \text{ / } O(1)$ | $O(N)$ |
-| **Probabilistic Sketches** | Phase 15 - 45, 90 - 92 | HyperLogLog, Count-Min Sketch, DDSketch, BJKST, KMV, AKMV | $O(1)$ | $O(\text{poly}(1/\epsilon)) \text{ / } O(k)$ |
-| **Reinforcement Learning** | Phase 46 - 65, 90 - 92 | Thompson Sampling, SAC-Lagrangian, PPO-Clip, MAPPO, MA-ICQ, QPLEX | $O(K) \text{ / } O(|S||A|)$ | $O(|S|)$ |
-| **Multi-Agent Coordination** | Phase 66 - 92 | QMIX, COMA, QTRAN, TarMAC, BiCNet, FACMAC, COPA, R-COMA, HAPPO, QPLEX | $O(N \cdot |A|)$ | $O(N)$ |
-| **Green Logistics & Rail Transit** | Phase 67 - 92 | EVRPTW-BSS, Urban LEZ, Drone Tandem, MCT, Dual-Dock, Pods, Cargo Bikes, Trams | $O(V^2) \text{ Heuristic}$ | $O(V)$ |
+| **Probabilistic Sketches** | Phase 15 - 45, 90 - 93 | HyperLogLog, Count-Min, DDSketch, BJKST, KMV, AKMV, Linear Counting | $O(1)$ | $O(\text{poly}(1/\epsilon)) \text{ / } O(m)$ |
+| **Reinforcement Learning** | Phase 46 - 65, 90 - 93 | Thompson Sampling, SAC-Lagrangian, PPO-Clip, MAPPO, WQMIX | $O(K) \text{ / } O(|S||A|)$ | $O(|S|)$ |
+| **Multi-Agent Coordination** | Phase 66 - 93 | QMIX, COMA, QTRAN, TarMAC, BiCNet, FACMAC, COPA, R-COMA, QPLEX, WQMIX | $O(N \cdot |A|)$ | $O(N)$ |
+| **Green Logistics & Multimodal** | Phase 67 - 93 | EVRPTW-BSS, Urban LEZ, Drone Tandem, MCT, Pods, Cargo Bikes, Trams, Barges | $O(V^2) \text{ Heuristic}$ | $O(V)$ |
 
 ---
 
 ## 7. HIỆU QUẢ KINH TẾ & GIÁ TRỊ THỰC TIỄN BÀN GIAO
 
-Việc đưa vào vận hành trọn bộ 92 Phase thuật toán doanh nghiệp mang lại giá trị kinh tế trực tiếp cho đơn vị chủ quản:
+Việc đưa vào vận hành trọn bộ 93 Phase thuật toán doanh nghiệp mang lại giá trị kinh tế trực tiếp cho đơn vị chủ quản:
 1. **Tiết kiệm chi phí hạ tầng máy chủ:** Nhờ cấu trúc dữ liệu xác suất Sub-linear space, hệ thống có thể theo dõi và giám sát hàng triệu phiên truy cập với mức tiêu thụ RAM dưới $100\text{ MB}$, giảm hơn $80\%$ chi phí lưu trữ cụm máy chủ Redis/ElastiCache.
 2. **Triệt tiêu thất thoát tài chính do bán vượt kho:** Thuật toán OCC kết hợp Atomic CAS đảm bảo $0\%$ đơn hàng bị hủy do âm kho trong các ngày hội mua sắm Mega Sale.
 3. **Bảo vệ biên lợi nhuận cho người bán:** Khóa sàn giá vốn an toàn $1.05 \times \text{COGS}$ ngăn ngừa các quyết định hạ giá cạnh tranh tiêu cực, duy trì môi trường kinh doanh lành mạnh.

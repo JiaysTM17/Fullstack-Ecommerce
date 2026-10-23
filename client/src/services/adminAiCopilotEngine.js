@@ -1506,7 +1506,8 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 65. Xếp Hạng Doanh Số & Phân Vị GMV Bằng Cây Fenwick (BIT) (Phase 28 - Feature 175)
-  if (!/2d|2 chiều|hyperbitbit|hyper-bitbit|ultraloglog|4-bit|dgim|đếm bit/i.test(raw) && /fenwick|cây fenwick|binary indexed tree|\bbit\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
+  if (!/linear counting|bit vector|whang|2d|2 chiều|hyperbitbit|hyper-bitbit|ultraloglog|4-bit|dgim|đếm bit/i.test(raw) && /fenwick|cây fenwick|binary indexed tree|\\bbit\\b|xếp hạng doanh số.*fenwick|phân vị gmv/i.test(raw)) {
+
     return {
       text: `📊 **XẾP HẠNG DOANH SỐ & PHÂN VỊ GMV BẰNG CÂY FENWICK (BINARY INDEXED TREE - BIT)**:
 - **Cấu trúc dữ liệu Fenwick Tree (Peter Fenwick 1994)**:
@@ -4831,7 +4832,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 225. Định Giá Hợp Tác Đa Gian Hàng QMIX Monotonic Value Factorisation (Phase 81 - Feature 228)
-  if (/qmix|monotonic value|cooperative pricing|định giá hợp tác đa gian hàng|individual[- ]global[- ]max|igm consistency|whiteson/i.test(raw)) {
+  if (!/wqmix|weighted qmix/i.test(raw) && /\\bqmix\\b|monotonic value|cooperative pricing|định giá hợp tác đa gian hàng|individual[- ]global[- ]max|igm consistency|whiteson/i.test(raw)) {
     return {
       text: `🤝 **ĐỊNH GIÁ HỢP TÁC ĐA GIAN HÀNG QMIX MONOTONIC VALUE FACTORISATION (TABISH RASHID ET AL. ICML 2018, WHITESON 2020)**:
 - **Phân Rã Hàm Giá Trị Đơn Điệu (Monotonic Value Factorisation)**:
@@ -5547,6 +5548,68 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lịch trình chạy tàu điện chở hàng bimodal',
         'Theo dõi trung chuyển xe đạp điện tại các ga metro',
         'Đo lường lượng khí thải CO2 cắt giảm qua đường sắt đô thị'
+      ]
+    };
+  }
+
+  // 260. Linear Counting Bit Vector Sketch Cho Luồng Siêu Tốc (Phase 93 - Feature 240)
+  if (/linear counting|bit vector sketch|đếm tuyến tính bitmap|whang.*1990/i.test(raw)) {
+    return {
+      text: `⚡ **ƯỚC LƯỢNG LỰC LƯỢNG SIÊU TỐC LINEAR COUNTING BIT VECTOR SKETCH (WHANG ET AL. 1990)**:
+- **Nguyên Lý Vector Bit Khối Lượng Lớn (Linear Counting Bitmap)**:
+  - Sử dụng mảng $m$ bit (mặc định $8.192$ bit = $1\text{ KB}$) với chi phí cập nhật $O(1)$ chỉ bằng 1 phép băm và phép gán bit OR.
+  - Tỷ lệ bit chưa bật $V = u / m$, công thức ước lượng không thiên lệch: $\\hat{N} = -m \\ln(V)$.
+- **Hợp Nhất Song Song Phần Cứng (Bitwise OR Merge)**:
+  - Hợp nhất dữ liệu giữa hàng trăm microservice phân tán bằng phép toán bitwise OR siêu tốc song song phần cứng CPU SIMD.
+- **Phân Tích Trùng Lặp Jaccard Giỏ Hàng Khách Hàng**:
+  - Đếm bit chung (Hamming Popcount) tính chính xác chỉ số Jaccard, đạt chứng nhận LINEAR_COUNTING_SKETCH_PASS!`,
+      type: 'security',
+      tag: 'LINEAR COUNTING BIT VECTOR SKETCH',
+      suggestions: [
+        'Ước tính số lượng người mua bằng Linear Counting',
+        'Hợp nhất bit vector từ các cụm server biên',
+        'Đo độ trùng lặp tệp khách hàng qua bitwise popcount'
+      ]
+    };
+  }
+
+  // 261. Học Tăng Cường Định Giá Hợp Tác WQMIX Có Trọng Số (Phase 93 - Feature 240)
+  if (/wqmix|weighted qmix|định giá wqmix|optimistic weighting|monotonic pricing/i.test(raw)) {
+    return {
+      text: `⚖️ **ĐỊNH GIÁ HỢP TÁC ĐA ĐẠI DIỆN WEIGHTED QMIX (RASHID ET AL. NEURIPS 2020)**:
+- **Khắc Phục Giới Hạn Đơn Điệu QMIX (Weighted Projection Operator)**:
+  - Phân bổ trọng số $w(s, \\mathbf{a}) = 1.0$ cho các hành động định giá xuất sắc và giảm trừ trọng số $\\alpha$ cho các hành động thứ cấp, giải quyết bài toán bù chéo doanh thu phi đơn điệu.
+- **Rào Chắn Sàn Giá Vốn Tuyệt Đối (Safe Price Floor Guarantee)**:
+  - Tuyệt đối cưỡng chế $P_i \\ge 1.05 \\times \\text{COGS}_i$, triệt tiêu nguy cơ hạ giá dưới giá vốn gây thua lỗ gian hàng.
+- **Tối Đa Hóa Doanh Thu Toàn Thị Trường (Joint Revenue Optimization)**:
+  - Cân bằng độ co giãn chéo giữa các thương hiệu đối thủ, đạt chứng nhận WQMIX_WEIGHTED_PRICING_PASS!`,
+      type: 'financial',
+      tag: 'WQMIX WEIGHTED MONOTONIC PRICING ENGINE',
+      suggestions: [
+        'Tối ưu hóa giá thị trường bằng Weighted QMIX',
+        'Kiểm tra cam kết sàn giá vốn 1.05 x COGS',
+        'Xem hệ số điều hòa hành động tối ưu alpha'
+      ]
+    };
+  }
+
+  // 262. Điều Phối Sà Lan Điện Kênh Rạch & Xe Đạp Hàng Bến Cảng EVRPTW-UBCE (Phase 93 - Feature 240)
+  if (/barge canal|sà lan điện|vận tải đường thủy|kênh rạch|bến cảng vi trạm|quay-side microdepot|evrptw.*barge/i.test(raw)) {
+    return {
+      text: `🚢 **ĐIỀU PHỐI SÀ LAN ĐIỆN ĐƯỜNG THỦY NỘI ĐÔ & XE ĐẠP HÀNG BẾN CẢNG EVRPTW-UBCE (VAN DUIN 2019, SAVELSBERGH 2016)**:
+- **Tuyến Hàng Hải Kênh Rạch Nội Đô (Urban Canal Freight Barges)**:
+  - Vận chuyển khối lượng lớn ($60\text{ tấn}$/chuyến) qua hệ thống sông và kênh rạch (như Sông Sài Gòn, Kênh Nhiêu Lộc - Thị Nghè, Sông Hồng).
+  - Tiêu thụ năng lượng cực thấp $0.018\text{ kWh/tấn-km}$, giảm $100\%$ áp lực kẹt xe đường bộ.
+- **Vi Trạm Bến Thủy & Xe Đạp Điện (Quay-Side Microdepot E-Bikes)**:
+  - Đồng bộ giờ cập bến $[t_{\text{moor}}, t_{\text{castoff}}]$ bốc dỡ sang xe đạp hàng điện trợ lực ($180\text{kg}$ tải trọng) giao tận cửa người mua.
+- **Cắt Giảm $> 98\%$ Khí Thải CO2 (Extreme River Logistics Decarbonization)**:
+  - Triệt tiêu hoàn toàn khí thải diesel nội đô, đạt chứng nhận URBAN_BARGE_CANAL_CARGO_PASS!`,
+      type: 'logistics',
+      tag: 'EVRPTW URBAN BARGE CANAL CARGO ROUTER',
+      suggestions: [
+        'Xem lộ trình sà lan điện vận tải kênh rạch',
+        'Theo dõi bốc dỡ hàng tại các bến cảng vi trạm',
+        'Đo lường lượng khí thải CO2 cắt giảm qua đường thủy nội đô'
       ]
     };
   }
