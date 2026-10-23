@@ -477,6 +477,10 @@ import {
   PCSAFlajoletMartinSketch,
   LenientQMultiAgentPricing,
   EVRPTWUrbanCrowdShippingCommuterRouter,
+  // Phase 97 Enterprise Algorithms
+  ElasticSketchHeavyHitters,
+  WoLFPHCMultiAgentPricing,
+  EVRPTWUrbanMobileLockerTruckFeederRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -733,6 +737,9 @@ import { EVRPTWUrbanSharedTaxiCrowdParcelRouter as ServerEVRPTWSharedTaxiRouter 
 import { PCSAFlajoletMartinSketch as ServerPCSASketch } from "../../server/src/utils/pcsaFlajoletMartinSketch.js";
 import { LenientQMultiAgentPricing as ServerLenientQPricing } from "../../server/src/utils/lenientQMultiAgentPricing.js";
 import { EVRPTWUrbanCrowdShippingCommuterRouter as ServerEVRPTWCommuterRouter } from "../../server/src/utils/evrptwUrbanCrowdShippingCommuterRouter.js";
+import { ElasticSketchHeavyHitters as ServerElasticSketch } from "../../server/src/utils/elasticSketchHeavyHitters.js";
+import { WoLFPHCMultiAgentPricing as ServerWoLFPricing } from "../../server/src/utils/wolfPhcMultiAgentPricing.js";
+import { EVRPTWUrbanMobileLockerTruckFeederRouter as ServerEVRPTWMobileLockerRouter } from "../../server/src/utils/evrptwUrbanMobileLockerTruckFeederRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -39191,6 +39198,307 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Khu vực của tôi có được giao hàng bởi xe máy điện tiện đường không?");
         expect.equal(buyerRes.intent, "PCSA_LENIENT_COMMUTER_PARCEL_ASSIST");
         expect.ok(buyerRes.replyText.includes("GIAO HÀNG TIỆN ĐƯỜNG"));
+      });
+    });
+
+    describe("Feature 244: Elastic Sketch Elephant Flow Detection, WoLF-PHC Multi-Agent Pricing & Mobile Locker Logistics (Phase 97)", () => {
+      // --- Elastic Sketch Heavy Hitters Tests (T01 - T07) ---
+      test("F244-T01: ElasticSketchHeavyHitters initializes with heavyBuckets, light dimensions, and zero items", () => {
+        const sketch = new ElasticSketchHeavyHitters({ heavyBuckets: 32, lightDepth: 3, lightWidth: 64, lambdaThreshold: 8 });
+        expect.equal(sketch.heavyBuckets, 32);
+        expect.equal(sketch.lightDepth, 3);
+        expect.equal(sketch.lightWidth, 64);
+        expect.equal(sketch.lambdaThreshold, 8);
+        expect.equal(sketch.totalItemsSeen, 0);
+      });
+
+      test("F244-T02: Elements added into empty heavy buckets store key and positive votes", () => {
+        const sketch = new ElasticSketchHeavyHitters({ heavyBuckets: 16 });
+        const res = sketch.add("sku_iphone_15", 5);
+        expect.equal(res, true);
+        expect.equal(sketch.totalItemsSeen, 5);
+        expect.ok(sketch.estimateFrequency("sku_iphone_15") >= 5);
+      });
+
+      test("F244-T03: Frequent hits to matching heavy bucket increment positive votes", () => {
+        const sketch = new ElasticSketchHeavyHitters({ heavyBuckets: 16 });
+        for (let i = 0; i < 20; i++) {
+          sketch.add("sku_airpods", 1);
+        }
+        expect.ok(sketch.estimateFrequency("sku_airpods") >= 20);
+      });
+
+      test("F244-T04: Collision increments negative votes and triggers ostracism eviction to light part", () => {
+        const sketch = new ElasticSketchHeavyHitters({ heavyBuckets: 8, lambdaThreshold: 2 });
+        // Force collision by repeatedly adding competing keys
+        sketch.add("key_alpha", 2);
+        for (let i = 0; i < 15; i++) {
+          sketch.add(`colliding_mouse_${i}`, 1);
+        }
+        expect.ok(sketch.totalItemsSeen > 10);
+      });
+
+      test("F244-T05: findHeavyHitters accurately detects elephant SKUs above threshold", () => {
+        const sketch = new ElasticSketchHeavyHitters({ heavyBuckets: 32 });
+        sketch.add("elephant_deal_1", 50);
+        sketch.add("elephant_deal_2", 30);
+        for (let i = 0; i < 15; i++) {
+          sketch.add(`mouse_${i}`, 1);
+        }
+
+        const hitters = sketch.findHeavyHitters(20);
+        expect.ok(hitters.length >= 2);
+        const keys = hitters.map(h => h.key);
+        expect.ok(keys.includes("elephant_deal_1"));
+        expect.ok(keys.includes("elephant_deal_2"));
+      });
+
+      test("F244-T06: Serialization and deserialization preserve heavy and light table states", () => {
+        const sketch = new ElasticSketchHeavyHitters({ heavyBuckets: 16 });
+        sketch.add("test_sku_1", 10);
+        sketch.add("test_sku_2", 15);
+
+        const state = sketch.serialize();
+        const restored = ElasticSketchHeavyHitters.deserialize(state);
+
+        expect.equal(restored.heavyBuckets, sketch.heavyBuckets);
+        expect.equal(restored.totalItemsSeen, sketch.totalItemsSeen);
+        expect.equal(restored.estimateFrequency("test_sku_1"), sketch.estimateFrequency("test_sku_1"));
+      });
+
+      test("F244-T07: Client-Server dual parity for ElasticSketchHeavyHitters", () => {
+        const clientSketch = new ElasticSketchHeavyHitters({ heavyBuckets: 32, seed: 999 });
+        const serverSketch = new ServerElasticSketch({ heavyBuckets: 32, seed: 999 });
+
+        for (let i = 0; i < 40; i++) {
+          const key = `parity_item_${i % 5}`;
+          clientSketch.add(key, 2);
+          serverSketch.add(key, 2);
+        }
+
+        expect.equal(clientSketch.totalItemsSeen, serverSketch.totalItemsSeen);
+        expect.equal(clientSketch.estimateFrequency("parity_item_0"), serverSketch.estimateFrequency("parity_item_0"));
+      });
+
+      // --- WoLF-PHC Multi-Agent Pricing Tests (T08 - T15) ---
+      test("F244-T08: WoLFPHCMultiAgentPricing initializes with deltaWin, deltaLose and safe price floor", () => {
+        const engine = new WoLFPHCMultiAgentPricing({ deltaWin: 0.04, deltaLose: 0.16 });
+        expect.equal(engine.deltaWin, 0.04);
+        expect.equal(engine.deltaLose, 0.16);
+        expect.equal(engine.priceFloorMultiplier, 1.05);
+      });
+
+      test("F244-T09: enforceSafePriceFloor strictly clamps price below 1.05 * COGS", () => {
+        const engine = new WoLFPHCMultiAgentPricing();
+        const cogs = 150000;
+        const low = 140000;
+        const good = 210000;
+
+        const clamped = engine.enforceSafePriceFloor(low, cogs);
+        expect.equal(clamped.wasClamped, true);
+        expect.equal(clamped.price, 157500);
+
+        const okPrice = engine.enforceSafePriceFloor(good, cogs);
+        expect.equal(okPrice.wasClamped, false);
+        expect.equal(okPrice.price, 210000);
+      });
+
+      test("F244-T10: generatePriceCandidates strictly respects safe price floor bounds", () => {
+        const engine = new WoLFPHCMultiAgentPricing();
+        const agent = { cogs: 70000, currentPrice: 100000, maxAllowedPrice: 180000 };
+        const candidates = engine.generatePriceCandidates(agent);
+
+        expect.ok(candidates.length > 0);
+        for (const p of candidates) {
+          expect.ok(p >= 73500); // 70000 * 1.05
+          expect.ok(p <= 180000);
+        }
+      });
+
+      test("F244-T11: Cross-price demand estimation decreases with own price and increases with competitor price", () => {
+        const engine = new WoLFPHCMultiAgentPricing();
+        const agent = { cogs: 90000, baseDemand: 100, elasticity: 1.4 };
+        const dLow = engine.calculateDemand(agent, 105000, [105000, 120000]);
+        const dHigh = engine.calculateDemand(agent, 150000, [150000, 120000]);
+
+        expect.ok(dLow > dHigh);
+      });
+
+      test("F244-T12: Policy simplex projection updates weights correctly and normalizes to 1.0", () => {
+        const engine = new WoLFPHCMultiAgentPricing();
+        const initialPolicy = [0.2, 0.2, 0.2, 0.2, 0.2];
+        const updated = engine._updatePolicySimplex(initialPolicy, 2, 0.08);
+
+        const sum = updated.reduce((s, p) => s + p, 0);
+        expect.ok(Math.abs(sum - 1.0) < 1e-6);
+        expect.ok(updated[2] > initialPolicy[2]);
+      });
+
+      test("F244-T13: optimizePrices executes WoLF-PHC updates and returns WOLF_PHC_PRICING_PASS", () => {
+        const engine = new WoLFPHCMultiAgentPricing({ iterations: 15 });
+        const agents = [
+          { id: "shop_alpha", cogs: 80000, currentPrice: 110000 },
+          { id: "shop_beta", cogs: 140000, currentPrice: 190000 }
+        ];
+
+        const result = engine.optimizePrices(agents);
+        expect.equal(result.certification, "WOLF_PHC_PRICING_PASS");
+        expect.equal(result.summary.totalAgents, 2);
+        expect.equal(result.summary.allSafeFloorCompliant, true);
+        expect.ok(result.summary.totalRevenue > 0);
+        expect.ok(result.summary.totalProfit > 0);
+      });
+
+      test("F244-T14: All recommended prices strictly adhere to safe floor P_i >= 1.05 * COGS_i", () => {
+        const engine = new WoLFPHCMultiAgentPricing({ iterations: 10 });
+        const agents = [
+          { id: "v_cheap", cogs: 60000, currentPrice: 50000 }
+        ];
+        const result = engine.optimizePrices(agents);
+        expect.ok(result.agentOptimizations[0].recommendedPrice >= 63000);
+        expect.equal(result.agentOptimizations[0].safeFloorCompliant, true);
+      });
+
+      test("F244-T15: Client-Server dual parity for WoLFPHCMultiAgentPricing", () => {
+        const clientEngine = new WoLFPHCMultiAgentPricing({ iterations: 10 });
+        const serverEngine = new ServerWoLFPricing({ iterations: 10 });
+        const agents = [
+          { id: "v1", cogs: 60000, currentPrice: 85000 },
+          { id: "v2", cogs: 110000, currentPrice: 155000 }
+        ];
+
+        const cRes = clientEngine.optimizePrices(agents);
+        const sRes = serverEngine.optimizePrices(agents);
+
+        expect.equal(cRes.certification, sRes.certification);
+        expect.equal(cRes.summary.totalRevenue, sRes.summary.totalRevenue);
+        expect.equal(cRes.agentOptimizations[0].recommendedPrice, sRes.agentOptimizations[0].recommendedPrice);
+      });
+
+      // --- Mobile Locker Truck Router Tests (T16 - T21) ---
+      test("F244-T16: EVRPTWUrbanMobileLockerTruckFeederRouter initializes with compartments and payload", () => {
+        const router = new EVRPTWUrbanMobileLockerTruckFeederRouter({ truckLockerCompartments: 50 });
+        expect.equal(router.truckLockerCompartments, 50);
+        expect.equal(router.truckPayloadCapacityKg, 350.0);
+        expect.equal(router.feederWalkingRadiusKm, 0.8);
+      });
+
+      test("F244-T17: Calculates precise distance between dwell stop and customer location", () => {
+        const router = new EVRPTWUrbanMobileLockerTruckFeederRouter();
+        const stop = { lat: 10.7769, lng: 106.7009 };
+        const cust = { lat: 10.7800, lng: 106.7040 };
+        const d = router.calculateDistance(stop, cust);
+
+        expect.ok(d > 0.1 && d < 1.0);
+      });
+
+      test("F244-T18: Dispatches orders to mobile locker truck within dwell stop time windows", () => {
+        const router = new EVRPTWUrbanMobileLockerTruckFeederRouter({ feederWalkingRadiusKm: 1.0 });
+        const truck = {
+          truckId: "LOCKER_TRUCK_01",
+          truckName: "Xe Tải Tủ Đồ Quận 1",
+          dwellStops: [
+            { stopId: "ST1", stopName: "Sảnh Vincom Đồng Khởi", lat: 10.7770, lng: 106.7010, parkMin: 480, departMin: 540 },
+            { stopId: "ST2", stopName: "Sảnh Bitexco", lat: 10.7715, lng: 106.7045, parkMin: 560, departMin: 620 }
+          ]
+        };
+        const orders = [
+          { id: "ORD_L1", name: "Đơn tự lấy Vincom", lat: 10.7775, lng: 106.7015, weightKg: 3.0, preferSelfCollect: true, dueMin: 530 },
+          { id: "ORD_L2", name: "Đơn giao đi bộ Bitexco", lat: 10.7720, lng: 106.7050, weightKg: 4.0, preferSelfCollect: false, dueMin: 610 }
+        ];
+
+        const plan = router.planLockerTruckRoutes(truck, orders);
+        expect.equal(plan.certification, "EVRPTW_MOBILE_LOCKER_TRUCK_PASS");
+        expect.equal(plan.totalOrdersDelivered, 2);
+        expect.equal(plan.unassignedOrdersCount, 0);
+      });
+
+      test("F244-T19: Unassigned orders handled when distance exceeds feeder walking radius", () => {
+        const router = new EVRPTWUrbanMobileLockerTruckFeederRouter({ feederWalkingRadiusKm: 0.5 });
+        const truck = {
+          truckId: "LOCKER_TRUCK_02",
+          truckName: "Xe Tủ Đồ Trung Tâm",
+          dwellStops: [
+            { stopId: "S1", stopName: "Bến Thành", lat: 10.7700, lng: 106.7000, parkMin: 400, departMin: 460 }
+          ]
+        };
+        const farOrder = [
+          { id: "FAR_1", name: "Khách ở ngoại vi", lat: 10.8200, lng: 106.7500, weightKg: 2.0 }
+        ];
+
+        const plan = router.planLockerTruckRoutes(truck, farOrder);
+        expect.equal(plan.unassignedOrdersCount, 1);
+        expect.equal(plan.unassignedOrders[0].reason, "BEYOND_MOBILE_LOCKER_FEEDER_RADIUS");
+      });
+
+      test("F244-T20: Demonstrates >90% CO2 emissions reduction vs baseline multi-stop diesel van", () => {
+        const router = new EVRPTWUrbanMobileLockerTruckFeederRouter();
+        const truck = {
+          truckId: "TRUCK_GREEN",
+          truckName: "Xe Tủ Đồ Xanh Eco",
+          dwellStops: [
+            { stopId: "S1", stopName: "Trạm A", lat: 10.7700, lng: 106.7000, parkMin: 500, departMin: 560 },
+            { stopId: "S2", stopName: "Trạm B", lat: 10.7800, lng: 106.7100, parkMin: 580, departMin: 640 }
+          ]
+        };
+        const orders = [
+          { id: "O1", name: "Đơn Trạm A", lat: 10.7710, lng: 106.7010, weightKg: 4.0, dueMin: 550, preferSelfCollect: true }
+        ];
+
+        const plan = router.planLockerTruckRoutes(truck, orders);
+        expect.ok(plan.emissionsAnalysis.co2AbatementPercent >= 90.0);
+        expect.ok(plan.emissionsAnalysis.co2SavedKg > 0);
+      });
+
+      test("F244-T21: Client-Server dual parity for EVRPTWUrbanMobileLockerTruckFeederRouter", () => {
+        const clientRouter = new EVRPTWUrbanMobileLockerTruckFeederRouter();
+        const serverRouter = new ServerEVRPTWMobileLockerRouter();
+
+        const truck = {
+          truckId: "TRUCK_PARITY",
+          truckName: "Xe Đối Soát Parity",
+          dwellStops: [
+            { stopId: "ST1", stopName: "Trạm 1", lat: 10.7725, lng: 106.6980, parkMin: 480, departMin: 540 }
+          ]
+        };
+        const orders = [
+          { id: "ORD_P1", name: "Đơn Parity", lat: 10.7730, lng: 106.6990, weightKg: 2.5, dueMin: 520, preferSelfCollect: true }
+        ];
+
+        const cPlan = clientRouter.planLockerTruckRoutes(truck, orders);
+        const sPlan = serverRouter.planLockerTruckRoutes(truck, orders);
+
+        expect.equal(cPlan.certification, sPlan.certification);
+        expect.equal(cPlan.totalOrdersDelivered, sPlan.totalOrdersDelivered);
+        expect.equal(cPlan.emissionsAnalysis.co2SavedKg, sPlan.emissionsAnalysis.co2SavedKg);
+      });
+
+      // --- Tri-Role AI Copilot Tests (T22 - T24) ---
+      test("F244-T22: Admin Sentinel Copilot Sections 272, 273, 274 handle Elastic Sketch, WoLF-PHC & Mobile Locker", () => {
+        const r272 = generateAdminCopilotResponse("Phân tích luồng dữ liệu voi bằng Elastic Sketch và ostracism");
+        expect.equal(r272.tag, "ELASTIC SKETCH HEAVY HITTERS");
+        expect.ok(r272.text.includes("ELASTIC SKETCH"));
+
+        const r273 = generateAdminCopilotResponse("Kiểm tra định giá đa đại lý WoLF-PHC win or learn fast");
+        expect.equal(r273.tag, "WOLF PHC MULTI-AGENT PRICING");
+        expect.ok(r273.text.includes("WOLF-PHC"));
+
+        const r274 = generateAdminCopilotResponse("Điều phối xe tải tủ đồ lưu động và shipper đi bộ mobile locker feeder evrptw");
+        expect.equal(r274.tag, "EVRPTW URBAN MOBILE LOCKER TRUCK FEEDER ROUTER");
+        expect.ok(r274.text.includes("TỦ ĐỒ LƯU ĐỘNG"));
+      });
+
+      test("F244-T23: Seller ShopSmart Copilot Section 106 handles Elastic Sketch, WoLF-PHC & Mobile Locker", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn bắt sóng elephant sku bằng elastic sketch và định giá wolf-phc kết hợp tủ đồ lưu động");
+        expect.equal(sellerRes.tag, "ELASTIC SKETCH, WOLF PHC PRICING & MOBILE LOCKER ROUTER");
+        expect.ok(sellerRes.text.includes("ELASTIC SKETCH"));
+        expect.ok(sellerRes.text.includes("WOLF-PHC"));
+      });
+
+      test("F244-T24: Buyer Shopping Assistant Intent 99 handles ELASTIC_SKETCH_WOLF_LOCKER_ASSIST", () => {
+        const buyerRes = generateAiChatResponse("Khu vực của tôi có được nhận hàng tại xe tải tủ đồ lưu động không?");
+        expect.equal(buyerRes.intent, "ELASTIC_SKETCH_WOLF_LOCKER_ASSIST");
+        expect.ok(buyerRes.replyText.includes("TỦ ĐỒ LƯU ĐỘNG"));
       });
     });
   });
