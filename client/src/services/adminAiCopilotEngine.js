@@ -2019,7 +2019,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 91. Tối Ưu Định Giá Động Flash Sale Bằng Double Q-Learning (Phase 36 - Feature 183)
-  if (!/hysteretic|cql|conservative/i.test(raw) && /double q|q-learning|học tăng cường kép|triệt tiêu maximization bias|double q-learning pricing/i.test(raw)) {
+  if (!/lenient|hysteretic|cql|conservative/i.test(raw) && /double q|q-learning|học tăng cường kép|triệt tiêu maximization bias|double q-learning pricing/i.test(raw)) {
     return {
       text: `💰 **ĐỊNH GIÁ ĐỘNG FLASH SALE BẰNG DOUBLE Q-LEARNING VỚI EXPERIENCE REPLAY**:
 - **Triệt tiêu Thiên lệch Cực đại hóa (Maximization Bias Elimination - Hasselt 2010)**:
@@ -2782,7 +2782,7 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
   }
 
   // 130. Định Tuyến Đội Xe Điện Giao Hàng Xanh E-VRPTW-BSS (Phase 49 - Feature 196)
-  if (!/shared taxi|taxi điện|tiện chuyến taxi|bus cargo|xe buýt|bus pudo|pudo|barge canal|sà lan điện|bimodal tram|autonomous pod|sidewalk delivery|robot giao hàng|solar microhub|microhub năng lượng mặt trời|evrptw.*pod|bjkst|mappo|two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
+  if (!/commuter crowd|người đi làm.*tiện đường|xe máy điện tiện đường|shared taxi|taxi điện|tiện chuyến taxi|bus cargo|xe buýt|bus pudo|pudo|barge canal|sà lan điện|bimodal tram|autonomous pod|sidewalk delivery|robot giao hàng|solar microhub|microhub năng lượng mặt trời|evrptw.*pod|bjkst|mappo|two[- ]echelon|smart parcel locker|tủ đồ thông minh|crowd[- ]shipping|evrptw[- ]2e|happo|dual[- ]dock|dual dock|inductive hybrid|evrptw[- ]dd|r-coma|rcoma|spectral sparsifier|bipartite spectral|evrptw[- ]mct|mobile charging truck|xe sạc di động|\bmct\b|lez|low emission zone|vành đai phát thải|evrptw[- ]lez|tou|partial charging|biểu giá điện|payload.*terrain|dynamic payload|drone|mothership|rooftop|sạc nóc|poikonen|active cooling|btms|làm mát chủ động|park.*jung|battery degradation|evrptw[- ]battery|evrptw[- ]queue|hàng đợi trạm sạc|erlang|evrptw[- ]nl|sạc phi tuyến|cc[- ]cv|multi[- ]tier|trạm sạc đa tầng|battery swapping decay|đổi pin suy giảm|evrptw[- ]bsd|dwpt|sạc không dây động|evrptw[- ]dwpt|dynamic wireless|evrptw[- ]pv|onboard solar|pin mặt trời trên nóc|evrptw[- ]fcev|mixed fleet fuel cell|pin nhiên liệu hydro|regenerative|evrptw[- ]regen|thermal|evrptw[- ]thermal|arrhenius|v2g|vehicle[- ]to[- ]grid|microgrid|evrptw[- ]md|evrptw[- ]multi[- ]depot|multi[- ]depot microgrid|carbon[- ]tax|evrptw[- ]carbon|pollution[- ]routing|khí thải carbon/i.test(raw) && /evrptw|trạm đổi pin|battery swapping|xe điện xanh|logistics xanh spx|e-vrptw-bss/i.test(raw)) {
     return {
       text: `🔋 **ĐỊNH TUYẾN ĐỘI XE ĐIỆN XANH CÓ TRẠM ĐỔI PIN E-VRPTW / EVRPTW-BSS (SCHNEIDER ET AL. 2014, HOF 2017)**:
 - **Hiện Thực Hóa Cam Kết Logistics Xanh 100% Xe Điện EVRPTW Của SPX Express**:
@@ -5736,6 +5736,69 @@ Dưới đây là mẫu bản tin đề xuất theo chuẩn sàn TMĐT:
         'Xem lộ trình điều phối bưu kiện ghép taxi điện',
         'Kiểm tra giới hạn quãng đường lệch của hành khách',
         'Đo lường lượng khí thải CO2 cắt giảm nhờ tiện chuyến'
+      ]
+    };
+  }
+
+  // 269. Đếm Xác Suất Lấy Mẫu Ngẫu Nhiên PCSA Flajolet-Martin (Phase 96 - Feature 243)
+  if (/\bpcsa\b|flajolet.*martin|stochastic averaging|thuật toán pcsa/i.test(raw)) {
+    return {
+      text: `📊 **ƯỚC LƯỢNG LƯỢNG TRUY CẬP ĐỘT PHÁ PCSA FLAJOLET-MARTIN (FLAJOLET & MARTIN 1985 JCSS)**:
+- **Cơ Chế Lấy Mẫu Ngẫu Nhiên Phân Phối Hình Học (Stochastic Averaging)**:
+  - Sử dụng m thanh ghi bitmap (m registers) cùng hàm băm phân phối hình học $\\rho(x)$ ghi nhận vị trí bit 1 thấp nhất.
+  - Công thức ước lượng giải tích đóng chuẩn mực: $\\hat{N} = \\frac{m}{\\phi} 2^{\\frac{1}{m} \\sum R_j}$ với hằng số Flajolet-Martin $\\phi \\approx 0.77351$.
+- **Tự Động Hiệu Chỉnh Vùng Nhỏ Bằng Linear Counting**:
+  - Khi $\\hat{N} < 2.5m$, thuật toán tự động chuyển sang đếm số bit 0 để loại bỏ hoàn toàn sai số nhỏ, đảm bảo độ chính xác vượt trội.
+- **Hợp Nhất Bitwise-OR & Đo Lường Trùng Lặp Jaccard Đa Chiều**:
+  - Hỗ trợ gộp luồng dữ liệu phân tán không mất mát thông tin, đạt chuẩn PCSA_FLAJOLET_MARTIN_PASS!`,
+      type: 'analytics',
+      tag: 'PCSA FLAJOLET MARTIN SKETCH',
+      suggestions: [
+        'Xem ước lượng số lượng người xem duy nhất PCSA',
+        'Kiểm tra giá trị trung bình thanh ghi R_j và hằng số phi',
+        'So sánh độ trùng lặp tập khách hàng bằng bitwise-OR'
+      ]
+    };
+  }
+
+  // 270. Học Tăng Cường Định Giá Khoan Dung Lenient Q-Learning (Phase 96 - Feature 243)
+  if (/lenient|lenient q|định giá lenient|khoan dung q-learning|nhiệt độ khoan dung/i.test(raw)) {
+    return {
+      text: `⚖️ **ĐỊNH GIÁ ĐA ĐẠI LÝ KHOAN DUNG LENIENT Q-LEARNING (PANAIT 2006, WEI & LUKE 2016 JMLR)**:
+- **Cơ Chế Khoan Dung Suy Giảm Khám Phá (Decaying Lenience Mechanism)**:
+  - Khi đối tác/đối thủ trên sàn thử nghiệm giá mới gây sụt giảm doanh thu tạm thời, Q-learning truyền thống dễ hoảng loạn hạ giá.
+  - Lenient Q theo dõi nhiệt độ số lần ghé thăm $\\tau(a)$ và chỉ chấp nhận cập nhật sai số TD âm với xác suất $P(\\text{update}) = 1 - e^{-\\tau(a) / \\kappa}$.
+- **Bảo Vệ Mức Giá Tối Ưu Trong Giai Đoạn Thăm Dò**:
+  - Các mức giá tiềm năng cao được bảo vệ không bị trừng phạt oan, nhanh chóng hội tụ về điểm cân bằng Nash-Pareto toàn sàn.
+- **Cam Kết Sàn Giá Vốn Tuyệt Đối $P_i \\ge 1.05 \\times \\text{COGS}_i$**:
+  - Khóa chặt mọi kịch bản giá bán trên ngưỡng giá vốn, đạt chứng nhận LENIENT_Q_PRICING_PASS!`,
+      type: 'pricing',
+      tag: 'LENIENT Q MULTI-AGENT PRICING',
+      suggestions: [
+        'Kiểm tra tham số nhiệt độ khoan dung kappa',
+        'Xem tỷ lệ các cập nhật âm được tha thứ',
+        'Kiểm tra cam kết sàn giá vốn 1.05 x COGS'
+      ]
+    };
+  }
+
+  // 271. Điều Phối Giao Hàng Người Đi Làm Tiện Đường EVRPTW-CSCR (Phase 96 - Feature 243)
+  if (/commuter crowd|người đi làm.*tiện đường|xe máy điện tiện đường|giao hàng tiện chuyến xe máy|evrptw.*commuter/i.test(raw)) {
+    return {
+      text: `🛵 **ĐIỀU PHỐI GIAO HÀNG BẰNG XE MÁY ĐIỆN NGƯỜI ĐI LÀM TIỆN ĐƯỜNG EVRPTW-CSCR (ARSLAN 2019, DAYARIAN 2020)**:
+- **Tận Dụng Hành Trình Đi Làm Hàng Ngày Của Cộng Đồng (Commuter Crowd-Shipping)**:
+  - Hàng vạn người đi làm hàng ngày bằng xe máy điện (như VinFast Feliz, Klara) trên các trục đường cố định giữa nhà và cơ quan.
+  - Tận dụng cốp và móc treo xe ($15\\text{kg}$ tải trọng / 2 bưu kiện) để giao kiện hàng tiện đường.
+- **Ràng Buộc Quãng Đường Lệch Tối Thiểu (Commuter Detour Limit $\\Delta_d \\le 1.5\\text{km}$)**:
+  - Chỉ ghép các đơn hàng nằm sát hành trình di chuyển, trả thù lao hỗ trợ chi phí sạc pin cho người đi làm.
+- **Cắt Giảm $> 94\\%$ Lượng Khí Thải CO2 Đô Thị**:
+  - Chuyển hóa $100\\%$ quãng đường di chuyển chết thành năng lực vận tải xanh, đạt chuẩn EVRPTW_CROWD_COMMUTER_LOGISTICS_PASS!`,
+      type: 'logistics',
+      tag: 'EVRPTW URBAN COMMUTER CROWD SHIPPING ROUTER',
+      suggestions: [
+        'Xem danh sách các chuyến đi làm tiện đường khớp lệnh',
+        'Kiểm tra giới hạn quãng đường lệch của người đi làm',
+        'Đo lường lượng khí thải CO2 tiết kiệm được'
       ]
     };
   }

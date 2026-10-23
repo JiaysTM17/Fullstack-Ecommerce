@@ -473,6 +473,10 @@ import {
   CVMDistinctElementsSketch,
   HystereticQMultiAgentPricing,
   EVRPTWUrbanSharedTaxiCrowdParcelRouter,
+  // Phase 96 Enterprise Algorithms
+  PCSAFlajoletMartinSketch,
+  LenientQMultiAgentPricing,
+  EVRPTWUrbanCrowdShippingCommuterRouter,
 } from "../../client/src/services/aiAlgorithms.js";
 import { SPXHubGraphRouter as ServerSPXRouter } from "../../server/src/utils/spxHubGraphRouter.js";
 import { RoaringBitmap as ServerRoaringBitmap, FacetedCatalogIndex as ServerFacetedIndex } from "../../server/src/utils/roaringBitmapFilter.js";
@@ -726,6 +730,9 @@ import { EVRPTWUrbanPassengerBusCargoPUDORouter as ServerEVRPTWBusCargoRouter } 
 import { CVMDistinctElementsSketch as ServerCVMSketch } from "../../server/src/utils/cvmDistinctElementsSketch.js";
 import { HystereticQMultiAgentPricing as ServerHystereticQPricing } from "../../server/src/utils/hystereticQMultiAgentPricing.js";
 import { EVRPTWUrbanSharedTaxiCrowdParcelRouter as ServerEVRPTWSharedTaxiRouter } from "../../server/src/utils/evrptwUrbanSharedTaxiCrowdParcelRouter.js";
+import { PCSAFlajoletMartinSketch as ServerPCSASketch } from "../../server/src/utils/pcsaFlajoletMartinSketch.js";
+import { LenientQMultiAgentPricing as ServerLenientQPricing } from "../../server/src/utils/lenientQMultiAgentPricing.js";
+import { EVRPTWUrbanCrowdShippingCommuterRouter as ServerEVRPTWCommuterRouter } from "../../server/src/utils/evrptwUrbanCrowdShippingCommuterRouter.js";
 import fs from "fs";
 
 describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite (Features 60-63)", { tier: "tier1", subsystem: "sub11" }, () => {
@@ -38845,6 +38852,345 @@ describe("Tier 1 - Subsystem 11: Enterprise Seller & Super Admin Advanced Suite 
         const buyerRes = generateAiChatResponse("Khu vực của tôi có được giao hàng bằng taxi điện tiện chuyến không?");
         expect.equal(buyerRes.intent, "CVM_HYSTERETIC_TAXI_PARCEL_ASSIST");
         expect.ok(buyerRes.replyText.includes("TAXI ĐIỆN TIỆN CHUYẾN"));
+      });
+    });
+
+    describe("Feature 243: PCSA Flajolet-Martin Stream Sketch, Lenient Q Multi-Agent Pricing & Commuter Crowd-Shipping Logistics (Phase 96)", () => {
+      // --- PCSA Flajolet-Martin Stream Sketch Tests (T01 - T07) ---
+      test("F243-T01: PCSAFlajoletMartinSketch initializes with m registers and zero items", () => {
+        const sketch = new PCSAFlajoletMartinSketch({ m: 32, seed: 1337 });
+        expect.equal(sketch.m, 32);
+        expect.equal(sketch.registers.length, 32);
+        expect.equal(sketch.totalItemsSeen, 0);
+        for (let i = 0; i < 32; i++) {
+          expect.equal(sketch.registers[i], 0);
+        }
+      });
+
+      test("F243-T02: Ingested items set corresponding bit in registers using geometric hash", () => {
+        const sketch = new PCSAFlajoletMartinSketch({ m: 16 });
+        const res1 = sketch.add("visitor_alpha");
+        expect.equal(res1, true);
+        expect.equal(sketch.totalItemsSeen, 1);
+
+        const res2 = sketch.add("visitor_alpha");
+        expect.equal(res2, false); // Duplicate sets no new bit
+        expect.equal(sketch.totalItemsSeen, 2);
+      });
+
+      test("F243-T03: Computes accurate cardinality estimate using Flajolet-Martin stochastic averaging", () => {
+        const sketch = new PCSAFlajoletMartinSketch({ m: 64, seed: 42 });
+        const trueCount = 250;
+        for (let i = 0; i < trueCount; i++) {
+          sketch.add(`buyer_pcsa_${i}`);
+        }
+        const est = sketch.estimateCardinality();
+        expect.ok(est >= 100 && est <= 500);
+      });
+
+      test("F243-T04: Applies small-range linear counting correction accurately for small cardinalities", () => {
+        const sketch = new PCSAFlajoletMartinSketch({ m: 64 });
+        for (let i = 0; i < 15; i++) {
+          sketch.add(`small_set_${i}`);
+        }
+        const est = sketch.estimateCardinality();
+        expect.ok(est >= 10 && est <= 25);
+      });
+
+      test("F243-T05: Serialization and deserialization preserve register state accurately", () => {
+        const sketch = new PCSAFlajoletMartinSketch({ m: 32, seed: 99 });
+        for (let i = 0; i < 50; i++) {
+          sketch.add(`session_${i}`);
+        }
+        const serialized = sketch.serialize();
+        const restored = PCSAFlajoletMartinSketch.deserialize(serialized);
+
+        expect.equal(restored.m, sketch.m);
+        expect.equal(restored.estimateCardinality(), sketch.estimateCardinality());
+        for (let j = 0; j < sketch.m; j++) {
+          expect.equal(restored.registers[j], sketch.registers[j]);
+        }
+      });
+
+      test("F243-T06: Merge via bitwise-OR accurately evaluates cohort overlap and Jaccard", () => {
+        const cohortA = Array.from({ length: 40 }, (_, i) => `item_${i}`);
+        const cohortB = Array.from({ length: 40 }, (_, i) => `item_${i + 20}`);
+
+        const overlap = PCSAFlajoletMartinSketch.assessMultiTenantCartOverlap(cohortA, cohortB, 32);
+        expect.equal(overlap.certification, "PCSA_FLAJOLET_MARTIN_PASS");
+        expect.ok(overlap.estimatedJaccard > 0.05 && overlap.estimatedJaccard < 0.8);
+      });
+
+      test("F243-T07: Client-Server dual parity for PCSAFlajoletMartinSketch", () => {
+        const clientSketch = new PCSAFlajoletMartinSketch({ m: 32, seed: 777 });
+        const serverSketch = new ServerPCSASketch({ m: 32, seed: 777 });
+
+        for (let i = 0; i < 70; i++) {
+          const item = `parity_pcsa_${i}`;
+          clientSketch.add(item);
+          serverSketch.add(item);
+        }
+
+        expect.equal(clientSketch.estimateCardinality(), serverSketch.estimateCardinality());
+        for (let j = 0; j < 32; j++) {
+          expect.equal(clientSketch.registers[j], serverSketch.registers[j]);
+        }
+      });
+
+      // --- Lenient Q Multi-Agent Pricing Tests (T08 - T15) ---
+      test("F243-T08: LenientQMultiAgentPricing initializes with learningRate, lenienceKappa and price floor", () => {
+        const engine = new LenientQMultiAgentPricing({ lenienceKappa: 3.5 });
+        expect.equal(engine.lenienceKappa, 3.5);
+        expect.equal(engine.priceFloorMultiplier, 1.05);
+      });
+
+      test("F243-T09: enforceSafePriceFloor strictly clamps price below 1.05 * COGS", () => {
+        const engine = new LenientQMultiAgentPricing();
+        const cogs = 100000;
+        const low = 95000;
+        const good = 135000;
+
+        const clamped = engine.enforceSafePriceFloor(low, cogs);
+        expect.equal(clamped.wasClamped, true);
+        expect.equal(clamped.price, 105000);
+
+        const okPrice = engine.enforceSafePriceFloor(good, cogs);
+        expect.equal(okPrice.wasClamped, false);
+        expect.equal(okPrice.price, 135000);
+      });
+
+      test("F243-T10: generatePriceCandidates strictly respects safe price floor bounds", () => {
+        const engine = new LenientQMultiAgentPricing();
+        const agent = { cogs: 60000, currentPrice: 85000, maxAllowedPrice: 150000 };
+        const candidates = engine.generatePriceCandidates(agent);
+
+        expect.ok(candidates.length > 0);
+        for (const p of candidates) {
+          expect.ok(p >= 63000); // 60000 * 1.05
+          expect.ok(p <= 150000);
+        }
+      });
+
+      test("F243-T11: Cross-price demand estimation decreases with own price and increases with competitor price", () => {
+        const engine = new LenientQMultiAgentPricing();
+        const agent = { cogs: 80000, baseDemand: 100, elasticity: 1.3 };
+        const dLow = engine.calculateDemand(agent, 95000, [95000, 110000]);
+        const dHigh = engine.calculateDemand(agent, 130000, [130000, 110000]);
+
+        expect.ok(dLow > dHigh);
+      });
+
+      test("F243-T12: Payoff computation yields positive revenue and margin", () => {
+        const engine = new LenientQMultiAgentPricing();
+        const agent = { cogs: 40000 };
+        const payoff = engine._computePayoff(agent, 60000, 50);
+        expect.ok(payoff > 0);
+      });
+
+      test("F243-T13: optimizePrices executes Lenient Q updates and returns LENIENT_Q_PRICING_PASS", () => {
+        const engine = new LenientQMultiAgentPricing({ iterations: 15 });
+        const agents = [
+          { id: "shop_alpha", cogs: 70000, currentPrice: 95000 },
+          { id: "shop_beta", cogs: 120000, currentPrice: 160000 }
+        ];
+
+        const result = engine.optimizePrices(agents);
+        expect.equal(result.certification, "LENIENT_Q_PRICING_PASS");
+        expect.equal(result.summary.totalAgents, 2);
+        expect.equal(result.summary.allSafeFloorCompliant, true);
+        expect.ok(result.summary.totalRevenue > 0);
+        expect.ok(result.summary.totalProfit > 0);
+      });
+
+      test("F243-T14: All recommended prices strictly adhere to safe floor P_i >= 1.05 * COGS_i", () => {
+        const engine = new LenientQMultiAgentPricing({ iterations: 10 });
+        const agents = [
+          { id: "v_underpriced", cogs: 80000, currentPrice: 60000 }
+        ];
+        const result = engine.optimizePrices(agents);
+        expect.ok(result.agentOptimizations[0].recommendedPrice >= 84000);
+        expect.equal(result.agentOptimizations[0].safeFloorCompliant, true);
+      });
+
+      test("F243-T15: Client-Server dual parity for LenientQMultiAgentPricing", () => {
+        const clientEngine = new LenientQMultiAgentPricing({ iterations: 10 });
+        const serverEngine = new ServerLenientQPricing({ iterations: 10 });
+        const agents = [
+          { id: "v1", cogs: 50000, currentPrice: 70000 },
+          { id: "v2", cogs: 100000, currentPrice: 135000 }
+        ];
+
+        const cRes = clientEngine.optimizePrices(agents);
+        const sRes = serverEngine.optimizePrices(agents);
+
+        expect.equal(cRes.certification, sRes.certification);
+        expect.equal(cRes.summary.totalRevenue, sRes.summary.totalRevenue);
+        expect.equal(cRes.agentOptimizations[0].recommendedPrice, sRes.agentOptimizations[0].recommendedPrice);
+      });
+
+      // --- Commuter Crowd-Shipping Router Tests (T16 - T21) ---
+      test("F243-T16: EVRPTWUrbanCrowdShippingCommuterRouter initializes with detour limit and payload", () => {
+        const router = new EVRPTWUrbanCrowdShippingCommuterRouter({ maxDetourKm: 1.5 });
+        expect.equal(router.maxDetourKm, 1.5);
+        expect.equal(router.commuterPayloadCapacityKg, 15.0);
+        expect.equal(router.maxParcelsPerCommuter, 2);
+      });
+
+      test("F243-T17: Calculates precise detour added to commuter work-home trajectory", () => {
+        const router = new EVRPTWUrbanCrowdShippingCommuterRouter();
+        const origin = { lat: 10.7769, lng: 106.7009 }; // Ben Thanh (Workplace)
+        const dest = { lat: 10.7520, lng: 106.6540 }; // Cho Lon (Home)
+        const pPickup = { lat: 10.7720, lng: 106.6950 };
+        const pDropoff = { lat: 10.7580, lng: 106.6700 };
+
+        const detour = router._computeDetour(origin, dest, pPickup, pDropoff);
+        expect.ok(detour >= 0);
+        expect.ok(detour < 2.5);
+      });
+
+      test("F243-T18: Dispatches parcels to commuters within allowable detour limit", () => {
+        const router = new EVRPTWUrbanCrowdShippingCommuterRouter({ maxDetourKm: 2.0 });
+        const commuters = [
+          {
+            id: "COMMUTER_01",
+            name: "Nguyễn Văn A (VinFast Feliz)",
+            origin: { lat: 10.7725, lng: 106.6980 },
+            dest: { lat: 10.7520, lng: 106.6540 },
+            departMin: 1020, // 17:00 tan ca
+            arriveMin: 1050
+          }
+        ];
+        const parcels = [
+          {
+            id: "PARCEL_C1",
+            name: "Hộp quà sinh nhật",
+            pickup: { lat: 10.7710, lng: 106.6960 },
+            dropoff: { lat: 10.7550, lng: 106.6600 },
+            weightKg: 2.5,
+            dueMin: 1080
+          }
+        ];
+
+        const plan = router.planCommuterDeliveries(commuters, parcels);
+        expect.equal(plan.certification, "EVRPTW_CROWD_COMMUTER_LOGISTICS_PASS");
+        expect.equal(plan.totalParcelsDelivered, 1);
+        expect.equal(plan.unassignedParcelsCount, 0);
+      });
+
+      test("F243-T19: Unassigned parcels flagged when detour exceeds commuter limit", () => {
+        const router = new EVRPTWUrbanCrowdShippingCommuterRouter({ maxDetourKm: 0.1 });
+        const commuters = [
+          {
+            id: "COMMUTER_02",
+            name: "Trần Thị B",
+            origin: { lat: 10.7700, lng: 106.7000 },
+            dest: { lat: 10.7800, lng: 106.7100 },
+            departMin: 480,
+            arriveMin: 500
+          }
+        ];
+        const farParcel = [
+          {
+            id: "FAR_PARCEL",
+            name: "Hàng ở xa lộ trình đi làm",
+            pickup: { lat: 10.8200, lng: 106.7500 },
+            dropoff: { lat: 10.8400, lng: 106.7800 },
+            weightKg: 3.0
+          }
+        ];
+
+        const plan = router.planCommuterDeliveries(commuters, farParcel);
+        expect.equal(plan.unassignedParcelsCount, 1);
+        expect.equal(plan.unassignedParcels[0].reason, "NO_COMMUTER_WITHIN_DETOUR_OR_CAPACITY_LIMIT");
+      });
+
+      test("F243-T20: Demonstrates >90% CO2 emissions reduction vs baseline diesel delivery van", () => {
+        const router = new EVRPTWUrbanCrowdShippingCommuterRouter({ maxDetourKm: 1.5 });
+        const commuters = [
+          {
+            id: "C_GREEN",
+            name: "Biker điện xanh",
+            origin: { lat: 10.7700, lng: 106.7000 },
+            dest: { lat: 10.7500, lng: 106.6600 },
+            departMin: 1020,
+            arriveMin: 1045
+          }
+        ];
+        const parcels = [
+          {
+            id: "P_GREEN",
+            name: "Gói hàng xanh",
+            pickup: { lat: 10.7680, lng: 106.6950 },
+            dropoff: { lat: 10.7520, lng: 106.6650 },
+            weightKg: 2.0,
+            dueMin: 1100
+          }
+        ];
+
+        const plan = router.planCommuterDeliveries(commuters, parcels);
+        expect.ok(plan.emissionsAnalysis.co2AbatementPercent >= 90.0);
+        expect.ok(plan.emissionsAnalysis.co2SavedKg > 0);
+      });
+
+      test("F243-T21: Client-Server dual parity for EVRPTWUrbanCrowdShippingCommuterRouter", () => {
+        const clientRouter = new EVRPTWUrbanCrowdShippingCommuterRouter();
+        const serverRouter = new ServerEVRPTWCommuterRouter();
+
+        const commuters = [
+          {
+            id: "C_PARITY",
+            name: "Commuter Parity",
+            origin: { lat: 10.7725, lng: 106.6980 },
+            dest: { lat: 10.7520, lng: 106.6540 },
+            departMin: 480,
+            arriveMin: 510
+          }
+        ];
+        const parcels = [
+          {
+            id: "P_PARITY",
+            name: "Hàng Parity",
+            pickup: { lat: 10.7710, lng: 106.6960 },
+            dropoff: { lat: 10.7550, lng: 106.6600 },
+            weightKg: 2.0,
+            dueMin: 550
+          }
+        ];
+
+        const cPlan = clientRouter.planCommuterDeliveries(commuters, parcels);
+        const sPlan = serverRouter.planCommuterDeliveries(commuters, parcels);
+
+        expect.equal(cPlan.certification, sPlan.certification);
+        expect.equal(cPlan.totalParcelsDelivered, sPlan.totalParcelsDelivered);
+        expect.equal(cPlan.emissionsAnalysis.co2SavedKg, sPlan.emissionsAnalysis.co2SavedKg);
+      });
+
+      // --- Tri-Role AI Copilot Tests (T22 - T24) ---
+      test("F243-T22: Admin Sentinel Copilot Sections 269, 270, 271 handle PCSA, Lenient Q & Commuter Crowd", () => {
+        const r269 = generateAdminCopilotResponse("Ước lượng lượng truy cập bằng thuật toán PCSA Flajolet-Martin");
+        expect.equal(r269.tag, "PCSA FLAJOLET MARTIN SKETCH");
+        expect.ok(r269.text.includes("PCSA FLAJOLET-MARTIN"));
+
+        const r264 = generateAdminCopilotResponse("Kiểm tra định giá khoan dung lenient Q-learning và nhiệt độ kappa");
+        expect.equal(r264.tag, "LENIENT Q MULTI-AGENT PRICING");
+        expect.ok(r264.text.includes("LENIENT Q"));
+
+        const r271 = generateAdminCopilotResponse("Điều phối giao hàng bằng xe máy điện người đi làm tiện đường commuter crowd evrptw");
+        expect.equal(r271.tag, "EVRPTW URBAN COMMUTER CROWD SHIPPING ROUTER");
+        expect.ok(r271.text.includes("NGƯỜI ĐI LÀM"));
+      });
+
+      test("F243-T23: Seller ShopSmart Copilot Section 105 handles PCSA, Lenient Q & Commuter Crowd", () => {
+        const sellerRes = generateSellerCopilotResponse("Tư vấn đo khách bằng PCSA và định giá lenient q kết hợp người đi làm tiện đường");
+        expect.equal(sellerRes.tag, "PCSA SKETCH, LENIENT Q PRICING & COMMUTER CROWD ROUTER");
+        expect.ok(sellerRes.text.includes("PCSA"));
+        expect.ok(sellerRes.text.includes("LENIENT"));
+      });
+
+      test("F243-T24: Buyer Shopping Assistant Intent 98 handles PCSA_LENIENT_COMMUTER_PARCEL_ASSIST", () => {
+        const buyerRes = generateAiChatResponse("Khu vực của tôi có được giao hàng bởi xe máy điện tiện đường không?");
+        expect.equal(buyerRes.intent, "PCSA_LENIENT_COMMUTER_PARCEL_ASSIST");
+        expect.ok(buyerRes.replyText.includes("GIAO HÀNG TIỆN ĐƯỜNG"));
       });
     });
   });
